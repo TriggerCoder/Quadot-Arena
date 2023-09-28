@@ -1,0 +1,118 @@
+[gd_resource type="VisualShader" load_steps=10 format=3 uid="uid://cbrge045qw3ab"]
+
+[sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_huhgq"]
+input_name = "uv2"
+
+[sub_resource type="VisualShaderNodeExpression" id="VisualShaderNodeExpression_alu6j"]
+size = Vector2(363.946, 219.622)
+expression = "color = input0 * input1;"
+
+[sub_resource type="VisualShaderNodeTexture" id="VisualShaderNodeTexture_hufbw"]
+source = 5
+
+[sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_mhanj"]
+input_name = "uv"
+
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_ldwx0"]
+parameter_name = "MainTex"
+texture_repeat = 1
+
+[sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_un7sg"]
+input_name = "color"
+
+[sub_resource type="VisualShaderNodeExpression" id="VisualShaderNodeExpression_uptoq"]
+size = Vector2(363.946, 219.622)
+expression = "color = input0 * input1;"
+
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_xfcy2"]
+parameter_name = "LightMap"
+color_default = 1
+texture_repeat = 1
+
+[sub_resource type="VisualShaderNodeTexture" id="VisualShaderNodeTexture_v4rmr"]
+source = 5
+
+[resource]
+code = "shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
+
+uniform sampler2D MainTex : repeat_enable;
+uniform sampler2D LightMap : hint_default_black, repeat_enable;
+
+
+
+void fragment() {
+// Input:3
+	vec2 n_out3p0 = UV;
+
+
+	vec4 n_out2p0;
+// Texture2D:2
+	n_out2p0 = texture(MainTex, n_out3p0);
+
+
+// Input:5
+	vec4 n_out5p0 = COLOR;
+
+
+	vec4 n_out7p0;
+// Expression:7
+	n_out7p0 = vec4(0.0, 0.0, 0.0, 0.0);
+	{
+		n_out7p0 = n_out2p0 * n_out5p0;
+	}
+
+
+// Input:10
+	vec2 n_out10p0 = UV2;
+
+
+	vec4 n_out9p0;
+// Texture2D:9
+	n_out9p0 = texture(LightMap, n_out10p0);
+
+
+	vec4 n_out11p0;
+// Expression:11
+	n_out11p0 = vec4(0.0, 0.0, 0.0, 0.0);
+	{
+		n_out11p0 = n_out2p0 * n_out9p0;
+	}
+
+
+// Output:0
+	ALBEDO = vec3(n_out7p0.xyz);
+	EMISSION = vec3(n_out11p0.xyz);
+
+
+}
+"
+nodes/vertex/0/position = Vector2(640, 140)
+nodes/fragment/0/position = Vector2(1380, 280)
+nodes/fragment/2/node = SubResource("VisualShaderNodeTexture_hufbw")
+nodes/fragment/2/position = Vector2(320, 160)
+nodes/fragment/3/node = SubResource("VisualShaderNodeInput_mhanj")
+nodes/fragment/3/position = Vector2(-160, 60)
+nodes/fragment/4/node = SubResource("VisualShaderNodeTexture2DParameter_ldwx0")
+nodes/fragment/4/position = Vector2(-180, 180)
+nodes/fragment/5/node = SubResource("VisualShaderNodeInput_un7sg")
+nodes/fragment/5/position = Vector2(-160, 480)
+nodes/fragment/7/node = SubResource("VisualShaderNodeExpression_uptoq")
+nodes/fragment/7/position = Vector2(680, 220)
+nodes/fragment/7/size = Vector2(363.946, 219.622)
+nodes/fragment/7/input_ports = "0,5,input0;1,5,input1;"
+nodes/fragment/7/output_ports = "0,5,color;"
+nodes/fragment/7/expression = "color = input0 * input1;"
+nodes/fragment/8/node = SubResource("VisualShaderNodeTexture2DParameter_xfcy2")
+nodes/fragment/8/position = Vector2(-160, 740)
+nodes/fragment/9/node = SubResource("VisualShaderNodeTexture_v4rmr")
+nodes/fragment/9/position = Vector2(340, 720)
+nodes/fragment/10/node = SubResource("VisualShaderNodeInput_huhgq")
+nodes/fragment/10/position = Vector2(-160, 600)
+nodes/fragment/11/node = SubResource("VisualShaderNodeExpression_alu6j")
+nodes/fragment/11/position = Vector2(680, 620)
+nodes/fragment/11/size = Vector2(363.946, 219.622)
+nodes/fragment/11/input_ports = "0,5,input0;1,5,input1;"
+nodes/fragment/11/output_ports = "0,5,color;"
+nodes/fragment/11/expression = "color = input0 * input1;"
+nodes/fragment/connections = PackedInt32Array(3, 0, 2, 0, 4, 0, 2, 2, 2, 0, 7, 0, 8, 0, 9, 2, 10, 0, 9, 0, 9, 0, 11, 1, 11, 0, 0, 5, 7, 0, 0, 0, 5, 0, 7, 1, 2, 0, 11, 0)

@@ -1,0 +1,73 @@
+[gd_resource type="VisualShader" load_steps=6 format=3 uid="uid://d2rmih505ogyx"]
+
+[sub_resource type="VisualShaderNodeTexture" id="VisualShaderNodeTexture_hufbw"]
+source = 5
+
+[sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_mhanj"]
+input_name = "uv"
+
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_ldwx0"]
+parameter_name = "MainTex"
+texture_repeat = 1
+
+[sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_un7sg"]
+input_name = "color"
+
+[sub_resource type="VisualShaderNodeExpression" id="VisualShaderNodeExpression_uptoq"]
+size = Vector2(363.946, 219.622)
+expression = "color = input0 * input1;"
+
+[resource]
+code = "shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
+
+uniform sampler2D MainTex : repeat_enable;
+
+
+
+void fragment() {
+// Input:3
+	vec2 n_out3p0 = UV;
+
+
+	vec4 n_out2p0;
+// Texture2D:2
+	n_out2p0 = texture(MainTex, n_out3p0);
+
+
+// Input:5
+	vec4 n_out5p0 = COLOR;
+
+
+	vec4 n_out7p0;
+// Expression:7
+	n_out7p0 = vec4(0.0, 0.0, 0.0, 0.0);
+	{
+		n_out7p0 = n_out2p0 * n_out5p0;
+	}
+
+
+// Output:0
+	ALBEDO = vec3(n_out7p0.xyz);
+
+
+}
+"
+graph_offset = Vector2(-215.87, -90.8215)
+nodes/vertex/0/position = Vector2(640, 140)
+nodes/fragment/0/position = Vector2(1160, 100)
+nodes/fragment/2/node = SubResource("VisualShaderNodeTexture_hufbw")
+nodes/fragment/2/position = Vector2(340, 80)
+nodes/fragment/3/node = SubResource("VisualShaderNodeInput_mhanj")
+nodes/fragment/3/position = Vector2(-80, 80)
+nodes/fragment/4/node = SubResource("VisualShaderNodeTexture2DParameter_ldwx0")
+nodes/fragment/4/position = Vector2(-80, 160)
+nodes/fragment/5/node = SubResource("VisualShaderNodeInput_un7sg")
+nodes/fragment/5/position = Vector2(-80, 480)
+nodes/fragment/7/node = SubResource("VisualShaderNodeExpression_uptoq")
+nodes/fragment/7/position = Vector2(580, 120)
+nodes/fragment/7/size = Vector2(363.946, 219.622)
+nodes/fragment/7/input_ports = "0,5,input0;1,5,input1;"
+nodes/fragment/7/output_ports = "0,5,color;"
+nodes/fragment/7/expression = "color = input0 * input1;"
+nodes/fragment/connections = PackedInt32Array(3, 0, 2, 0, 4, 0, 2, 2, 7, 0, 0, 0, 2, 0, 7, 0, 5, 0, 7, 1)

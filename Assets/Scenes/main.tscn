@@ -1,0 +1,39 @@
+[gd_scene load_steps=10 format=3 uid="uid://dkadw51a54t5j"]
+
+[ext_resource type="Texture2D" uid="uid://dv1ug6ajvhega" path="res://Assets/Textures/Skyboxes/Gehenna/gehenna.png" id="1_si63v"]
+[ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
+[ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
+[ext_resource type="Material" uid="uid://e85dhhcu56nc" path="res://Assets/Materials/illegal.tres" id="4_qhfc4"]
+[ext_resource type="Material" uid="uid://b7a0ll36sihim" path="res://Assets/Materials/default.tres" id="5_is83x"]
+[ext_resource type="Material" uid="uid://bxnkqiouvmut0" path="res://Assets/Materials/defaultLightMap.tres" id="6_i1nl1"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_7oboo"]
+panorama = ExtResource("1_si63v")
+
+[sub_resource type="Sky" id="Sky_smrr4"]
+sky_material = SubResource("PanoramaSkyMaterial_7oboo")
+
+[sub_resource type="Environment" id="Environment_rcj1l"]
+background_mode = 2
+sky = SubResource("Sky_smrr4")
+ambient_light_source = 2
+ambient_light_color = Color(0.262745, 0.262745, 0.262745, 1)
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="main" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_rcj1l")
+
+[node name="Quadot" type="Node" parent="."]
+script = ExtResource("2_8g0sx")
+
+[node name="MaterialManager" type="Node" parent="Quadot"]
+script = ExtResource("3_amftv")
+illegal = ExtResource("4_qhfc4")
+defaultMaterial = ExtResource("5_is83x")
+defaultLightMapMaterial = ExtResource("6_i1nl1")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.971961, -0.0896057, -0.2174, 0, 0.924546, -0.38107, 0.235142, 0.370386, 0.898623, -10, 0, 20)
