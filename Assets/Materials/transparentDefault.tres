@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://dx20p677lxv8l"]
+
+[ext_resource type="Shader" uid="uid://dxif5gtuqkqv5" path="res://Assets/Shaders/transparentDefault.tres" id="1_ah1n1"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_ah1n1")
+shader_parameter/AmbientColor = Color(1, 1, 1, 1)

@@ -40,7 +40,7 @@ public partial class MaterialManager : Node
 
 	public static string lightMapProperty = "shader_parameter/LightMap";
 	public static string opaqueTexProperty = "shader_parameter/MainTex";
-	public static string scaleProperty = "shader_parameter/UVScale";
+	public static string colorProperty = "shader_parameter/AmbientColor";
 
 	public static Dictionary<string, Material> Materials = new Dictionary<string, Material>();
 	public static Dictionary<string, MaterialOverride> OverrideMaterials = new Dictionary<string, MaterialOverride>();
@@ -127,10 +127,11 @@ public partial class MaterialManager : Node
 			return Materials[textureName];
 		// Lightmapping is off, so don't.
 		if (forceSkinAlpha)
-			mat = (Material)Instance.defaultMaterial.Duplicate(true);
+			mat = (Material)Instance.defaultTransparentMaterial.Duplicate(true);
 		else
 			mat = (Material)Instance.defaultMaterial.Duplicate(true);
 		mat.Set(opaqueTexProperty, tex);
+		mat.Set(colorProperty, GameManager.ambientLight);
 		Materials.Add(textureName, mat);
 		return mat;
 	}

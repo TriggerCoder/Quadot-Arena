@@ -1,0 +1,94 @@
+[gd_scene load_steps=7 format=3 uid="uid://xi3ybp7mrio2"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerThing.cs" id="1_da8o2"]
+[ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerControls.cs" id="1_g37r6"]
+[ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerInfo.cs" id="2_jjym4"]
+[ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerCamera.cs" id="3_bs0x2"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3kcwc"]
+height = 1.5
+
+[sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_aj4xj"]
+length = 0.991696
+
+[node name="Player" type="CharacterBody3D" groups=["Player"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+collision_layer = 64
+collision_mask = 125
+script = ExtResource("1_da8o2")
+
+[node name="Torso" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.442, 0)
+shape = SubResource("CapsuleShape3D_3kcwc")
+
+[node name="Feets" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+shape = SubResource("SeparationRayShape3D_aj4xj")
+
+[node name="PlayerControls" type="Node3D" parent="." node_paths=PackedStringArray("playerInfo", "playerThing", "playerCamera", "controller")]
+script = ExtResource("1_g37r6")
+playerInfo = NodePath("../PlayerInfo")
+playerThing = NodePath("..")
+playerCamera = NodePath("../MainCameras")
+controller = NodePath("..")
+
+[node name="PlayerInfo" type="Node3D" parent="."]
+script = ExtResource("2_jjym4")
+
+[node name="MainCameras" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "SkyholeCamera", "UICamera")]
+transform = Transform3D(-0.681998, 0, 0.731354, 0, 1, 0, -0.731354, 0, -0.681998, 0, 0.85, 0)
+script = ExtResource("3_bs0x2")
+playerControls = NodePath("../PlayerControls")
+SkyholeCamera = NodePath("Control/Skyhole/SkyholeViewport/SkyholeCamera")
+UICamera = NodePath("Control/UI/UIViewport/UICamera")
+
+[node name="Control" type="Control" parent="MainCameras"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Skyhole" type="SubViewportContainer" parent="MainCameras/Control"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SkyholeViewport" type="SubViewport" parent="MainCameras/Control/Skyhole"]
+handle_input_locally = false
+size = Vector2i(1280, 720)
+render_target_update_mode = 4
+
+[node name="SkyholeCamera" type="Camera3D" parent="MainCameras/Control/Skyhole/SkyholeViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0)
+near = 0.1
+far = 300.0
+
+[node name="UI" type="SubViewportContainer" parent="MainCameras/Control"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="UIViewport" type="SubViewport" parent="MainCameras/Control/UI"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1280, 720)
+render_target_update_mode = 4
+
+[node name="UICamera" type="Camera3D" parent="MainCameras/Control/UI/UIViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0)
+near = 0.1
+far = 300.0
+
+[node name="AudioListener3D" type="AudioListener3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+current = true

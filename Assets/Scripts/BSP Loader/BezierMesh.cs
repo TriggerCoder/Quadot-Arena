@@ -412,10 +412,15 @@ public partial class BezierMesh
 				if ((i == 0) && (j == 0))
 				{
 					string goName = "Bezier_Collider_";
-					if (!is3D)
+					if (is3D)
+						goName += "3D_";
+					else
 						goName += "2D_";
-					ColliderNode = new Node3D();
+
+					ColliderNode = new StaticBody3D();
 					ColliderNode.Name = goName + surfaceId + "_" + patchNumber;
+					ColliderNode.CollisionLayer = (1 << GameManager.ColliderLayer);
+					ColliderNode.CollisionMask = GameManager.TakeDamageMask;
 					parent = ColliderNode;
 				}
 
@@ -423,14 +428,17 @@ public partial class BezierMesh
 				mc.Name = "Collider_" + i + "_" + j + "_collider";
 				parent.AddChild(mc);
 				ConvexPolygonShape3D convexHull = new ConvexPolygonShape3D();
-				convexHull.Points = Mesher.RemoveDuplicatedVectors(vertexCache).ToArray();
+				if (is3D)
+					convexHull.Points = Mesher.RemoveDuplicatedVectors(vertexCache).ToArray();
+				else
+					convexHull.Points = Mesher.GetExtrudedVerticesFromPoints(Mesher.RemoveDuplicatedVectors(vertexCache).ToArray(), normal); 
 				mc.Shape = convexHull;
 			}
 		}
 	}
 	public MeshInstance3D mesh { get; }
 
-	public Node3D ColliderNode { get; set; }
+	public StaticBody3D ColliderNode { get; set; }
 	//Check Collinear
 	private static bool ArePointsCollinear(List<Vector3> points)
 	{

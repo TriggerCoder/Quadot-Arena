@@ -1,6 +1,7 @@
-[gd_resource type="VisualShader" load_steps=8 format=3 uid="uid://d2rmih505ogyx"]
+[gd_resource type="VisualShader" load_steps=8 format=3 uid="uid://dxif5gtuqkqv5"]
 
 [sub_resource type="VisualShaderNodeTexture" id="VisualShaderNodeTexture_hufbw"]
+expanded_output_ports = [0]
 source = 5
 
 [sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_mhanj"]
@@ -27,7 +28,7 @@ expression = "color = input0 * input1;"
 
 [resource]
 code = "shader_type spatial;
-render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
+render_mode blend_mix, depth_draw_opaque, cull_disabled, diffuse_lambert, specular_schlick_ggx;
 
 uniform sampler2D MainTex : repeat_enable;
 uniform vec4 AmbientColor : source_color = vec4(1.000000, 1.000000, 1.000000, 1.000000);
@@ -42,6 +43,7 @@ void fragment() {
 	vec4 n_out2p0;
 // Texture2D:2
 	n_out2p0 = texture(MainTex, n_out3p0);
+	float n_out2p4 = n_out2p0.a;
 
 
 // Input:5
@@ -70,12 +72,14 @@ void fragment() {
 
 // Output:0
 	ALBEDO = vec3(n_out7p0.xyz);
+	ALPHA = n_out2p4;
 	EMISSION = vec3(n_out9p0.xyz);
 
 
 }
 "
-graph_offset = Vector2(-207.387, -71.9196)
+graph_offset = Vector2(-45.5457, -31.2587)
+modes/cull = 2
 nodes/vertex/0/position = Vector2(640, 140)
 nodes/fragment/0/position = Vector2(1780, 140)
 nodes/fragment/2/node = SubResource("VisualShaderNodeTexture_hufbw")
@@ -87,7 +91,7 @@ nodes/fragment/4/position = Vector2(-80, 160)
 nodes/fragment/5/node = SubResource("VisualShaderNodeInput_un7sg")
 nodes/fragment/5/position = Vector2(-80, 480)
 nodes/fragment/7/node = SubResource("VisualShaderNodeExpression_uptoq")
-nodes/fragment/7/position = Vector2(580, 120)
+nodes/fragment/7/position = Vector2(620, 120)
 nodes/fragment/7/size = Vector2(363.946, 219.622)
 nodes/fragment/7/input_ports = "0,5,input0;1,5,input1;"
 nodes/fragment/7/output_ports = "0,5,color;"
@@ -100,4 +104,4 @@ nodes/fragment/9/size = Vector2(363.946, 219.622)
 nodes/fragment/9/input_ports = "0,5,input0;1,5,input1;"
 nodes/fragment/9/output_ports = "0,5,color;"
 nodes/fragment/9/expression = "color = input0 * input1;"
-nodes/fragment/connections = PackedInt32Array(3, 0, 2, 0, 4, 0, 2, 2, 7, 0, 0, 0, 2, 0, 7, 0, 5, 0, 7, 1, 7, 0, 9, 0, 8, 0, 9, 1, 9, 0, 0, 5)
+nodes/fragment/connections = PackedInt32Array(3, 0, 2, 0, 4, 0, 2, 2, 7, 0, 0, 0, 2, 0, 7, 0, 5, 0, 7, 1, 7, 0, 9, 0, 8, 0, 9, 1, 9, 0, 0, 5, 2, 4, 0, 1)

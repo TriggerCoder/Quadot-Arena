@@ -307,8 +307,9 @@ public static class Mesher
 		return arrMesh;
 	}
 
-	public static bool GenerateBrushCollider(QBrush brush, Node3D holder, Node3D objCollider = null, bool addRigidBody = false)
+	public static bool GenerateBrushCollider(QBrush brush, Node3D holder, CollisionObject3D objCollider = null, bool addRigidBody = false)
 	{
+		bool isTrigger = false;
 		//Remove brushed used for BSP Generations and for Details
 		uint type = MapLoader.mapTextures[brush.shaderId].contentsFlags;
 
@@ -368,44 +369,51 @@ public static class Mesher
 			return false;
 		}
 
+		ContentType contentType = new ContentType();
+		contentType.Init(type);
+
+		if ((contentType.value & MaskPlayerSolid) == 0)
+			isTrigger = true;
+
+		if (objCollider == null)
+		{
+			if (isTrigger)
+				objCollider = new Area3D();
+			else if (addRigidBody)
+				objCollider = new AnimatableBody3D();
+			else
+				objCollider = new StaticBody3D();
+			objCollider.Name = "Polygon_" + brush.brushSide + "_collider";
+			holder.AddChild(objCollider);
+		}
+		objCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
+		objCollider.CollisionMask = GameManager.TakeDamageMask;
+		objCollider.AddChild(contentType); 
+
 		CollisionShape3D mc = new CollisionShape3D();
 		mc.Name = "brushSide: " + brush.brushSide;
-		holder.AddChild(mc);
+		objCollider.AddChild(mc);
 		ConvexPolygonShape3D convexHull = new ConvexPolygonShape3D();
 		convexHull.Points = intersectPoint.ToArray();
 		mc.Shape = convexHull;
 
-/*
-		if (addRigidBody)
-		{
-			Rigidbody rb = objCollider.AddComponent<Rigidbody>();
-			rb.isKinematic = true;
-			rb.useGravity = false;
-			rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
-		}
-
-		ContentType contentType = objCollider.AddComponent<ContentType>();
-		contentType.Init(type);
-
-		if ((contentType.value & MaskPlayerSolid) == 0)
-			mc.isTrigger = true;
-
-		//		if ((contentType.value & ContentFlags.PlayerClip) == 0)
-		//			objCollider.layer = GameManager.InvisibleBlockerLayer;
+//		if ((contentType.value & ContentFlags.PlayerClip) == 0)
+//			objCollider.layer = GameManager.InvisibleBlockerLayer;
 
 		type = MapLoader.mapTextures[brush.shaderId].surfaceFlags;
-		SurfaceType surfaceType = objCollider.AddComponent<SurfaceType>();
+		SurfaceType surfaceType = new SurfaceType();
 		surfaceType.Init(type);
+		objCollider.AddChild(surfaceType);
 
-		if ((surfaceType.value & NoMarks) != 0)
-			MapLoader.noMarks.Add(mc);
+//		if ((surfaceType.value & NoMarks) != 0)
+//			MapLoader.noMarks.Add(mc);
 
 		if ((surfaceType.value & MaskTransparent) != 0)
-			objCollider.layer = GameManager.InvisibleBlockerLayer;
+			objCollider.CollisionLayer = (1 << GameManager.InvisibleBlockerLayer);
 
-		//		if ((type & SurfaceFlags.NonSolid) != 0)
-		//			Debug.Log("brushSide: " + brush.brushSide + " Surface Type is: " + type);
-*/
+//		if ((type & SurfaceFlags.NonSolid) != 0)
+//			GD.Print("brushSide: " + brush.brushSide + " Surface Type is: " + type);
+
 		return true;
 	}
 	public static bool CanForm3DConvexHull(List<Vector3> points, ref Vector3 normal)
@@ -490,6 +498,24 @@ public static class Mesher
 			return false;
 
 		return true;
+	}
+
+	public static Vector3[] GetExtrudedVerticesFromPoints(Vector3[] points, Vector3 normal)
+	{
+		Vector3[] vertices = new Vector3[points.Length * 2];
+		float depth = 0.001f;
+
+		for (int i = 0; i < points.Length; i++)
+		{
+			vertices[i].X = points[i].X;
+			vertices[i].Y = points[i].Y;
+			vertices[i].Z = points[i].Z;
+			vertices[i + points.Length].X = points[i].X - depth * normal.X;
+			vertices[i + points.Length].Y = points[i].Y - depth * normal.Y;
+			vertices[i + points.Length].Z = points[i].Z + depth * normal.Z;
+		}
+
+		return vertices;
 	}
 	public static List<Vector3> RemoveDuplicatedVectors(List<Vector3> test)
 	{
