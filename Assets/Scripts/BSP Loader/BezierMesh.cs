@@ -64,15 +64,12 @@ public partial class BezierMesh
 		p2scolorCache = new List<Color>();
 	}
 
-	public BezierMesh(int level, int patchNumber, List<Vector3> control, List<Vector2> controlUvs, List<Vector2> controlUv2s, List<Color> controlColor)
+	public BezierMesh(ArrayMesh patchMesh, int level, int patchNumber, List<Vector3> control, List<Vector2> controlUvs, List<Vector2> controlUv2s, List<Color> controlColor)
 	{
 		// The mesh we're building
-		ArrayMesh patchMesh = new ArrayMesh();
+		ArrayMesh tempArrayMesh = new ArrayMesh();
 		var surfaceArray = new Godot.Collections.Array();
 		surfaceArray.Resize((int)Mesh.ArrayType.Max);
-
-		mesh = new MeshInstance3D();
-		mesh.Name = "Bezier_Patch_" + patchNumber;
 
 		// We'll use these two to hold our verts, tris, and uvs
 		int capacity = level * level + (2 * level);
@@ -193,15 +190,14 @@ public partial class BezierMesh
 		surfaceArray[TriIndex] = indiciesCache.ToArray();
 
 		// Create the Mesh.
-		patchMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+		tempArrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 
 		// Tool needed to recalculate normals .
 		SurfaceTool st = new SurfaceTool();
-		st.CreateFrom(patchMesh, 0);
+		st.CreateFrom(tempArrayMesh, 0);
 		st.GenerateNormals();
 		surfaceArray = st.CommitToArrays();
 		patchMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
-		mesh.Mesh = patchMesh;
 	}
 
 	public void BezierColliderMesh(int surfaceId, int patchNumber, List<Vector3> control)
@@ -436,8 +432,6 @@ public partial class BezierMesh
 			}
 		}
 	}
-	public MeshInstance3D mesh { get; }
-
 	public StaticBody3D ColliderNode { get; set; }
 	//Check Collinear
 	private static bool ArePointsCollinear(List<Vector3> points)

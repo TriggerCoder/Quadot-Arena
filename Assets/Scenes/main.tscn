@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=13 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Texture2D" uid="uid://dv1ug6ajvhega" path="res://Assets/Textures/Skyboxes/Gehenna/gehenna.png" id="1_si63v"]
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
@@ -8,6 +8,7 @@
 [ext_resource type="Material" uid="uid://dx20p677lxv8l" path="res://Assets/Materials/transparentDefault.tres" id="6_fojn5"]
 [ext_resource type="Material" uid="uid://bxnkqiouvmut0" path="res://Assets/Materials/defaultLightMap.tres" id="6_i1nl1"]
 [ext_resource type="PackedScene" uid="uid://xi3ybp7mrio2" path="res://Assets/Player/Player.tscn" id="7_rdgk2"]
+[ext_resource type="Script" path="res://Assets/Scripts/Managers/ClusterPVSManager.cs" id="8_vpkit"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_7oboo"]
 panorama = ExtResource("1_si63v")
@@ -19,7 +20,7 @@ sky_material = SubResource("PanoramaSkyMaterial_7oboo")
 background_mode = 2
 sky = SubResource("Sky_smrr4")
 ambient_light_source = 2
-ambient_light_color = Color(0.262745, 0.262745, 0.262745, 1)
+ambient_light_color = Color(0.498039, 0.498039, 0.498039, 1)
 tonemap_mode = 2
 glow_enabled = true
 
@@ -35,10 +36,12 @@ worldEnvironment = NodePath("../WorldEnvironment")
 [node name="MaterialManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("3_amftv")
 illegal = ExtResource("4_qhfc4")
-skyHole = ExtResource("4_qhfc4")
 defaultMaterial = ExtResource("5_is83x")
 defaultTransparentMaterial = ExtResource("6_fojn5")
 defaultLightMapMaterial = ExtResource("6_i1nl1")
+
+[node name="ClusterPVSManager" type="Node" parent="Quadot Arena"]
+script = ExtResource("8_vpkit")
 
 [node name="Player" parent="." instance=ExtResource("7_rdgk2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 1, 20)

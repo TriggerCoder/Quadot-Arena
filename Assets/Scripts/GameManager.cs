@@ -21,8 +21,8 @@ public partial class GameManager : Node
 	public const float modelScale = 1f / 64f;
 
 	//Physic Layers
-	public const short DefaultLayer = 0;                //Same on 3DRender Layer
-	public const short FXLayer = 1;                     //Same on 3DRender Layer
+	public const short DefaultLayer = 0;
+	public const short FXLayer = 1;
 
 	public const short ColliderLayer = 2;
 	public const short InvisibleBlockerLayer = 3;
@@ -33,28 +33,34 @@ public partial class GameManager : Node
 	public const short RagdollLayer = 7;
 
 	//3DRender Layer
-	public const short MapMeshesLayer = 2;
-	public const short Player1ViewLayer = 3;
-	public const short Player2ViewLayer = 4;
-	public const short Player3ViewLayer = 5;
-	public const short Player4ViewLayer = 6;
-	public const short Player5ViewLayer = 7;
-	public const short Player6ViewLayer = 8;
-	public const short Player7ViewLayer = 9;
-	public const short Player8ViewLayer = 10;
+	public const short Player1ViewLayer = 0;
+	public const short Player2ViewLayer = 1;
+	public const short Player3ViewLayer = 2;
+	public const short Player4ViewLayer = 3;
+	public const short Player5ViewLayer = 4;
+	public const short Player6ViewLayer = 5;
 
-	public const short Player1Layer = 11;
-	public const short Player2Layer = 12;
-	public const short Player3Layer = 13;
-	public const short Player4Layer = 14;
-	public const short Player5Layer = 15;
-	public const short Player6Layer = 16;
-	public const short Player7Layer = 17;
-	public const short Player8Layer = 18;
+	public const short Player1UIViewLayer = 6;
+	public const short Player2UIViewLayer = 7;
+	public const short Player3UIViewLayer = 8;
+	public const short Player4UIViewLayer = 9;
+	public const short Player5UIViewLayer = 10;
+	public const short Player6UIViewLayer = 11;
 
+	public const short Player1Layer = 12;
+	public const short Player2Layer = 13;
+	public const short Player3Layer = 14;
+	public const short Player4Layer = 15;
+	public const short Player5Layer = 16;
+	public const short Player6Layer = 17;
+
+	//Physic Masks
 	public const int TakeDamageMask = (1 << DamageablesLayer);
+	public const int NoHitMask = ((1 << FXLayer) | (1 << InvisibleBlockerLayer) | (1 << WalkTriggerLayer) | (1 << ThingsLayer));
 
-	public const int NoHit = ((1 << FXLayer) | (1 << InvisibleBlockerLayer) | (1 << WalkTriggerLayer) | (1 << ThingsLayer));
+	//Rendering Masks
+	public const int InvisibleMask = 0;
+	public const int AllPlayerViewMask = ((1 << Player1ViewLayer) | (1 << Player2ViewLayer) | (1 << Player3ViewLayer) | (1 << Player4ViewLayer) | (1 << Player5ViewLayer) | (1 << Player6ViewLayer));
 
 	public bool paused = true;
 	public static bool Paused { get { return Instance.paused; } }
@@ -68,6 +74,7 @@ public partial class GameManager : Node
 
 	private Godot.Environment environment;
 	private Color ambientLightColor;
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -78,6 +85,7 @@ public partial class GameManager : Node
 		PakManager.LoadPK3Files();
 		if (MapLoader.Load(autoloadMap))
 		{
+			ClusterPVSManager.Instance.ResetClusterList();
 			MapLoader.GenerateMapCollider();
 			MapLoader.GenerateSurfaces();
 		}

@@ -1,11 +1,8 @@
 using Godot;
-using Godot.NativeInterop;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Net.Mime;
-
 public static class Mesher
 {
 	public static Node3D MapMeshes;
@@ -68,20 +65,28 @@ public static class Mesher
 		}
 
 		Material material = MaterialManager.GetMaterials(textureName, lmIndex);
+		MeshInstance3D mesh = new MeshInstance3D();
+		ArrayMesh arrMesh = new ArrayMesh();
+		int index = 0;
 		for (int i = 0; i < surfaces.Length; i++)
 		{
 			for (int n = 0; n < numPatches[i]; n++)
 			{
-
-				BezierMesh BezMesh = GenerateBezMesh(surfaces[i], n);
-				MeshInstance3D mesh = BezMesh.mesh;
-				holder.AddChild(mesh);
-				mesh.Name = "Mesh_Surfaces_" + surfaces[i].surfaceId;
-				mesh.Mesh.SurfaceSetMaterial(0, material);
+				GenerateBezMesh(arrMesh, surfaces[i], n);
+				arrMesh.SurfaceSetMaterial(index, material);
+				index++;
 			}
 		}
+		holder.AddChild(mesh);
+		mesh.Layers = GameManager.InvisibleMask;
+		mesh.Name = Name;
+		mesh.Mesh = arrMesh;
+
+		//PVS only add on Static Geometry, as it has BSP Nodes
+		if (addPVS)
+			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(mesh, surfaces);
 	}
-	public static BezierMesh GenerateBezMesh(QSurface surface, int patchNumber)
+	public static BezierMesh GenerateBezMesh(ArrayMesh arrMesh, QSurface surface, int patchNumber)
 	{
 		//Calculate how many patches there are using size[]
 		//There are n_patchesX by n_patchesY patches in the grid, each of those
@@ -204,7 +209,7 @@ public static class Mesher
 		color.Add(vertGrid[vi + 1, vj + 2].color);
 		color.Add(vertGrid[vi + 2, vj + 2].color);
 
-		BezierMesh bezPatch = new BezierMesh(GameManager.Instance.tessellations, patchNumber, bverts, uv, uv2, color);
+		BezierMesh bezPatch = new BezierMesh(arrMesh, GameManager.Instance.tessellations, patchNumber, bverts, uv, uv2, color);
 		bezPatch.BezierColliderMesh(surface.surfaceId, patchNumber, bverts);
 		if (bezPatch.ColliderNode != null)
 			MapLoader.ColliderGroup.AddChild(bezPatch.ColliderNode);
@@ -225,20 +230,28 @@ public static class Mesher
 
 		Material material = MaterialManager.GetMaterials(textureName, lmIndex);
 
+		MeshInstance3D mesh = new MeshInstance3D();
+		ArrayMesh arrMesh = new ArrayMesh();
+		string Name = "Mesh_Surfaces";
+
 		for (var i = 0; i < surfaces.Length; i++)
 		{
-			MeshInstance3D mesh = new MeshInstance3D();
-			holder.AddChild(mesh);
-			mesh.Mesh = GeneratePolygonMesh(surfaces[i], lmIndex);
-			mesh.Name = "Mesh_Surfaces_" + surfaces[i].surfaceId;
-			mesh.Mesh.SurfaceSetMaterial(0, material);
+			GeneratePolygonMesh(arrMesh, surfaces[i], lmIndex);
+			Name += "_" + surfaces[i].surfaceId;
+			arrMesh.SurfaceSetMaterial(i, material);
 		}
+		holder.AddChild(mesh);
+		mesh.Layers = GameManager.InvisibleMask;
+		mesh.Name = Name;
+		mesh.Mesh = arrMesh;
+
+		//PVS only add on Static Geometry, as it has BSP Nodes
+		if (addPVS)
+			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(mesh, surfaces);
 	}
 
-	public static ArrayMesh GeneratePolygonMesh(QSurface surface, int lm_index)
+	public static void GeneratePolygonMesh(ArrayMesh arrMesh, QSurface surface, int lm_index)
 	{
-		ArrayMesh arrMesh = new ArrayMesh();
-
 		var surfaceArray = new Godot.Collections.Array();
 		surfaceArray.Resize((int)Mesh.ArrayType.Max);
 
@@ -303,8 +316,6 @@ public static class Mesher
 
 		// Create the Mesh.
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
-
-		return arrMesh;
 	}
 
 	public static bool GenerateBrushCollider(QBrush brush, Node3D holder, CollisionObject3D objCollider = null, bool addRigidBody = false)
@@ -365,7 +376,7 @@ public static class Mesher
 		Vector3 normal = Vector3.Zero;
 		if (!CanForm3DConvexHull(intersectPoint, ref normal))
 		{
-			GD.Print("Cannot Form3D ConvexHull " + brush.brushSide + " this was a waste of time");
+			GD.Print("Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time");
 			return false;
 		}
 

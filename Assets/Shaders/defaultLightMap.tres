@@ -76,7 +76,7 @@ void fragment() {
 // Expression:11
 	n_out11p0 = vec4(0.0, 0.0, 0.0, 0.0);
 	{
-		n_out11p0 = n_out2p0 * n_out9p0;
+		n_out11p0 = n_out7p0 * n_out9p0;
 	}
 
 
@@ -87,8 +87,9 @@ void fragment() {
 
 }
 "
+graph_offset = Vector2(-242.982, -78.2653)
 nodes/vertex/0/position = Vector2(640, 140)
-nodes/fragment/0/position = Vector2(1380, 280)
+nodes/fragment/0/position = Vector2(1800, 260)
 nodes/fragment/2/node = SubResource("VisualShaderNodeTexture_hufbw")
 nodes/fragment/2/position = Vector2(320, 160)
 nodes/fragment/3/node = SubResource("VisualShaderNodeInput_mhanj")
@@ -110,9 +111,9 @@ nodes/fragment/9/position = Vector2(340, 720)
 nodes/fragment/10/node = SubResource("VisualShaderNodeInput_huhgq")
 nodes/fragment/10/position = Vector2(-160, 600)
 nodes/fragment/11/node = SubResource("VisualShaderNodeExpression_alu6j")
-nodes/fragment/11/position = Vector2(680, 620)
+nodes/fragment/11/position = Vector2(1200, 600)
 nodes/fragment/11/size = Vector2(363.946, 219.622)
 nodes/fragment/11/input_ports = "0,5,input0;1,5,input1;"
 nodes/fragment/11/output_ports = "0,5,color;"
 nodes/fragment/11/expression = "color = input0 * input1;"
-nodes/fragment/connections = PackedInt32Array(3, 0, 2, 0, 4, 0, 2, 2, 2, 0, 7, 0, 8, 0, 9, 2, 10, 0, 9, 0, 9, 0, 11, 1, 11, 0, 0, 5, 7, 0, 0, 0, 5, 0, 7, 1, 2, 0, 11, 0)
+nodes/fragment/connections = PackedInt32Array(3, 0, 2, 0, 4, 0, 2, 2, 2, 0, 7, 0, 8, 0, 9, 2, 10, 0, 9, 0, 9, 0, 11, 1, 11, 0, 0, 5, 7, 0, 0, 0, 5, 0, 7, 1, 7, 0, 11, 0)

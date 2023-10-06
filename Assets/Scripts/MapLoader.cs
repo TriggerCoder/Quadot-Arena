@@ -20,8 +20,7 @@ public static class MapLoader
 	public static List<QNode> nodes;
 	public static List<QLeaf> leafs;
 	public static List<int> leafsSurfaces;
-	public static int[] leafRenderFrame;
-	public static int[] leafRenderLayer;
+	public static int[] leafRenderFrameLayer;
 	public static List<QModel> models;
 	public static List<QBrush> brushes;
 	public static List<int> leafsBrushes;
@@ -33,6 +32,8 @@ public static class MapLoader
 
 	public static Node3D MapMesh;
 	public static Node3D ColliderGroup;
+
+	public static int MAX_MESH_SURFACES = 256;
 	public enum LightMapSize
 	{
 		Q3_QL = 128,
@@ -123,8 +124,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.LeafSurfaces].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.LeafSurfaces].Length / 4;
 			leafsSurfaces = new List<int>(num);
-			leafRenderFrame = new int[num];
-			leafRenderLayer = new int[num];
+			leafRenderFrameLayer = new int[num];
 			GD.Print("leafsSurfaces " + num);
 			for (int i = 0; i < num; i++)
 			{
@@ -283,7 +283,6 @@ public static class MapLoader
 
 	public static void GenerateMapCollider()
 	{
-	
 		Node3D MapColliders = new Node3D();
 		MapColliders.Name = "MapColliders";
 		ColliderGroup = MapColliders;
@@ -308,29 +307,33 @@ public static class MapLoader
 		// Each surface group is its own object
 		var groups = staticGeometry.GroupBy(x => new { x.type, x.shaderId, x.lightMapID });
 		int groupId = 0;
-		foreach (var group in groups)
+		foreach (var bigGroup in groups)
 		{
-			QSurface[] groupSurfaces = group.ToArray();
-			if (groupSurfaces.Length == 0)
-				continue;
-
-			groupId++;
-
-			switch (group.Key.type)
+			var limitedGroup = bigGroup.Chunk(MAX_MESH_SURFACES);
+			foreach (var group in limitedGroup)
 			{
-				case QSurfaceType.Patch:
-					Mesher.GenerateBezObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
-					break;
-				case QSurfaceType.Polygon:
-				case QSurfaceType.Mesh:
-					Mesher.GeneratePolygonObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
-					break;
-				case QSurfaceType.Billboard:
-//					Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
-					break;
-				default:
-					GD.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + group.Key.type + ").");
-					break;
+				QSurface[] groupSurfaces = group.ToArray();
+				if (groupSurfaces.Length == 0)
+					continue;
+
+				groupId++;
+
+				switch (bigGroup.Key.type)
+				{
+					case QSurfaceType.Patch:
+						Mesher.GenerateBezObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
+						break;
+					case QSurfaceType.Polygon:
+					case QSurfaceType.Mesh:
+						Mesher.GeneratePolygonObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
+						break;
+					case QSurfaceType.Billboard:
+	//					Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
+						break;
+					default:
+						GD.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + bigGroup.Key.type + ").");
+						break;
+				}
 			}
 		}
 
