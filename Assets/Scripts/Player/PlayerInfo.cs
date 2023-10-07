@@ -95,12 +95,17 @@ public partial class PlayerInfo : Node3D
 			{
 				int surfaceId = MapLoader.leafsSurfaces[leaf.leafSurface + surfaceCount];
 
-				// Check if the surface has already been rendered in the current frame and that the layer is not the same
-				if (((MapLoader.leafRenderFrameLayer[surfaceId] & RenderFrameMask) == currentFrame) && ((MapLoader.leafRenderFrameLayer[surfaceId] & currentLayer) != 0))
-					continue;
-
-				// Set the surface as rendered in the current frame
-				MapLoader.leafRenderFrameLayer[surfaceId] = currentFrame | currentLayer;
+				// Check if the surface has already been added to be render in the current frame
+				// and that the layer mask is not visible to the player
+				if ((MapLoader.leafRenderFrameLayer[surfaceId] & RenderFrameMask) == currentFrame)
+				{
+					if ((MapLoader.leafRenderFrameLayer[surfaceId] & currentLayer) != 0)
+						continue;
+					// Add the player layer mask to the surface in the current frame
+					MapLoader.leafRenderFrameLayer[surfaceId] |= currentLayer;
+				}
+				else // Add the player layer mask and the current frame to the surface
+					MapLoader.leafRenderFrameLayer[surfaceId] = currentFrame | currentLayer;
 
 				// Activate the cluster associated with the surface
 				ClusterPVSManager.Instance.ActivateClusterBySurface(surfaceId, (uint)currentLayer);

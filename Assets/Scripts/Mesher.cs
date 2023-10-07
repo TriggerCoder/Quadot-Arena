@@ -67,16 +67,14 @@ public static class Mesher
 		Material material = MaterialManager.GetMaterials(textureName, lmIndex);
 		MeshInstance3D mesh = new MeshInstance3D();
 		ArrayMesh arrMesh = new ArrayMesh();
-		int index = 0;
+		int offset = 0;
 		for (int i = 0; i < surfaces.Length; i++)
 		{
 			for (int n = 0; n < numPatches[i]; n++)
-			{
-				GenerateBezMesh(arrMesh, surfaces[i], n);
-				arrMesh.SurfaceSetMaterial(index, material);
-				index++;
-			}
+				GenerateBezMesh(surfaces[i], n, ref offset);
 		}
+		BezierMesh.FinalizeBezierMesh(arrMesh);
+		arrMesh.SurfaceSetMaterial(0, material);
 		holder.AddChild(mesh);
 		mesh.Layers = GameManager.InvisibleMask;
 		mesh.Name = Name;
@@ -86,7 +84,7 @@ public static class Mesher
 		if (addPVS)
 			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(mesh, surfaces);
 	}
-	public static BezierMesh GenerateBezMesh(ArrayMesh arrMesh, QSurface surface, int patchNumber)
+	public static void GenerateBezMesh(QSurface surface, int patchNumber, ref int offset)
 	{
 		//Calculate how many patches there are using size[]
 		//There are n_patchesX by n_patchesY patches in the grid, each of those
@@ -209,12 +207,12 @@ public static class Mesher
 		color.Add(vertGrid[vi + 1, vj + 2].color);
 		color.Add(vertGrid[vi + 2, vj + 2].color);
 
-		BezierMesh bezPatch = new BezierMesh(arrMesh, GameManager.Instance.tessellations, patchNumber, bverts, uv, uv2, color);
-		bezPatch.BezierColliderMesh(surface.surfaceId, patchNumber, bverts);
-		if (bezPatch.ColliderNode != null)
-			MapLoader.ColliderGroup.AddChild(bezPatch.ColliderNode);
+		BezierMesh.GenerateBezierMesh(GameManager.Instance.tessellations, bverts, uv, uv2, color, ref offset);
+		StaticBody3D ColliderNode = BezierMesh.BezierColliderMesh(surface.surfaceId, patchNumber, bverts);
+		if (ColliderNode != null)
+			MapLoader.ColliderGroup.AddChild(ColliderNode);
 
-		return bezPatch;
+		return;
 	}
 	public static void GeneratePolygonObject(string textureName, int lmIndex, int indexId, Node3D holder, params QSurface[] surfaces)
 	{
@@ -233,13 +231,14 @@ public static class Mesher
 		MeshInstance3D mesh = new MeshInstance3D();
 		ArrayMesh arrMesh = new ArrayMesh();
 		string Name = "Mesh_Surfaces";
-
+		int offset = 0;
 		for (var i = 0; i < surfaces.Length; i++)
 		{
-			GeneratePolygonMesh(arrMesh, surfaces[i], lmIndex);
+			GeneratePolygonMesh(surfaces[i], lmIndex, ref offset);
 			Name += "_" + surfaces[i].surfaceId;
-			arrMesh.SurfaceSetMaterial(i, material);
 		}
+		FinalizePolygonMesh(arrMesh);
+		arrMesh.SurfaceSetMaterial(0, material);
 		holder.AddChild(mesh);
 		mesh.Layers = GameManager.InvisibleMask;
 		mesh.Name = Name;
@@ -249,32 +248,17 @@ public static class Mesher
 		if (addPVS)
 			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(mesh, surfaces);
 	}
-
-	public static void GeneratePolygonMesh(ArrayMesh arrMesh, QSurface surface, int lm_index)
+	public static void GeneratePolygonMesh(QSurface surface, int lm_index, ref int offset)
 	{
-		var surfaceArray = new Godot.Collections.Array();
-		surfaceArray.Resize((int)Mesh.ArrayType.Max);
-
-		// Rip verts, uvs, and normals
-		int vertexCount = surface.numOfVerts;
-		if (vertsCache.Capacity < vertexCount)
+		if (offset == 0)
 		{
-			vertsCache.Capacity = vertexCount;
-			uvCache.Capacity = vertexCount;
-			uv2Cache.Capacity = vertexCount;
-			normalsCache.Capacity = vertexCount;
-			vertsColor.Capacity = vertexCount;
+			vertsCache.Clear();
+			uvCache.Clear();
+			uv2Cache.Clear();
+			normalsCache.Clear();
+			indiciesCache.Clear();
+			vertsColor.Clear();
 		}
-
-		if (indiciesCache.Capacity < surface.numOfIndices)
-			indiciesCache.Capacity = surface.numOfIndices;
-
-		vertsCache.Clear();
-		uvCache.Clear();
-		uv2Cache.Clear();
-		normalsCache.Clear();
-		indiciesCache.Clear();
-		vertsColor.Clear();
 
 		int vstep = surface.startVertIndex;
 		for (int n = 0; n < surface.numOfVerts; n++)
@@ -296,9 +280,16 @@ public static class Mesher
 		int mstep = surface.startIndex;
 		for (int n = 0; n < surface.numOfIndices; n++)
 		{
-			indiciesCache.Add(MapLoader.vertIndices[mstep]);
+			indiciesCache.Add(MapLoader.vertIndices[mstep] + offset);
 			mstep++;
 		}
+
+		offset += surface.numOfVerts;
+	}
+	public static void FinalizePolygonMesh(ArrayMesh arrMesh)
+	{
+		var surfaceArray = new Godot.Collections.Array();
+		surfaceArray.Resize((int)Mesh.ArrayType.Max);
 
 		// add the verts, uvs, and normals we ripped to the surfaceArray
 		surfaceArray[VertexInd] = vertsCache.ToArray();
@@ -317,7 +308,6 @@ public static class Mesher
 		// Create the Mesh.
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 	}
-
 	public static bool GenerateBrushCollider(QBrush brush, Node3D holder, CollisionObject3D objCollider = null, bool addRigidBody = false)
 	{
 		bool isTrigger = false;

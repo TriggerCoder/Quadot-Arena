@@ -1,38 +1,42 @@
 using Godot;
 using System.Collections.Generic;
-using System.Diagnostics;
-
-public partial class BezierMesh
+public static class BezierMesh
 {
-	private static List<Vector3> vertexCache = new List<Vector3>();
+	private static List<Vector3> vertsCache = new List<Vector3>();
 	private static List<Vector2> uvCache = new List<Vector2>();
 	private static List<Vector2> uv2Cache = new List<Vector2>();
-	private static List<Color> colorCache = new List<Color>();
+	private static List<Vector3> normalsCache = new List<Vector3>();
+	private static List<Color> vertsColor = new List<Color>();
 	private static List<int> indiciesCache = new List<int>();
 
-	private static List<Vector3> p0sCache = new List<Vector3>();
-	private static List<Vector2> p0suvCache = new List<Vector2>();
-	private static List<Vector2> p0suv2Cache = new List<Vector2>();
-	private static List<Color> p0scolorCache = new List<Color>();
-
-	private static List<Vector3> p1sCache = new List<Vector3>();
-	private static List<Vector2> p1suvCache = new List<Vector2>();
-	private static List<Vector2> p1suv2Cache = new List<Vector2>();
-	private static List<Color> p1scolorCache = new List<Color>();
-
-	private static List<Vector3> p2sCache = new List<Vector3>();
-	private static List<Vector2> p2suvCache = new List<Vector2>();
-	private static List<Vector2> p2suv2Cache = new List<Vector2>();
-	private static List<Color> p2scolorCache = new List<Color>();
-
-	private static List<Vector2> vertex2d = new List<Vector2>();
-
 	private const int VertexInd = (int)Mesh.ArrayType.Vertex;
-	private const int NormalInd = (int)Mesh.ArrayType.Normal;
 	private const int TexUVInd = (int)Mesh.ArrayType.TexUV;
 	private const int TexUV2Ind = (int)Mesh.ArrayType.TexUV2;
 	private const int ColorInd = (int)Mesh.ArrayType.Color;
 	private const int TriIndex = (int)Mesh.ArrayType.Index;
+
+	private static List<Vector3> vertsLocalCache = new List<Vector3>();
+	private static List<Vector2> uvLocalCache = new List<Vector2>();
+	private static List<Vector2> uv2LocalCache = new List<Vector2>();
+	private static List<Color> vertsLocalColor = new List<Color>();
+	private static List<int> indiciesLocalCache = new List<int>();
+
+	private static List<Vector3> p0sCache = new List<Vector3>();
+	private static List<Vector2> p0suvLocalCache = new List<Vector2>();
+	private static List<Vector2> p0suv2LocalCache = new List<Vector2>();
+	private static List<Color> p0svertsLocalColor = new List<Color>();
+
+	private static List<Vector3> p1sCache = new List<Vector3>();
+	private static List<Vector2> p1suvLocalCache = new List<Vector2>();
+	private static List<Vector2> p1suv2LocalCache = new List<Vector2>();
+	private static List<Color> p1svertsLocalColor = new List<Color>();
+
+	private static List<Vector3> p2sCache = new List<Vector3>();
+	private static List<Vector2> p2suvLocalCache = new List<Vector2>();
+	private static List<Vector2> p2suv2LocalCache = new List<Vector2>();
+	private static List<Color> p2svertsLocalColor = new List<Color>();
+
+	private static List<Vector2> vertex2d = new List<Vector2>();
 	public enum Axis
 	{
 		None,
@@ -42,67 +46,57 @@ public partial class BezierMesh
 	}
 	public static void ClearCaches()
 	{
-		vertexCache = new List<Vector3>();
+		vertsCache = new List<Vector3>();
 		uvCache = new List<Vector2>();
 		uv2Cache = new List<Vector2>();
+		normalsCache = new List<Vector3>();
+		vertsColor = new List<Color>();
 		indiciesCache = new List<int>();
-		colorCache = new List<Color>();
-
-		p0sCache = new List<Vector3>();
-		p0suvCache = new List<Vector2>();
-		p0suv2Cache = new List<Vector2>();
-		p0scolorCache = new List<Color>();
-
-		p1sCache = new List<Vector3>();
-		p1suvCache = new List<Vector2>();
-		p1suv2Cache = new List<Vector2>();
-		p1scolorCache = new List<Color>();
-
-		p2sCache = new List<Vector3>();
-		p2suvCache = new List<Vector2>();
-		p2suv2Cache = new List<Vector2>();
-		p2scolorCache = new List<Color>();
 	}
-
-	public BezierMesh(ArrayMesh patchMesh, int level, int patchNumber, List<Vector3> control, List<Vector2> controlUvs, List<Vector2> controlUv2s, List<Color> controlColor)
+	public static void GenerateBezierMesh(int level, List<Vector3> control, List<Vector2> controlUvs, List<Vector2> controlUv2s, List<Color> controlColor, ref int offset)
 	{
-		// The mesh we're building
-		ArrayMesh tempArrayMesh = new ArrayMesh();
-		var surfaceArray = new Godot.Collections.Array();
-		surfaceArray.Resize((int)Mesh.ArrayType.Max);
-
 		// We'll use these two to hold our verts, tris, and uvs
 		int capacity = level * level + (2 * level);
-		if (vertexCache.Capacity < capacity)
+		if (vertsLocalCache.Capacity < capacity)
 		{
-			vertexCache.Capacity = capacity;
-			uvCache.Capacity = capacity;
-			uv2Cache.Capacity = capacity;
-			indiciesCache.Capacity = capacity;
-			colorCache.Capacity = capacity;
+			vertsLocalCache.Capacity = capacity;
+			uvLocalCache.Capacity = capacity;
+			uv2LocalCache.Capacity = capacity;
+			indiciesLocalCache.Capacity = capacity;
+			vertsLocalColor.Capacity = capacity;
 		}
 
-		vertexCache.Clear();
-		uvCache.Clear();
-		uv2Cache.Clear();
-		indiciesCache.Clear();
-		colorCache.Clear();
+		if (offset == 0)
+		{
+			vertsCache.Clear();
+			uvCache.Clear();
+			uv2Cache.Clear();
+			normalsCache.Clear();
+			vertsColor.Clear();
+			indiciesCache.Clear();
+		}
+
+		vertsLocalCache.Clear();
+		uvLocalCache.Clear();
+		uv2LocalCache.Clear();
+		indiciesLocalCache.Clear();
+		vertsLocalColor.Clear();
 
 
 		p0sCache.Clear();
-		p0suvCache.Clear();
-		p0suv2Cache.Clear();
-		p0scolorCache.Clear();
+		p0suvLocalCache.Clear();
+		p0suv2LocalCache.Clear();
+		p0svertsLocalColor.Clear();
 
 		p1sCache.Clear();
-		p1suvCache.Clear();
-		p1suv2Cache.Clear();
-		p1scolorCache.Clear();
+		p1suvLocalCache.Clear();
+		p1suv2LocalCache.Clear();
+		p1svertsLocalColor.Clear();
 
 		p2sCache.Clear();
-		p2suvCache.Clear();
-		p2suv2Cache.Clear();
-		p2scolorCache.Clear();
+		p2suvLocalCache.Clear();
+		p2suv2LocalCache.Clear();
+		p2svertsLocalColor.Clear();
 
 		// The incoming list is 9 entires, 
 		// referenced as p0 through p8 here.
@@ -116,28 +110,28 @@ public partial class BezierMesh
 		// p2s from p2 p5 p8
 
 		Tessellate(level, control[0], control[3], control[6], p0sCache);
-		TessellateUV(level, controlUvs[0], controlUvs[3], controlUvs[6], p0suvCache);
-		TessellateUV(level, controlUv2s[0], controlUv2s[3], controlUv2s[6], p0suv2Cache);
-		TessellateColor(level, controlColor[0], controlColor[3], controlColor[6], p0scolorCache);
+		TessellateUV(level, controlUvs[0], controlUvs[3], controlUvs[6], p0suvLocalCache);
+		TessellateUV(level, controlUv2s[0], controlUv2s[3], controlUv2s[6], p0suv2LocalCache);
+		TessellateColor(level, controlColor[0], controlColor[3], controlColor[6], p0svertsLocalColor);
 
 		Tessellate(level, control[1], control[4], control[7], p1sCache);
-		TessellateUV(level, controlUvs[1], controlUvs[4], controlUvs[7], p1suvCache);
-		TessellateUV(level, controlUv2s[1], controlUv2s[4], controlUv2s[7], p1suv2Cache);
-		TessellateColor(level, controlColor[1], controlColor[4], controlColor[7], p1scolorCache);
+		TessellateUV(level, controlUvs[1], controlUvs[4], controlUvs[7], p1suvLocalCache);
+		TessellateUV(level, controlUv2s[1], controlUv2s[4], controlUv2s[7], p1suv2LocalCache);
+		TessellateColor(level, controlColor[1], controlColor[4], controlColor[7], p1svertsLocalColor);
 
 		Tessellate(level, control[2], control[5], control[8], p2sCache);
-		TessellateUV(level, controlUvs[2], controlUvs[5], controlUvs[8], p2suvCache);
-		TessellateUV(level, controlUv2s[2], controlUv2s[5], controlUv2s[8], p2suv2Cache);
-		TessellateColor(level, controlColor[2], controlColor[5], controlColor[8], p2scolorCache);
+		TessellateUV(level, controlUvs[2], controlUvs[5], controlUvs[8], p2suvLocalCache);
+		TessellateUV(level, controlUv2s[2], controlUv2s[5], controlUv2s[8], p2suv2LocalCache);
+		TessellateColor(level, controlColor[2], controlColor[5], controlColor[8], p2svertsLocalColor);
 
 		// Tessellate all those new sets of control points and pack
 		// all the results into our vertex array, which we'll return.
 		for (int i = 0; i <= level; i++)
 		{
-			Tessellate(level, p0sCache[i], p1sCache[i], p2sCache[i], vertexCache);
-			TessellateUV(level, p0suvCache[i], p1suvCache[i], p2suvCache[i], uvCache);
-			TessellateUV(level, p0suv2Cache[i], p1suv2Cache[i], p2suv2Cache[i], uv2Cache);
-			TessellateColor(level, p0scolorCache[i], p1scolorCache[i], p2scolorCache[i], colorCache);
+			Tessellate(level, p0sCache[i], p1sCache[i], p2sCache[i], vertsLocalCache);
+			TessellateUV(level, p0suvLocalCache[i], p1suvLocalCache[i], p2suvLocalCache[i], uvLocalCache);
+			TessellateUV(level, p0suv2LocalCache[i], p1suv2LocalCache[i], p2suv2LocalCache[i], uv2LocalCache);
+			TessellateColor(level, p0svertsLocalColor[i], p1svertsLocalColor[i], p2svertsLocalColor[i], vertsLocalColor);
 		}
 
 		// This will produce (tessellationLevel + 1)^2 verts
@@ -153,66 +147,62 @@ public partial class BezierMesh
 			//on left edge
 			if (xStep == 1)
 			{
-				indiciesCache.Add(i);
-				indiciesCache.Add(i + width);
-				indiciesCache.Add(i + 1);
+				indiciesLocalCache.Add(i);
+				indiciesLocalCache.Add(i + width);
+				indiciesLocalCache.Add(i + 1);
 
 				xStep++;
 			}
 			else if (xStep == width) //on right edge
 			{
-				indiciesCache.Add(i);
-				indiciesCache.Add(i + (width - 1));
-				indiciesCache.Add(i + width);
+				indiciesLocalCache.Add(i);
+				indiciesLocalCache.Add(i + (width - 1));
+				indiciesLocalCache.Add(i + width);
 
 				xStep = 1;
 			}
 			else // not on an edge, so add two
 			{
-				indiciesCache.Add(i);
-				indiciesCache.Add(i + (width - 1));
-				indiciesCache.Add(i + width);
+				indiciesLocalCache.Add(i);
+				indiciesLocalCache.Add(i + (width - 1));
+				indiciesLocalCache.Add(i + width);
 
 
-				indiciesCache.Add(i);
-				indiciesCache.Add(i + width);
-				indiciesCache.Add(i + 1);
+				indiciesLocalCache.Add(i);
+				indiciesLocalCache.Add(i + width);
+				indiciesLocalCache.Add(i + 1);
 
 				xStep++;
 			}
 		}
 
-		// Add the verts and tris
-		surfaceArray[VertexInd] = vertexCache.ToArray();
-		surfaceArray[TexUVInd] = uvCache.ToArray();
-		surfaceArray[TexUV2Ind] = uv2Cache.ToArray();
-		surfaceArray[ColorInd] = colorCache.ToArray();
-		surfaceArray[TriIndex] = indiciesCache.ToArray();
+		vertsCache.AddRange(vertsLocalCache);
+		uvCache.AddRange(uvLocalCache);
+		uv2Cache.AddRange(uv2LocalCache);
+		vertsColor.AddRange(vertsLocalColor);
 
-		// Create the Mesh.
-		tempArrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+		int indicies = indiciesLocalCache.Count;
+		for (int i = 0; i < indicies; i++)
+			indiciesCache.Add(indiciesLocalCache[i] + offset);
 
-		// Tool needed to recalculate normals .
-		SurfaceTool st = new SurfaceTool();
-		st.CreateFrom(tempArrayMesh, 0);
-		st.GenerateNormals();
-		surfaceArray = st.CommitToArrays();
-		patchMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+		offset += vertsLocalCache.Count;
 	}
 
-	public void BezierColliderMesh(int surfaceId, int patchNumber, List<Vector3> control)
+	public static StaticBody3D BezierColliderMesh(int surfaceId, int patchNumber, List<Vector3> control)
 	{
 		const int colliderTessellations = 4;  //Do not modify
 
 		Node3D parent = null;
+		StaticBody3D ColliderNode = null;
+
 		float step, s, f, m;
 		int iterOne = colliderTessellations, interTwo = colliderTessellations;
 		bool Collinear, allCollinear = false;
 
 		// We'll use these two to hold our verts
 		int capacity = control.Count;
-		if (vertexCache.Capacity < capacity)
-			vertexCache.Capacity = capacity;
+		if (vertsLocalCache.Capacity < capacity)
+			vertsLocalCache.Capacity = capacity;
 
 		//Check if control points rows are collinear
 		{
@@ -255,19 +245,19 @@ public partial class BezierMesh
 			allCollinear = true;
 			for (int j = 0; j < 3; j++)
 			{
-				vertexCache.Clear();
+				vertsLocalCache.Clear();
 				for (int i = 0; i < 3; i++)
-					vertexCache.Add(control[(3 * i) + j]);
-				allCollinear &= ArePointsCollinear(vertexCache);
+					vertsLocalCache.Add(control[(3 * i) + j]);
+				allCollinear &= ArePointsCollinear(vertsLocalCache);
 				if (!allCollinear)
 					break;
 			}
 			if (allCollinear)
 			{
 				interTwo = 1;
-				vertexCache.Clear();
+				vertsLocalCache.Clear();
 				for (int i = 0; i < capacity; i++)
-					vertexCache.Add(control[i]);
+					vertsLocalCache.Add(control[i]);
 			}
 		}
 
@@ -310,28 +300,28 @@ public partial class BezierMesh
 					s = j * step;
 					f = (j + 1) * step;
 					m = (s + f) / 2f;
-					vertexCache.Clear();
+					vertsLocalCache.Clear();
 
 					//Top row
-					vertexCache.Add(BezCurve(s, p0sCache[0], p1sCache[0], p2sCache[0]));
-					vertexCache.Add(BezCurve(m, p0sCache[0], p1sCache[0], p2sCache[0]));
-					vertexCache.Add(BezCurve(f, p0sCache[0], p1sCache[0], p2sCache[0]));
+					vertsLocalCache.Add(BezCurve(s, p0sCache[0], p1sCache[0], p2sCache[0]));
+					vertsLocalCache.Add(BezCurve(m, p0sCache[0], p1sCache[0], p2sCache[0]));
+					vertsLocalCache.Add(BezCurve(f, p0sCache[0], p1sCache[0], p2sCache[0]));
 
 					//Middle row
-					vertexCache.Add(BezCurve(s, p0sCache[1], p1sCache[1], p2sCache[1]));
-					vertexCache.Add(BezCurve(m, p0sCache[1], p1sCache[1], p2sCache[1]));
-					vertexCache.Add(BezCurve(f, p0sCache[1], p1sCache[1], p2sCache[1]));
+					vertsLocalCache.Add(BezCurve(s, p0sCache[1], p1sCache[1], p2sCache[1]));
+					vertsLocalCache.Add(BezCurve(m, p0sCache[1], p1sCache[1], p2sCache[1]));
+					vertsLocalCache.Add(BezCurve(f, p0sCache[1], p1sCache[1], p2sCache[1]));
 
 					//Bottom row
-					vertexCache.Add(BezCurve(s, p0sCache[2], p1sCache[2], p2sCache[2]));
-					vertexCache.Add(BezCurve(m, p0sCache[2], p1sCache[2], p2sCache[2]));
-					vertexCache.Add(BezCurve(f, p0sCache[2], p1sCache[2], p2sCache[2]));
+					vertsLocalCache.Add(BezCurve(s, p0sCache[2], p1sCache[2], p2sCache[2]));
+					vertsLocalCache.Add(BezCurve(m, p0sCache[2], p1sCache[2], p2sCache[2]));
+					vertsLocalCache.Add(BezCurve(f, p0sCache[2], p1sCache[2], p2sCache[2]));
 				}
 				Vector3 normal = Vector3.Zero;
 				Axis axis;
 				bool is3D = true;
 				Quaternion changeRotation = Quaternion.Identity;
-				if (!Mesher.CanForm3DConvexHull(vertexCache, ref normal))
+				if (!Mesher.CanForm3DConvexHull(vertsLocalCache, ref normal))
 				{
 					if ((normal.X == 1) || (normal.X == -1))
 						axis = Axis.X;
@@ -378,9 +368,9 @@ public partial class BezierMesh
 
 					//Check if it's a 2D Surface
 					vertex2d.Clear();
-					for (int k = 0; k < vertexCache.Count; k++)
+					for (int k = 0; k < vertsLocalCache.Count; k++)
 					{
-						Vector3 vertex = changeRotation * vertexCache[k];
+						Vector3 vertex = changeRotation * vertsLocalCache[k];
 						switch (axis)
 						{ 
 							case Axis.X:
@@ -397,9 +387,8 @@ public partial class BezierMesh
 
 					if (!Mesher.CanForm2DConvexHull(vertex2d))
 					{
-						ColliderNode = null;
 						GD.Print("Cannot Form 2D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time");
-						return;
+						return null;
 					}
 					else
 						is3D = false;
@@ -425,14 +414,39 @@ public partial class BezierMesh
 				parent.AddChild(mc);
 				ConvexPolygonShape3D convexHull = new ConvexPolygonShape3D();
 				if (is3D)
-					convexHull.Points = Mesher.RemoveDuplicatedVectors(vertexCache).ToArray();
+					convexHull.Points = Mesher.RemoveDuplicatedVectors(vertsLocalCache).ToArray();
 				else
-					convexHull.Points = Mesher.GetExtrudedVerticesFromPoints(Mesher.RemoveDuplicatedVectors(vertexCache).ToArray(), normal); 
+					convexHull.Points = Mesher.GetExtrudedVerticesFromPoints(Mesher.RemoveDuplicatedVectors(vertsLocalCache).ToArray(), normal); 
 				mc.Shape = convexHull;
 			}
 		}
+
+		return ColliderNode;
 	}
-	public StaticBody3D ColliderNode { get; set; }
+	public static void FinalizeBezierMesh(ArrayMesh arrMesh)
+	{
+		// The mesh we're building
+		ArrayMesh tempArrayMesh = new ArrayMesh();
+		var surfaceArray = new Godot.Collections.Array();
+		surfaceArray.Resize((int)Mesh.ArrayType.Max);
+
+		// Add the verts and tris
+		surfaceArray[VertexInd] = vertsCache.ToArray();
+		surfaceArray[TexUVInd] = uvCache.ToArray();
+		surfaceArray[TexUV2Ind] = uv2Cache.ToArray();
+		surfaceArray[ColorInd] = vertsColor.ToArray();
+		surfaceArray[TriIndex] = indiciesCache.ToArray();
+
+		// Create the Mesh.
+		tempArrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+
+		// Tool needed to recalculate normals .
+		SurfaceTool st = new SurfaceTool();
+		st.CreateFrom(tempArrayMesh, 0);
+		st.GenerateNormals();
+		surfaceArray = st.CommitToArrays();
+		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+	}
 	//Check Collinear
 	private static bool ArePointsCollinear(List<Vector3> points)
 	{
@@ -460,7 +474,7 @@ public partial class BezierMesh
 		return true;
 	}
 
-	Quaternion CalculateRotation(Vector3 normal1, Vector3 normal2)
+	private static Quaternion CalculateRotation(Vector3 normal1, Vector3 normal2)
 	{
 		float dotProduct = normal1.Dot(normal2);
 		float angle =  Mathf.RadToDeg(Mathf.Acos(dotProduct));
@@ -470,7 +484,7 @@ public partial class BezierMesh
 
 		return new Quaternion(axis, angle);
 	}
-	private Vector2 BezCurveUV(float t, Vector2 p0, Vector2 p1, Vector2 p2)
+	private static Vector2 BezCurveUV(float t, Vector2 p0, Vector2 p1, Vector2 p2)
 	{
 		float[] tPoints = new float[2];
 
@@ -486,7 +500,7 @@ public partial class BezierMesh
 	}
 
 	// This time for colors
-	private Color BezCurveColor(float t, Color p0, Color p1, Color p2)
+	private static Color BezCurveColor(float t, Color p0, Color p1, Color p2)
 	{
 		float[] tPoints = new float[4];
 
@@ -504,7 +518,7 @@ public partial class BezierMesh
 	// Calculate a vector3 at point t on a quadratic Bezier curve between
 	// Using the formula B(t) = (1-t)^2 * p0 + 2 * (1-t) * t * p1 + t^2 * p2
 	// p0 and p2 via p1.  
-	private Vector3 BezCurve(float t, Vector3 p0, Vector3 p1, Vector3 p2)
+	private static Vector3 BezCurve(float t, Vector3 p0, Vector3 p1, Vector3 p2)
 	{
 		float[] tPoints = new float[3];
 
@@ -523,7 +537,7 @@ public partial class BezierMesh
 	// p0 is start, p1 is the midpoint, p2 is the endpoint
 	// The returned list begins with p0, ends with p2, with
 	// the tessellated verts in between.
-	private void Tessellate(int level, Vector3 p0, Vector3 p1, Vector3 p2, List<Vector3> appendList = null)
+	private static void Tessellate(int level, Vector3 p0, Vector3 p1, Vector3 p2, List<Vector3> appendList = null)
 	{
 		if (appendList == null)
 			appendList = new List<Vector3>(level + 1);
@@ -541,7 +555,7 @@ public partial class BezierMesh
 	}
 
 	// Same as above, but for UVs
-	private void TessellateUV(int level, Vector2 p0, Vector2 p1, Vector2 p2, List<Vector2> appendList = null)
+	private static void TessellateUV(int level, Vector2 p0, Vector2 p1, Vector2 p2, List<Vector2> appendList = null)
 	{
 		if (appendList == null)
 			appendList = new List<Vector2>(level + 2);
@@ -559,7 +573,7 @@ public partial class BezierMesh
 	}
 
 	// Same, but this time for colors
-	private void TessellateColor(int level, Color p0, Color p1, Color p2, List<Color> appendList = null)
+	private static void TessellateColor(int level, Color p0, Color p1, Color p2, List<Color> appendList = null)
 	{
 		if (appendList == null)
 			appendList = new List<Color>(level + 1);
