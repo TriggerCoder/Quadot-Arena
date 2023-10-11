@@ -188,12 +188,9 @@ public static class BezierMesh
 		offset += vertsLocalCache.Count;
 	}
 
-	public static StaticBody3D BezierColliderMesh(int surfaceId, int patchNumber, List<Vector3> control)
+	public static void BezierColliderMesh(uint ownerShapeId, CollisionObject3D collider, int surfaceId, int patchNumber, List<Vector3> control)
 	{
 		const int colliderTessellations = 4;  //Do not modify
-
-		Node3D parent = null;
-		StaticBody3D ColliderNode = null;
 
 		float step, s, f, m;
 		int iterOne = colliderTessellations, interTwo = colliderTessellations;
@@ -388,40 +385,22 @@ public static class BezierMesh
 					if (!Mesher.CanForm2DConvexHull(vertex2d))
 					{
 						GD.Print("Cannot Form 2D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time");
-						return null;
+						return;
 					}
 					else
 						is3D = false;
 				}
 
-				if ((i == 0) && (j == 0))
-				{
-					string goName = "Bezier_Collider_";
-					if (is3D)
-						goName += "3D_";
-					else
-						goName += "2D_";
-
-					ColliderNode = new StaticBody3D();
-					ColliderNode.Name = goName + surfaceId + "_" + patchNumber;
-					ColliderNode.CollisionLayer = (1 << GameManager.ColliderLayer);
-					ColliderNode.CollisionMask = GameManager.TakeDamageMask;
-					parent = ColliderNode;
-				}
-
-				CollisionShape3D mc = new CollisionShape3D();
-				mc.Name = "Collider_" + i + "_" + j + "_collider";
-				parent.AddChild(mc);
 				ConvexPolygonShape3D convexHull = new ConvexPolygonShape3D();
 				if (is3D)
 					convexHull.Points = Mesher.RemoveDuplicatedVectors(vertsLocalCache).ToArray();
 				else
 					convexHull.Points = Mesher.GetExtrudedVerticesFromPoints(Mesher.RemoveDuplicatedVectors(vertsLocalCache).ToArray(), normal); 
-				mc.Shape = convexHull;
+				collider.ShapeOwnerAddShape(ownerShapeId, convexHull);
 			}
 		}
 
-		return ColliderNode;
+		return;
 	}
 	public static void FinalizeBezierMesh(ArrayMesh arrMesh)
 	{

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.IO;
+
 public static class PakManager
 {
 	public static Dictionary<string, string> ZipFiles = new Dictionary<string, string>();
@@ -34,6 +35,10 @@ public static class PakManager
 					}
 					else
 						ZipFiles.Add(logName, FileName);
+
+					//Add Shaders Files for processing
+					if (logName.Contains(".SHADER"))
+						QShaderManager.AddShaderFiles(logName);
 				}
 			}
 			reader.Close();

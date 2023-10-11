@@ -71,6 +71,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.Entities].Offset, SeekOrigin.Begin);
 		}
 
+		QShaderManager.ProcessShaders();
 		//shaders (textures)
 		{
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.Shaders].Offset, SeekOrigin.Begin);
@@ -288,9 +289,22 @@ public static class MapLoader
 		ColliderGroup = MapColliders;
 		GameManager.Instance.AddChild(MapColliders);
 
+		List<QBrush> staticBrushes = new List<QBrush>();
 		for (int i = 0; i < models[0].numBrushes; i++)
+			staticBrushes.Add(brushes[models[0].firstBrush + i]);
+
+		// Each brush group is its own object
+		var groups = staticBrushes.GroupBy(x => new { mapTextures[x.shaderId].contentsFlags, mapTextures[x.shaderId].surfaceFlags });
+		int groupId = 0;
+		foreach (var group in groups)
 		{
-			Mesher.GenerateBrushCollider(brushes[models[0].firstBrush + i], ColliderGroup);
+			QBrush[] groupBrushes = group.ToArray();
+			if (groupBrushes.Length == 0)
+				continue;
+			
+			groupId++;
+
+			Mesher.GenerateGroupBrushCollider(groupId, ColliderGroup, groupBrushes);
 		}
 	}
 	public static void GenerateSurfaces()

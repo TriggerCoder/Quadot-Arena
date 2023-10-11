@@ -296,48 +296,48 @@ public class LumpType
 
 public class ContentFlags
 {
-	public const uint Solid = 0x000001;     // Blocking surface
-	public const uint Lava = 0x000008;      // Block and lava effects
-	public const uint Slime = 0x000010;     // Block and slime effects
-	public const uint Water = 0x000020;     // Non Blocking change physics
-	public const uint Fog = 0x000040;     // Non Blocking Fog effect
-	public const uint AreaPortal = 0x008000;        // Trigger Teleporter
+	public const uint Solid = 0x000001;				// Blocking surface
+	public const uint Lava = 0x000008;				// Block and lava effects
+	public const uint Slime = 0x000010;				// Block and slime effects
+	public const uint Water = 0x000020;				// Non Blocking change physics
+	public const uint Fog = 0x000040;				// Non Blocking Fog effect
+	public const uint AreaPortal = 0x008000;		// Trigger Teleporter
 	public const uint PlayerClip = 0x010000;
 	public const uint MonsterClip = 0x020000;
 
-	public const uint Teleporter = 0x040000;        // Bots info
-	public const uint JumpPad = 0x080000;       // Jump Pad
-	public const uint ClusterPortal = 0x100000;     // Bots info
-	public const uint BotsNotEnter = 0x200000;     // Restricter area for Bots
+	public const uint Teleporter = 0x040000;		// Bots info
+	public const uint JumpPad = 0x080000;			// Jump Pad
+	public const uint ClusterPortal = 0x100000;		// Bots info
+	public const uint BotsNotEnter = 0x200000;		// Restricter area for Bots
 
 	public const uint Origin = 0x1000000;
 
-	public const uint Body = 0x2000000;    // Never on BSP
+	public const uint Body = 0x2000000;				// Never on BSP
 	public const uint Corpse = 0x4000000;
-	public const uint Details = 0x8000000;   // Not used on BSP
-	public const uint Structural = 0x10000000;  // Used on BSP 
+	public const uint Details = 0x8000000;			// Not used on BSP
+	public const uint Structural = 0x10000000;		// Used on BSP 
 	public const uint Translucent = 0x20000000;
 	public const uint Trigger = 0x40000000;
-	public const uint NoDrop = 0x80000000;  //Leave not bodies or items
+	public const uint NoDrop = 0x80000000;			//Don't leave bodies or items
 }
 public class SurfaceFlags
 {
-	public const int NoDamage = 0x00001;        // Don't give falling damage
-	public const int Slick = 0x00002;      // Affects game physics
-	public const int Sky = 0x00004;      // Lighting from environment map
-	public const int Ladder = 0x00008;      // Surface is climbable
-	public const int NoImpact = 0x00010;      // No missile explosions
-	public const int NoMarks = 0x00020;     // No missile marks
-	public const int Flesh = 0x00040;      // Flesh sounds and effects
-	public const int NoDraw = 0x00080;      // Don't generate a drawsurface at all
+	public const int NoDamage = 0x00001;			// Don't give falling damage
+	public const int Slick = 0x00002;				// Affects game physics
+	public const int Sky = 0x00004;					// Lighting from environment map
+	public const int Ladder = 0x00008;				// Surface is climbable
+	public const int NoImpact = 0x00010;			// No missile explosions
+	public const int NoMarks = 0x00020;				// No missile marks
+	public const int Flesh = 0x00040;				// Flesh sounds and effects
+	public const int NoDraw = 0x00080;				// Don't generate a drawsurface at all
 	public const int Hint = 0x00100;
-	public const int Skip = 0x00200;      // Ignore, allowing non-closed brushes
-	public const int NoLightMap = 0x00400;      // Don't add lightmap to surface
-	public const int PointLight = 0x00800;      // Generate lighting info at verts
-	public const int MetalSteps = 0x01000;      // Metal sounds and effects
-	public const int NoSteps = 0x02000;     // No step sounds
-	public const int NonSolid = 0x04000;        // No Collision
-	public const int LightFilter = 0x08000;      // Act as a light filter during map compiling
-	public const int AlphaShadow = 0x10000;     // Map compiling do per-pixel light shadow casting 
-	public const int NoDynLight = 0x20000;      // Don't add dynamic lights
+	public const int Skip = 0x00200;				// Ignore, allowing non-closed brushes
+	public const int NoLightMap = 0x00400;			// Don't add lightmap to surface
+	public const int PointLight = 0x00800;			// Generate lighting info at verts
+	public const int MetalSteps = 0x01000;			// Metal sounds and effects
+	public const int NoSteps = 0x02000;				// No step sounds
+	public const int NonSolid = 0x04000;			// No Collision
+	public const int LightFilter = 0x08000;			// Act as a light filter during map compiling
+	public const int AlphaShadow = 0x10000;			// Map compiling do per-pixel light shadow casting 
+	public const int NoDynLight = 0x20000;			// Don't add dynamic lights
 }

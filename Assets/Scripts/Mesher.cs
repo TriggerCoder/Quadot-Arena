@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,12 +66,18 @@ public static class Mesher
 		Material material = MaterialManager.GetMaterials(textureName, lmIndex);
 		MeshInstance3D mesh = new MeshInstance3D();
 		ArrayMesh arrMesh = new ArrayMesh();
+		StaticBody3D collider = new StaticBody3D();
+		MapLoader.ColliderGroup.AddChild(collider);
+		collider.Name = "Bezier_" + indexId + "_collider";
+		uint OwnerShapeId = collider.CreateShapeOwner(holder);
+
 		int offset = 0;
 		for (int i = 0; i < surfaces.Length; i++)
 		{
 			for (int n = 0; n < numPatches[i]; n++)
-				GenerateBezMesh(surfaces[i], n, ref offset);
+				GenerateBezMesh(OwnerShapeId, collider, surfaces[i], n, ref offset);
 		}
+
 		BezierMesh.FinalizeBezierMesh(arrMesh);
 		arrMesh.SurfaceSetMaterial(0, material);
 		holder.AddChild(mesh);
@@ -84,7 +89,7 @@ public static class Mesher
 		if (addPVS)
 			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(mesh, surfaces);
 	}
-	public static void GenerateBezMesh(QSurface surface, int patchNumber, ref int offset)
+	public static void GenerateBezMesh(uint OwnerShapeId, CollisionObject3D collider, QSurface surface, int patchNumber, ref int offset)
 	{
 		//Calculate how many patches there are using size[]
 		//There are n_patchesX by n_patchesY patches in the grid, each of those
@@ -208,9 +213,7 @@ public static class Mesher
 		color.Add(vertGrid[vi + 2, vj + 2].color);
 
 		BezierMesh.GenerateBezierMesh(GameManager.Instance.tessellations, bverts, uv, uv2, color, ref offset);
-		StaticBody3D ColliderNode = BezierMesh.BezierColliderMesh(surface.surfaceId, patchNumber, bverts);
-		if (ColliderNode != null)
-			MapLoader.ColliderGroup.AddChild(ColliderNode);
+		BezierMesh.BezierColliderMesh(OwnerShapeId, collider, surface.surfaceId, patchNumber, bverts);
 
 		return;
 	}
@@ -308,6 +311,110 @@ public static class Mesher
 		// Create the Mesh.
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 	}
+	public static void GenerateGroupBrushCollider(int indexId, Node3D holder, params QBrush[] brushes)
+	{
+		bool isTrigger = false;
+		CollisionObject3D objCollider;
+		uint type = MapLoader.mapTextures[brushes[0].shaderId].contentsFlags;
+
+		if (((type & ContentFlags.Details) != 0) || ((type & ContentFlags.Structural) != 0))
+		{
+			GD.Print("brushes: " + indexId + " Not used for collisions, Content Type is: " + type);
+			return;
+		}
+
+		ContentType contentType = new ContentType();
+		contentType.Init(type);
+
+		if ((contentType.value & MaskPlayerSolid) == 0)
+			isTrigger = true;
+
+		if (isTrigger)
+			objCollider = new Area3D();
+		else
+			objCollider = new StaticBody3D();
+
+		objCollider.Name = "Polygon_" + indexId + "_collider";
+		holder.AddChild(objCollider);
+		objCollider.AddChild(contentType);
+
+		uint OwnerShapeId = objCollider.CreateShapeOwner(holder);
+		for (int i = 0; i < brushes.Length; i++)
+		{
+			ConvexPolygonShape3D convexHull = GenerateBrushCollider(brushes[i]);
+			if (convexHull != null)
+				objCollider.ShapeOwnerAddShape(OwnerShapeId, convexHull);
+		}
+		type = MapLoader.mapTextures[brushes[0].shaderId].surfaceFlags;
+		SurfaceType surfaceType = new SurfaceType();
+		surfaceType.Init(type);
+
+		if ((surfaceType.value & MaskTransparent) != 0)
+			objCollider.CollisionLayer = (1 << GameManager.InvisibleBlockerLayer);
+		else
+			objCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
+
+		objCollider.CollisionMask = GameManager.TakeDamageMask;
+		objCollider.AddChild(surfaceType);
+	}
+	public static ConvexPolygonShape3D GenerateBrushCollider(QBrush brush)
+	{
+		List<Vector3> possibleIntersectPoint = new List<Vector3>();
+		List<Vector3> intersectPoint = new List<Vector3>();
+
+		for (int i = 0; i < brush.numOfBrushSides; i++)
+		{
+			int planeIndex = MapLoader.brushSides[brush.brushSide + i].plane;
+			QPlane p1 = MapLoader.planes[planeIndex];
+
+			for (int j = i + 1; j < brush.numOfBrushSides; j++)
+			{
+				planeIndex = MapLoader.brushSides[brush.brushSide + j].plane;
+				QPlane p2 = MapLoader.planes[planeIndex];
+				for (int k = j + 1; k < brush.numOfBrushSides; k++)
+				{
+					planeIndex = MapLoader.brushSides[brush.brushSide + k].plane;
+					QPlane p3 = MapLoader.planes[planeIndex];
+					List<float> intersect = p1.IntersectPlanes(p2, p3);
+					if (intersect != null)
+						possibleIntersectPoint.Add(new Vector3(intersect[0], intersect[1], intersect[2]));
+				}
+			}
+		}
+
+		for (int i = 0; i < possibleIntersectPoint.Count; i++)
+		{
+			bool inside = true;
+			for (int j = 0; j < brush.numOfBrushSides; j++)
+			{
+				int planeIndex = MapLoader.brushSides[brush.brushSide + j].plane;
+				QPlane plane = MapLoader.planes[planeIndex];
+				if (plane.GetSide(possibleIntersectPoint[i], QPlane.CheckPointPlane.IsFront))
+				{
+					inside = false;
+					j = brush.numOfBrushSides;
+				}
+			}
+			if (inside)
+			{
+				if (!intersectPoint.Contains(possibleIntersectPoint[i]))
+					intersectPoint.Add(possibleIntersectPoint[i]);
+			}
+		}
+
+		intersectPoint = RemoveDuplicatedVectors(intersectPoint);
+		Vector3 normal = Vector3.Zero;
+		if (!CanForm3DConvexHull(intersectPoint, ref normal))
+		{
+			GD.Print("Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time");
+			return null;
+		}
+
+		ConvexPolygonShape3D convexHull = new ConvexPolygonShape3D();
+		convexHull.Points = intersectPoint.ToArray();
+
+		return convexHull;
+	}
 	public static bool GenerateBrushCollider(QBrush brush, Node3D holder, CollisionObject3D objCollider = null, bool addRigidBody = false)
 	{
 		bool isTrigger = false;
@@ -316,7 +423,7 @@ public static class Mesher
 
 		if (((type & ContentFlags.Details) != 0) || ((type & ContentFlags.Structural) != 0))
 		{
-			//			Debug.Log("brushSide: " + brush.brushSide + " Not used for collisions, Content Type is: " + type);
+//			GD.Print("brushSide: " + brush.brushSide + " Not used for collisions, Content Type is: " + type);
 			return false;
 		}
 
