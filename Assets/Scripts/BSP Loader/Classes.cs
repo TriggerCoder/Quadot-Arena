@@ -32,14 +32,6 @@ public class QShader
 		this.surfaceFlags = surfaceFlags;
 		this.contentsFlags = contentsFlags;
 		this.addAlpha = addAlpha;
-		// Remove some common shader modifiers to get normal
-		// textures instead. This is kind of a hack, and could
-		// bit you if a texture just happens to have any of these
-		// in its name but isn't actually a shader texture.
-		this.name = this.name.Replace("_hell", string.Empty);
-		this.name = this.name.Replace("_trans", string.Empty);
-		this.name = this.name.Replace("flat_400", string.Empty);
-		this.name = this.name.Replace("_750", string.Empty);
 	}
 }
 public class QNode

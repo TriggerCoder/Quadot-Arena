@@ -6,33 +6,33 @@ public partial class MaterialManager : Node
 {
 	public static MaterialManager Instance;
 	[Export]
-	public Material illegal;
+	public ShaderMaterial illegal;
 	[Export]
-	public Material skyHole;
+	public ShaderMaterial skyHole;
 	[Export]
-	public Material opaqueMaterial;
+	public ShaderMaterial opaqueMaterial;
 	[Export]
-	public Material defaultMaterial;
+	public ShaderMaterial defaultMaterial;
 	[Export]
-	public Material billBoardMaterial;
+	public ShaderMaterial billBoardMaterial;
 	[Export]
-	public Material spriteMaterial;
+	public ShaderMaterial spriteMaterial;
 	[Export]
-	public Material defaultTransparentMaterial;
+	public ShaderMaterial defaultTransparentMaterial;
 	[Export]
-	public Material defaultLightMapMaterial;
+	public ShaderMaterial defaultLightMapMaterial;
 	[Export]
-	public Material defaultTransparentLightMapMaterial;
+	public ShaderMaterial defaultTransparentLightMapMaterial;
 	[Export]
-	public Material debug;
+	public ShaderMaterial debug;
 	[Export]
-	public Material rgbGenIdentity;
+	public ShaderMaterial rgbGenIdentity;
 	[Export]
-	public Material tcGenEnvironment;
+	public ShaderMaterial tcGenEnvironment;
 	[Export]
-	public Material tcModRotate;
+	public ShaderMaterial tcModRotate;
 	[Export]
-	public Material tcModScroll;
+	public ShaderMaterial tcModScroll;
 
 	public MaterialOverride[] _OverrideMaterials = new MaterialOverride[0];
 
@@ -42,7 +42,7 @@ public partial class MaterialManager : Node
 	public static string opaqueTexProperty = "shader_parameter/MainTex";
 	public static string colorProperty = "shader_parameter/AmbientColor";
 
-	public static Dictionary<string, Material> Materials = new Dictionary<string, Material>();
+	public static Dictionary<string, ShaderMaterial> Materials = new Dictionary<string, ShaderMaterial>();
 	public static Dictionary<string, MaterialOverride> OverrideMaterials = new Dictionary<string, MaterialOverride>();
 	public static Dictionary<string, QShader> AditionalTextures = new Dictionary<string, QShader>();
 
@@ -91,7 +91,7 @@ public partial class MaterialManager : Node
 			AditionalTextures.Add(textureName, shader);
 	}
 	
-	public static Material GetMaterials(string textureName, int lm_index, bool forceSkinAlpha = false)
+	public static ShaderMaterial GetMaterials(string textureName, int lm_index, bool forceSkinAlpha = false)
 	{
 		if (IsSkyTexture(textureName))
 			return Instance.skyHole;
@@ -101,37 +101,46 @@ public partial class MaterialManager : Node
 		// available .pk3 files and compiled a dictionary of textures for us.
 		ImageTexture tex = TextureLoader.GetTexture(textureName);
 
-		Material mat;
+		ShaderMaterial mat;
 		// Lightmapping is on, so calc the lightmaps
 		if (lm_index >= 0 && Instance.applyLightmaps)
 		{
 			if (Materials.ContainsKey(textureName + lm_index.ToString()))
 				return Materials[textureName + lm_index.ToString()];
 
-			// Lightmapping
-			ImageTexture lmap = MapLoader.lightMaps[lm_index];
-
-			if (forceSkinAlpha)
-				mat = (Material)Instance.defaultLightMapMaterial.Duplicate(true);
-			else
-				mat = (Material)Instance.defaultLightMapMaterial.Duplicate(true);
-
-			mat.Set(opaqueTexProperty, tex);
-			mat.Set(lightMapProperty, lmap);
+			mat = QShaderManager.GetShadedMaterial(textureName, lm_index);
+			if (mat == null)
+			{
+				// Lightmapping
+				ImageTexture lmap = MapLoader.lightMaps[lm_index];
+				if (forceSkinAlpha)
+					mat = (ShaderMaterial)Instance.defaultLightMapMaterial.Duplicate(true);
+				else
+					mat = (ShaderMaterial)Instance.defaultLightMapMaterial.Duplicate(true);
 			
+				mat.Set(opaqueTexProperty, tex);
+				mat.Set(lightMapProperty, lmap);
+			}
 			Materials.Add(textureName + lm_index.ToString(), mat);
 			return mat;
 		}
 
 		if (Materials.ContainsKey(textureName))
 			return Materials[textureName];
-		// Lightmapping is off, so don't.
-		if (forceSkinAlpha)
-			mat = (Material)Instance.defaultTransparentMaterial.Duplicate(true);
-		else
-			mat = (Material)Instance.defaultMaterial.Duplicate(true);
-		mat.Set(opaqueTexProperty, tex);
-		mat.Set(colorProperty, GameManager.ambientLight);
+
+		mat = QShaderManager.GetShadedMaterial(textureName, 0);
+		if (mat == null)
+		{
+			// Lightmapping is off, so don't.
+			if (forceSkinAlpha)
+				mat = (ShaderMaterial)Instance.defaultTransparentMaterial.Duplicate(true);
+			else
+				mat = (ShaderMaterial)Instance.defaultMaterial.Duplicate(true);
+
+//			GD.Print(mat.Shader.Code);
+			mat.Set(opaqueTexProperty, tex);
+			mat.Set(colorProperty, GameManager.ambientLight);
+		}
 		Materials.Add(textureName, mat);
 		return mat;
 	}

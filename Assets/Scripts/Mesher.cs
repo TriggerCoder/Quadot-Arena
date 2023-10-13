@@ -63,7 +63,7 @@ public static class Mesher
 			Name += "_" + surfaces[i].surfaceId;
 		}
 
-		Material material = MaterialManager.GetMaterials(textureName, lmIndex);
+		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex);
 		MeshInstance3D mesh = new MeshInstance3D();
 		ArrayMesh arrMesh = new ArrayMesh();
 		StaticBody3D collider = new StaticBody3D();
@@ -229,7 +229,7 @@ public static class Mesher
 			return;
 		}
 
-		Material material = MaterialManager.GetMaterials(textureName, lmIndex);
+		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex);
 
 		MeshInstance3D mesh = new MeshInstance3D();
 		ArrayMesh arrMesh = new ArrayMesh();

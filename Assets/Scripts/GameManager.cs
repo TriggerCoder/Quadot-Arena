@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 public partial class GameManager : Node
 {
@@ -78,6 +79,12 @@ public partial class GameManager : Node
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		//Used in order to parse float with "." as decimal separator
+		CultureInfo CurrentCultureInfo = new CultureInfo("en", false);
+		CurrentCultureInfo.NumberFormat.NumberDecimalSeparator = ".";
+		CurrentCultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
+		CultureInfo.DefaultThreadCurrentCulture = CurrentCultureInfo;
+
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		environment = worldEnvironment.Environment;
 		ambientLightColor = environment.AmbientLightColor;

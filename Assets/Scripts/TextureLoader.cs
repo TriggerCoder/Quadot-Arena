@@ -23,6 +23,17 @@ public static class TextureLoader
 		LoadTextures(list);
 		LoadTextures(list,ImageFormat.TGA);
 	}
+
+	public static ImageTexture GetTextureOrAddTexture(string textureName)
+	{
+		string upperName = textureName.ToUpper();
+		if (Textures.ContainsKey(upperName))
+			return Textures[upperName];
+
+		GD.Print("GetTextureOrAddTexture: No texture \"" + upperName + "\"");
+		AddNewTexture(upperName, true);
+		return GetTexture(upperName);
+	}
 	public static ImageTexture GetTexture(string textureName)
 	{
 		string upperName = textureName.ToUpper();
@@ -65,9 +76,9 @@ public static class TextureLoader
 						for (int j = 0; j < height; j++)
 						{
 							Color pulledColors = baseTex.GetPixel(i, j);
-							int gray = (pulledColors.R8 + pulledColors.G8 + pulledColors.B8) / 2;
+							int gray = (pulledColors.R8 + pulledColors.G8 + pulledColors.B8) / 3;
 							gray = Mathf.Clamp(gray, 0, 255);
-							pulledColors.A8 = gray;
+							pulledColors.A8 = 255 - gray;
 							baseTex.SetPixel(i,j, pulledColors);
 						}
 					}
