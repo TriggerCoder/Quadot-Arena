@@ -19,7 +19,7 @@ sky_material = SubResource("PanoramaSkyMaterial_7oboo")
 background_mode = 2
 sky = SubResource("Sky_smrr4")
 ambient_light_source = 2
-ambient_light_color = Color(0.498039, 0.498039, 0.498039, 1)
+ambient_light_color = Color(0.376471, 0.376471, 0.376471, 1)
 tonemap_mode = 2
 glow_enabled = true
 
@@ -31,6 +31,7 @@ environment = SubResource("Environment_rcj1l")
 [node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
+mixBrightness = 0.25
 
 [node name="MaterialManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("3_amftv")

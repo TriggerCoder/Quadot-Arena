@@ -14,6 +14,8 @@ public partial class GameManager : Node
 	[Export]
 	public float colorLightning = 1f;
 	[Export]
+	public float mixBrightness = 0.5f; // Don't go above .5f
+	[Export]
 	public CharacterBody3D Player;
 
 	public static GameManager Instance;

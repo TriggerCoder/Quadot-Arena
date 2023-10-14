@@ -28,7 +28,7 @@ public static class QShaderManager
 	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index)
 	{
 		string code = "";
-		string GSHeader = "shader_type spatial;\n \n";
+		string GSHeader = "shader_type spatial;\n \nrender_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;";
 		string GSUniforms = "";
 		string GSVertexH = "void vertex(){ \n";
 		string GSFragmentH = "void fragment(){ \n";
@@ -36,8 +36,8 @@ public static class QShaderManager
 		string GSFragmentTcMod = "";
 		string GSFragmentTexs = "";
 		string GSFragmentRGBs = "";
-		string GSFragmentBlends = "vec4 color = vec4(1.0,1.0,1.0,1.0); \n";
-		string GSFragmentEnd = "ALBEDO = color.rgb;\n\n ";
+		string GSFragmentBlends = "vec4 vertx_color = COLOR;\nvec4 color = vec4(1.0,1.0,1.0,1.0); \n";
+		string GSFragmentEnd = "ALBEDO = (color.rgb * vertx_color.rgb);\n";
 
 		List<string> textures = new List<string>();
 
@@ -48,17 +48,27 @@ public static class QShaderManager
 		QShaderData qShader = QShaders[upperName];
 		GD.Print("Shader found: " + upperName);
 
+		int lightmapStage = -1;
 		for (int i = 0; i < qShader.qShaderStages.Count; i++)
 		{
 			QShaderStage qShaderStage = qShader.qShaderStages[i];
+			GSUniforms += "uniform sampler2D " + "stage_" + i;
 			if (qShaderStage.map != null)
+			{
 				textures.Add(qShaderStage.map[0]);
+				GSUniforms += " : repeat_enable;\n";
+			}
 			else if (qShaderStage.clampMap != null)
+			{
 				textures.Add(qShaderStage.clampMap[0]);
+				GSUniforms += " : repeat_disable;\n";
+			}
 			else if (qShaderStage.animMap != null)
+			{
 				textures.Add(qShaderStage.animMap[1].Split('.')[0]);
-			GSUniforms += "uniform sampler2D " + "stage_" + i + ";\n";
-			GSFragmentUvs += GetTcGen(qShader, i);
+				GSUniforms += " : repeat_enable;\n";
+			}
+			GSFragmentUvs += GetTcGen(qShader, i, ref lightmapStage);
 			GSFragmentTcMod += GetTcMod(qShader, i);
 			GSFragmentTexs += "vec4 tex" + i + " = texture(" + "stage_" + i + ", uv" + i + ");\n";
 			GSFragmentRGBs += GetRGBGen(qShader, i);
@@ -73,7 +83,12 @@ public static class QShaderManager
 		code += GSFragmentTexs;
 		code += GSFragmentRGBs;
 		code += GSFragmentBlends;
+
 		code += GSFragmentEnd;
+		if (lightmapStage >= 0)
+		{
+			code += "EMISSION = mix((tex" + lightmapStage + ".rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n\n ";
+		}
 		code += "\n}\n\n";
 
 		Shader shader = new Shader();
@@ -93,7 +108,7 @@ public static class QShaderManager
 		return shaderMaterial;
 	}
 
-	public static string GetTcGen(QShaderData qShader, int currentStage)
+	public static string GetTcGen(QShaderData qShader, int currentStage, ref int lightmapStage)
 	{
 		string TcGen = "";
 
@@ -110,7 +125,10 @@ public static class QShaderManager
 			if (qShader.qShaderStages[currentStage].map != null)
 			{
 				if (qShader.qShaderStages[currentStage].map[0].Contains("$LIGHTMAP"))
+				{
+					lightmapStage = currentStage;
 					TcGen = "vec2 uv" + currentStage + "=UV2;\n";
+				}
 				else
 					TcGen = "vec2 uv" + currentStage + "=UV;\n";
 			}
@@ -387,6 +405,7 @@ public static class QShaderManager
 
 			if (keyValue.Length == 2)
 			{
+				//Sanitizing extra spaces 
 				p = 0;
 				for (int i = 0; i < keyValue[1].Length; i++)
 				{
@@ -398,10 +417,16 @@ public static class QShaderManager
 						break;
 						case ' ':
 							if (p > 0)
-								line[p++] = c;
+							{
+								if ((line[p - 1]) != ' ')
+									line[p++] = c;
+							}
 						break;
 					}
 				}
+				if ((p > 0) && ((line[p - 1]) == ' '))
+					p--;
+
 				line[p] = '\0';
 				keyValue[1] = new string(line, 0, p);
 
@@ -605,55 +630,55 @@ public class QShaderStage
 			case "ANIMMAP":
 			{
 				if (animMap == null)
-					animMap = Value.Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
-				}
+					animMap = Value.Split(' ');
+			}
 			break;
 			case "BLENDFUNC":
 				if (blendFunc == null) 
-					blendFunc = Value.Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+					blendFunc = Value.Split(' ');
 				break;
 			case "RGBGEN":
 				if (rgbGen == null)
-					rgbGen = Value.Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+					rgbGen = Value.Split(' ');
 			break;
 			case "ALPHAGEN":
 				if (alphaGen == null)
-					alphaGen = Value.Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+					alphaGen = Value.Split(' ');
 				break;
 			case "TCGEN":
 				if (tcGen  == null)
-					tcGen = Value.Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+					tcGen = Value.Split(' ');
 				break;
 			case "TCMOD":
 			{
-				string[] keyValue = Value.Split(' ', 2).Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+				string[] keyValue = Value.Split(' ', 2);
 				if (keyValue.Length == 2)
 				{
 					switch (keyValue[0])
 					{
 						case "SCALE":
 							if (tcModScale == null)
-								tcModScale = keyValue[1].Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+								tcModScale = keyValue[1].Split(' ');
 								break;
 						case "TURB":
 							if (tcModTurb == null)
-								tcModTurb = keyValue[1].Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+								tcModTurb = keyValue[1].Split(' ');
 								break;
 						case "ROTATE":
 							if (tcModRotate == null)
-								tcModRotate = keyValue[1].Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+								tcModRotate = keyValue[1].Split(' ');
 								break;
 						case "STRETCH":
 							if (tcModStretch ==  null)
-								tcModStretch = keyValue[1].Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+								tcModStretch = keyValue[1].Split(' ');
 								break;
 						case "TRANSFORM":
 							if (tcModTransform == null)
-								tcModTransform = keyValue[1].Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+								tcModTransform = keyValue[1].Split(' ');
 								break;
 						case "SCROLL":
 							if (tcModScroll  == null)
-								tcModScroll = keyValue[1].Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+								tcModScroll = keyValue[1].Split(' ');
 								break;
 					}
 				}
@@ -661,15 +686,15 @@ public class QShaderStage
 			break;
 			case "DEPTHFUNC":
 				if (depthFunc  == null)
-					depthFunc = Value.Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+					depthFunc = Value.Split(' ');
 				break;
 			case "DEPTHWRITE":
 				if (depthWrite == null)
-					depthWrite = Value.Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+					depthWrite = Value.Split(' ');
 				break;
 			case "ALPHAFUNC":
 				if (alphaFunc == null)
-					alphaFunc = Value.Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+					alphaFunc = Value.Split(' ');
 				break;
 		}
 	}

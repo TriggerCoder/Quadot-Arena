@@ -41,6 +41,7 @@ public partial class MaterialManager : Node
 	public static string lightMapProperty = "shader_parameter/LightMap";
 	public static string opaqueTexProperty = "shader_parameter/MainTex";
 	public static string colorProperty = "shader_parameter/AmbientColor";
+	public static string mixBrightness = "shader_parameter/mixBrightness";
 
 	public static Dictionary<string, ShaderMaterial> Materials = new Dictionary<string, ShaderMaterial>();
 	public static Dictionary<string, MaterialOverride> OverrideMaterials = new Dictionary<string, MaterialOverride>();
@@ -93,8 +94,8 @@ public partial class MaterialManager : Node
 	
 	public static ShaderMaterial GetMaterials(string textureName, int lm_index, bool forceSkinAlpha = false)
 	{
-		if (IsSkyTexture(textureName))
-			return Instance.skyHole;
+//		if (IsSkyTexture(textureName))
+//			return Instance.skyHole;
 
 		// Load the primary texture for the surface from the texture lump
 		// The texture lump itself will have already looked over all
@@ -120,6 +121,7 @@ public partial class MaterialManager : Node
 			
 				mat.Set(opaqueTexProperty, tex);
 				mat.Set(lightMapProperty, lmap);
+				mat.Set(mixBrightness, GameManager.Instance.mixBrightness);
 			}
 			Materials.Add(textureName + lm_index.ToString(), mat);
 			return mat;
@@ -140,6 +142,7 @@ public partial class MaterialManager : Node
 //			GD.Print(mat.Shader.Code);
 			mat.Set(opaqueTexProperty, tex);
 			mat.Set(colorProperty, GameManager.ambientLight);
+			mat.Set(mixBrightness, GameManager.Instance.mixBrightness);
 		}
 		Materials.Add(textureName, mat);
 		return mat;
