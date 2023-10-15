@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections;
 using System.Collections.Generic;
+using static Godot.Image;
 
 public static class TextureLoader
 {
@@ -67,8 +68,9 @@ public static class TextureLoader
 					baseTex.LoadTgaFromBuffer(imageBytes);
 				else
 					baseTex.LoadJpgFromBuffer(imageBytes);
-				if (tex.addAlpha)
+				if ((tex.addAlpha) && (baseTex.DetectAlpha() == AlphaMode.None))
 				{
+					baseTex.Convert(Format.Rgba8);
 					int width = baseTex.GetWidth();
 					int height = baseTex.GetHeight();
 					for (int i = 0; i < width; i++)
@@ -76,14 +78,12 @@ public static class TextureLoader
 						for (int j = 0; j < height; j++)
 						{
 							Color pulledColors = baseTex.GetPixel(i, j);
-							int gray = (pulledColors.R8 + pulledColors.G8 + pulledColors.B8) / 3;
-							gray = Mathf.Clamp(gray, 0, 255);
-							pulledColors.A8 = 255 - gray;
+							pulledColors.A8 = 255;
 							baseTex.SetPixel(i,j, pulledColors);
 						}
 					}
 				}
-				baseTex.ResizeToPo2(false, Image.Interpolation.Lanczos);
+				baseTex.ResizeToPo2(false, Interpolation.Lanczos);
 				ImageTexture readyTex = ImageTexture.CreateFromImage(baseTex);
 
 				if (Textures.ContainsKey(upperName))

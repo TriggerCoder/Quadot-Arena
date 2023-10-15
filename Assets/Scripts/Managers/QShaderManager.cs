@@ -2,8 +2,9 @@ using Godot;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using static QShaderStage;
 using System;
-using System.Linq;
+using System.Drawing;
 
 public static class QShaderManager
 {
@@ -28,16 +29,16 @@ public static class QShaderManager
 	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index)
 	{
 		string code = "";
-		string GSHeader = "shader_type spatial;\n \nrender_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;";
+		string GSHeader = "shader_type spatial;\nrender_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;\n \n";
 		string GSUniforms = "";
-		string GSVertexH = "void vertex(){ \n";
-		string GSFragmentH = "void fragment(){ \n";
+		string GSVertexH = "void vertex()\n{ \n";
+		string GSFragmentH = "void fragment()\n{ \n";
 		string GSFragmentUvs = "";
 		string GSFragmentTcMod = "";
 		string GSFragmentTexs = "";
 		string GSFragmentRGBs = "";
-		string GSFragmentBlends = "vec4 vertx_color = COLOR;\nvec4 color = vec4(1.0,1.0,1.0,1.0); \n";
-		string GSFragmentEnd = "ALBEDO = (color.rgb * vertx_color.rgb);\n";
+		string GSFragmentBlends = "\tvec4 vertx_color = COLOR;\n\tvec4 color = vec4(1.0,1.0,1.0,1.0); \n";
+		string GSFragmentEnd = "\t//if (length(color.rgb) == 1.0)\n\t//{\n\t\t//discard;\n\t//}\n\tALBEDO = (color.rgb * vertx_color.rgb);\n";
 
 		List<string> textures = new List<string>();
 
@@ -49,6 +50,7 @@ public static class QShaderManager
 		GD.Print("Shader found: " + upperName);
 
 		int lightmapStage = -1;
+		bool helperRotate = false;
 		for (int i = 0; i < qShader.qShaderStages.Count; i++)
 		{
 			QShaderStage qShaderStage = qShader.qShaderStages[i];
@@ -69,14 +71,21 @@ public static class QShaderManager
 				GSUniforms += " : repeat_enable;\n";
 			}
 			GSFragmentUvs += GetTcGen(qShader, i, ref lightmapStage);
-			GSFragmentTcMod += GetTcMod(qShader, i);
-			GSFragmentTexs += "vec4 tex" + i + " = texture(" + "stage_" + i + ", uv" + i + ");\n";
+			GSFragmentTcMod += GetTcMod(qShader, i, ref helperRotate);
+			GSFragmentTexs += "\tvec4 tex" + i + " = texture(" + "stage_" + i + ", uv" + i + ");\n";
 			GSFragmentRGBs += GetRGBGen(qShader, i);
 			GSFragmentBlends += GetBlend(qShader, i);
 		}
 
 		code += GSHeader;
 		code += GSUniforms;
+
+		if (helperRotate)
+		{
+			code += "\nvec2 rotate(vec2 uv, vec2 pivot, float angle)\n{\n\tmat2 rotation = mat2(vec2(sin(angle), -cos(angle)),vec2(cos(angle), sin(angle)));\n";
+			code += "\tuv -= pivot;\n\tuv = uv * rotation;\n\tuv += pivot;\n\treturn uv;\n}\n\n";
+		}
+
 		code += GSFragmentH;
 		code += GSFragmentUvs;
 		code += GSFragmentTcMod;
@@ -87,7 +96,7 @@ public static class QShaderManager
 		code += GSFragmentEnd;
 		if (lightmapStage >= 0)
 		{
-			code += "EMISSION = mix((tex" + lightmapStage + ".rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n\n ";
+			code += "\tEMISSION = mix((tex" + lightmapStage + ".rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n\n ";
 		}
 		code += "\n}\n\n";
 
@@ -115,10 +124,10 @@ public static class QShaderManager
 		if (qShader.qShaderGlobal.skyParms != null)
 		{
 //			int cloudheight = int.Parse(qShader.qShaderGlobal.skyParms[1]) / 5;
-			TcGen = "vec4 vot" + currentStage + "  = INV_VIEW_MATRIX * vec4(VERTEX, 0.0);\n";
-			TcGen += "vot" + currentStage + ".y = 6.0 * (vot" + currentStage + ".y );\n";
-			TcGen += "vot" + currentStage + " = normalize(vot" + currentStage + ");\n";
-			TcGen += "vec2 uv" + currentStage + "= vec2(vot" + currentStage + ".x, vot" + currentStage + ".z);\n";
+			TcGen += "\tvec4 vot" + currentStage + "  = INV_VIEW_MATRIX * vec4(VERTEX, 0.0);\n";
+			TcGen += "\tvot" + currentStage + ".y = 6.0 * (vot" + currentStage + ".y );\n";
+			TcGen += "\tvot" + currentStage + " = normalize(vot" + currentStage + ");\n";
+			TcGen += "\tvec2 uv" + currentStage + "= vec2(vot" + currentStage + ".x, vot" + currentStage + ".z);\n";
 		}
 		else
 		{
@@ -127,61 +136,80 @@ public static class QShaderManager
 				if (qShader.qShaderStages[currentStage].map[0].Contains("$LIGHTMAP"))
 				{
 					lightmapStage = currentStage;
-					TcGen = "vec2 uv" + currentStage + "=UV2;\n";
+					TcGen = "\tvec2 uv" + currentStage + " = UV2;\n";
 				}
 				else
-					TcGen = "vec2 uv" + currentStage + "=UV;\n";
+					TcGen = "\tvec2 uv" + currentStage + " = UV;\n";
 			}
 			else
-				TcGen = "vec2 uv" + currentStage + "=UV;\n";
+				TcGen = "\tvec2 uv" + currentStage + " = UV;\n";
 		}
 
 		return TcGen;
 	}
 
-	public static string GetTcMod(QShaderData qShader, int currentStage)
+	public static string GetTcMod(QShaderData qShader, int currentStage, ref bool helperRotate)
 	{
 		string TcMod = "";
 
-		if (qShader.qShaderStages[currentStage].tcModRotate != null)
+		if (qShader.qShaderStages[currentStage].tcMod == null)
+			return TcMod;
+
+		for (int i = 0; i < qShader.qShaderStages[currentStage].tcMod.Count; i++)
 		{
-			float deg = TryToParseFloat(qShader.qShaderStages[currentStage].tcModRotate[0]);
-			TcMod = "uv" + currentStage + " *=vec2(cos(" + deg.ToString("0.00") + "),-sin(" + deg.ToString("0.00") + "))* TIME*0.5; \n";
-		}
-		if (qShader.qShaderStages[currentStage].tcModStretch != null)
-		{
-			string func = qShader.qShaderStages[currentStage].tcModStretch[0];
-			float basis = TryToParseFloat(qShader.qShaderStages[currentStage].tcModStretch[1]);
-			float amp = TryToParseFloat(qShader.qShaderStages[currentStage].tcModStretch[2]);
-			float phase = TryToParseFloat(qShader.qShaderStages[currentStage].tcModStretch[3]);
-			float freq = TryToParseFloat(qShader.qShaderStages[currentStage].tcModStretch[4]);
-			TcMod += "float str_" + currentStage + " = " + basis.ToString("0.00") + " + " + amp.ToString("0.00") + " * (sin(fract(TIME)*" + freq.ToString("0.00") + "*6.28)+" + phase.ToString("0.00") + ");\n";
-			TcMod += "uv" + currentStage + "  = uv" + currentStage + " *(str_" + currentStage + ") - vec2(1.0,1.0)*str_" + currentStage + "*0.5 + vec2(0.5,0.5);\n";	
-		}
-		if (qShader.qShaderStages[currentStage].tcModTransform != null)
-		{
-		}
-		if (qShader.qShaderStages[currentStage].tcModTurb != null)
-		{
-		}
-		if (qShader.qShaderStages[currentStage].tcModScale != null)
-		{
-			float SScale = TryToParseFloat(qShader.qShaderStages[currentStage].tcModScale[0]);
-			float TScale = TryToParseFloat(qShader.qShaderStages[currentStage].tcModScale[1]);
-			TcMod += "uv" + currentStage + " *=vec2(" + SScale.ToString("0.00") + "," + TScale.ToString("0.00") + "); \n";
-		}
-		if (qShader.qShaderStages[currentStage].tcModScroll != null)
-		{
-			float SSpeed = TryToParseFloat(qShader.qShaderStages[currentStage].tcModScroll[0]);
-			float TSpeed = TryToParseFloat(qShader.qShaderStages[currentStage].tcModScroll[1]);
-			TcMod += "uv" + currentStage + " += vec2(" + SSpeed.ToString("0.00") + "," + TSpeed.ToString("0.00") + ") * TIME*0.5; \n";
+			QShaderTCMod shaderTCMod = qShader.qShaderStages[currentStage].tcMod[i];
+
+			switch(shaderTCMod.type)
+			{
+				case TCModType.Rotate:
+				{
+					if (helperRotate == false)
+						helperRotate = true;
+					float deg = TryToParseFloat(shaderTCMod.value[0]);
+					TcMod += "\tuv" + currentStage + " = rotate(uv" + currentStage + ", vec2(0.5), radians(" + deg.ToString("0.00") + ") * TIME*0.5);\n";
+				}
+				break;
+				case TCModType.Scale:
+				{
+					float SScale = TryToParseFloat(shaderTCMod.value[0]);
+					float TScale = TryToParseFloat(shaderTCMod.value[1]);
+					TcMod += "\tuv" + currentStage + " *= vec2(" + SScale.ToString("0.00") + "," + TScale.ToString("0.00") + "); \n";
+				}
+				break;
+				case TCModType.Scroll:
+				{
+					float SSpeed = TryToParseFloat(shaderTCMod.value[0]);
+					float TSpeed = TryToParseFloat(shaderTCMod.value[1]);
+					TcMod += "\tuv" + currentStage + " += vec2(" + SSpeed.ToString("0.00") + "," + TSpeed.ToString("0.00") + ") * TIME*0.5; \n";
+				}
+				break;
+				case TCModType.Stretch:
+				{
+					string func = shaderTCMod.value[0];
+					float basis = TryToParseFloat(shaderTCMod.value[1]);
+					float amp = TryToParseFloat(shaderTCMod.value[2]);
+					float phase = TryToParseFloat(shaderTCMod.value[3]);
+					float freq = TryToParseFloat(shaderTCMod.value[4]);
+					TcMod += "\tfloat str_" + currentStage + " = " + basis.ToString("0.00") + " + " + amp.ToString("0.00") + " * (sin((TIME)*" + freq.ToString("0.00") + "*6.28)+" + phase.ToString("0.00") + ");\n";
+					TcMod += "\tuv" + currentStage + "  = uv" + currentStage + " *(str_" + currentStage + ") - vec2(1.0,1.0)*str_" + currentStage + "*0.5 + vec2(0.5,0.5);\n";
+				}
+				break;
+				case TCModType.Transform:
+				{
+				}
+				break;
+				case TCModType.Turb:
+				{
+				}
+				break;
+			}
 		}
 		return TcMod;
 	}
 
 	public static string GetRGBGen(QShaderData qShader, int currentStage)
 	{
-		string RGBGen = "tex" + currentStage + ".rgb = tex" + currentStage + ".rgb * 1.0 ; \n";
+		string RGBGen = "\ttex" + currentStage + ".rgb = tex" + currentStage + ".rgb * 1.0 ; \n";
 		if (qShader.qShaderStages[currentStage].rgbGen != null)
 		{
 			if (qShader.qShaderStages[currentStage].rgbGen.Length > 0)
@@ -198,23 +226,23 @@ public static class QShaderManager
 				switch (RGBFunc)
 				{
 					case "SIN":
-						RGBGen = "tex" + currentStage + ".rgb = tex" + currentStage + ".rgb * ";
+						RGBGen = "\ttex" + currentStage + ".rgb = tex" + currentStage + ".rgb * ";
 						RGBGen += basis.ToString("0.00") + " + sin((TIME * " + freq.ToString("0.00") + ")*6.28+" + phase.ToString("0.00") + ")  * " + amp.ToString("0.00") + " ; \n";
 					break;
 					case "SQUARE":
-						RGBGen = "tex" + currentStage + ".rgb = tex" + currentStage + ".rgb * ";
+						RGBGen = "\ttex" + currentStage + ".rgb = tex" + currentStage + ".rgb * ";
 						RGBGen += basis.ToString("0.00") + " + sign(sin((TIME  * " + freq.ToString("0.00") + ")*6.28)+" + phase.ToString("0.00") + ")  * " + amp.ToString("0.00") + " ; \n";
 					break;
 					case "TRIANGLE":
-						RGBGen = "tex" + currentStage + ".rgb = tex" + currentStage + ".rgb * (";
+						RGBGen = "\ttex" + currentStage + ".rgb = tex" + currentStage + ".rgb * (";
 						RGBGen += basis.ToString("0.00") + " + abs( 0.5 - mod(TIME  + " + phase.ToString("0.00") + ", 1.0/" + freq.ToString("0.00") + ")+" + phase.ToString("0.00") + ")  * " + amp.ToString("0.00") + ") ; \n";
 					break;
 					case "SAWTOOTH":
-						RGBGen = "tex" + currentStage + ".rgb = tex" + currentStage + ".rgb * (";
+						RGBGen = "\ttex" + currentStage + ".rgb = tex" + currentStage + ".rgb * (";
 						RGBGen += basis.ToString("0.00") + " + mod(TIME  + " + phase.ToString("0.00") + ", 1.0/" + freq.ToString("0.00") + ")+" + phase.ToString("0.00") + "  * " + amp.ToString("0.00") + ") ; \n";
 					break;
 					case "INVERSESAWTOOTH":
-						RGBGen = "tex" + currentStage + ".rgb = tex" + currentStage + ".rgb * (";
+						RGBGen = "\ttex" + currentStage + ".rgb = tex" + currentStage + ".rgb * (";
 						RGBGen += basis.ToString("0.00") + " + ( 1.0 - mod(TIME  + " + phase.ToString("0.00") + ", 1.0/" + freq.ToString("0.00") + ")+" + phase.ToString("0.00") + ")  * " + amp.ToString("0.00") + ") ; \n";
 					break;
 				}
@@ -230,11 +258,11 @@ public static class QShaderManager
 		{
 			string BlendWhat = qShader.qShaderStages[currentStage].blendFunc[0];
 			if (BlendWhat.Contains("ADD"))
-				Blend = "color = color + tex" + currentStage + "; \n";
+				Blend = "\tcolor = tex" + currentStage + " + color; \n";
 			else if (BlendWhat.Contains("FILTER"))
-				Blend = "color = color * tex" + currentStage + "; \n";
+				Blend = "\tcolor = tex" + currentStage + " * color; \n";
 			else if (BlendWhat.Contains("BLEND"))
-				Blend = "color.rgb = color.rgb * tex" + currentStage + ".a + tex" + currentStage + ".rgb * (1.0 - tex" + currentStage + ".a); \n";
+				Blend = "\tcolor.rgb = tex" + currentStage + ".rgb * tex" + currentStage + ".a + color.rgb * (1.0 - tex" + currentStage + ".a); \n";
 			else
 			{
 				string src = qShader.qShaderStages[currentStage].blendFunc[0];
@@ -260,6 +288,12 @@ public static class QShaderManager
 						break;
 					case "GL_ONE_MINUS_SRC_ALPHA":
 						fsrc = " (1.0 -  tex" + currentStage + ".a) ";
+						break;
+					case "GL_DST_ALPHA":
+						fsrc = " color.a ";
+						break;
+					case "GL_ONE_MINUS_DST_ALPHA":
+						fsrc = " (1.0 - color.a) ";
 						break;
 				}
 				switch (dst)
@@ -289,11 +323,11 @@ public static class QShaderManager
 						fdst = " (1.0 -  tex" + currentStage + ".a) ";
 						break;
 				}
-				Blend = "color.rgb = color.rgb * " + fdst + " + tex" + currentStage + ".rgb * " + fsrc + "; \n";
+				Blend = "\tcolor.rgb = tex" + currentStage + ".rgb * " + fsrc + " + color.rgb * " + fdst + "; \n";
 			}
 		}
 		else
-			Blend = "color =  tex" + currentStage + "; \n";
+			Blend = "\tcolor =  tex" + currentStage + "; \n";
 		return Blend;
 	}
 
@@ -605,12 +639,7 @@ public class QShaderStage
 	public string[] rgbGen = null;
 	public string[] alphaGen = null;
 	public string[] tcGen = null;
-	public string[] tcModScale = null;
-	public string[] tcModScroll = null;
-	public string[] tcModTurb = null;
-	public string[] tcModRotate = null;
-	public string[] tcModStretch = null;
-	public string[] tcModTransform = null;
+	public List<QShaderTCMod> tcMod = null;
 	public string[] depthFunc = null;
 	public string[] depthWrite = null;
 	public string[] alphaFunc = null;
@@ -654,33 +683,33 @@ public class QShaderStage
 				string[] keyValue = Value.Split(' ', 2);
 				if (keyValue.Length == 2)
 				{
+					if (tcMod == null)
+						tcMod = new List<QShaderTCMod>();
+					QShaderTCMod shaderTCMod = new QShaderTCMod();
+
 					switch (keyValue[0])
 					{
-						case "SCALE":
-							if (tcModScale == null)
-								tcModScale = keyValue[1].Split(' ');
-								break;
-						case "TURB":
-							if (tcModTurb == null)
-								tcModTurb = keyValue[1].Split(' ');
-								break;
 						case "ROTATE":
-							if (tcModRotate == null)
-								tcModRotate = keyValue[1].Split(' ');
-								break;
-						case "STRETCH":
-							if (tcModStretch ==  null)
-								tcModStretch = keyValue[1].Split(' ');
-								break;
-						case "TRANSFORM":
-							if (tcModTransform == null)
-								tcModTransform = keyValue[1].Split(' ');
-								break;
+							shaderTCMod.type = TCModType.Rotate;
+						break;
+						case "SCALE":
+							shaderTCMod.type = TCModType.Scale;
+						break;
 						case "SCROLL":
-							if (tcModScroll  == null)
-								tcModScroll = keyValue[1].Split(' ');
-								break;
+							shaderTCMod.type = TCModType.Scroll;
+						break;
+						case "STRETCH":
+							shaderTCMod.type = TCModType.Stretch;
+						break;
+						case "TRANSFORM":
+							shaderTCMod.type = TCModType.Transform;
+						break;
+						case "TURB":
+							shaderTCMod.type = TCModType.Turb;
+						break;
 					}
+					shaderTCMod.value = keyValue[1].Split(' ');
+					tcMod.Add(shaderTCMod);
 				}
 			}
 			break;
@@ -697,6 +726,20 @@ public class QShaderStage
 					alphaFunc = Value.Split(' ');
 				break;
 		}
+	}
+	public class QShaderTCMod
+	{
+		public TCModType type;
+		public string[] value = null;
+	}
+	public enum TCModType
+	{
+		Rotate,
+		Scale,
+		Scroll,
+		Stretch,
+		Transform,
+		Turb
 	}
 }
 

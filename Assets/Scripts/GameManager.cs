@@ -14,7 +14,7 @@ public partial class GameManager : Node
 	[Export]
 	public float colorLightning = 1f;
 	[Export]
-	public float mixBrightness = 0.5f; // Don't go above .5f
+	public float mixBrightness = 0.25f;				// Range from 0 to 1, .25f Is the nicest
 	[Export]
 	public CharacterBody3D Player;
 
