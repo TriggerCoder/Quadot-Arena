@@ -21,8 +21,8 @@ public static class TextureLoader
 		{
 			new QShader(textureName, 0, 0, forceSkinAlpha)
 		};
-		LoadTextures(list);
-		LoadTextures(list,ImageFormat.TGA);
+		LoadTextures(list, false);
+		LoadTextures(list, false , ImageFormat.TGA);
 	}
 
 	public static ImageTexture GetTextureOrAddTexture(string textureName, bool forceAlpha)
@@ -44,12 +44,16 @@ public static class TextureLoader
 		GD.Print("TextureLoader: No texture \"" + upperName + "\"");
 		return illegal;
 	}
-	public static void LoadTextures(List<QShader> mapTextures, ImageFormat imageFormat = ImageFormat.JPG)
+	public static void LoadTextures(List<QShader> mapTextures, bool ignoreShaders, ImageFormat imageFormat = ImageFormat.JPG)
 	{
 		foreach (QShader tex in mapTextures)
 		{
 			string upperName = tex.name.ToUpper();
 			string path = upperName;
+
+			if (ignoreShaders)
+				if (QShaderManager.QShaders.ContainsKey(upperName))
+					continue;
 
 			if (imageFormat == ImageFormat.TGA)
 				path += ".TGA";
@@ -73,15 +77,27 @@ public static class TextureLoader
 					baseTex.Convert(Format.Rgba8);
 					int width = baseTex.GetWidth();
 					int height = baseTex.GetHeight();
+					float avgGray = 0;
 					for (int i = 0; i < width; i++)
 					{
 						for (int j = 0; j < height; j++)
 						{
 							Color pulledColors = baseTex.GetPixel(i, j);
-							int gray = (pulledColors.R8 + pulledColors.G8 + pulledColors.B8) / 2;
-							gray = Mathf.Clamp(gray, 0, 255);
-							pulledColors.A8 = gray;
-							baseTex.SetPixel(i,j, pulledColors);
+							avgGray += (pulledColors.R + pulledColors.G + pulledColors.B);
+						}
+					}
+					// Get the average gray of the image 
+					avgGray /= 3 * width* height;
+					for (int i = 0; i < width; i++)
+					{
+						for (int j = 0; j < height; j++)
+						{
+							Color pulledColors = baseTex.GetPixel(i, j);
+							float gray = (pulledColors.R + pulledColors.G + pulledColors.B) * 0.15f;
+							gray /= avgGray;
+							gray = Mathf.Clamp(gray, 0, 1);
+							pulledColors.A = gray;
+							baseTex.SetPixel(i, j, pulledColors);
 						}
 					}
 				}
@@ -95,7 +111,10 @@ public static class TextureLoader
 				}
 				else
 				{
-					GD.Print("Adding texture with name " + upperName + "."+ imageFormat);
+					if (tex.addAlpha)
+						GD.Print("Adding transparent texture with name " + upperName + "."+ imageFormat);
+					else
+						GD.Print("Adding texture with name " + upperName + "." + imageFormat);
 					Textures.Add(upperName, readyTex);
 				}
 			}

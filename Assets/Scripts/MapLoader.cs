@@ -405,7 +405,7 @@ public static class MapLoader
 	}
 	public static void GetMapTextures()
 	{
-		TextureLoader.LoadTextures(mapTextures);
-		TextureLoader.LoadTextures(mapTextures, TextureLoader.ImageFormat.TGA);
+		TextureLoader.LoadTextures(mapTextures, true);
+		TextureLoader.LoadTextures(mapTextures, true, TextureLoader.ImageFormat.TGA);
 	}
 }
