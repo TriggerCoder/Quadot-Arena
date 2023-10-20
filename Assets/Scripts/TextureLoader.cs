@@ -77,26 +77,16 @@ public static class TextureLoader
 					baseTex.Convert(Format.Rgba8);
 					int width = baseTex.GetWidth();
 					int height = baseTex.GetHeight();
-					float avgGray = 0;
 					for (int i = 0; i < width; i++)
 					{
 						for (int j = 0; j < height; j++)
 						{
 							Color pulledColors = baseTex.GetPixel(i, j);
-							avgGray += (pulledColors.R + pulledColors.G + pulledColors.B);
-						}
-					}
-					// Get the average gray of the image 
-					avgGray /= 3 * width* height;
-					for (int i = 0; i < width; i++)
-					{
-						for (int j = 0; j < height; j++)
-						{
-							Color pulledColors = baseTex.GetPixel(i, j);
-							float gray = (pulledColors.R + pulledColors.G + pulledColors.B) * 0.15f;
-							gray /= avgGray;
-							gray = Mathf.Clamp(gray, 0, 1);
-							pulledColors.A = gray;
+							float alpha = computeAlphaFromColorFilter(pulledColors, Colors.Black);
+							pulledColors.R /= alpha;
+							pulledColors.G /= alpha;
+							pulledColors.B /= alpha;
+							pulledColors.A = alpha;
 							baseTex.SetPixel(i, j, pulledColors);
 						}
 					}
@@ -122,7 +112,10 @@ public static class TextureLoader
 				GD.Print("Image not found " + upperName + "." + imageFormat);
 		}
 	}
-
+	public static float computeAlphaFromColorFilter(Color color, Color filter)
+	{ 
+		return Mathf.Max(Mathf.Max(Mathf.Abs(color.R - filter.R), Mathf.Abs(color.G - filter.G)), Mathf.Abs(color.B - filter.B));
+	}
 	public static ImageTexture CreateLightmapTexture(byte[] rgb)
 	{
 		Color colors;

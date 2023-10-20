@@ -34,9 +34,9 @@ public static class QShaderManager
 		string GSFragmentTcMod = "";
 		string GSFragmentTexs = "";
 		string GSLateFragmentTexs = "";
-		string GSFragmentRGBs = "";
-		string GSFragmentBlends = "\tvec4 vertx_color = COLOR;\n";
-		string GSFragmentEnd = "\t//if (length(color.rgb) == 1.0)\n\t//{\n\t\t//discard;\n\t//}\n\tALBEDO = (color.rgb * vertx_color.rgb);\n";
+		string GSFragmentRGBs = "\tvec4 vertx_color = COLOR;\n"; 
+		string GSFragmentBlends = "";
+		string GSFragmentEnd = "\tALBEDO = (color.rgb * vertx_color.rgb);\n";
 		string GSAnimation = "";
 		bool alphaIsTransparent = false;
 
@@ -121,6 +121,7 @@ public static class QShaderManager
 			GSFragmentTcMod += GetTcMod(qShader, i, ref helperRotate);
 			
 			GSFragmentRGBs += GetRGBGen(qShader, i);
+			GSFragmentRGBs += GetAlphaFunc(qShader, i);
 			GSFragmentBlends += GetBlend(qShader, i);
 		}
 
@@ -201,6 +202,9 @@ public static class QShaderManager
 		code += GSLateFragmentTexs;
 		code += GSFragmentRGBs;
 
+		if (lightmapStage < 0)
+			code += "\tvec4 ambient = vec4("+ GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.R.ToString("0.00") + ","+ GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.G.ToString("0.00") + ","+ GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.B.ToString("0.00") + ", 1.0 );\n";
+
 		if (lightmapStage >= 0)
 			code += "\tvec4 color = Stage_" + lightmapStage + ";\n";
 		else if (qShader.qShaderGlobal.editorImage.Length != 0)
@@ -218,15 +222,17 @@ public static class QShaderManager
 		code += GSFragmentEnd;
 
 		if (lightmapStage >= 0)
-		{
-			code += "\tEMISSION = mix((Stage_" + lightmapStage + ".rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n\n ";
-		}
+			code += "\tEMISSION = mix((Stage_" + lightmapStage + ".rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n";
+		else
+			code += "\tEMISSION = mix((ambient.rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n";
+		
+
 		if (alphaIsTransparent)
 		{
 //			code += "\tALPHA_SCISSOR_THRESHOLD = 0.5;\n";
 			code += "\tALPHA = color.a;\n";
 		}
-		code += "\n}\n\n";
+		code += "}\n\n";
 
 		Shader shader = new Shader();
 		shader.Code = code;
@@ -363,25 +369,53 @@ public static class QShaderManager
 				break;
 				case "SQUARE":
 					RGBGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * (";
-					RGBGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(TIME  * " + freq.ToString("0.00") + "+ " + phase.ToString("0.00") + "))); \n";
+					RGBGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
 				break;
 				case "TRIANGLE":
 					RGBGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * (";
-					RGBGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (TIME  * " + freq.ToString("0.00") + "+ " + phase.ToString("0.00") + " - floor(0.5 + TIME * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
+					RGBGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(0.5 + TIME * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
 				break;
 				case "SAWTOOTH":
 					RGBGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * (";
-					RGBGen += offset.ToString("0.00") + "+ " + amp.ToString("0.00") + " * (TIME  * " + freq.ToString("0.00") + "+ " + phase.ToString("0.00") + " - floor(TIME  * " + freq.ToString("0.00") + "+ " + phase.ToString("0.00") + "))); \n";
+					RGBGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
 				break;
 				case "INVERSESAWTOOTH":
 					RGBGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * (";
-					RGBGen += offset.ToString("0.00") + "+ " + amp.ToString("0.00") + " * (1.0 - (TIME  * " + freq.ToString("0.00") + "+ " + phase.ToString("0.00") + " - floor(TIME  * " + freq.ToString("0.00") + "+ " + phase.ToString("0.00") + ")))); \n";
+					RGBGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + ")))); \n";
 				break;
 			}
+		}
+		else if (qShader.qShaderStages[currentStage].rgbGen.Length == 1)
+		{
+			string RGBFunc = qShader.qShaderStages[currentStage].rgbGen[0];
+			if (RGBFunc.Contains("VERTEX"))
+				RGBGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * vertx_color.rgb ; \n";
 		}
 		return RGBGen;
 	}
 
+	public static string GetAlphaFunc(QShaderData qShader, int currentStage)
+	{
+		string AlphaFunc = "";
+		if (qShader.qShaderStages[currentStage].alphaFunc == QShaderStage.AlphaFuncType.NONE)
+			return AlphaFunc;
+
+		AlphaFunc = "\tif (Stage_" + currentStage + ".a ";		
+		switch (qShader.qShaderStages[currentStage].alphaFunc)
+		{
+			case QShaderStage.AlphaFuncType.GT0:
+				AlphaFunc += "== 1.0)\n";
+			break;
+			case QShaderStage.AlphaFuncType.LT128:
+				AlphaFunc += ">= 0.5)\n";
+			break;
+			case QShaderStage.AlphaFuncType.GE128:
+				AlphaFunc += "< 0.5)\n";
+			break;
+		}
+		AlphaFunc += "\t{\n\t\tdiscard;\n\t}\n";
+		return AlphaFunc;
+	}
 	public static string GetBlend(QShaderData qShader, int currentStage)
 	{
 		string Blend = "";
@@ -395,7 +429,7 @@ public static class QShaderManager
 			else if (BlendWhat.Contains("BLEND"))
 			{
 				Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * Stage_" + currentStage + ".a + color.rgb * (1.0 - Stage_" + currentStage + ".a); \n";
-				Blend += "\tcolor.a = clamp(Stage_" + currentStage + ".a *   Stage_" + currentStage + ".a  + color.a *  (1.0 -  Stage_" + currentStage + ".a) , 0.0, 1.0); \n";
+				Blend += "\tcolor.a = clamp(Stage_" + currentStage + ".a *   Stage_" + currentStage + ".a + color.a *  (1.0 -  Stage_" + currentStage + ".a) , 0.0, 1.0); \n";
 			}
 			else
 			{
@@ -821,7 +855,7 @@ public class QShaderStage
 	public List<QShaderTCMod> tcMod = null;
 	public string[] depthFunc = null;
 	public string[] depthWrite = null;
-	public string[] alphaFunc = null;
+	public AlphaFuncType alphaFunc = AlphaFuncType.NONE;
 
 	public void AddStageParams(string Params, string Value)
 	{
@@ -903,8 +937,18 @@ public class QShaderStage
 					depthWrite = Value.Split(' ');
 				break;
 			case "ALPHAFUNC":
-				if (alphaFunc == null)
-					alphaFunc = Value.Split(' ');
+				switch (Value)
+				{
+					case "GT0":
+						alphaFunc = AlphaFuncType.GT0;
+					break;
+					case "LT128":
+						alphaFunc = AlphaFuncType.LT128;
+					break;
+					case "GE128":
+						alphaFunc = AlphaFuncType.GE128;
+					break;
+				}
 				break;
 		}
 	}
@@ -921,6 +965,13 @@ public class QShaderStage
 		Stretch,
 		Transform,
 		Turb
+	}
+	public enum AlphaFuncType
+	{
+		NONE,
+		GT0,
+		LT128,
+		GE128
 	}
 }
 
