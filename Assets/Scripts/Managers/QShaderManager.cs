@@ -8,6 +8,11 @@ public static class QShaderManager
 	public static Dictionary<string, Shader> Shaders = new Dictionary<string, Shader>();
 	public static Dictionary<string, QShaderData> QShaders = new Dictionary<string, QShaderData>();
 	public static List<string> QShadersFiles = new List<string>();
+	public enum GenFuncType
+	{
+		RGB,
+		Alpha
+	}
 	public static void ProcessShaders()
 	{
 		foreach (string shaderFile in QShadersFiles)
@@ -18,7 +23,6 @@ public static class QShaderManager
 				var reader = new ZipReader();
 				reader.Open(FileName);
 				byte[] rawShader = reader.ReadFile(shaderFile, false);
-//				GD.Print(shaderFile);
 				ReadShaderData(rawShader);
 			}
 		}
@@ -34,7 +38,7 @@ public static class QShaderManager
 		string GSFragmentTcMod = "";
 		string GSFragmentTexs = "";
 		string GSLateFragmentTexs = "";
-		string GSFragmentRGBs = "\tvec4 vertx_color = COLOR;\n"; 
+		string GSFragmentRGBs = "\tvec4 vertx_color = COLOR;\n";
 		string GSFragmentBlends = "";
 		string GSFragmentEnd = "\tALBEDO = (color.rgb * vertx_color.rgb);\n";
 		string GSAnimation = "";
@@ -120,7 +124,8 @@ public static class QShaderManager
 			GSFragmentUvs += GetTcGen(qShader, i, ref lightmapStage);
 			GSFragmentTcMod += GetTcMod(qShader, i, ref helperRotate);
 			
-			GSFragmentRGBs += GetRGBGen(qShader, i);
+			GSFragmentRGBs += GetGenFunc(qShader, i, GenFuncType.RGB);
+			GSFragmentRGBs += GetGenFunc(qShader, i, GenFuncType.Alpha);
 			GSFragmentRGBs += GetAlphaFunc(qShader, i);
 			GSFragmentBlends += GetBlend(qShader, i);
 		}
@@ -348,50 +353,59 @@ public static class QShaderManager
 		return TcMod;
 	}
 
-	public static string GetRGBGen(QShaderData qShader, int currentStage)
+	public static string GetGenFunc(QShaderData qShader, int currentStage, GenFuncType type)
 	{
-		string RGBGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * 1.0 ; \n";
-		if (qShader.qShaderStages[currentStage].rgbGen == null)
-			return RGBGen;
-
-		if (qShader.qShaderStages[currentStage].rgbGen.Length > 2)
+		string GenType = ".rgb";
+		string[] GenFunc = qShader.qShaderStages[currentStage].rgbGen;
+		
+		if (type == GenFuncType.Alpha)
 		{
-			string RGBFunc = qShader.qShaderStages[currentStage].rgbGen[1];
-			float offset = TryToParseFloat(qShader.qShaderStages[currentStage].rgbGen[2]);
-			float amp = TryToParseFloat(qShader.qShaderStages[currentStage].rgbGen[3]);
-			float phase = TryToParseFloat(qShader.qShaderStages[currentStage].rgbGen[4]);
-			float freq = TryToParseFloat(qShader.qShaderStages[currentStage].rgbGen[5]);
+			GenType = ".a";
+			GenFunc = qShader.qShaderStages[currentStage].alphaGen;
+		}
+
+		string StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType +" * 1.0 ; \n";
+		if (GenFunc == null)
+			return StageGen;
+
+		if (GenFunc.Length > 2)
+		{
+			string RGBFunc = GenFunc[1];
+			float offset = TryToParseFloat(GenFunc[2]);
+			float amp = TryToParseFloat(GenFunc[3]);
+			float phase = TryToParseFloat(GenFunc[4]);
+			float freq = TryToParseFloat(GenFunc[5]);
 			switch (RGBFunc)
 			{
 				case "SIN":
-					RGBGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * (";
-					RGBGen += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (TIME +" + phase.ToString("0.00") + "))  * " + amp.ToString("0.00") + "); \n";
+					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
+					StageGen += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (TIME +" + phase.ToString("0.00") + "))  * " + amp.ToString("0.00") + "); \n";
 				break;
 				case "SQUARE":
-					RGBGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * (";
-					RGBGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
+					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
+					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
 				break;
 				case "TRIANGLE":
-					RGBGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * (";
-					RGBGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(0.5 + TIME * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
+					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
+					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(0.5 + TIME * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
 				break;
 				case "SAWTOOTH":
-					RGBGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * (";
-					RGBGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
+					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
+					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
 				break;
 				case "INVERSESAWTOOTH":
-					RGBGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * (";
-					RGBGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + ")))); \n";
+					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
+					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + ")))); \n";
 				break;
 			}
 		}
-		else if (qShader.qShaderStages[currentStage].rgbGen.Length == 1)
+		else if (GenFunc.Length == 1)
 		{
-			string RGBFunc = qShader.qShaderStages[currentStage].rgbGen[0];
+			string RGBFunc = GenFunc[0];
 			if (RGBFunc.Contains("VERTEX"))
-				RGBGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * vertx_color.rgb ; \n";
+				StageGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * vertx_color.rgb ; \n";
 		}
-		return RGBGen;
+		return StageGen;
 	}
 
 	public static string GetAlphaFunc(QShaderData qShader, int currentStage)
@@ -853,8 +867,8 @@ public class QShaderStage
 	public string[] alphaGen = null;
 	public string[] tcGen = null;
 	public List<QShaderTCMod> tcMod = null;
-	public string[] depthFunc = null;
-	public string[] depthWrite = null;
+	public DepthFuncType depthFunc = DepthFuncType.LEQUAL;
+	public bool depthWrite = false;
 	public AlphaFuncType alphaFunc = AlphaFuncType.NONE;
 
 	public void AddStageParams(string Params, string Value)
@@ -929,13 +943,19 @@ public class QShaderStage
 			}
 			break;
 			case "DEPTHFUNC":
-				if (depthFunc  == null)
-					depthFunc = Value.Split(' ');
+				switch (Value)
+				{
+					case "LEQUAL":
+						depthFunc = DepthFuncType.LEQUAL;
+						break;
+					case "EQUAL":
+						depthFunc = DepthFuncType.EQUAL;
+						break;
+				}
 				break;
 			case "DEPTHWRITE":
-				if (depthWrite == null)
-					depthWrite = Value.Split(' ');
-				break;
+				depthWrite = true;
+			break;
 			case "ALPHAFUNC":
 				switch (Value)
 				{
@@ -973,5 +993,11 @@ public class QShaderStage
 		LT128,
 		GE128
 	}
+	public enum DepthFuncType
+	{
+		LEQUAL,
+		EQUAL
+	}
+	
 }
 

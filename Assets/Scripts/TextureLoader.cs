@@ -35,6 +35,14 @@ public static class TextureLoader
 		AddNewTexture(upperName, forceAlpha);
 		return GetTexture(upperName);
 	}
+	public static bool HasTexture(string textureName)
+	{
+		string upperName = textureName.ToUpper();
+		if (Textures.ContainsKey(upperName))
+			return true;
+
+		return false;
+	}
 	public static ImageTexture GetTexture(string textureName)
 	{
 		string upperName = textureName.ToUpper();
