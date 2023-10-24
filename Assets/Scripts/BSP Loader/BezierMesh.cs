@@ -405,7 +405,6 @@ public static class BezierMesh
 	public static void FinalizeBezierMesh(ArrayMesh arrMesh)
 	{
 		// The mesh we're building
-		ArrayMesh tempArrayMesh = new ArrayMesh();
 		var surfaceArray = new Godot.Collections.Array();
 		surfaceArray.Resize((int)Mesh.ArrayType.Max);
 
@@ -417,11 +416,12 @@ public static class BezierMesh
 		surfaceArray[TriIndex] = indiciesCache.ToArray();
 
 		// Create the Mesh.
-		tempArrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 
 		// Tool needed to recalculate normals .
 		SurfaceTool st = new SurfaceTool();
-		st.CreateFrom(tempArrayMesh, 0);
+		st.CreateFrom(arrMesh, 0);
+		arrMesh = new ArrayMesh();
 		st.GenerateNormals();
 		surfaceArray = st.CommitToArrays();
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);

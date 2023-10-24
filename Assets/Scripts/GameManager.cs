@@ -42,20 +42,17 @@ public partial class GameManager : Node
 	public const short Player4ViewLayer = 3;
 	public const short Player5ViewLayer = 4;
 	public const short Player6ViewLayer = 5;
+	public const short Player7ViewLayer = 6;
+	public const short Player8ViewLayer = 7;
 
-	public const short Player1UIViewLayer = 6;
-	public const short Player2UIViewLayer = 7;
-	public const short Player3UIViewLayer = 8;
-	public const short Player4UIViewLayer = 9;
-	public const short Player5UIViewLayer = 10;
-	public const short Player6UIViewLayer = 11;
-
-	public const short Player1Layer = 12;
-	public const short Player2Layer = 13;
-	public const short Player3Layer = 14;
-	public const short Player4Layer = 15;
-	public const short Player5Layer = 16;
-	public const short Player6Layer = 17;
+	public const short Player1UIViewLayer = 8;
+	public const short Player2UIViewLayer = 9;
+	public const short Player3UIViewLayer = 10;
+	public const short Player4UIViewLayer = 11;
+	public const short Player5UIViewLayer = 12;
+	public const short Player6UIViewLayer = 13;
+	public const short Player7UIViewLayer = 14;
+	public const short Player8UIViewLayer = 15;
 
 	//Physic Masks
 	public const int TakeDamageMask = (1 << DamageablesLayer);
@@ -63,7 +60,7 @@ public partial class GameManager : Node
 
 	//Rendering Masks
 	public const int InvisibleMask = 0;
-	public const int AllPlayerViewMask = ((1 << Player1ViewLayer) | (1 << Player2ViewLayer) | (1 << Player3ViewLayer) | (1 << Player4ViewLayer) | (1 << Player5ViewLayer) | (1 << Player6ViewLayer));
+	public const int AllPlayerViewMask = ((1 << Player1ViewLayer) | (1 << Player2ViewLayer) | (1 << Player3ViewLayer) | (1 << Player4ViewLayer) | (1 << Player5ViewLayer) | (1 << Player6ViewLayer) | (1 << Player7ViewLayer) | (1 << Player8ViewLayer));
 
 	public bool paused = true;
 	public static bool Paused { get { return Instance.paused; } }
@@ -78,7 +75,8 @@ public partial class GameManager : Node
 	private Godot.Environment environment;
 	private Color ambientLightColor;
 
-	// Called when the node enters the scene tree for the first time.
+	public bool ready = false;
+	public int skipFrames = 5;
 	public override void _Ready()
 	{
 		//Used in order to parse float with "." as decimal separator
@@ -98,6 +96,7 @@ public partial class GameManager : Node
 			MapLoader.GenerateMapCollider();
 			MapLoader.GenerateSurfaces();
 		}
+		ready = true;
 		return;
 	}
 
@@ -105,8 +104,18 @@ public partial class GameManager : Node
 	{
 
 	}
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+		//skip frames are used to easen up deltaTime after loading
+		if (ready)
+		{
+			if (skipFrames > 0)
+			{
+				skipFrames--;
+
+				if (skipFrames == 0)
+					paused = false;
+			}
+		}
 	}
 }

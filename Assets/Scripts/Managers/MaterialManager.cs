@@ -115,7 +115,7 @@ public partial class MaterialManager : Node
 				// Lightmapping
 				ImageTexture lmap = MapLoader.lightMaps[lm_index];
 				if (forceSkinAlpha)
-					mat = (ShaderMaterial)Instance.defaultLightMapMaterial.Duplicate(true);
+					mat = (ShaderMaterial)Instance.defaultTransparentLightMapMaterial.Duplicate(true);
 				else
 					mat = (ShaderMaterial)Instance.defaultLightMapMaterial.Duplicate(true);
 			
@@ -139,7 +139,6 @@ public partial class MaterialManager : Node
 			else
 				mat = (ShaderMaterial)Instance.defaultMaterial.Duplicate(true);
 
-//			GD.Print(mat.Shader.Code);
 			mat.Set(opaqueTexProperty, tex);
 			mat.Set(colorProperty, GameManager.ambientLight);
 			mat.Set(mixBrightness, GameManager.Instance.mixBrightness);

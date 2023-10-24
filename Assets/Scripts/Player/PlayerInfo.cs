@@ -1,10 +1,33 @@
 using Godot;
 using System;
-
 public partial class PlayerInfo : Node3D
 {
-	int currentLayer = (1 << GameManager.Player1ViewLayer);
+	[Export]
+	public PlayerControls playerControls;
 
+	public PlayerCamera playerCamera;
+	public PlayerThing playerThing;
+//	public PlayerHUD playerHUD;
+	public Node3D player;
+	public int playerLayer = GameManager.DamageablesLayer;
+//	public Canvas UICanvas;
+	[Export]
+	public Node3D WeaponHand;
+
+	public int[] Ammo = new int[8] { 100, 0, 0, 0, 0, 0, 0, 0 }; //bullets, shells, grenades, rockets, lightning, slugs, cells, bfgammo
+	public bool[] Weapon = new bool[9] { false, true, false, false, false, false, false, false, false }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k
+	public int[] MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 200 };
+
+	public bool godMode = false;
+	public int MaxHealth = 100;
+	public int MaxBonusHealth = 200;
+	public int MaxArmor = 100;
+	public int MaxBonusArmor = 200;
+	[Export]
+	public PackedScene[] WeaponPrefabs = new PackedScene[9];
+
+	public int currentLayer = (1 << GameManager.Player1ViewLayer);
+	public uint uiLayer = (1 << GameManager.Player1UIViewLayer);
 	public const int RenderFrameMask = 0xFFF0;
 
 	// Called when the node enters the scene tree for the first time.
@@ -12,7 +35,29 @@ public partial class PlayerInfo : Node3D
 	{
 	}
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
+	public void Reset()
+	{
+		Ammo = new int[8] { 100, 0, 0, 0, 0, 0, 0, 0 };
+		Weapon = new bool[9] { false, true, false, false, false, false, false, false, false };
+		MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 200 };
+
+		godMode = false;
+
+//		playerHUD.pickupFlashTime = 0f;
+//		playerHUD.painFlashTime = 0f;
+
+		playerThing.hitpoints = 100;
+		playerThing.armor = 0;
+
+		playerControls.impulseVector = Vector3.Zero;
+		playerControls.CurrentWeapon = -1;
+		playerControls.SwapWeapon = -1;
+//		playerControls.SwapToBestWeapon();
+
+//		playerHUD.HUDUpdateAmmoNum();
+//		playerHUD.HUDUpdateHealthNum();
+//		playerHUD.HUDUpdateArmorNum();
+	}
 	public override void _Process(double delta)
 	{
 		int currentFrame = (Engine.GetFramesDrawn() << GameManager.Player1UIViewLayer);

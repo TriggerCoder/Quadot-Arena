@@ -311,6 +311,279 @@ public static class Mesher
 		// Create the Mesh.
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 	}
+	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, Dictionary<string, string> meshToSkin, uint layer)
+	{
+		return GenerateModelFromMeshes(model, layer, null, false, meshToSkin);
+	}
+	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, Node3D ownerObject = null, bool forceSkinAlpha = false, Dictionary<string, string> meshToSkin = null)
+	{
+		if (model == null || model.meshes.Count == 0)
+		{
+			GD.Print("Failed to create model object because there are no meshes");
+			return null;
+		}
+
+		if (ownerObject == null)
+		{
+			GD.Print("No ownerObject");
+			ownerObject = new Node3D();
+			ownerObject.Name = "Model_" + model.name;
+		}
+
+		MD3GodotConverted md3Model = new MD3GodotConverted();
+		md3Model.node = ownerObject;
+		md3Model.numMeshes = model.meshes.Count;
+		md3Model.arrMesh = new ArrayMesh[md3Model.numMeshes];
+
+		int groupId = 0;
+		if ((model.numFrames > 1) || (meshToSkin != null))
+		{
+			foreach (MD3Mesh modelMesh in model.meshes)
+			{
+				MeshInstance3D mesh = new MeshInstance3D();
+				ArrayMesh arrMesh = GenerateModelMesh(modelMesh);
+				Node3D modelObject;
+
+				if (groupId == 0)
+					modelObject = ownerObject;
+				else
+				{
+					modelObject = new Node3D();
+					modelObject.Name = "Mesh_" + groupId;
+					ownerObject.AddChild(modelObject);
+					modelObject.Position = Vector3.Zero;
+				}
+
+				ShaderMaterial material = null;
+				string skinName;
+				if (meshToSkin == null)
+					skinName = modelMesh.skins[0].name;
+				else
+					skinName = meshToSkin[modelMesh.name];
+
+				material = MaterialManager.GetMaterials(skinName, -1, forceSkinAlpha);
+				mesh.Name = modelMesh.name;
+				mesh.Mesh = arrMesh;
+				mesh.Layers = layer;
+
+				arrMesh.SurfaceSetMaterial(0, material);
+				md3Model.arrMesh[modelMesh.meshNum] = arrMesh;
+				model.readyMeshes.Add(mesh);
+				model.readyMaterials.Add(material);
+				GD.Print("Adding Child: " + mesh.Name + " to: " + ownerObject.Name);
+				ownerObject.AddChild(mesh);
+				groupId++;
+			}
+		}
+		else
+		{
+			var baseGroups = model.meshes.GroupBy(x => new { x.numSkins });
+			foreach (var baseGroup in baseGroups)
+			{
+				MD3Mesh[] baseGroupMeshes = baseGroup.ToArray();
+				if (baseGroupMeshes.Length == 0)
+					continue;
+
+				var groupMeshes = baseGroupMeshes.GroupBy(x => new { x.skins[0].name });
+				foreach (var groupMesh in groupMeshes)
+				{
+					MD3Mesh[] meshes = groupMesh.ToArray();
+					if (meshes.Length == 0)
+						continue;
+
+					MeshInstance3D mesh = new MeshInstance3D();
+					ArrayMesh arrMesh = new ArrayMesh();
+					string Name = "Mesh_";
+					if (meshes.Length > 1)
+					{
+						int offset = 0;
+						for (var i = 0; i < meshes.Length; i++)
+						{
+							GenerateModelMesh(meshes[i],ref offset);
+							Name += "_" + meshes[i].name;
+						}
+						FinalizeModelMesh(arrMesh);
+					}
+					else
+					{
+						arrMesh = GenerateModelMesh(meshes[0]);
+						Name += meshes[0].name;
+					}
+
+					Node3D modelObject;
+					if (groupId == 0)
+						modelObject = ownerObject;
+					else
+					{
+						modelObject = new Node3D();
+						modelObject.Name = "Mesh_" + groupId;
+						ownerObject.AddChild(modelObject);
+						modelObject.Position = Vector3.Zero;
+					}
+
+					ShaderMaterial material = MaterialManager.GetMaterials(meshes[0].skins[0].name, -1, forceSkinAlpha);
+
+					for (int i = 0; i < meshes.Length; i++)
+						md3Model.arrMesh[meshes[i].meshNum] = arrMesh;
+
+					mesh.Name = Name;
+					mesh.Mesh = arrMesh;
+					mesh.Layers = layer;
+
+					arrMesh.SurfaceSetMaterial(0, material);
+					model.readyMeshes.Add(mesh);
+					model.readyMaterials.Add(material);
+					GD.Print("Adding Child: " + mesh.Name + " to: " + ownerObject.Name);
+					ownerObject.AddChild(mesh);
+					groupId++;
+				}
+			}
+		}
+		return md3Model;
+	}
+	/*
+public static MD3GodotConverted FillModelFromProcessedData(MD3 model, Dictionary<string, string> meshToSkin)
+{
+	return FillModelFromProcessedData(model, null, meshToSkin);
+}
+
+public static MD3GodotConverted FillModelFromProcessedData(MD3 model, Node3D ownerObject = null, Dictionary<string, string> meshToSkin = null)
+{
+	if (ownerObject == null)
+	{
+		ownerObject = new Node3D();
+		ownerObject.Name = "Model_" + model.name;
+	}
+
+	MD3GodotConverted md3Model = new MD3GodotConverted();
+	md3Model.node = ownerObject;
+	md3Model.numMeshes = model.meshes.Count;
+	md3Model.arrMesh = new ArrayMesh[md3Model.numMeshes];
+
+	for (int i = 0; i < model.readyMeshes.Count; i++)
+	{
+		Node3D modelObject;
+		if (i == 0)
+			modelObject = ownerObject;
+		else
+		{
+			modelObject = new Node3D();
+			modelObject.Name = "Mesh_" + i;
+			ownerObject.AddChild(modelObject);
+			modelObject.Position = Vector3.Zero;
+		}
+
+
+		meshFilter.mesh = model.readyMeshes[i];
+		if (!string.IsNullOrEmpty(model.animations[i]))
+		{
+			Material newMat = null;
+			MaterialManager.GetOverrideMaterials(model.animations[i], -1, ref newMat, ref modelObject);
+			mr.sharedMaterial = newMat;
+		}
+		else
+			mr.sharedMaterial = model.readyMaterials[i];
+
+		if (meshToSkin != null)
+		{
+			string skinName = meshToSkin[model.readyMeshes[i].name];
+			if (TextureLoader.HasTexture(skinName))
+			{
+				Texture tex = TextureLoader.Instance.GetTexture(skinName);
+				mr.material.SetTexture(MaterialManager.opaqueTexPropertyId, tex);
+			}
+		}
+		md3Model.data[i].meshFilter = meshFilter;
+		md3Model.data[i].meshRenderer = mr;
+
+	}
+	return md3Model;
+}
+*/
+
+	public static ArrayMesh GenerateModelMesh(MD3Mesh md3Mesh)
+	{
+		if (md3Mesh == null)
+		{
+			GD.Print("Failed to generate polygon mesh because there are no meshe info");
+			return null;
+		}
+		ArrayMesh arrMesh = new ArrayMesh();
+		var surfaceArray = new Godot.Collections.Array();
+		surfaceArray.Resize((int)Mesh.ArrayType.Max);
+
+		List<int> Triangles = new List<int>();
+
+		for (int i = 0; i < md3Mesh.triangles.Count; i++)
+		{
+			Triangles.Add(md3Mesh.triangles[i].vertex1);
+			Triangles.Add(md3Mesh.triangles[i].vertex2);
+			Triangles.Add(md3Mesh.triangles[i].vertex3);
+		}
+
+		// add the verts
+		surfaceArray[VertexInd] = md3Mesh.verts[0].ToArray();
+
+		// Add the texture co-ords (or UVs) to the surface/mesh
+		surfaceArray[TexUVInd] = md3Mesh.texCoords.ToArray();
+
+		// add the meshverts to the object being built
+		surfaceArray[TriIndex] = Triangles.ToArray();
+
+		// Create the Mesh.
+		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+
+		// Tool needed to recalculate normals .
+		SurfaceTool st = new SurfaceTool();
+		st.CreateFrom(arrMesh, 0);
+		arrMesh = new ArrayMesh();
+		st.GenerateNormals();
+		surfaceArray = st.CommitToArrays();
+		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+		return arrMesh;
+	}
+
+	public static void GenerateModelMesh(MD3Mesh md3Mesh, ref int offset)
+	{
+		if (offset == 0)
+		{
+			vertsCache.Clear();
+			uvCache.Clear();
+			uv2Cache.Clear();
+			normalsCache.Clear();
+			indiciesCache.Clear();
+			vertsColor.Clear();
+		}
+
+		vertsCache.AddRange(md3Mesh.verts[0].ToArray());
+		uvCache.AddRange(md3Mesh.texCoords.ToArray());
+
+		// Rip meshverts / triangles
+		for (int i = 0; i < md3Mesh.triangles.Count; i++)
+		{
+			indiciesCache.Add(md3Mesh.triangles[i].vertex1 + offset);
+			indiciesCache.Add(md3Mesh.triangles[i].vertex2 + offset);
+			indiciesCache.Add(md3Mesh.triangles[i].vertex3 + offset);
+		}
+		offset += md3Mesh.verts[0].Count;
+	}
+	public static void FinalizeModelMesh(ArrayMesh arrMesh)
+	{
+		var surfaceArray = new Godot.Collections.Array();
+		surfaceArray.Resize((int)Mesh.ArrayType.Max);
+
+		// add the verts, uvs, and normals we ripped to the surfaceArray
+		surfaceArray[VertexInd] = vertsCache.ToArray();
+
+		// Add the texture co-ords (or UVs) to the surface/mesh
+		surfaceArray[TexUVInd] = uvCache.ToArray();
+
+		// add the meshverts to the object being built
+		surfaceArray[TriIndex] = indiciesCache.ToArray();
+
+		// Create the Mesh.
+		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+	}
 	public static void GenerateGroupBrushCollider(int indexId, Node3D holder, params QBrush[] brushes)
 	{
 		bool isTrigger = false;

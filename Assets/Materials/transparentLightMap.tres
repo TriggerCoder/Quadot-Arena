@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://b4co3lx7imeoo"]
+
+[ext_resource type="Shader" uid="uid://ucr1bcsuerko" path="res://Assets/Shaders/transparentLightMap.tres" id="1_7my0h"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_7my0h")
+shader_parameter/mixBrightness = 0.5

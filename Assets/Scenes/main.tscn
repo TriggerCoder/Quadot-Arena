@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=13 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Texture2D" uid="uid://dv1ug6ajvhega" path="res://Assets/Textures/Skyboxes/Gehenna/gehenna.png" id="1_si63v"]
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
@@ -7,6 +7,7 @@
 [ext_resource type="Material" uid="uid://dx20p677lxv8l" path="res://Assets/Materials/transparentDefault.tres" id="6_fojn5"]
 [ext_resource type="Material" uid="uid://bxnkqiouvmut0" path="res://Assets/Materials/defaultLightMap.tres" id="6_i1nl1"]
 [ext_resource type="PackedScene" uid="uid://xi3ybp7mrio2" path="res://Assets/Player/Player.tscn" id="7_rdgk2"]
+[ext_resource type="Material" uid="uid://b4co3lx7imeoo" path="res://Assets/Materials/transparentLightMap.tres" id="7_wtcy7"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/ClusterPVSManager.cs" id="8_vpkit"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_7oboo"]
@@ -31,13 +32,13 @@ environment = SubResource("Environment_rcj1l")
 [node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
-mixBrightness = 0.25
 
 [node name="MaterialManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("3_amftv")
 defaultMaterial = ExtResource("5_is83x")
 defaultTransparentMaterial = ExtResource("6_fojn5")
 defaultLightMapMaterial = ExtResource("6_i1nl1")
+defaultTransparentLightMapMaterial = ExtResource("7_wtcy7")
 
 [node name="ClusterPVSManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("8_vpkit")

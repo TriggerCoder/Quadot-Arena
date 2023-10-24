@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://cc4ta84dtl6ve"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/MachineGunWeapon.cs" id="1_pbxxv"]
+
+[node name="PlayerWeapon" type="Node3D"]
+script = ExtResource("1_pbxxv")
+UIModelName = "weapons2/machinegun/machinegun_barrel"
+CompleteModelName = "weapons2/machinegun/machinegun"
+MuzzleModelName = "weapons2/machinegun/machinegun_flash"

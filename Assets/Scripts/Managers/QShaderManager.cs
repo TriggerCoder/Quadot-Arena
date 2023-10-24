@@ -30,7 +30,7 @@ public static class QShaderManager
 	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index)
 	{
 		string code = "";
-		string GSHeader = "shader_type spatial;\nrender_mode blend_mix, depth_draw_opaque, diffuse_lambert, specular_schlick_ggx, ";
+		string GSHeader = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, ";
 		string GSUniforms = "";
 		string GSVertexH = "void vertex()\n{ \n";
 		string GSFragmentH = "void fragment()\n{ \n";
@@ -54,6 +54,17 @@ public static class QShaderManager
 		QShaderData qShader = QShaders[upperName];
 		GD.Print("Shader found: " + upperName);
 
+		switch (qShader.qShaderGlobal.sort)
+		{
+			case QShaderGlobal.SortType.Opaque:
+				GSHeader += "depth_draw_opaque, blend_mix, ";
+			break;
+			case QShaderGlobal.SortType.Additive:
+				GSHeader += "depth_draw_always, blend_add, ";
+				alphaIsTransparent = true;
+			break;
+		}
+		
 		switch (qShader.qShaderGlobal.cullType)
 		{
 			case QShaderGlobal.CullType.Back:
@@ -733,7 +744,7 @@ public class QShaderGlobal
 	public List<string> skyParms = null;
 	public List<string> deformVertexes = null;
 	public List<string> fogParms = null;
-	public List<string> sort = null;
+	public SortType sort = SortType.Opaque;
 	public List<string> tessSize = null;
 	public List<string> q3map_BackShader = null;
 	public List<string> q3map_GlobalTexture = null;
@@ -754,6 +765,16 @@ public class QShaderGlobal
 		Back,
 		Front,
 		Disable
+	}
+	public enum SortType
+	{
+		Portal,
+		Sky,
+		Opaque,
+		Banner,
+		Underwater,
+		Additive,
+		Nearest
 	}
 	public void AddGlobal(string Params, string Value)
 	{
@@ -800,10 +821,16 @@ public class QShaderGlobal
 				fogParms.Add(Value);
 			break;
 			case "SORT":
-				if (sort ==  null)
-					sort = new List<string>();
-				sort.Add(Value);
-			break;
+				switch (Value)
+				{
+					case "ADDITIVE":
+						sort = SortType.Additive;
+					break;
+					default:
+						sort = SortType.Opaque;
+					break;
+				}
+				break;
 			case "TESSSIZE":
 				if (tessSize == null)
 					tessSize = new List<string>();

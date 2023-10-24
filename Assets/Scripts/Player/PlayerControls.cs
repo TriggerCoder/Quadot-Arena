@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Xml.Linq;
 
@@ -9,8 +10,8 @@ public partial class PlayerControls : Node3D
 	public PlayerInfo playerInfo;
 	[Export]
 	public PlayerThing playerThing;
-	//	[Export]
-	//	public PlayerWeapon playerWeapon;
+
+	public PlayerWeapon playerWeapon;
 	[Export]
 	public PlayerCamera playerCamera;
 
@@ -59,6 +60,8 @@ public partial class PlayerControls : Node3D
 
 	private float deathTime = 0;
 	private float respawnDelay = 1.7f;
+
+	public Vector2 Look = Vector2.Zero;
 	struct currentMove
 	{
 		public float forwardSpeed;
@@ -94,7 +97,7 @@ public partial class PlayerControls : Node3D
 	{
 		if (@event is InputEventMouseMotion eventMouseMotion)
 		{
-			Vector2 Look = eventMouseMotion.Relative;
+			Look = eventMouseMotion.Relative;
 			viewDirection.Y -= Look.X * GameOptions.MouseSensitivity.X;
 			viewDirection.X -= Look.Y * GameOptions.MouseSensitivity.Y;
 
@@ -113,6 +116,9 @@ public partial class PlayerControls : Node3D
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+		if (GameManager.Paused)
+			return;
+
 		controllerIsGrounded = playerThing.IsOnFloor();
 		//Player can only crounch if it is grounded
 		if ((Input.IsActionJustPressed("Action_Crouch")) && (controllerIsGrounded))
@@ -170,21 +176,40 @@ public partial class PlayerControls : Node3D
 		//Movement Checks
 		if (currentMoveType != MoveType.Crouch)
 			QueueJump();
-/*
-		if (controllerIsGrounded)
+		/*
+				if (controllerIsGrounded)
+				{
+					if (playerThing.avatar.enableOffset)
+						playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed);
+					if (wishJump)
+						AnimateLegsOnJump();
+				}
+				else
+					playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed);
+		*/
+		//swap weapon
+		if (playerWeapon == null)
 		{
-			if (playerThing.avatar.enableOffset)
-				playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed);
-			if (wishJump)
-				AnimateLegsOnJump();
+			if (SwapWeapon == -1)
+				SwapToBestWeapon();
+
+			if (SwapWeapon > -1)
+			{
+				CurrentWeapon = SwapWeapon;
+				GD.Print("CurrentWeapon: " + CurrentWeapon);
+				playerWeapon = (PlayerWeapon)playerInfo.WeaponPrefabs[CurrentWeapon].Instantiate();
+				playerWeapon.Init(playerInfo);
+				SwapWeapon = -1;
+			}
 		}
-		else
-			playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed);
-*/
+
 	}
 
 	public override void _PhysicsProcess(double delta)
 	{
+		if (GameManager.Paused)
+			return;
+
 		rotAngle.Y = viewDirection.Y;
 		playerThing.RotationDegrees = rotAngle;
 
@@ -386,4 +411,80 @@ public partial class PlayerControls : Node3D
 		playerVelocity.Y = zspeed; // Note this line
 		playerVelocity.Z *= speed;
 	}
+
+	public bool TrySwapWeapon(int weapon)
+	{
+		if (CurrentWeapon == weapon || SwapWeapon != -1)
+			return false;
+
+		if (weapon < 0 || weapon >= playerInfo.Weapon.Length)
+			return false;
+
+		if (!playerInfo.Weapon[weapon])
+			return false;
+
+		switch (weapon)
+		{
+			default:
+				return false;
+
+			case 0:
+				break;
+
+			case 1:
+				if (playerInfo.Ammo[0] <= 0)
+					return false;
+				break;
+			case 2:
+				if (playerInfo.Ammo[1] <= 0)
+					return false;
+				break;
+
+			case 3:
+				if (playerInfo.Ammo[2] <= 0)
+					return false;
+				break;
+
+			case 4:
+				if (playerInfo.Ammo[3] <= 0)
+					return false;
+				break;
+
+			case 5:
+				if (playerInfo.Ammo[4] <= 0)
+					return false;
+				break;
+			case 6:
+				if (playerInfo.Ammo[5] <= 0)
+					return false;
+				break;
+			case 7:
+				if (playerInfo.Ammo[6] <= 0)
+					return false;
+				break;
+			case 8:
+				if (playerInfo.Ammo[7] <= 0)
+					return false;
+				break;
+		}
+
+		if (playerWeapon != null)
+			playerWeapon.putAway = true;
+
+		SwapWeapon = weapon;
+		return true;
+	}
+	public void SwapToBestWeapon()
+	{
+		if (TrySwapWeapon(8)) return; //bfg10k
+		if (TrySwapWeapon(5)) return; //lightning gun
+		if (TrySwapWeapon(7)) return; //plasma gun
+		if (TrySwapWeapon(6)) return; //railgun
+		if (TrySwapWeapon(2)) return; //shotgun
+		if (TrySwapWeapon(1)) return; //machinegun
+		if (TrySwapWeapon(4)) return; //rocketlauncher
+		if (TrySwapWeapon(3)) return; //grenade launcher
+		if (TrySwapWeapon(0)) return; //gauntlet
+	}
+
 }

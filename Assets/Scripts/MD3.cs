@@ -4,6 +4,12 @@ using System.Collections;
 using System.Collections.Generic;
 using ExtensionMethods;
 
+public class MD3GodotConverted
+{
+	public Node3D	node;
+	public int numMeshes;
+	public ArrayMesh[] arrMesh;
+}
 public class MD3
 {
 	public string name;																// The name of the model
@@ -18,9 +24,8 @@ public class MD3
 	public List<List<MD3Tag>> tagsbyId = new List<List<MD3Tag>>();					// The list of tags in the model by Id
 	public List<MD3Mesh> meshes;													// The list of meshes in the model
 	public List<MD3Skin> skins;														// The list of skins in the model
-	public List<string> animations = new List<string>();							// This is the aditional animations for the mesh
-	public List<Mesh> readyMeshes = new List<Mesh>();								// This is the processed Godot Mesh
-	public List<Material> readyMaterials = new List<Material>();					// This is the processed Material
+	public List<MeshInstance3D> readyMeshes = new List<MeshInstance3D>();			// This is the processed Godot Mesh
+	public List<ShaderMaterial> readyMaterials = new List<ShaderMaterial>();		// This is the processed Material
 	public static MD3 ImportModel(string modelName, bool forceSkinAlpha)
 	{
 		BinaryReader Md3ModelFile;
@@ -91,8 +96,8 @@ public class MD3
 			frame.locOrigin = new Vector3(x, y, z);
 
 			Md3ModelFile.ReadBytes(16);
-			//			name = (new string(Md3ModelFile.ReadChars(16))).Split('\0');
-			//			frame.name = name[0].Replace("\0", string.Empty);
+//			name = (new string(Md3ModelFile.ReadChars(16))).Split('\0');
+//			frame.name = name[0].Replace("\0", string.Empty);
 			frame.name = "Tag Frame " + numFrame++;
 			if (((i + 1) % md3Model.numFrames) == 0)
 			{
@@ -137,9 +142,14 @@ public class MD3
 			//We need to convert the rotation to the new coordinate system, the new coordinate system conversion is given by T (Quakt To Unity Conversion)
 			//If the two coordinate system are in the same space and they are related by T, with the old rotation Ra then the new rotation Rb is given by 
 			//Rb = TRaT^-1
-			tag.orientation = tag.orientation.QuakeToGodotConversion() * new Transform3D(column0, column1, column2, column3) * tag.orientation.QuakeToGodotConversion().Inverse();
-			tag.rotation = tag.orientation.ExtractRotation().Inverse();
-
+			Transform3D R = new Transform3D(column0, column1, column2, column3);
+			if (R.IsFinite())
+			{
+				tag.orientation = tag.orientation.QuakeToGodotConversion() * R * tag.orientation.QuakeToGodotConversion().Inverse();
+//				tag.rotation = tag.orientation.Basis.GetRotationQuaternion();
+				tag.rotation = tag.orientation.ExtractRotation();
+//				GD.Print(" X " + tag.rotation.X + " Y " + tag.rotation.Y + " Z " + tag.rotation.Z + " W "+ tag.rotation.W);
+			}
 			tag.QuakeToGodotCoordSystem();
 			if (!md3Model.tagsIdbyName.ContainsKey(tag.name))
 			{
@@ -300,7 +310,7 @@ public class MD3Mesh
 			float n1 = Md3ModelFile.ReadByte();
 			float n2 = Md3ModelFile.ReadByte();
 
-			Vector3 position = new Vector3(-x, z, -y);
+			Vector3 position = new Vector3(-x, z, y);
 			position *= GameManager.sizeDividor;
 			verts[j].Add(position);
 
