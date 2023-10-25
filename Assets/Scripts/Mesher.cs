@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -536,10 +537,13 @@ public static MD3GodotConverted FillModelFromProcessedData(MD3 model, Node3D own
 		// Tool needed to recalculate normals .
 		SurfaceTool st = new SurfaceTool();
 		st.CreateFrom(arrMesh, 0);
-		arrMesh = new ArrayMesh();
 		st.GenerateNormals();
+		st.GenerateTangents();
+		arrMesh.ClearSurfaces();
+		surfaceArray.Clear();
 		surfaceArray = st.CommitToArrays();
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+
 		return arrMesh;
 	}
 

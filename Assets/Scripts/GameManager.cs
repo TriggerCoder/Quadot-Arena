@@ -102,7 +102,33 @@ public partial class GameManager : Node
 
 	public override void _Input(InputEvent @event)
 	{
-
+		if (@event is InputEventKey)
+		{
+			if (Input.IsActionJustPressed("Escape"))
+			{
+				if (!paused)
+				{
+					paused = true;
+					Input.MouseMode = Input.MouseModeEnum.Visible;
+				}
+				else
+				{
+					paused = false;
+					Input.MouseMode = Input.MouseModeEnum.Captured;
+				}
+			}
+		}
+		else if (paused)
+		{
+			if (@event is InputEventMouseButton)
+			{
+				if (Input.IsActionJustPressed("Action_Fire"))
+				{
+					paused = false;
+					Input.MouseMode = Input.MouseModeEnum.Captured;
+				}
+			}
+		}
 	}
 	public override void _Process(double delta)
 	{
@@ -112,7 +138,6 @@ public partial class GameManager : Node
 			if (skipFrames > 0)
 			{
 				skipFrames--;
-
 				if (skipFrames == 0)
 					paused = false;
 			}

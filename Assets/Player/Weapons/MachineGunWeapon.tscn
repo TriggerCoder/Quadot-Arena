@@ -2,8 +2,15 @@
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/MachineGunWeapon.cs" id="1_pbxxv"]
 
-[node name="PlayerWeapon" type="Node3D"]
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("muzzleLight")]
 script = ExtResource("1_pbxxv")
 UIModelName = "weapons2/machinegun/machinegun_barrel"
 CompleteModelName = "weapons2/machinegun/machinegun"
 MuzzleModelName = "weapons2/machinegun/machinegun_flash"
+muzzleLight = NodePath("OmniLight3D")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+layers = 255
+light_color = Color(1, 0.686275, 0, 1)
+light_bake_mode = 0
+omni_shadow_mode = 0

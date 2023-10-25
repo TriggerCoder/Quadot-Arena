@@ -95,6 +95,9 @@ public partial class PlayerControls : Node3D
 
 	public override void _Input(InputEvent @event)
 	{
+		if (GameManager.Paused)
+			return;
+
 		if (@event is InputEventMouseMotion eventMouseMotion)
 		{
 			Look = eventMouseMotion.Relative;

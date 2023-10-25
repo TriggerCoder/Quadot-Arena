@@ -421,8 +421,10 @@ public static class BezierMesh
 		// Tool needed to recalculate normals .
 		SurfaceTool st = new SurfaceTool();
 		st.CreateFrom(arrMesh, 0);
-		arrMesh = new ArrayMesh();
 		st.GenerateNormals();
+		st.GenerateTangents();
+		arrMesh.ClearSurfaces();
+		surfaceArray.Clear();
 		surfaceArray = st.CommitToArrays();
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 	}

@@ -60,8 +60,8 @@ public partial class PlayerWeapon : Node3D
 
 	public float _muzzleTime = .1f;
 	public float muzzleTimer = 0f;
-
-	protected SpotLight3D muzzleLight;
+	[Export]
+	protected OmniLight3D muzzleLight;
 
 	protected float coolTimer = 0f;
 
@@ -81,8 +81,8 @@ public partial class PlayerWeapon : Node3D
 */
 		if (!GameOptions.UseMuzzleLight)
 		{
-			if (muzzleLight != null)
-				muzzleLight.SetProcess(false);
+//			if (muzzleLight != null)
+//				muzzleLight.SetProcess(false);
 		}
 	}
 
@@ -128,12 +128,12 @@ public partial class PlayerWeapon : Node3D
 //					Mesher.FillModelFromProcessedData(model, muzzleObject);
 			}
 //			muzzleObject.Hide(); ;
-/*			if (muzzleLight != null)
+			if (muzzleLight != null)
 			{
-				muzzleLight.transform.SetParent(muzzleObject.transform);
-				muzzleLight.transform.localPosition = new Vector3(0, 0, .05f);
+				muzzleLight.Reparent(muzzleObject);
+				muzzleLight.Position = new Vector3(0, 0, .05f);
 			}
-*/		}
+		}
 
 //		GameManager.SetLayerAllChildren(transform, playerInfo.playerLayer - 14);
 
