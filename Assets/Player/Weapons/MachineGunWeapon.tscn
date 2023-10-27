@@ -7,6 +7,8 @@ script = ExtResource("1_pbxxv")
 UIModelName = "weapons2/machinegun/machinegun_barrel"
 CompleteModelName = "weapons2/machinegun/machinegun"
 MuzzleModelName = "weapons2/machinegun/machinegun_flash"
+_fireRate = 0.09
+_muzzleTime = 0.13
 muzzleLight = NodePath("OmniLight3D")
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]

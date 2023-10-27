@@ -92,7 +92,7 @@ public partial class MaterialManager : Node
 			AditionalTextures.Add(textureName, shader);
 	}
 	
-	public static ShaderMaterial GetMaterials(string textureName, int lm_index, bool forceSkinAlpha = false)
+	public static ShaderMaterial GetMaterials(string textureName, int lm_index = -1, bool forceSkinAlpha = false)
 	{
 //		if (IsSkyTexture(textureName))
 //			return Instance.skyHole;

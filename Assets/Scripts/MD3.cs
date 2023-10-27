@@ -8,7 +8,12 @@ public class MD3GodotConverted
 {
 	public Node3D	node;
 	public int numMeshes;
-	public ArrayMesh[] arrMesh;
+	public dataMeshes[] data;
+	public class dataMeshes
+	{
+		public Godot.Collections.Array surfaceArray;
+		public ArrayMesh arrMesh;
+	}
 }
 public class MD3
 {
@@ -229,6 +234,7 @@ public class MD3Mesh
 	public List<MD3Skin> skins;         // The list of shaders in the surface
 	public List<MD3Triangle> triangles; // The list of triangles in the surface
 	public List<Vector3>[] verts;       // The list of vertexes in the surface
+	public List<Vector3>[] normals;       // The list of normals in the surface
 	public List<Vector2> texCoords;     // The texture coordinates of the vertex
 	public int meshSize;                // This stores the total mesh size
 	public void parseMesh(int MeshNum, string modelName, BinaryReader Md3ModelFile, int MeshOffset, bool forceSkinAlpha)
@@ -298,22 +304,29 @@ public class MD3Mesh
 		}
 
 		verts = new List<Vector3>[numFrames];
+		normals = new List<Vector3>[numFrames];
 		for (int i = 0; i < numFrames; i++)
+		{
 			verts[i] = new List<Vector3>();
-
+			normals[i] = new List<Vector3>();
+		}
 		Md3ModelFile.BaseStream.Seek(MeshOffset + ofsVerts, SeekOrigin.Begin);
 		for (int i = 0, j = 0; i < numVertices * numFrames; i++)
 		{
 			float x = Md3ModelFile.ReadInt16() * GameManager.modelScale;
 			float y = Md3ModelFile.ReadInt16() * GameManager.modelScale;
 			float z = Md3ModelFile.ReadInt16() * GameManager.modelScale;
-			float n1 = Md3ModelFile.ReadByte();
-			float n2 = Md3ModelFile.ReadByte();
+			byte n1 = Md3ModelFile.ReadByte();
+			byte n2 = Md3ModelFile.ReadByte();
 
+			float lat = n1 * (6.28f) / 255.0f;
+			float lng = n2 * (6.28f) / 255.0f;
+
+			Vector3	normal = new Vector3(- Mathf.Cos(lat) * Mathf.Sin(lng), Mathf.Cos(lng), Mathf.Sin(lat) * Mathf.Sin(lng));
 			Vector3 position = new Vector3(-x, z, y);
 			position *= GameManager.sizeDividor;
 			verts[j].Add(position);
-
+			normals[j].Add(normal.Normalized());
 			if (((i + 1) % numVertices) == 0)
 				j++;
 		}

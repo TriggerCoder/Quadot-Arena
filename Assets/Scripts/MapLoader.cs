@@ -44,6 +44,9 @@ public static class MapLoader
 		Q3_QL = 49152,      //128*128*3
 		QAA = 786432        //512*512*3
 	}
+
+	//Don't add decals nor marks to these surfaces
+	public static HashSet<CollisionObject3D> noMarks;
 	public static bool Load(string mapName)
 	{
 
@@ -60,6 +63,9 @@ public static class MapLoader
 		}
 		else
 			return false;
+
+		//Clear noMarks
+		noMarks = new HashSet<CollisionObject3D>();
 
 		//header
 		{

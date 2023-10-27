@@ -167,7 +167,15 @@ Escape={
 3d_physics/layer_5="WalkTriggerLayer"
 3d_physics/layer_6="ThingsLayer"
 3d_physics/layer_7="DamageablesLayer"
-3d_physics/layer_8="RagdollLayer"
+3d_physics/layer_8="Player1Layer"
+3d_physics/layer_9="Player2Layer"
+3d_physics/layer_10="Player3Layer"
+3d_physics/layer_11="Player4Layer"
+3d_physics/layer_12="Player5Layer"
+3d_physics/layer_13="Player6Layer"
+3d_physics/layer_14="Player7Layer"
+3d_physics/layer_15="Player8Layer"
+3d_physics/layer_16="RagdollLayer"
 
 [physics]
 

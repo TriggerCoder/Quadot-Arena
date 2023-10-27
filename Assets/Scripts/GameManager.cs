@@ -33,7 +33,15 @@ public partial class GameManager : Node
 
 	public const short ThingsLayer = 5;
 	public const short DamageablesLayer = 6;
-	public const short RagdollLayer = 7;
+	public const short Player1Layer = 7;
+	public const short Player2Layer = 8;
+	public const short Player3Layer = 9;
+	public const short Player4Layer = 10;
+	public const short Player5Layer = 11;
+	public const short Player6Layer = 12;
+	public const short Player7Layer = 13;
+	public const short Player8Layer = 14;
+	public const short RagdollLayer = 15;
 
 	//3DRender Layer
 	public const short Player1ViewLayer = 0;
@@ -77,6 +85,7 @@ public partial class GameManager : Node
 
 	public bool ready = false;
 	public int skipFrames = 5;
+	public Node3D TemporaryObjectsHolder;
 	public override void _Ready()
 	{
 		//Used in order to parse float with "." as decimal separator
@@ -89,6 +98,10 @@ public partial class GameManager : Node
 		environment = worldEnvironment.Environment;
 		ambientLightColor = environment.AmbientLightColor;
 		Instance = this;
+
+		TemporaryObjectsHolder = new Node3D();
+		TemporaryObjectsHolder.Name = "TemporaryObjectsHolder";
+		AddChild(TemporaryObjectsHolder);
 		PakManager.LoadPK3Files();
 		if (MapLoader.Load(autoloadMap))
 		{

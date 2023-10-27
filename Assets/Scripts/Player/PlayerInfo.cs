@@ -4,17 +4,16 @@ public partial class PlayerInfo : Node3D
 {
 	[Export]
 	public PlayerControls playerControls;
-
+	[Export]
 	public PlayerCamera playerCamera;
 	public PlayerThing playerThing;
 //	public PlayerHUD playerHUD;
 	public Node3D player;
-	public int playerLayer = GameManager.DamageablesLayer;
 //	public Canvas UICanvas;
 	[Export]
 	public Node3D WeaponHand;
 
-	public int[] Ammo = new int[8] { 100, 0, 0, 0, 0, 0, 0, 0 }; //bullets, shells, grenades, rockets, lightning, slugs, cells, bfgammo
+	public int[] Ammo = new int[8] { 1000, 0, 0, 0, 0, 0, 0, 0 }; //bullets, shells, grenades, rockets, lightning, slugs, cells, bfgammo
 	public bool[] Weapon = new bool[9] { false, true, false, false, false, false, false, false, false }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k
 	public int[] MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 200 };
 
@@ -26,7 +25,8 @@ public partial class PlayerInfo : Node3D
 	[Export]
 	public PackedScene[] WeaponPrefabs = new PackedScene[9];
 
-	public int currentLayer = (1 << GameManager.Player1ViewLayer);
+	public int viewLayer = (1 << GameManager.Player1ViewLayer);
+	public uint playerLayer = (1 << GameManager.Player1Layer);
 	public uint uiLayer = (1 << GameManager.Player1UIViewLayer);
 	public const int RenderFrameMask = 0xFFF0;
 
@@ -144,16 +144,16 @@ public partial class PlayerInfo : Node3D
 				// and that the layer mask is not visible to the player
 				if ((MapLoader.leafRenderFrameLayer[surfaceId] & RenderFrameMask) == currentFrame)
 				{
-					if ((MapLoader.leafRenderFrameLayer[surfaceId] & currentLayer) != 0)
+					if ((MapLoader.leafRenderFrameLayer[surfaceId] & viewLayer) != 0)
 						continue;
 					// Add the player layer mask to the surface in the current frame
-					MapLoader.leafRenderFrameLayer[surfaceId] |= currentLayer;
+					MapLoader.leafRenderFrameLayer[surfaceId] |= viewLayer;
 				}
 				else // Add the player layer mask and the current frame to the surface
-					MapLoader.leafRenderFrameLayer[surfaceId] = currentFrame | currentLayer;
+					MapLoader.leafRenderFrameLayer[surfaceId] = currentFrame | viewLayer;
 
 				// Activate the cluster associated with the surface
-				ClusterPVSManager.Instance.ActivateClusterBySurface(surfaceId, (uint)currentLayer);
+				ClusterPVSManager.Instance.ActivateClusterBySurface(surfaceId, (uint)viewLayer);
 			}
 		}
 	}

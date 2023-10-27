@@ -54,10 +54,10 @@ public partial class PlayerWeapon : Node3D
 	public float muzzleLightTime = 5f;
 	public float cooldownTime = 0f;
 
-
+	[Export]
 	public float _fireRate = .4f;
 	public float fireTime = 0f;
-
+	[Export]
 	public float _muzzleTime = .1f;
 	public float muzzleTimer = 0f;
 	[Export]
@@ -127,7 +127,7 @@ public partial class PlayerWeapon : Node3D
 //				else
 //					Mesher.FillModelFromProcessedData(model, muzzleObject);
 			}
-//			muzzleObject.Hide(); ;
+			muzzleObject.Visible = false;
 			if (muzzleLight != null)
 			{
 				muzzleLight.Reparent(muzzleObject);
@@ -151,33 +151,26 @@ public partial class PlayerWeapon : Node3D
 			return;
 
 		float deltaTime = (float)delta;
-/*		if (GameOptions.UseMuzzleLight)
+		if (GameOptions.UseMuzzleLight)
+		{
 			if (muzzleLight != null)
 			{
-				if (muzzleLight.enabled)
+				if (muzzleLight.Visible)
 				{
-					muzzleLight.intensity = Mathf.Max(Mathf.Lerp(muzzleLight.intensity, 0, Time.deltaTime * muzzleLightTime), 0);
-					if (muzzleLight.intensity <= 0.1f)
+					muzzleLight.LightEnergy = Mathf.Max(Mathf.Lerp(muzzleLight.LightEnergy, 0, deltaTime * muzzleLightTime), 0);
+					if (muzzleLight.LightEnergy <= 0.8f)
 					{
-						muzzleLight.intensity = 0;
-						muzzleLight.enabled = false;
 						if (muzzleObject != null)
-							if (muzzleObject.activeSelf)
+							if (muzzleObject.Visible)
 							{
-								muzzleObject.SetActive(false);
-								playerInfo.playerThing.avatar.MuzzleFlashSetActive(false);
+								muzzleObject.Visible = false;
+//								playerInfo.playerThing.avatar.MuzzleFlashSetActive(false);
 							}
 					}
-					else if (muzzleLight.intensity <= 0.8f)
-						if (muzzleObject != null)
-							if (muzzleObject.activeSelf)
-							{
-								muzzleObject.SetActive(false);
-								playerInfo.playerThing.avatar.MuzzleFlashSetActive(false);
-							}
 				}
 			}
-*/
+		}
+
 		MousePosition.X = playerInfo.playerControls.Look.X + playerInfo.playerControls.playerVelocity.X;
 		MousePosition.Y = playerInfo.playerControls.Look.Y + playerInfo.playerControls.playerVelocity.Y;
 
@@ -252,12 +245,12 @@ public partial class PlayerWeapon : Node3D
 
 		Quaternion targetRot = rotX * rotY * rotZ;
 
-		return targetRot;
+		return targetRot.Normalized();
 	}
 
 	void ApplyRotation(Quaternion targetRot, float deltaTime)
 	{
-		Transform = new Transform3D(new Basis(Transform.Basis.GetRotationQuaternion().Slerp(targetRot, rotateSpeed * deltaTime)), Transform.Origin);
+		Basis = new Basis(Transform.Basis.GetRotationQuaternion().Slerp(targetRot, rotateSpeed * deltaTime));
 	}
 
 	protected virtual Quaternion GetRotate(float deltaTime)

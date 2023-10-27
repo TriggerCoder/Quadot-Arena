@@ -33,14 +33,15 @@ playerThing = NodePath("..")
 playerCamera = NodePath("../MainCameras")
 controller = NodePath("..")
 
-[node name="PlayerInfo" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "WeaponHand")]
+[node name="PlayerInfo" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "playerCamera", "WeaponHand")]
 script = ExtResource("2_jjym4")
 playerControls = NodePath("../PlayerControls")
+playerCamera = NodePath("../MainCameras")
 WeaponHand = NodePath("../MainCameras/Control/UI/UIViewport/UICamera/WeaponHand")
 WeaponPrefabs = [null, ExtResource("4_4obu3"), null, null, null, null, null, null, null]
 
 [node name="MainCameras" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "SkyholeCamera", "UICamera")]
-transform = Transform3D(-0.681998, 0, 0.731354, 0, 1, 0, -0.731354, 0, -0.681998, 0, 0.85, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 script = ExtResource("3_bs0x2")
 playerControls = NodePath("../PlayerControls")
 SkyholeCamera = NodePath("Control/Skyhole/SkyholeViewport/SkyholeCamera")

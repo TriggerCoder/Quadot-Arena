@@ -91,6 +91,7 @@ public partial class PlayerControls : Node3D
 	{
 		moveSpeed = runSpeed;
 		currentMoveType = MoveType.Run;
+		controller.CollisionLayer = playerInfo.playerLayer;
 	}
 
 	public override void _Input(InputEvent @event)
@@ -190,6 +191,10 @@ public partial class PlayerControls : Node3D
 				else
 					playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed);
 		*/
+
+		if (Input.IsActionPressed("Action_Fire"))
+			wishFire = true;
+
 		//swap weapon
 		if (playerWeapon == null)
 		{
@@ -225,6 +230,16 @@ public partial class PlayerControls : Node3D
 
 		//apply move
 		ApplyMove(deltaTime);
+
+		if (wishFire)
+		{
+			wishFire = false;
+			if (playerWeapon.Fire())
+			{
+//				playerInfo.playerHUD.HUDUpdateAmmoNum();
+//				playerThing.avatar.Attack();
+			}
+		}
 	}
 
 	void ApplyMove(float deltaTime)

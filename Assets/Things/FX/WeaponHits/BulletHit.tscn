@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=3 uid="uid://0ys87si5lkyg"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="1_c2lv5"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="2_0djq0"]
+
+[sub_resource type="Resource" id="Resource_trrf8"]
+script = ExtResource("2_0djq0")
+fps = 12.0
+lerpTime = 0.0
+currentLerpTime = 0.0
+
+[sub_resource type="Resource" id="Resource_7d5sb"]
+script = ExtResource("2_0djq0")
+fps = 6.0
+lerpTime = 0.0
+currentLerpTime = 0.0
+
+[node name="BulletHit" type="Node3D"]
+script = ExtResource("1_c2lv5")
+modelName = "weaphits/bullet"
+isTransparent = true
+castShadow = false
+modelAnimation = SubResource("Resource_trrf8")
+textureAnimation = SubResource("Resource_7d5sb")
