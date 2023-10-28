@@ -75,6 +75,7 @@ public partial class GameManager : Node
 
 	public static Color ambientLight { get { return Instance.ambientLightColor; } }
 
+	public static float CurrentTimeMsec { get { return (Time.GetTicksMsec() - Mathf.Floor(Time.GetTicksMsec() / 3600) * 3600); } }
 	public float gravity = 25f;
 	public float friction = 6;
 	public float terminalVelocity = 100f;

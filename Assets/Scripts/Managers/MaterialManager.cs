@@ -130,7 +130,7 @@ public partial class MaterialManager : Node
 		if (Materials.ContainsKey(textureName))
 			return Materials[textureName];
 
-		mat = QShaderManager.GetShadedMaterial(textureName, 0);
+		mat = QShaderManager.GetShadedMaterial(textureName, 0, forceSkinAlpha);
 		if (mat == null)
 		{
 			// Lightmapping is off, so don't.

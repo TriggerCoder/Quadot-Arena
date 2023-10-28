@@ -27,7 +27,7 @@ public static class QShaderManager
 			}
 		}
 	}
-	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index)
+	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, bool alphaIsTransparent = false)
 	{
 		string code = "";
 		string GSHeader = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, ";
@@ -42,7 +42,6 @@ public static class QShaderManager
 		string GSFragmentBlends = "";
 		string GSFragmentEnd = "\tALBEDO = (color.rgb * vertx_color.rgb);\n";
 		string GSAnimation = "";
-		bool alphaIsTransparent = false;
 
 		List<string> textures = new List<string>();
 		Dictionary<string, int> TexIndex = new Dictionary<string, int>();
@@ -90,12 +89,12 @@ public static class QShaderManager
 				if (qShaderStage.animFreq > 0)
 				{
 					animStages = true;
-					GSLateFragmentTexs += "\tvec4 Stage_" + i + " = animation_" + i + "(";
+					GSLateFragmentTexs += "\tvec4 Stage_" + i + " = animation_" + i + "(Time, ";
 					GSLateFragmentTexs += qShaderStage.animFreq.ToString("0.00") + " , " + qShaderStage.map.Length;
 					for (int j = 0; j < qShaderStage.map.Length; j++)
 						GSLateFragmentTexs += " , Anim_" + i + "_" + j;
 					GSLateFragmentTexs += ");\n";
-					GSAnimation += "vec4 animation_" + i + "(";
+					GSAnimation += "vec4 animation_" + i + "(float Time, ";
 					GSAnimation += "float freq , int frames";
 					for (int j = 0; j < qShaderStage.map.Length; j++)
 						GSAnimation += " , vec4 frame_" + j;
@@ -109,7 +108,7 @@ public static class QShaderManager
 						GSAnimation += "frame_" + j;
 					}
 					GSAnimation += "};\n";
-					GSAnimation += "\tint currentFrame = int(mod(TIME * freq,  float(frames)));\n";
+					GSAnimation += "\tint currentFrame = int(floor(mod(Time * freq,  float(frames))));\n";
 					GSAnimation += "\treturn frame[currentFrame];\n";
 					GSAnimation += "}\n";
 				}
@@ -201,7 +200,7 @@ public static class QShaderManager
 
 		code += GSHeader;
 		code += GSUniforms;
-
+		code += "uniform float OffSetTime = 0.0;\n";
 		if (helperRotate)
 		{
 			code += "\nvec2 rotate(vec2 uv, vec2 pivot, float angle)\n{\n\tmat2 rotation = mat2(vec2(sin(angle), -cos(angle)),vec2(cos(angle), sin(angle)));\n";
@@ -213,6 +212,7 @@ public static class QShaderManager
 
 		code += GSFragmentH;
 		code += GSFragmentUvs;
+		code += "\tfloat Time = TIME - OffSetTime;\n";
 		code += GSFragmentTcMod;
 		code += GSFragmentTexs;
 		code += GSLateFragmentTexs;
@@ -249,6 +249,9 @@ public static class QShaderManager
 			code += "\tALPHA = color.a;\n";
 		}
 		code += "}\n\n";
+
+		if (upperName.Contains("BULLETEXPLOSION"))
+			GD.Print(code);
 
 		Shader shader = new Shader();
 		shader.Code = code;
@@ -316,7 +319,7 @@ public static class QShaderManager
 					if (helperRotate == false)
 						helperRotate = true;
 					float deg = TryToParseFloat(shaderTCMod.value[0]);
-					TcMod += "\tuv_" + currentStage + " = rotate(uv_" + currentStage + ", vec2(0.5), radians(" + deg.ToString("0.00") + ") * TIME*0.5);\n";
+					TcMod += "\tuv_" + currentStage + " = rotate(uv_" + currentStage + ", vec2(0.5), radians(" + deg.ToString("0.00") + ") * Time*0.5);\n";
 				}
 				break;
 				case QShaderStage.TCModType.Scale:
@@ -330,7 +333,7 @@ public static class QShaderManager
 				{
 					float SSpeed = TryToParseFloat(shaderTCMod.value[0]);
 					float TSpeed = TryToParseFloat(shaderTCMod.value[1]);
-					TcMod += "\tuv_" + currentStage + " += vec2(" + SSpeed.ToString("0.00") + "," + TSpeed.ToString("0.00") + ") * TIME*0.5; \n";
+					TcMod += "\tuv_" + currentStage + " += vec2(" + SSpeed.ToString("0.00") + "," + TSpeed.ToString("0.00") + ") * Time*0.5; \n";
 				}
 				break;
 				case QShaderStage.TCModType.Stretch:
@@ -340,7 +343,7 @@ public static class QShaderManager
 					float amp = TryToParseFloat(shaderTCMod.value[2]);
 					float phase = TryToParseFloat(shaderTCMod.value[3]);
 					float freq = TryToParseFloat(shaderTCMod.value[4]);
-					TcMod += "\tfloat str_" + currentStage + " = " + basis.ToString("0.00") + " + " + amp.ToString("0.00") + " * (sin((TIME)*" + freq.ToString("0.00") + "*6.28)+" + phase.ToString("0.00") + ");\n";
+					TcMod += "\tfloat str_" + currentStage + " = " + basis.ToString("0.00") + " + " + amp.ToString("0.00") + " * (sin((Time)*" + freq.ToString("0.00") + "*6.28)+" + phase.ToString("0.00") + ");\n";
 					TcMod += "\tuv_" + currentStage + "  = uv_" + currentStage + " *(str_" + currentStage + ") - vec2(1.0,1.0)*str_" + currentStage + "*0.5 + vec2(0.5,0.5);\n";
 				}
 				break;
@@ -354,8 +357,8 @@ public static class QShaderManager
 					float amp = TryToParseFloat(shaderTCMod.value[1]);
 					float phase = TryToParseFloat(shaderTCMod.value[2]);
 					float freq = TryToParseFloat(shaderTCMod.value[3]);
-					string turbX = "(sin( (2.0 /" + freq.ToString("0.00") + ") * (TIME * 6.28) + " + phase.ToString("0.00") + ") * " + amp.ToString("0.00") + " )";
-					string turbY = "(sin( (2.0 /" + freq.ToString("0.00") + ") * (TIME * 6.28) + " + phase.ToString("0.00") + ") * " + amp.ToString("0.00") + " )";
+					string turbX = "(sin( (2.0 /" + freq.ToString("0.00") + ") * (Time * 6.28) + " + phase.ToString("0.00") + ") * " + amp.ToString("0.00") + " )";
+					string turbY = "(sin( (2.0 /" + freq.ToString("0.00") + ") * (Time * 6.28) + " + phase.ToString("0.00") + ") * " + amp.ToString("0.00") + " )";
 					TcMod += "\tuv_" + currentStage + " += vec2(" + turbX + "," + turbY + "); \n";				
 				}
 				break;
@@ -390,23 +393,23 @@ public static class QShaderManager
 			{
 				case "SIN":
 					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
-					StageGen += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (TIME +" + phase.ToString("0.00") + "))  * " + amp.ToString("0.00") + "); \n";
+					StageGen += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") + "))  * " + amp.ToString("0.00") + "); \n";
 				break;
 				case "SQUARE":
 					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
-					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
+					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
 				break;
 				case "TRIANGLE":
 					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
-					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(0.5 + TIME * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
+					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
 				break;
 				case "SAWTOOTH":
 					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
-					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
+					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
 				break;
 				case "INVERSESAWTOOTH":
 					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
-					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(TIME  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + ")))); \n";
+					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + ")))); \n";
 				break;
 			}
 		}

@@ -59,22 +59,31 @@ public partial class MachineGunWeapon : PlayerWeapon
 		{
 			Transform3D global = playerInfo.playerCamera.CurrentCamera.GlobalTransform;
 			Vector3 d = global.Basis.Z;
-			Vector2 r = Vector2.Zero;//GetDispersion();
+			Vector2 r = GetDispersion();
 			d += global.Basis.X * r.X + global.Basis.Y * r.Y;
 			d = d.Normalized();
 			Vector3 Origin = playerInfo.playerCamera.CurrentCamera.GlobalPosition;
 			Vector3 End = Origin - d * maxRange;
-			var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | (~playerInfo.playerLayer)));
+			var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | ~((playerInfo.playerLayer) | (1 << GameManager.InvisibleBlockerLayer))));
 			var SpaceState = GetWorld3D().DirectSpaceState;
 			var hit = SpaceState.IntersectRay(RayCast);
 			if (hit.ContainsKey("collider"))
 			{
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
-				Vector3 collision = (Vector3)hit["position"];
-				Vector3 normal = (Vector3)hit["normal"];
-				var BulletHit = (Node3D)ThingsManager.thingsPrefabs["BulletHit"].Instantiate();
-				GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletHit);
-				BulletHit.Position = collision;
+				if (!MapLoader.noMarks.Contains(collider))
+				{
+					Vector3 collision = (Vector3)hit["position"];
+					Vector3 normal = (Vector3)hit["normal"];
+					var BulletHit = (Node3D)ThingsManager.thingsPrefabs["BulletHit"].Instantiate();
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletHit);
+					BulletHit.Position = collision + d * .2f;
+					BulletHit.LookAt(collision + normal, Vector3.Up);
+					BulletHit.Rotate(Vector3.Up, - Mathf.Pi * .5f);
+					var random = new RandomNumberGenerator();
+					BulletHit.Rotate(normal, random.RandfRange(0, Mathf.Pi * 2.0f));
+				}
+				else
+					GD.Print("Collider: " + collider.Name + "es No hit");
 			}
 		/*	if (Physics.Raycast(ray, out hit, maxRange, ~(GameManager.NoHit | (1 << playerInfo.playerLayer)), QueryTriggerInteraction.Ignore))
 			{

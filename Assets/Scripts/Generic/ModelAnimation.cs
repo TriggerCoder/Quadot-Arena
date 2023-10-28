@@ -7,6 +7,8 @@ public partial class ModelAnimation : Node3D
 	[Export]
 	public string modelName;
 	[Export]
+	public string shaderName;
+	[Export]
 	public bool isTransparent = false;
 	[Export]
 	public bool castShadow = true;
@@ -18,6 +20,8 @@ public partial class ModelAnimation : Node3D
 	public AnimData modelAnimation;
 	[Export]
 	public AnimData textureAnimation;
+	[Export]
+	public DestroyType destroyType;
 
 	private List<int> modelAnim = new List<int>();
 	private List<int> textureAnim = new List<int>();
@@ -30,6 +34,18 @@ public partial class ModelAnimation : Node3D
 	private float height;
 	private float timer = 0;
 
+	private float ModelLerpTime = 0;
+	private float ModelCurrentLerpTime = 0;
+
+	private float TextureLerpTime = 0;
+	private float TextureCurrentLerpTime = 0;
+	public enum DestroyType
+	{
+		NoDestroy,
+		DestroyAfterTime,
+		DestroyAfterModelLastFrame,
+		DestroyAfterTextureLastFrame
+	}
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -48,13 +64,29 @@ public partial class ModelAnimation : Node3D
 		}
 
 		Node3D currentObject = this;
-		model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, currentObject, isTransparent, null);
+		Dictionary<string, string> meshToSkin = null;
+		if (!string.IsNullOrEmpty(shaderName))
+		{
+			meshToSkin = new Dictionary<string, string>
+			{
+				{ md3Model.meshes[0].name, shaderName }
+			};
+		}
+
+		if (md3Model.readySurfaceArray.Count == 0)
+			model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, currentObject, isTransparent, meshToSkin);
+		else
+			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, currentObject);
 
 		for (int i = 0; i < md3Model.meshes.Count; i++)
 		{
 			var modelMesh = md3Model.meshes[i];
 			if (modelMesh.numFrames > 1)
 				modelAnim.Add(i);
+
+			if (!string.IsNullOrEmpty(shaderName))
+				continue;
+
 			if (modelMesh.numSkins > 1)
 			{
 				ShaderMaterial[] frames = new ShaderMaterial[modelMesh.numSkins];
@@ -76,48 +108,45 @@ public partial class ModelAnimation : Node3D
 		}
 
 		modelCurrentFrame = 0;
-		modelAnimation.currentLerpTime = 0;
-		textureAnimation.currentLerpTime = 0;
 	}
 
 	void AnimateModel(float deltaTime)
 	{
 		int currentFrame = modelCurrentFrame;
 		int nextFrame = currentFrame + 1;
-		float t = modelAnimation.currentLerpTime;
+		
 		if (nextFrame >= md3Model.numFrames)
 			nextFrame = 0;
 
 		for (int i = 0; i < modelAnim.Count; i++)
 		{
 			MD3Mesh currentMesh = md3Model.meshes[modelAnim[i]];
-			List<Vector3> lerpVertex = new List<Vector3>(currentMesh.numVertices);
-			List<Vector3> lerpNormals = new List<Vector3>(currentMesh.numVertices);
 			for (int j = 0; j < currentMesh.numVertices; j++)
 			{
-				Vector3 newVertex = currentMesh.verts[currentFrame][j].Lerp(currentMesh.verts[nextFrame][j], t);
-				Vector3 newNormal = currentMesh.normals[currentFrame][j].Lerp(currentMesh.normals[nextFrame][j], t);
-
-				lerpVertex.Add(newVertex);
-				lerpNormals.Add(newNormal);
+				Vector3 newVertex = currentMesh.verts[currentFrame][j].Lerp(currentMesh.verts[nextFrame][j], ModelCurrentLerpTime);
+				Vector3 newNormal = currentMesh.normals[currentFrame][j].Lerp(currentMesh.normals[nextFrame][j], ModelCurrentLerpTime);
+				model.data[i].meshDataTool.SetVertex(j, newVertex);
+				model.data[i].meshDataTool.SetVertexNormal(j, newNormal);
 			}
-			Mesher.UpdateVertices(model.data[i], lerpVertex, lerpNormals);
-//			Mesher.RecalculateNormals((ArrayMesh)model.meshInstance[i].Mesh,model.arrMesh[i]);
+			model.data[i].arrMesh.ClearSurfaces();
+			model.data[i].meshDataTool.CommitToSurface(model.data[i].arrMesh);
 		}
 
-		modelAnimation.lerpTime = modelAnimation.fps * deltaTime;
-		modelAnimation.currentLerpTime += modelAnimation.lerpTime;
+		ModelLerpTime = modelAnimation.fps * deltaTime;
+		ModelCurrentLerpTime += ModelLerpTime;
 
-		if (modelAnimation.currentLerpTime >= 1.0f)
+		if (ModelCurrentLerpTime >= 1.0f)
 		{
-			modelAnimation.currentLerpTime -= 1.0f;
+			ModelCurrentLerpTime -= 1.0f;
 			modelCurrentFrame = nextFrame;
+			if ((nextFrame == 0) && (destroyType == DestroyType.DestroyAfterModelLastFrame))
+				QueueFree();
 		}
 	}
 	void AnimateTexture(float deltaTime)
 	{
-		textureAnimation.lerpTime = textureAnimation.fps * deltaTime;
-		textureAnimation.currentLerpTime += textureAnimation.lerpTime;
+		TextureLerpTime = textureAnimation.fps * deltaTime;
+		TextureCurrentLerpTime += TextureLerpTime;
 
 		for (int i = 0; i < textureAnim.Count; i++)
 		{
@@ -127,15 +156,16 @@ public partial class ModelAnimation : Node3D
 			int nextFrame = currentFrame + 1;
 			if (nextFrame >= currentMesh.numSkins)
 				nextFrame = 0;
-			if (textureAnimation.currentLerpTime >= 1.0f)
+			if (TextureCurrentLerpTime >= 1.0f)
 			{
+				model.data[currentMesh.meshNum].meshDataTool.SetMaterial(materials[i][nextFrame]);
 				model.data[currentMesh.meshNum].arrMesh.SurfaceSetMaterial(0, materials[i][nextFrame]);
 				textureCurrentFrame[i] = nextFrame;
 			}
 		}
 
-		if (textureAnimation.currentLerpTime >= 1.0f)
-			textureAnimation.currentLerpTime -= 1.0f;
+		if (TextureCurrentLerpTime >= 1.0f)
+			TextureCurrentLerpTime -= 1.0f;
 	}
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
@@ -143,9 +173,6 @@ public partial class ModelAnimation : Node3D
 		if (GameManager.Paused)
 			return;
 
-		if (md3Model == null)
-			_Ready();
-		
 		float deltaTime = (float)delta;
 
 		AnimateModel(deltaTime);
