@@ -59,7 +59,7 @@ public partial class ModelAnimation : Node3D
 		if (md3Model == null)
 		{
 			GD.Print("Model not found: " + modelName);
-//			SetProcess(false);
+			QueueFree();
 			return;
 		}
 

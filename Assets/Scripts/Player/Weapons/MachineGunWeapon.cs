@@ -70,17 +70,21 @@ public partial class MachineGunWeapon : PlayerWeapon
 			if (hit.ContainsKey("collider"))
 			{
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
+				Vector3 collision = (Vector3)hit["position"];
+				Vector3 normal = (Vector3)hit["normal"];
+				var BulletHit = (Node3D)ThingsManager.thingsPrefabs["BulletHit"].Instantiate();
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletHit);
+				BulletHit.Position = collision + (d * .2f);
+				BulletHit.LookAt(collision + normal, Vector3.Up);
+				BulletHit.Rotate(BulletHit.Basis.Y, -Mathf.Pi * .5f);
+				BulletHit.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				if (!MapLoader.noMarks.Contains(collider))
 				{
-					Vector3 collision = (Vector3)hit["position"];
-					Vector3 normal = (Vector3)hit["normal"];
-					var BulletHit = (Node3D)ThingsManager.thingsPrefabs["BulletHit"].Instantiate();
-					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletHit);
-					BulletHit.Position = collision + d * .2f;
-					BulletHit.LookAt(collision + normal, Vector3.Up);
-					BulletHit.Rotate(Vector3.Up, - Mathf.Pi * .5f);
-					var random = new RandomNumberGenerator();
-					BulletHit.Rotate(normal, random.RandfRange(0, Mathf.Pi * 2.0f));
+					var BulletMark= (Node3D)ThingsManager.thingsPrefabs["BulletMark"].Instantiate();
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletMark);
+					BulletMark.Position = collision + (d * .05f);
+					BulletMark.LookAt(collision - normal, Vector3.Up);
+					BulletMark.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}
 				else
 					GD.Print("Collider: " + collider.Name + "es No hit");

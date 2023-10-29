@@ -14,6 +14,7 @@ fps = 6.0
 [node name="BulletHit" type="Node3D"]
 script = ExtResource("1_c2lv5")
 modelName = "weaphits/bullet"
+shaderName = "bulletExplosion"
 isTransparent = true
 castShadow = false
 modelAnimation = SubResource("Resource_trrf8")

@@ -23,7 +23,7 @@ source = 5
 input_name = "uv"
 
 [sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_ldwx0"]
-parameter_name = "MainTex"
+parameter_name = "Tex_0"
 texture_repeat = 1
 
 [sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_un7sg"]
@@ -45,7 +45,7 @@ source = 5
 code = "shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
 
-uniform sampler2D MainTex : repeat_enable;
+uniform sampler2D Tex_0 : repeat_enable;
 uniform sampler2D LightMap : hint_default_black, repeat_enable;
 uniform float mixBrightness = 0.5;
 
@@ -62,7 +62,7 @@ void fragment() {
 
 	vec4 n_out2p0;
 // Texture2D:2
-	n_out2p0 = texture(MainTex, n_out3p0);
+	n_out2p0 = texture(Tex_0, n_out3p0);
 
 
 // Input:10
@@ -109,6 +109,7 @@ void fragment() {
 
 }
 "
+graph_offset = Vector2(-528.661, 0)
 nodes/vertex/0/position = Vector2(640, 140)
 nodes/fragment/0/position = Vector2(1800, 260)
 nodes/fragment/2/node = SubResource("VisualShaderNodeTexture_hufbw")

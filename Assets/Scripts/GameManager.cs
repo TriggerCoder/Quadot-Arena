@@ -75,7 +75,7 @@ public partial class GameManager : Node
 
 	public static Color ambientLight { get { return Instance.ambientLightColor; } }
 
-	public static float CurrentTimeMsec { get { return (Time.GetTicksMsec() - Mathf.Floor(Time.GetTicksMsec() / 3600) * 3600); } }
+	public static float CurrentTimeMsec { get { return Time.GetTicksMsec() * .001f; } }
 	public float gravity = 25f;
 	public float friction = 6;
 	public float terminalVelocity = 100f;
@@ -89,6 +89,7 @@ public partial class GameManager : Node
 	public Node3D TemporaryObjectsHolder;
 	public override void _Ready()
 	{
+		GD.Randomize();
 		//Used in order to parse float with "." as decimal separator
 		CultureInfo CurrentCultureInfo = new CultureInfo("en", false);
 		CurrentCultureInfo.NumberFormat.NumberDecimalSeparator = ".";
@@ -123,11 +124,13 @@ public partial class GameManager : Node
 				if (!paused)
 				{
 					paused = true;
+					RenderingServer.GlobalShaderParameterSet("TimeMult", 0.0f);
 					Input.MouseMode = Input.MouseModeEnum.Visible;
 				}
 				else
 				{
 					paused = false;
+					RenderingServer.GlobalShaderParameterSet("TimeMult", 1.0f);
 					Input.MouseMode = Input.MouseModeEnum.Captured;
 				}
 			}
@@ -139,6 +142,7 @@ public partial class GameManager : Node
 				if (Input.IsActionJustPressed("Action_Fire"))
 				{
 					paused = false;
+					RenderingServer.GlobalShaderParameterSet("TimeMult", 1.0f);
 					Input.MouseMode = Input.MouseModeEnum.Captured;
 				}
 			}
@@ -146,6 +150,7 @@ public partial class GameManager : Node
 	}
 	public override void _Process(double delta)
 	{
+//		RenderingServer.GlobalShaderParameterSet("MsTime", CurrentTimeMsec);
 		//skip frames are used to easen up deltaTime after loading
 		if (ready)
 		{

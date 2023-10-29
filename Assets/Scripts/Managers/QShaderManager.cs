@@ -200,7 +200,9 @@ public static class QShaderManager
 
 		code += GSHeader;
 		code += GSUniforms;
-		code += "uniform float OffSetTime = 0.0;\n";
+		code += "global uniform float TimeMult;\n";
+//		code += "global uniform float MsTime;\n";
+		code += "instance uniform float OffSetTime = 0.0;\n";
 		if (helperRotate)
 		{
 			code += "\nvec2 rotate(vec2 uv, vec2 pivot, float angle)\n{\n\tmat2 rotation = mat2(vec2(sin(angle), -cos(angle)),vec2(cos(angle), sin(angle)));\n";
@@ -212,7 +214,7 @@ public static class QShaderManager
 
 		code += GSFragmentH;
 		code += GSFragmentUvs;
-		code += "\tfloat Time = TIME - OffSetTime;\n";
+		code += "\tfloat Time = (TIME - OffSetTime) * TimeMult;\n";
 		code += GSFragmentTcMod;
 		code += GSFragmentTexs;
 		code += GSLateFragmentTexs;
@@ -234,6 +236,8 @@ public static class QShaderManager
 		else 
 			code += "\tvec4 color = vec4(0.0, 0.0, 0.0, 0.0);\n";
 
+		code += "\tvec4 black = vec4(0.0, 0.0, 0.0, 0.0);\n";
+		code += "\tvec4 white = vec4(1.0, 1.0, 1.0, 1.0);\n";
 		code += GSFragmentBlends;
 		code += GSFragmentEnd;
 
@@ -250,7 +254,9 @@ public static class QShaderManager
 		}
 		code += "}\n\n";
 
-		if (upperName.Contains("BULLETEXPLOSION"))
+		if (upperName.Contains("FLAME2"))
+
+//		if (upperName.Contains("BULLET_MRK"))
 			GD.Print(code);
 
 		Shader shader = new Shader();
@@ -357,8 +363,8 @@ public static class QShaderManager
 					float amp = TryToParseFloat(shaderTCMod.value[1]);
 					float phase = TryToParseFloat(shaderTCMod.value[2]);
 					float freq = TryToParseFloat(shaderTCMod.value[3]);
-					string turbX = "(sin( (2.0 /" + freq.ToString("0.00") + ") * (Time * 6.28) + " + phase.ToString("0.00") + ") * " + amp.ToString("0.00") + " )";
-					string turbY = "(sin( (2.0 /" + freq.ToString("0.00") + ") * (Time * 6.28) + " + phase.ToString("0.00") + ") * " + amp.ToString("0.00") + " )";
+					string turbX = "(sin( (2.0 *" + freq.ToString("0.00") + ") * (Time * 6.28) + " + phase.ToString("0.00") + ") * " + amp.ToString("0.00") + " )";
+					string turbY = "(cos( (2.0 *" + freq.ToString("0.00") + ") * (Time * 6.28) + " + phase.ToString("0.00") + ") * " + amp.ToString("0.00") + " )";
 					TcMod += "\tuv_" + currentStage + " += vec2(" + turbX + "," + turbY + "); \n";				
 				}
 				break;
@@ -457,7 +463,7 @@ public static class QShaderManager
 			else if (BlendWhat.Contains("BLEND"))
 			{
 				Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * Stage_" + currentStage + ".a + color.rgb * (1.0 - Stage_" + currentStage + ".a); \n";
-				Blend += "\tcolor.a = clamp(Stage_" + currentStage + ".a *   Stage_" + currentStage + ".a + color.a *  (1.0 -  Stage_" + currentStage + ".a) , 0.0, 1.0); \n";
+				Blend += "\tcolor.a = Stage_" + currentStage + ".a *   Stage_" + currentStage + ".a + color.a *  (1.0 -  Stage_" + currentStage + ".a); \n";
 			}
 			else
 			{
@@ -537,12 +543,23 @@ public static class QShaderManager
 						adst = " (1.0 -  Stage_" + currentStage + ".a) ";
 						break;
 				}
-				Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
-				Blend += "\tcolor.a = clamp(Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ", 0.0, 1.0); \n";
+				//Horrible hack
+				if ((currentStage == 0) && (src == "GL_ZERO") && (dst == "GL_ONE_MINUS_SRC_COLOR"))
+				{
+					Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
+					Blend += "\tcolor.a = Stage_" + currentStage + ".a; \n";
+				}
+				else
+				{
+					Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
+					Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + "; \n";
+				}
 			}
 		}
 		else
-			Blend = "\tcolor =  Stage_" + currentStage + "; \n";
+			Blend = "\tcolor = Stage_" + currentStage + "; \n";
+
+		Blend += "\tcolor = clamp(color,black,white); \n";
 		return Blend;
 	}
 

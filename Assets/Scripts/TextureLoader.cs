@@ -85,15 +85,13 @@ public static class TextureLoader
 					baseTex.Convert(Format.Rgba8);
 					int width = baseTex.GetWidth();
 					int height = baseTex.GetHeight();
+					Color black = Colors.Black;
 					for (int i = 0; i < width; i++)
 					{
 						for (int j = 0; j < height; j++)
 						{
 							Color pulledColors = baseTex.GetPixel(i, j);
-							float alpha = computeAlphaFromColorFilter(pulledColors, Colors.Black);
-							pulledColors.R /= alpha;
-							pulledColors.G /= alpha;
-							pulledColors.B /= alpha;
+							float alpha = computeAlphaFromColorFilter(pulledColors, black);
 							pulledColors.A = alpha;
 							baseTex.SetPixel(i, j, pulledColors);
 						}

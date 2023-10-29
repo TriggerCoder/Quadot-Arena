@@ -8,7 +8,7 @@ source = 5
 input_name = "uv"
 
 [sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_ldwx0"]
-parameter_name = "MainTex"
+parameter_name = "Tex_0"
 texture_repeat = 1
 
 [sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_un7sg"]
@@ -30,7 +30,7 @@ expression = "color = input0 * input1;"
 code = "shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_disabled, diffuse_lambert, specular_schlick_ggx;
 
-uniform sampler2D MainTex : repeat_enable;
+uniform sampler2D Tex_0 : repeat_enable;
 uniform vec4 AmbientColor : source_color = vec4(1.000000, 1.000000, 1.000000, 1.000000);
 
 
@@ -42,7 +42,7 @@ void fragment() {
 
 	vec4 n_out2p0;
 // Texture2D:2
-	n_out2p0 = texture(MainTex, n_out3p0);
+	n_out2p0 = texture(Tex_0, n_out3p0);
 	float n_out2p4 = n_out2p0.a;
 
 
@@ -78,6 +78,7 @@ void fragment() {
 
 }
 "
+graph_offset = Vector2(-191.313, 0)
 modes/cull = 2
 nodes/vertex/0/position = Vector2(640, 140)
 nodes/fragment/0/position = Vector2(1780, 140)

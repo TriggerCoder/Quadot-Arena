@@ -482,14 +482,13 @@ public static class Mesher
 			md3Model.data[model.meshes[i].meshNum] = new dataMeshes();
 			var surfaceArray = model.readySurfaceArray[i];
 			md3Model.data[model.meshes[i].meshNum].arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
-			ShaderMaterial shaderMaterial = (ShaderMaterial)model.readyMaterials[i].Duplicate();
-			shaderMaterial.SetShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
-			md3Model.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, shaderMaterial);
+			md3Model.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, model.readyMaterials[i]);
 			md3Model.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(md3Model.data[model.meshes[i].meshNum].arrMesh, 0);
 			
 			mesh.Mesh = md3Model.data[model.meshes[i].meshNum].arrMesh;
 			mesh.Layers = layer;
 			modelObject.AddChild(mesh);
+			mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 		}
 		return md3Model;
 	}

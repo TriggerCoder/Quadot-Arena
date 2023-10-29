@@ -34,17 +34,15 @@ public partial class MaterialManager : Node
 	[Export]
 	public ShaderMaterial tcModScroll;
 
-	public MaterialOverride[] _OverrideMaterials = new MaterialOverride[0];
-
 	public bool applyLightmaps = true;
 
 	public static string lightMapProperty = "shader_parameter/LightMap";
-	public static string opaqueTexProperty = "shader_parameter/MainTex";
+	public static string opaqueTexProperty = "shader_parameter/Tex_0";
 	public static string colorProperty = "shader_parameter/AmbientColor";
 	public static string mixBrightness = "shader_parameter/mixBrightness";
 
+	public static List<ShaderMaterial> AllMaterials = new List<ShaderMaterial>();	
 	public static Dictionary<string, ShaderMaterial> Materials = new Dictionary<string, ShaderMaterial>();
-	public static Dictionary<string, MaterialOverride> OverrideMaterials = new Dictionary<string, MaterialOverride>();
 	public static Dictionary<string, QShader> AditionalTextures = new Dictionary<string, QShader>();
 
 	public static readonly string[] rgbGenTextures = { "_S_Texture", "_W_Texture", "_IW_Texture" };
@@ -53,27 +51,6 @@ public partial class MaterialManager : Node
 	public static readonly string[] rgbGenPhase = { "_S_Phase", "_W_Phase", "_IW_Phase" };
 	public static readonly string[] rgbGenFreq = { "_S_Freq", "_W_Freq", "_IW_Freq" };
 
-	[System.Serializable]
-	public struct MaterialOverride
-	{
-		public string overrideName;
-		public bool opaque;
-		public string opaqueTextureName;
-		public Material material;
-		public MaterialAnimation[] animation;
-	}
-
-	[System.Serializable]
-	public struct MaterialAnimation
-	{
-		public string[] textureFrames;
-		public bool addAlpha;
-		public int fps;
-		public float Base;
-		public float Amp;
-		public float Phase;
-		public float Freq;
-	}
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{

@@ -65,13 +65,11 @@ public partial class PlayerWeapon : Node3D
 
 	protected float coolTimer = 0f;
 
-//	Transform cTransform;
-
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-//		if (Instance != null)
-//			Destroy(Instance.gameObject);
+		if (Instance != null)
+			Instance.QueueFree();
 
 		Instance = this;
 
@@ -94,10 +92,10 @@ public partial class PlayerWeapon : Node3D
 		MD3 model = ModelsManager.GetModel(UIModelName);
 		if (model != null)
 		{
-//			if (model.readyMeshes.Count == 0)
+			if (model.readySurfaceArray.Count == 0)
 				Mesher.GenerateModelFromMeshes(model, p.uiLayer, this);
-//			else
-//				Mesher.FillModelFromProcessedData(model, gameObject);
+			else
+				Mesher.FillModelFromProcessedData(model, p.uiLayer, this);
 
 //			if (playerInfo.playerThing.avatar != null)
 //				playerInfo.playerThing.avatar.LoadWeapon(model, CompleteModelName, MuzzleModelName, playerInfo.playerLayer);
@@ -105,14 +103,7 @@ public partial class PlayerWeapon : Node3D
 
 		if (model.tagsIdbyName.TryGetValue("tag_flash", out int tagId))
 			MuzzleOffset = model.tagsbyId[tagId][0].origin;
-/*
-		cTransform = gameObject.transform;
-		for (int d = 0; d < cTransform.childCount; d++)
-		{
-			cTransform.GetChild(d).gameObject.transform.localPosition = Vector3.zero;
-			cTransform.GetChild(d).gameObject.transform.localScale = Vector3.one;
-		}
-*/
+
 		if (!string.IsNullOrEmpty(MuzzleModelName))
 		{
 			muzzleObject = new Node3D();
@@ -122,10 +113,10 @@ public partial class PlayerWeapon : Node3D
 			model = ModelsManager.GetModel(MuzzleModelName, true);
 			if (model != null)
 			{
-//				if (model.readyMeshes.Count == 0)
+				if (model.readySurfaceArray.Count == 0)
 					Mesher.GenerateModelFromMeshes(model, p.uiLayer, muzzleObject, true);
-//				else
-//					Mesher.FillModelFromProcessedData(model, muzzleObject);
+				else
+					Mesher.FillModelFromProcessedData(model, p.uiLayer, muzzleObject);
 			}
 			muzzleObject.Visible = false;
 			if (muzzleLight != null)
@@ -134,11 +125,6 @@ public partial class PlayerWeapon : Node3D
 				muzzleLight.Position = new Vector3(0, 0, .05f);
 			}
 		}
-
-//		GameManager.SetLayerAllChildren(transform, playerInfo.playerLayer - 14);
-
-//		oldMousePosition.X = playerInfo.playerControls.Look.X;
-//		oldMousePosition.Y = playerInfo.playerControls.Look.Y;
 
 //		playerInfo.playerHUD.HUDUpdateAmmoNum();
 		OnInit();
@@ -183,8 +169,8 @@ public partial class PlayerWeapon : Node3D
 //				playerInfo.playerThing.avatar.UnloadWeapon();
 
 			LowerAmount = Mathf.Lerp(LowerAmount, 1, deltaTime * swapSpeed);
-//			if (LowerAmount > .99f)
-//				DestroyAfterTime.DestroyObject(gameObject);
+			if (LowerAmount > .99f)
+				QueueFree();
 		}
 		else
 			LowerAmount = Mathf.Lerp(LowerAmount, 0, deltaTime * swapSpeed);
@@ -270,8 +256,7 @@ public partial class PlayerWeapon : Node3D
 	}
 	public Vector2 GetDispersion()
 	{
-		var random = new RandomNumberGenerator();
-		Vector2 dispersion = new Vector2(random.RandfRange(-1f, 1f), random.RandfRange(-1f, 1f));
+		Vector2 dispersion = new Vector2((float)GD.RandRange(-1f, 1f), (float)GD.RandRange(-1f, 1f));
 		float dx = Mathf.Abs(dispersion.X);
 		float dy = Mathf.Abs(dispersion.Y);
 

@@ -180,3 +180,14 @@ Escape={
 [physics]
 
 3d/physics_engine="JoltPhysics3D"
+
+[shader_globals]
+
+TimeMult={
+"type": "float",
+"value": 1.0
+}
+MsTime={
+"type": "float",
+"value": 0.0
+}
