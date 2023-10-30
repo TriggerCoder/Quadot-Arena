@@ -11,7 +11,7 @@ public partial class MultiAudioListener : Node3D
 
 	public static MultiAudioListener Main;
 
-	//AudioSource pool
+	//AudioStraem pool
 	//We limit the amount of items in the audio source pool. This number can be changed
 	private const int MaximumItemsAudioStreamPool = 512;
 	//We limit the amount of audio listener to 8 SplitScreen
@@ -94,5 +94,6 @@ public partial class MultiAudioListener : Node3D
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+
 	}
 }

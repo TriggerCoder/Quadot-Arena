@@ -60,7 +60,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 			audioStream.Stream = Sounds[0];
 			audioStream.Play();
 		}
-
+		
 		//Hitscan attack
 		{
 			Transform3D global = playerInfo.playerCamera.CurrentCamera.GlobalTransform;
@@ -78,76 +78,24 @@ public partial class MachineGunWeapon : PlayerWeapon
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
 				Vector3 collision = (Vector3)hit["position"];
 				Vector3 normal = (Vector3)hit["normal"];
-				var BulletHit = (Node3D)ThingsManager.thingsPrefabs["BulletHit"].Instantiate();
+				Node3D BulletHit = (Node3D)ThingsManager.thingsPrefabs["BulletHit"].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletHit);
 				BulletHit.Position = collision + (d * .2f);
 				BulletHit.LookAt(collision + normal, Vector3.Up);
 				BulletHit.Rotate(BulletHit.Basis.Y, -Mathf.Pi * .5f);
 				BulletHit.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+				if (Sounds.Length > 3)
+					SoundManager.Create3DSound(collision, Sounds[GD.RandRange(3, Sounds.Length - 1)]);
+
 				if (!MapLoader.noMarks.Contains(collider))
 				{
-					var BulletMark= (Node3D)ThingsManager.thingsPrefabs["BulletMark"].Instantiate();
+					Node3D BulletMark = (Node3D)ThingsManager.thingsPrefabs["BulletMark"].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletMark);
 					BulletMark.Position = collision + (d * .05f);
 					BulletMark.LookAt(collision - normal, Vector3.Up);
 					BulletMark.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}
-				else
-					GD.Print("Collider: " + collider.Name + "es No hit");
 			}
-		/*	if (Physics.Raycast(ray, out hit, maxRange, ~(GameManager.NoHit | (1 << playerInfo.playerLayer)), QueryTriggerInteraction.Ignore))
-			{
-				Damageable target = hit.collider.gameObject.GetComponent<Damageable>();
-				if (target != null)
-				{
-					target.Damage(Random.Range(DamageMin, DamageMax + 1), DamageType.Generic, playerInfo.gameObject);
-
-					if (target.Bleed)
-					{
-						GameObject blood;
-						switch (target.BloodColor)
-						{
-							default:
-							case BloodType.Red:
-								blood = PoolManager.GetObjectFromPool("BloodRed");
-								break;
-							case BloodType.Green:
-								blood = PoolManager.GetObjectFromPool("BloodGreen");
-								break;
-							case BloodType.Blue:
-								blood = PoolManager.GetObjectFromPool("BloodBlue");
-								break;
-						}
-						blood.transform.position = hit.point - ray.direction * .2f;
-					}
-					else
-					{
-						GameObject puff = PoolManager.GetObjectFromPool("BulletHit");
-						puff.transform.position = hit.point - ray.direction * .2f;
-					}
-				}
-				else
-				{
-					GameObject puff = PoolManager.GetObjectFromPool("BulletHit");
-					puff.transform.position = hit.point - ray.direction * .2f;
-					puff.transform.right = -hit.normal;
-					puff.transform.Rotate(Vector3.right, Random.Range(0, 360));
-
-					if (Sounds.Length > 3)
-						AudioManager.Create3DSound(puff.transform.position, Sounds[Random.Range(3, Sounds.Length)], 5f, 1);
-
-					//Check if collider can be marked
-					if (!MapLoader.noMarks.Contains(hit.collider))
-					{
-						GameObject mark = PoolManager.GetObjectFromPool("BulletMark");
-						mark.transform.position = hit.point + hit.normal * .05f;
-						mark.transform.forward = hit.normal;
-						mark.transform.Rotate(Vector3.forward, Random.Range(0, 360));
-					}
-					Debug.Log(hit.collider.name);
-				}
-			}
-*/
 		}
 		return true;
 	}

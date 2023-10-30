@@ -17,6 +17,10 @@ public partial class GameManager : Node
 	public float mixBrightness = 0.25f;				// Range from 0 to 1, .25f Is the nicest
 	[Export]
 	public CharacterBody3D Player;
+	[Export]
+	public SubViewport Skyhole;
+	[Export]
+	public SubViewport UI;
 
 	public static GameManager Instance;
 	// Quake3 also uses Doom and Wolf3d scaling down
@@ -150,7 +154,7 @@ public partial class GameManager : Node
 	}
 	public override void _Process(double delta)
 	{
-//		RenderingServer.GlobalShaderParameterSet("MsTime", CurrentTimeMsec);
+		RenderingServer.GlobalShaderParameterSet("MsTime", CurrentTimeMsec);
 		//skip frames are used to easen up deltaTime after loading
 		if (ready)
 		{
@@ -161,5 +165,19 @@ public partial class GameManager : Node
 					paused = false;
 			}
 		}
+	}
+
+	public void SetViewPortToCamera(Camera3D camera, bool ui = false)
+	{
+		var CamRID = camera.GetCameraRid();
+		SubViewport viewPort;
+
+		if (!ui)
+			viewPort = Skyhole;
+		else
+			viewPort = UI;
+
+		var viewPortRID = viewPort.GetViewportRid();
+		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 	}
 }

@@ -1,13 +1,10 @@
 using Godot;
 using System.Collections;
 using System.Collections.Generic;
-using static Godot.GodotThread;
-using System.Threading;
-using System.ComponentModel.DataAnnotations;
 
 public partial class MultiAudioStream : Node3D
 {
-	//Properties from the normal audiosource
+	//Properties from the normal AudioStreamPlayer3D
 
 	private AudioStream _stream = null;
 
@@ -233,9 +230,16 @@ public partial class MultiAudioStream : Node3D
 			}
 		}
 	}
-	//Extra options
-	public bool OnlyPlayForClosestCamera = true;
 
+	private bool _destroyAfterSoundPlayed = false;
+	public bool DestroyAfterSoundPlayed
+	{
+		get { return _destroyAfterSoundPlayed; }
+		set
+		{
+			_destroyAfterSoundPlayed = value;
+		}
+	}
 	//Internal components
 
 	private Dictionary<VirtualAudioListener, AudioStreamPlayer3D> _subAudioStreams = new Dictionary<VirtualAudioListener, AudioStreamPlayer3D>();
@@ -301,47 +305,10 @@ public partial class MultiAudioStream : Node3D
 			}
 		}
 		_subAudioStreams.Clear();
+		if (DestroyAfterSoundPlayed)
+			QueueFree();
 	}
 
-	void LateUpdate()
-	{
-		if (_Playing)
-		{
-			//Closest audioCulling
-			AudioStreamPlayer3D closestAudio = null;
-			float distanceClosestAudio = 0;
-			bool isCurrentlyPlaying = false;
-
-			foreach (var subAudioStream in _subAudioStreams)
-			{
-				//We set the the correct volume before we cull
-				subAudioStream.Value.VolumeDb = VolumeDb;
-
-				//ClosestAudioCulling
-				if (OnlyPlayForClosestCamera)
-				{
-					var distance = (subAudioStream.Key.GlobalPosition - GlobalPosition).LengthSquared();
-
-					if ((closestAudio == null) || (distance < distanceClosestAudio))
-					{
-						if (closestAudio != null)
-							closestAudio.VolumeDb = -100.0f;
-
-						closestAudio = subAudioStream.Value;
-						closestAudio.VolumeDb = VolumeDb * subAudioStream.Key.Volume;
-						distanceClosestAudio = distance;
-					}
-					else
-						subAudioStream.Value.VolumeDb = -100.0f;
-				}
-				MoveSubAudioStreamToNeededLocation(subAudioStream.Key, subAudioStream.Value);
-				isCurrentlyPlaying |= subAudioStream.Value.Playing;
-			}
-
-			if (!isCurrentlyPlaying)
-				Stop();
-		}
-	}
 	private void VirtualAudioListenerAdded(VirtualAudioListener virtualAudioListener)
 	{
 		bool hardwareChannelsLeft = true;
@@ -369,22 +336,14 @@ public partial class MultiAudioStream : Node3D
 		MoveSubAudioStreamToNeededLocation(virtualAudioListener, audioStream);
 	}
 
-	private void MoveSubAudioStreamToNeededLocation(VirtualAudioListener virtualListener,
-		AudioStreamPlayer3D subAudioStream)
+	private void MoveSubAudioStreamToNeededLocation(VirtualAudioListener virtualListener, AudioStreamPlayer3D subAudioStream)
 	{
 		//There is no main listener so translation is not needed
 		if (MultiAudioListener.Main == null) 
 			return;
 		// Get the position of the object relative to the virtual listener
 		Vector3 localPos = GlobalPosition - virtualListener.GlobalPosition;
-
-		Vector3 globalPos = localPos - MultiAudioListener.Main.GlobalPosition;
-		//Get the relative distance
-		Vector3 distance = globalPos - subAudioStream.GlobalPosition;
-
-		//If the distance is too small don't move it if not set the position of the subAudioSource object relative to the main audio listener
-		if (distance.LengthSquared() > 1)
-			subAudioStream.Translate(distance);
+		subAudioStream.Position = localPos;
 	}
 
 	private AudioStreamPlayer3D CreateAudioStream(string nameSubAudioStream, ref bool hardwareChannelsLeft)
@@ -395,12 +354,12 @@ public partial class MultiAudioStream : Node3D
 		{
 			audioStream = new AudioStreamPlayer3D();
 			audioStream.Name = nameSubAudioStream;
+			MultiAudioListener.Main.AddChild(audioStream);
 		}
 		else
 		{
 			audioStream.Name = nameSubAudioStream;
 		}
-		MultiAudioListener.Main.AddChild(audioStream);
 
 		SetAllValuesAudioStream(audioStream);
 
@@ -446,15 +405,44 @@ public partial class MultiAudioStream : Node3D
 
 	}
 
-
-	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		RenderingServer.FramePostDraw += () => LateUpdate();
 	}
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta)
+	public override void _PhysicsProcess(double delta)
 	{
+		if (_Playing)
+		{
+			//Closest audioCulling
+			AudioStreamPlayer3D closestAudio = null;
+			float distanceClosestAudio = 0;
+			bool isCurrentlyPlaying = false;
+
+			foreach (var subAudioStream in _subAudioStreams)
+			{
+				//We set the the correct volume before we cull
+				subAudioStream.Value.VolumeDb = VolumeDb;
+
+				var distance = (subAudioStream.Key.GlobalPosition - GlobalPosition).LengthSquared();
+
+				if ((closestAudio == null) || (distance < distanceClosestAudio))
+				{
+					if (closestAudio != null)
+						closestAudio.VolumeDb = -100.0f;
+
+					closestAudio = subAudioStream.Value;
+					closestAudio.VolumeDb = VolumeDb * subAudioStream.Key.Volume;
+					distanceClosestAudio = distance;
+				}
+				else
+					subAudioStream.Value.VolumeDb = -100.0f;
+
+				MoveSubAudioStreamToNeededLocation(subAudioStream.Key, subAudioStream.Value);
+				isCurrentlyPlaying |= subAudioStream.Value.Playing;
+			}
+
+			if (!isCurrentlyPlaying)
+				Stop();
+		}
 	}
 }

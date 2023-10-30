@@ -18,18 +18,15 @@ public partial class PlayerCamera : Node3D
 	public override void _Ready()
 	{
 		CurrentCamera = SkyholeCamera;
+		GameManager.Instance.SetViewPortToCamera(SkyholeCamera);
+		GameManager.Instance.SetViewPortToCamera(UICamera,true);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
 		rotAngle.X = playerControls.viewDirection.X;
-		rotAngle.Y = playerControls.viewDirection.Y;
 
-		SkyholeCamera.Position = playerControls.playerThing.Position + Vector3.Up * 0.85f;
-		SkyholeCamera.RotationDegrees = rotAngle;
-		UICamera.Position = playerControls.playerThing.Position + Vector3.Up * 0.85f;
-		UICamera.RotationDegrees = rotAngle;
-
+		RotationDegrees = rotAngle;
 	}
 }

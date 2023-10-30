@@ -79,7 +79,7 @@ public static class QShaderManager
 		int lightmapStage = -1;
 		bool helperRotate = false;
 		bool animStages = false;
-
+		bool useVertex = false;
 		int totalStages = qShader.qShaderStages.Count;
 		for (int i = 0; i < totalStages; i++)
 		{
@@ -134,8 +134,8 @@ public static class QShaderManager
 			GSFragmentUvs += GetTcGen(qShader, i, ref lightmapStage);
 			GSFragmentTcMod += GetTcMod(qShader, i, ref helperRotate);
 			
-			GSFragmentRGBs += GetGenFunc(qShader, i, GenFuncType.RGB);
-			GSFragmentRGBs += GetGenFunc(qShader, i, GenFuncType.Alpha);
+			GSFragmentRGBs += GetGenFunc(qShader, i, ref useVertex, GenFuncType.RGB);
+			GSFragmentRGBs += GetGenFunc(qShader, i, ref useVertex, GenFuncType.Alpha);
 			GSFragmentRGBs += GetAlphaFunc(qShader, i);
 			GSFragmentBlends += GetBlend(qShader, i);
 		}
@@ -201,7 +201,7 @@ public static class QShaderManager
 		code += GSHeader;
 		code += GSUniforms;
 		code += "global uniform float TimeMult;\n";
-//		code += "global uniform float MsTime;\n";
+		code += "global uniform float MsTime;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
 		if (helperRotate)
 		{
@@ -214,7 +214,7 @@ public static class QShaderManager
 
 		code += GSFragmentH;
 		code += GSFragmentUvs;
-		code += "\tfloat Time = (TIME - OffSetTime) * TimeMult;\n";
+		code += "\tfloat Time = (MsTime - OffSetTime) * TimeMult;\n";
 		code += GSFragmentTcMod;
 		code += GSFragmentTexs;
 		code += GSLateFragmentTexs;
@@ -250,13 +250,14 @@ public static class QShaderManager
 		if (alphaIsTransparent)
 		{
 //			code += "\tALPHA_SCISSOR_THRESHOLD = 0.5;\n";
-			code += "\tALPHA = color.a;\n";
+			if (useVertex)
+				code += "\tALPHA = color.a * vertx_color.a;\n";
+			else
+				code += "\tALPHA = color.a;\n";
 		}
 		code += "}\n\n";
 
-		if (upperName.Contains("FLAME2"))
-
-//		if (upperName.Contains("BULLET_MRK"))
+		if (upperName.Contains("BULLET_MRK"))
 			GD.Print(code);
 
 		Shader shader = new Shader();
@@ -373,7 +374,7 @@ public static class QShaderManager
 		return TcMod;
 	}
 
-	public static string GetGenFunc(QShaderData qShader, int currentStage, GenFuncType type)
+	public static string GetGenFunc(QShaderData qShader, int currentStage, ref bool useVertex, GenFuncType type)
 	{
 		string GenType = ".rgb";
 		string[] GenFunc = qShader.qShaderStages[currentStage].rgbGen;
@@ -423,7 +424,10 @@ public static class QShaderManager
 		{
 			string RGBFunc = GenFunc[0];
 			if (RGBFunc.Contains("VERTEX"))
+			{
 				StageGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * vertx_color.rgb ; \n";
+				useVertex = true;
+			}
 		}
 		return StageGen;
 	}
