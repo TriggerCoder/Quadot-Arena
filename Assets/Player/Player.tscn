@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://xi3ybp7mrio2"]
+[gd_scene load_steps=9 format=3 uid="uid://xi3ybp7mrio2"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerThing.cs" id="1_da8o2"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerControls.cs" id="1_g37r6"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerInfo.cs" id="2_jjym4"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerCamera.cs" id="3_bs0x2"]
 [ext_resource type="PackedScene" uid="uid://cc4ta84dtl6ve" path="res://Assets/Player/Weapons/MachineGunWeapon.tscn" id="4_4obu3"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/VirtualAudioListener.cs" id="6_ve4m7"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3kcwc"]
 height = 1.5
@@ -66,6 +67,8 @@ grow_vertical = 2
 
 [node name="SkyholeViewport" type="SubViewport" parent="MainCameras/Control/Skyhole"]
 handle_input_locally = false
+audio_listener_enable_2d = true
+audio_listener_enable_3d = true
 size = Vector2i(1280, 720)
 render_target_update_mode = 4
 
@@ -99,6 +102,5 @@ far = 300.0
 [node name="WeaponHand" type="Node3D" parent="MainCameras/Control/UI/UIViewport/UICamera"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 
-[node name="AudioListener3D" type="AudioListener3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-current = true
+[node name="VirtualAudioListener" type="Node3D" parent="."]
+script = ExtResource("6_ve4m7")

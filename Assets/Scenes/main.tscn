@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=17 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Texture2D" uid="uid://dv1ug6ajvhega" path="res://Assets/Textures/Skyboxes/Gehenna/gehenna.png" id="1_si63v"]
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/ThingsManager.cs" id="9_71i1l"]
 [ext_resource type="PackedScene" uid="uid://dgacpbgus4c07" path="res://Assets/Things/FX/Damage/BulletMark.tscn" id="11_m4ddm"]
 [ext_resource type="PackedScene" uid="uid://0ys87si5lkyg" path="res://Assets/Things/FX/WeaponHits/BulletHit.tscn" id="11_rh4dk"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioListener.cs" id="12_8hqnu"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_7oboo"]
 panorama = ExtResource("1_si63v")
@@ -49,6 +50,12 @@ script = ExtResource("8_vpkit")
 [node name="ThingsManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("9_71i1l")
 _ThingPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("11_m4ddm")])
+
+[node name="MultiAudioListener" type="Node3D" parent="Quadot Arena"]
+script = ExtResource("12_8hqnu")
+
+[node name="AudioListener3D" type="AudioListener3D" parent="Quadot Arena/MultiAudioListener"]
+current = true
 
 [node name="Player" parent="." instance=ExtResource("7_rdgk2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 1, 20)

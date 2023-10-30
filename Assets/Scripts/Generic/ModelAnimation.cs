@@ -32,7 +32,6 @@ public partial class ModelAnimation : Node3D
 
 	private Vector3 currentOrigin;
 	private float height;
-	private float timer = 0;
 
 	private float ModelLerpTime = 0;
 	private float ModelCurrentLerpTime = 0;

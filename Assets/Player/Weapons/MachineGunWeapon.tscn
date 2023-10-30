@@ -1,9 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://cc4ta84dtl6ve"]
+[gd_scene load_steps=3 format=3 uid="uid://cc4ta84dtl6ve"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/MachineGunWeapon.cs" id="1_pbxxv"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_450qi"]
 
-[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("muzzleLight")]
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("audioStream", "muzzleLight")]
 script = ExtResource("1_pbxxv")
+audioStream = NodePath("MultiAudioStream")
+_sounds = PackedStringArray("weapons/machinegun/machgf1b", "weapons/noammo", "weapons/change", "weapons/machinegun/ric1", "weapons/machinegun/ric2", "weapons/machinegun/ric3")
 UIModelName = "weapons2/machinegun/machinegun_barrel"
 CompleteModelName = "weapons2/machinegun/machinegun"
 MuzzleModelName = "weapons2/machinegun/machinegun_flash"
@@ -16,3 +19,6 @@ layers = 255
 light_color = Color(1, 0.686275, 0, 1)
 light_bake_mode = 0
 omni_shadow_mode = 0
+
+[node name="MultiAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_450qi")

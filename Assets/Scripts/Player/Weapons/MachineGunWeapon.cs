@@ -55,6 +55,12 @@ public partial class MachineGunWeapon : PlayerWeapon
 		fireTime = _fireRate + .05f;
 		coolTimer = 0f;
 
+		if (Sounds.Length > 0)
+		{
+			audioStream.Stream = Sounds[0];
+			audioStream.Play();
+		}
+
 		//Hitscan attack
 		{
 			Transform3D global = playerInfo.playerCamera.CurrentCamera.GlobalTransform;

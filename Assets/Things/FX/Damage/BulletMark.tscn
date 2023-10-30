@@ -4,7 +4,9 @@
 
 [node name="BulletMark" type="Sprite3D"]
 sorting_offset = -3000.0
+texture_filter = 1
 render_priority = -128
 script = ExtResource("1_wh720")
 spriteName = "gfx/damage/bullet_mrk"
-isTransparent = true
+spriteRadius = 8
+destroyTimer = 20.0

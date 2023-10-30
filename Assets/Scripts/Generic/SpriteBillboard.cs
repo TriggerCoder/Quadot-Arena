@@ -6,8 +6,11 @@ public partial class SpriteBillboard : Sprite3D
 	[Export]
 	public string spriteName;
 	[Export]
-	public bool isTransparent = false;
+	public int spriteRadius = 2;
+	[Export]
+	public float destroyTimer = 0;
 
+	private float baseTime = 1;
 	private ShaderMaterial spriteMaterial;
 	
 	// Called when the node enters the scene tree for the first time.
@@ -20,24 +23,35 @@ public partial class SpriteBillboard : Sprite3D
 		}
 
 		if (TextureLoader.HasTexture(spriteName))
-			spriteMaterial = MaterialManager.GetMaterials(spriteName, -1, isTransparent);
+			spriteMaterial = MaterialManager.GetMaterials(spriteName, -1, Transparent);
 		else
 		{
-			TextureLoader.AddNewTexture(spriteName, isTransparent);
-			spriteMaterial = MaterialManager.GetMaterials(spriteName, -1, isTransparent);
+			TextureLoader.AddNewTexture(spriteName, Transparent);
+			spriteMaterial = MaterialManager.GetMaterials(spriteName, -1, Transparent);
 		}
-		Texture2D MainTex = (Texture2D)spriteMaterial.Get("shader_parameter/Tex_0");
-		int height = MainTex.GetHeight();
-		int width = MainTex.GetWidth();
-		Axis = Vector3.Axis.Z;
-		PixelSize = .05f;
-		Texture = MainTex;
-		Billboard = BaseMaterial3D.BillboardModeEnum.Disabled;
-		MaterialOverride = spriteMaterial;
+		PixelSize = .5f * 1 / spriteRadius;
+		Texture = (Texture2D)spriteMaterial.Get("shader_parameter/Tex_0");
+		if (Billboard == BaseMaterial3D.BillboardModeEnum.Disabled)
+			MaterialOverride = spriteMaterial;
+		if (destroyTimer == 0)
+			SetProcess(false);
+		else
+			baseTime = destroyTimer;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+		if (GameManager.Paused)
+			return;
+
+		float deltaTime = (float)delta;
+		destroyTimer -= deltaTime;
+		Modulate = new Color(1.0f,1.0f, 1.0f, Mathf.Lerp(0.0f, 1.0f, destroyTimer/ baseTime));
+		if (destroyTimer < 0)
+		{
+			QueueFree();
+			return;
+		}
 	}
 }

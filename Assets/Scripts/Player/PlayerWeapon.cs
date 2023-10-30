@@ -7,6 +7,12 @@ public partial class PlayerWeapon : Node3D
 	public Vector3 Offset = new Vector3(.2f, -.2f, -.14f);
 	[Export]
 	public Vector3 MuzzleOffset = new Vector3(-0.5f, 0f, 0);
+	[Export]
+	public MultiAudioStream audioStream;
+	[Export]
+	public string[] _sounds = new string[0];
+
+	public AudioStreamWav[] Sounds = new AudioStreamWav[0];
 
 	public Node3D muzzleObject = null;
 
@@ -33,10 +39,6 @@ public partial class PlayerWeapon : Node3D
 
 	Vector2 MousePosition;
 	Vector2 oldMousePosition = Vector2.Zero;
-	[Export]
-	public string[] _sounds = new string[0];
-//	public AudioClip[] Sounds = new AudioClip[0];
-
 
 	public PlayerWeapon Instance;
 	public PlayerInfo playerInfo = null;
@@ -73,10 +75,10 @@ public partial class PlayerWeapon : Node3D
 
 		Instance = this;
 
-/*		Sounds = new AudioClip[_sounds.Length];
+		Sounds = new AudioStreamWav[_sounds.Length];
 		for (int i = 0; i < _sounds.Length; i++)
-			Sounds[i] = SoundLoader.LoadSound(_sounds[i]);
-*/
+			Sounds[i] = SoundManager.LoadSound(_sounds[i]);
+
 		if (!GameOptions.UseMuzzleLight)
 		{
 //			if (muzzleLight != null)
