@@ -1,8 +1,5 @@
 using Godot;
 using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Xml.Linq;
 
 public partial class PlayerControls : Node3D
 {
@@ -211,6 +208,7 @@ public partial class PlayerControls : Node3D
 			}
 		}
 
+		CheckMouseWheelWeaponChange();
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -505,4 +503,31 @@ public partial class PlayerControls : Node3D
 		if (TrySwapWeapon(0)) return; //gauntlet
 	}
 
+	public void CheckMouseWheelWeaponChange()
+	{
+		if (Input.IsActionJustPressed("Action_WeaponSwitch_Up"))
+		{
+			bool gotWeapon = false;
+			for (int NextWeapon = CurrentWeapon + 1; NextWeapon < 9; NextWeapon++)
+			{
+				gotWeapon = TrySwapWeapon(NextWeapon);
+				if (gotWeapon)
+					break;
+			}
+			if (!gotWeapon)
+				TrySwapWeapon(0);
+		}
+		else if (Input.IsActionJustPressed("Action_WeaponSwitch_Down"))
+		{
+			bool gotWeapon = false;
+			for (int NextWeapon = CurrentWeapon - 1; NextWeapon >= 0; NextWeapon--)
+			{
+				gotWeapon = TrySwapWeapon(NextWeapon);
+				if (gotWeapon)
+					break;
+			}
+			if (!gotWeapon)
+				SwapToBestWeapon();
+		}
+	}
 }

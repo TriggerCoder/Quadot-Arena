@@ -1,11 +1,13 @@
-[gd_scene load_steps=9 format=3 uid="uid://xi3ybp7mrio2"]
+[gd_scene load_steps=11 format=3 uid="uid://xi3ybp7mrio2"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerThing.cs" id="1_da8o2"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerControls.cs" id="1_g37r6"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerInfo.cs" id="2_jjym4"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerCamera.cs" id="3_bs0x2"]
 [ext_resource type="PackedScene" uid="uid://cc4ta84dtl6ve" path="res://Assets/Player/Weapons/MachineGunWeapon.tscn" id="4_4obu3"]
+[ext_resource type="PackedScene" uid="uid://cipo2kf330daf" path="res://Assets/Player/Weapons/RocketLauncherWeapon.tscn" id="5_jwttf"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/VirtualAudioListener.cs" id="6_ve4m7"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="7_qljl7"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3kcwc"]
 height = 1.5
@@ -34,12 +36,13 @@ playerThing = NodePath("..")
 playerCamera = NodePath("../MainCameras")
 controller = NodePath("..")
 
-[node name="PlayerInfo" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "playerCamera", "WeaponHand")]
+[node name="PlayerInfo" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "playerCamera", "audioStream", "WeaponHand")]
 script = ExtResource("2_jjym4")
 playerControls = NodePath("../PlayerControls")
 playerCamera = NodePath("../MainCameras")
+audioStream = NodePath("../MultiAudioStream")
 WeaponHand = NodePath("../MainCameras/UICamera/WeaponHand")
-WeaponPrefabs = [null, ExtResource("4_4obu3"), null, null, null, null, null, null, null]
+WeaponPrefabs = [null, ExtResource("4_4obu3"), null, null, ExtResource("5_jwttf"), null, null, null, null]
 
 [node name="MainCameras" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "SkyholeCamera", "UICamera")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
@@ -63,3 +66,6 @@ transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 
 
 [node name="VirtualAudioListener" type="Node3D" parent="."]
 script = ExtResource("6_ve4m7")
+
+[node name="MultiAudioStream" type="Node3D" parent="."]
+script = ExtResource("7_qljl7")

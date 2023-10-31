@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://dw2it7pnea5rd"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Projectile.cs" id="1_vfo3e"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_741w6"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="2_t21kj"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_v34hp"]
+
+[sub_resource type="Resource" id="Resource_drxc8"]
+script = ExtResource("3_v34hp")
+fps = 20.0
+
+[sub_resource type="Resource" id="Resource_ry408"]
+script = ExtResource("3_v34hp")
+fps = 20.0
+
+[node name="RocketProjectile" type="Node3D" node_paths=PackedStringArray("audioStream")]
+script = ExtResource("1_vfo3e")
+_lifeTime = 5.0
+speed = 28.0
+rotateSpeed = 180
+damageMin = 84
+damageMax = 100
+blastDamage = 100
+explosionRadius = 4.0
+damageType = 1
+pushForce = 1900.0
+_onFlySound = "weapons/rocket/rockfly"
+_onDeathSound = "weapons/rocket/rocklx1a"
+audioStream = NodePath("MultiAudioStream")
+
+[node name="Rocket" type="Node3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
+script = ExtResource("2_t21kj")
+modelName = "ammo/rocket/rocket"
+isTransparent = true
+castShadow = false
+modelAnimation = SubResource("Resource_drxc8")
+textureAnimation = SubResource("Resource_ry408")
+
+[node name="MultiAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_741w6")

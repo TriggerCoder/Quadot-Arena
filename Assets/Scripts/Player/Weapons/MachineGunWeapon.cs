@@ -18,11 +18,24 @@ public partial class MachineGunWeapon : PlayerWeapon
 	protected override void OnUpdate()
 	{
 		if (playerInfo.Ammo[0] <= 0 && fireTime < .1f)
+		{
+			if ((!putAway) && (Sounds.Length > 1))
+			{
+				audioStream.Stream = Sounds[1];
+				audioStream.Play();
+			}
 			putAway = true;
+
+		}
 	}
 
 	protected override void OnInit()
 	{
+		if (Sounds.Length > 2)
+		{
+			audioStream.Stream = Sounds[2];
+			audioStream.Play();
+		}
 	}
 	public override bool Fire()
 	{

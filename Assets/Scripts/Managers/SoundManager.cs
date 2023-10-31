@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public static class SoundManager
 {
 	public static Dictionary<string, AudioStreamWav> Sounds = new Dictionary<string, AudioStreamWav>();
-	public static AudioStreamWav LoadSound(string soundName)
+	public static AudioStreamWav LoadSound(string soundName, bool loop = false)
 	{
 		if (Sounds.ContainsKey(soundName))
 			return Sounds[soundName];
@@ -25,7 +25,7 @@ public static class SoundManager
 			return null;
 
 		string[] soundFileName = path.Split('/');
-		AudioStreamWav clip = ToAudioStream(WavSoudFile, 0, soundFileName[soundFileName.Length - 1]);
+		AudioStreamWav clip = ToAudioStream(WavSoudFile, 0, soundFileName[soundFileName.Length - 1], loop);
 
 		if (clip == null)
 			return null;
@@ -33,7 +33,7 @@ public static class SoundManager
 		Sounds.Add(soundName, clip);
 		return clip;
 	}
-	private static AudioStreamWav ToAudioStream(byte[] fileBytes, int offsetSamples = 0, string name = "wav")
+	private static AudioStreamWav ToAudioStream(byte[] fileBytes, int offsetSamples = 0, string name = "wav", bool loop = false)
 	{
 		int subchunk1 = BitConverter.ToInt32(fileBytes, 16);
 		ushort audioFormat = BitConverter.ToUInt16(fileBytes, 20);
@@ -49,6 +49,9 @@ public static class SoundManager
 		int sampleRate = BitConverter.ToInt32(fileBytes, 24);
 		ushort bitDepth = BitConverter.ToUInt16(fileBytes, 34);
 
+		int headerOffset = 16 + 4 + subchunk1 + 4;
+		int totalSamples = BitConverter.ToInt32(fileBytes, headerOffset);
+
 		AudioStreamWav audioStream= new AudioStreamWav();
 		if (audioFormat == 2)
 			audioStream.Format = AudioStreamWav.FormatEnum.ImaAdpcm;
@@ -63,7 +66,13 @@ public static class SoundManager
 		audioStream.MixRate = sampleRate;
 		if (channels == 2)
 			audioStream.Stereo = true;
-		GD.Print("AudioStreamWav " + name + " created. Channels " + channels + " sampleRate " + sampleRate +" format " + FormatCode(audioFormat));
+		if (loop)
+		{
+			audioStream.LoopBegin = 0;
+			audioStream.LoopEnd = totalSamples;
+			audioStream.LoopMode = AudioStreamWav.LoopModeEnum.Forward;
+		}
+		GD.Print("AudioStreamWav " + name + " created. Channels " + channels + " sampleRate " + sampleRate + " totalSamples "+ totalSamples + " format " + FormatCode(audioFormat));
 		return audioStream;
 	}
 	public static MultiAudioStream Create2DSound(AudioStream audio, Node3D parent = null, bool destroyAfterSound = true)

@@ -14,13 +14,9 @@ public partial class GameManager : Node
 	[Export]
 	public float colorLightning = 1f;
 	[Export]
-	public float mixBrightness = 0.25f;				// Range from 0 to 1, .25f Is the nicest
+	public float mixBrightness = 0.25f;             // Range from 0 to 1, .25f Is the nicest
 	[Export]
-	public CharacterBody3D Player;
-	[Export]
-	public SubViewport Skyhole;
-	[Export]
-	public SubViewport UI;
+	public PlayerViewPort playerViewPort;
 
 	public static GameManager Instance;
 	// Quake3 also uses Doom and Wolf3d scaling down
@@ -67,8 +63,8 @@ public partial class GameManager : Node
 	public const short Player8UIViewLayer = 15;
 
 	//Physic Masks
-	public const int TakeDamageMask = (1 << DamageablesLayer);
-	public const int NoHitMask = ((1 << FXLayer) | (1 << InvisibleBlockerLayer) | (1 << WalkTriggerLayer) | (1 << ThingsLayer));
+	public const uint TakeDamageMask = (1 << DamageablesLayer);
+	public const uint NoHitMask = ((1 << FXLayer) | (1 << InvisibleBlockerLayer) | (1 << WalkTriggerLayer) | (1 << ThingsLayer));
 
 	//Rendering Masks
 	public const int InvisibleMask = 0;
@@ -79,7 +75,8 @@ public partial class GameManager : Node
 
 	public static Color ambientLight { get { return Instance.ambientLightColor; } }
 
-	public static float CurrentTimeMsec { get { return Time.GetTicksMsec() * .001f; } }
+	private float timeMs = 0.0f;
+	public static float CurrentTimeMsec { get { return Instance.timeMs; } }
 	public float gravity = 25f;
 	public float friction = 6;
 	public float terminalVelocity = 100f;
@@ -128,13 +125,11 @@ public partial class GameManager : Node
 				if (!paused)
 				{
 					paused = true;
-					RenderingServer.GlobalShaderParameterSet("TimeMult", 0.0f);
 					Input.MouseMode = Input.MouseModeEnum.Visible;
 				}
 				else
 				{
 					paused = false;
-					RenderingServer.GlobalShaderParameterSet("TimeMult", 1.0f);
 					Input.MouseMode = Input.MouseModeEnum.Captured;
 				}
 			}
@@ -146,7 +141,6 @@ public partial class GameManager : Node
 				if (Input.IsActionJustPressed("Action_Fire"))
 				{
 					paused = false;
-					RenderingServer.GlobalShaderParameterSet("TimeMult", 1.0f);
 					Input.MouseMode = Input.MouseModeEnum.Captured;
 				}
 			}
@@ -154,7 +148,11 @@ public partial class GameManager : Node
 	}
 	public override void _Process(double delta)
 	{
-		RenderingServer.GlobalShaderParameterSet("MsTime", CurrentTimeMsec);
+		if (!paused)
+		{
+			timeMs += (float)delta;
+			RenderingServer.GlobalShaderParameterSet("MsTime", CurrentTimeMsec);
+		}
 		//skip frames are used to easen up deltaTime after loading
 		if (ready)
 		{
@@ -173,11 +171,12 @@ public partial class GameManager : Node
 		SubViewport viewPort;
 
 		if (!ui)
-			viewPort = Skyhole;
+			viewPort = playerViewPort.Skyhole;
 		else
-			viewPort = UI;
+			viewPort = playerViewPort.UI;
 
 		var viewPortRID = viewPort.GetViewportRid();
+//		camera.Reparent(viewPort);
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 	}
 }

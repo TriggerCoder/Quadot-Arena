@@ -251,10 +251,13 @@ public partial class PlayerWeapon : Node3D
 	{
 		return false;
 	}
-	void OnDestroy()
+
+	public override void _ExitTree()
 	{
+		base._ExitTree();
 		if (Instance == this)
 			Instance = null;
+		playerInfo.playerControls.playerWeapon = null;
 	}
 	public Vector2 GetDispersion()
 	{

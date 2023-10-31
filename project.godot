@@ -183,10 +183,6 @@ Escape={
 
 [shader_globals]
 
-TimeMult={
-"type": "float",
-"value": 1.0
-}
 MsTime={
 "type": "float",
 "value": 0.0
