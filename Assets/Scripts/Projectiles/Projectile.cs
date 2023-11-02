@@ -30,11 +30,11 @@ public partial class Projectile : Node3D
 	[Export] 
 	public float pushForce = 0f;
 	[Export] 
-	public Node3D OnDeathSpawn;
+	public string OnDeathSpawn;
 	[Export] 
 	public string decalMark;
 	[Export]
-	public Node3D SecondaryOnDeathSpawn;
+	public string SecondaryOnDeathSpawn;
 	[Export]
 	public string _onFlySound;
 	[Export]
@@ -68,73 +68,68 @@ public partial class Projectile : Node3D
 
 		if (time >= _lifeTime)
 		{
-			if (OnDeathSpawn != null)
+			if (!string.IsNullOrEmpty(OnDeathSpawn))
 			{
 //				GameObject go = PoolManager.GetObjectFromPool(OnDeathSpawn.name);
 //				go.transform.position = cTransform.position - cTransform.forward * .2f;
 			}
+			if (!string.IsNullOrEmpty(_onDeathSound))
+				SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(_onDeathSound));
 			QueueFree();
 			return;
 		}
-		//check for collision
+
 		CollisionObject3D Hit = null;
 		Vector3 Collision = Vector3.Zero;
 		Vector3 Normal = Vector3.Zero;
 		Vector3 d = GlobalTransform.Basis.Z;
-		float nearest = float.MaxValue;
+		//check for collision
 		{
 			var Sphere = PhysicsServer3D.SphereShapeCreate();
 			PhysicsServer3D.ShapeSetData(Sphere, projectileRadius);
 			var SphereCast = new PhysicsShapeQueryParameters3D();
 			SphereCast.ShapeRid = Sphere;
 			SphereCast.CollisionMask = ~GameManager.NoHitMask;
-			SphereCast.Motion = d * speed * deltaTime;
-			SphereCast.Transform = GlobalTransform;
+			SphereCast.Motion = Vector3.Zero;
+			SphereCast.Transform = new Transform3D(GlobalTransform.Basis, GlobalTransform.Origin - d * speed * deltaTime);
 			var SpaceState = GetWorld3D().DirectSpaceState;
 			var hit = SpaceState.GetRestInfo(SphereCast);
-			if (hit.ContainsKey("collider"))
+			if (hit.ContainsKey("collider_id"))
 			{
-				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
-				GD.Print("We HIT SOMETHING! " + collider.Name);
-				Vector3 collision = (Vector3)hit["point"];
-				Vector3 normal = (Vector3)hit["normal"];
-
-				GD.Print(collider.Name);
-				float distance = GlobalPosition.DistanceSquaredTo(collision);
-				if (distance < nearest)
+				CollisionObject3D collider = (CollisionObject3D)InstanceFromId((ulong)hit["collider_id"]);
+				if (collider != owner)
 				{
-					nearest = distance;
+					Vector3 collision = (Vector3)hit["point"];
+					Vector3 normal = (Vector3)hit["normal"];
 					Hit = collider;
 					Collision = collision;
 					Normal = normal;
-				}
-/*
-				if ((damageType == DamageType.Rocket) || (damageType == DamageType.Grenade) || (damageType == DamageType.Plasma) || (damageType == DamageType.BFGBall))
-				{
-					Vector3 impulseDir = dir.normalized;
 
-					Damageable d = hit.collider.GetComponent<Damageable>();
-					if (d != null)
+					if ((damageType == DamageType.Rocket) || (damageType == DamageType.Grenade) || (damageType == DamageType.Plasma) || (damageType == DamageType.BFGBall))
 					{
-						switch (damageType)
+						Vector3 impulseDir = d.Normalized();
+
+						if (Hit is Damageable damageable)
 						{
-							case DamageType.BFGBall:
-								d.Damage(Random.Range(damageMin, damageMax + 1) * 100, damageType, owner);
-								d.Impulse(impulseDir, pushForce);
+							switch (damageType)
+							{
+								case DamageType.BFGBall:
+									damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
+									damageable.Impulse(impulseDir, pushForce);
 								break;
-							default:
-								d.Damage(Random.Range(damageMin, damageMax + 1), damageType, owner);
-								d.Impulse(impulseDir, pushForce);
+								default:
+									damageable.Damage(GD.RandRange(damageMin, damageMax), damageType, owner);
+									damageable.Impulse(impulseDir, pushForce);
 								break;
+							}
 						}
 					}
 				}
-				*/
 			}
 		}
 
 		//explosion
-		if (nearest < float.MaxValue)
+		if (Hit != null)
 		{
 			var Sphere = PhysicsServer3D.SphereShapeCreate();
 			PhysicsServer3D.ShapeSetData(Sphere, explosionRadius);
@@ -142,69 +137,73 @@ public partial class Projectile : Node3D
 			SphereCast.ShapeRid = Sphere;
 			SphereCast.CollisionMask = GameManager.TakeDamageMask;
 			SphereCast.Motion = Vector3.Zero;
-			SphereCast.Transform = new Transform3D(GlobalTransform.Basis, GlobalTransform.Origin - d * nearest);
+			SphereCast.Transform = new Transform3D(GlobalTransform.Basis, Collision);
 			var SpaceState = GetWorld3D().DirectSpaceState;
-			var hit = SpaceState.GetRestInfo(SphereCast);
-			if (hit.ContainsKey("collider"))
+			var hits = SpaceState.IntersectShape(SphereCast);
+			var max = hits.Count;
+
+			for (int i = 0; i < max; i++)
 			{
-				float distance;
-/*				Damageable d = hit.GetComponent<Damageable>();
-
-				if (d != null)
+				var hit = hits[i];
+				if (!hit.ContainsKey("collider"))
+					continue;
+				
+				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
+				if (collider is Damageable damageable)
 				{
-					Vector3 hPosition = hit.transform.position;
-					Vector3 impulseDir = (hPosition - cPosition).normalized;
-
+					Vector3 hPosition = collider.Position;
+					Vector3 Distance = (hPosition - Collision);
+					Vector3 impulseDir = Distance.Normalized();
+					float lenght;
 					switch (damageType)
 					{
 						case DamageType.Explosion:
 						case DamageType.Rocket:
-							distance = (hPosition - cPosition).magnitude;
-							d.Damage(Mathf.CeilToInt(Mathf.Lerp(blastDamage, 1, distance / explosionRadius)), DamageType.Explosion, owner);
-							d.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, distance / explosionRadius));
-							break;
+							lenght = Distance.Length();
+							damageable.Damage(Mathf.CeilToInt(Mathf.Lerp(blastDamage, 1, lenght / explosionRadius)), DamageType.Explosion, owner);
+							damageable.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, lenght / explosionRadius));
+						break;
 						case DamageType.Plasma:
-							if (hit.gameObject == owner) //Plasma never does self damage
+							if (collider != owner) //Plasma never does self damage
 								continue;
 							else
-								d.Damage(Random.Range(damageMin, damageMax + 1), damageType, owner);
-							break;
+								damageable.Damage(GD.RandRange(damageMin, damageMax), damageType, owner);
+						break;
 						case DamageType.BFGBall:
-							if (hit.gameObject == owner) //BFG never does self damage
+							if (collider != owner) //BFG never does self damage
 								continue;
 							else
-								d.Damage(Random.Range(damageMin, damageMax + 1) * 100, damageType, owner);
-							break;
+								damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
+						break;
 						case DamageType.Telefrag:
-							distance = (hPosition - cPosition).magnitude;
-							d.Damage(blastDamage, DamageType.Telefrag, owner);
-							d.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, distance / explosionRadius));
-							break;
+							lenght = Distance.Length();
+							damageable.Damage(blastDamage, DamageType.Telefrag, owner);
+							damageable.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, lenght / explosionRadius));
+						break;
 						default:
-							d.Damage(Random.Range(damageMin, damageMax + 1), damageType, owner);
-							break;
+							damageable.Damage(GD.RandRange(damageMin, damageMax), damageType, owner);
+						break;
 					}
 				}
-				*/
 			}
 
-			if (OnDeathSpawn != null)
+			if (!string.IsNullOrEmpty(OnDeathSpawn))
 			{
-//				GameObject go = PoolManager.GetObjectFromPool(OnDeathSpawn.name);
-//				go.transform.position = cTransform.position - cTransform.forward * .2f;
+				Node3D DeathSpawn = (Node3D)ThingsManager.thingsPrefabs[OnDeathSpawn].Instantiate();
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(DeathSpawn);
+				DeathSpawn.Position = Collision + (d * .5f);
+				DeathSpawn.LookAt(Collision - Normal, Vector3.Up);
+				DeathSpawn.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 			}
 
 			//Check if collider can be marked
-			if (Hit != null)
+			if (!MapLoader.noMarks.Contains(Hit))
 			{
-				if (!MapLoader.noMarks.Contains(Hit))
-				{
-					Node3D BulletMark = (Node3D)ThingsManager.thingsPrefabs["BulletMark"].Instantiate();
-					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletMark);
-					BulletMark.Position = Collision + (d * .05f);
-					BulletMark.LookAt(Collision - Normal, Vector3.Up);
-					BulletMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
-				}
+				Node3D DecalMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
+				DecalMark.Position = Collision + (d * .05f);
+				DecalMark.LookAt(Collision - Normal, Vector3.Up);
+				DecalMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 			}
 			/*
 			if (damageType == DamageType.BFGBall)

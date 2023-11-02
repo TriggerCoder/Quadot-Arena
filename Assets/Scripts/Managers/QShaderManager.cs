@@ -27,6 +27,15 @@ public static class QShaderManager
 			}
 		}
 	}
+
+	public static bool HasShader(string shaderName)
+	{
+		string upperName = shaderName.ToUpper();
+		if (QShaders.ContainsKey(upperName))
+			return true;
+
+		return false;
+	}
 	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, bool alphaIsTransparent = false)
 	{
 		string code = "";
@@ -64,6 +73,9 @@ public static class QShaderManager
 			break;
 		}
 		
+		if ((qShader.qShaderGlobal.unShaded) || (qShader.qShaderGlobal.isSky))
+			GSHeader += "unshaded, ";
+
 		switch (qShader.qShaderGlobal.cullType)
 		{
 			case QShaderGlobal.CullType.Back:
@@ -210,6 +222,11 @@ public static class QShaderManager
 		if (animStages)
 			code += GSAnimation;
 
+		if (MaterialManager.HasBillBoard.Contains(upperName))
+		{
+			code += GSVertexH;
+			code += "VERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n}\n";
+		}
 		code += GSFragmentH;
 		code += GSFragmentUvs;
 		code += "\tfloat Time = (MsTime - OffSetTime);\n";
@@ -246,14 +263,11 @@ public static class QShaderManager
 		
 
 		if (alphaIsTransparent)
-		{
-//			code += "\tALPHA_SCISSOR_THRESHOLD = 0.5;\n";
 			code += "\tALPHA = color.a * vertx_color.a;\n";
-		}
 		code += "}\n\n";
 
-		if (upperName.Contains("BULLET_MRK"))
-			GD.Print(code);
+//		if (upperName.Contains("TIM_HELL"))
+//			GD.Print(code);
 
 		Shader shader = new Shader();
 		shader.Code = code;
@@ -770,6 +784,8 @@ public class QShaderGlobal
 	public List<string> q3map_LightSubdivide = null;
 	public string editorImage = "";
 	public CullType cullType = CullType.Back;
+	public bool isSky = false;
+	public bool unShaded = false;
 	public bool trans = false;
 	public bool noPicMip = false;
 	public bool portal = false;
@@ -804,6 +820,12 @@ public class QShaderGlobal
 				{
 					case "TRANS":
 						trans = true;
+					break;
+					case "NODLIGHT":
+						unShaded = true;
+					break;
+					case "SKY":
+						isSky = true;
 					break;
 				}
 				break;

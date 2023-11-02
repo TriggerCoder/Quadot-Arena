@@ -245,10 +245,10 @@ public partial class MultiAudioStream : Node3D
 	private Dictionary<VirtualAudioListener, AudioStreamPlayer3D> _subAudioStreams = new Dictionary<VirtualAudioListener, AudioStreamPlayer3D>();
 
 	private bool _Playing = false;
-
 	public bool Playing
 	{
 		get { return _Playing; }
+
 	}
 	public override void _ExitTree()
 	{

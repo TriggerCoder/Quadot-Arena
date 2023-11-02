@@ -84,6 +84,7 @@ public partial class PlayerWeapon : Node3D
 //			if (muzzleLight != null)
 //				muzzleLight.SetProcess(false);
 		}
+		Hide();
 	}
 
 	public void Init(PlayerInfo p)
@@ -137,6 +138,9 @@ public partial class PlayerWeapon : Node3D
 	{
 		if (GameManager.Paused)
 			return;
+
+		if (!Visible)
+			Show();
 
 		float deltaTime = (float)delta;
 		if (GameOptions.UseMuzzleLight)

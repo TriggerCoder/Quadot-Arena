@@ -63,8 +63,20 @@ public partial class GameManager : Node
 	public const short Player8UIViewLayer = 15;
 
 	//Physic Masks
-	public const uint TakeDamageMask = (1 << DamageablesLayer);
-	public const uint NoHitMask = ((1 << FXLayer) | (1 << InvisibleBlockerLayer) | (1 << WalkTriggerLayer) | (1 << ThingsLayer));
+	public const uint TakeDamageMask = ((1 << DamageablesLayer) | 
+										(1 << Player1Layer) | 
+										(1 << Player2Layer) | 
+										(1 << Player3Layer) | 
+										(1 << Player4Layer) | 
+										(1 << Player5Layer) | 
+										(1 << Player6Layer) | 
+										(1 << Player7Layer) | 
+										(1 << Player8Layer));
+
+	public const uint NoHitMask = ((1 << FXLayer) | 
+									(1 << InvisibleBlockerLayer) | 
+									(1 << WalkTriggerLayer) | 
+									(1 << ThingsLayer));
 
 	//Rendering Masks
 	public const int InvisibleMask = 0;

@@ -8,9 +8,9 @@ public partial class PlayerInfo : Node3D
 	public PlayerCamera playerCamera;
 	[Export]
 	public MultiAudioStream audioStream;
+	[Export]
 	public PlayerThing playerThing;
 //	public PlayerHUD playerHUD;
-	public Node3D player;
 //	public Canvas UICanvas;
 	[Export]
 	public Node3D WeaponHand;

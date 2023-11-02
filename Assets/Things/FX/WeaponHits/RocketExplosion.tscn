@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://cbqf3w6nv54ds"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="1_apdci"]
+
+[node name="RocketExplosion" type="Sprite3D"]
+layers = 255
+sorting_offset = -3000.0
+billboard = 1
+texture_filter = 1
+render_priority = -128
+script = ExtResource("1_apdci")
+spriteName = "rocketExplosion"
+spriteRadius = 8
+destroyTimer = 1.0

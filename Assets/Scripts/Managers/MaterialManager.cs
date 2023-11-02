@@ -24,15 +24,7 @@ public partial class MaterialManager : Node
 	[Export]
 	public ShaderMaterial defaultTransparentLightMapMaterial;
 	[Export]
-	public ShaderMaterial debug;
-	[Export]
-	public ShaderMaterial rgbGenIdentity;
-	[Export]
-	public ShaderMaterial tcGenEnvironment;
-	[Export]
-	public ShaderMaterial tcModRotate;
-	[Export]
-	public ShaderMaterial tcModScroll;
+	public string[] _applyBillboard;
 
 	public bool applyLightmaps = true;
 
@@ -41,6 +33,7 @@ public partial class MaterialManager : Node
 	public static string colorProperty = "shader_parameter/AmbientColor";
 	public static string mixBrightness = "shader_parameter/mixBrightness";
 
+	public static List<string> HasBillBoard = new List<string>();
 	public static List<ShaderMaterial> AllMaterials = new List<ShaderMaterial>();	
 	public static Dictionary<string, ShaderMaterial> Materials = new Dictionary<string, ShaderMaterial>();
 	public static Dictionary<string, QShader> AditionalTextures = new Dictionary<string, QShader>();
@@ -55,6 +48,8 @@ public partial class MaterialManager : Node
 	public override void _Ready()
 	{
 		Instance = this;
+		foreach(string shaderName in _applyBillboard)
+			HasBillBoard.Add(shaderName.ToUpper());
 	}
 	public static bool IsSkyTexture(string textureName)
 	{

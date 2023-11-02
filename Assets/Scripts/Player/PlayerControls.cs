@@ -26,8 +26,7 @@ public partial class PlayerControls : Node3D
 	public Vector3 jumpPadVel = Vector3.Zero;
 
 	public float impulseDampening = 4f;
-	[Export]
-	public CharacterBody3D controller;
+
 //	[Export]
 //	public CapsuleCollider capsuleCollider;
 //	[Export]
@@ -88,7 +87,7 @@ public partial class PlayerControls : Node3D
 	{
 		moveSpeed = runSpeed;
 		currentMoveType = MoveType.Run;
-		controller.CollisionLayer = playerInfo.playerLayer;
+		playerThing.CollisionLayer = playerInfo.playerLayer;
 	}
 
 	public override void _Input(InputEvent @event)
@@ -201,7 +200,6 @@ public partial class PlayerControls : Node3D
 			if (SwapWeapon > -1)
 			{
 				CurrentWeapon = SwapWeapon;
-				GD.Print("CurrentWeapon: " + CurrentWeapon);
 				playerWeapon = (PlayerWeapon)playerInfo.WeaponPrefabs[CurrentWeapon].Instantiate();
 				playerWeapon.Init(playerInfo);
 				SwapWeapon = -1;
@@ -249,7 +247,7 @@ public partial class PlayerControls : Node3D
 		//dampen impulse
 		if (impulseVector.LengthSquared() > 0)
 		{
-			impulseVector.Lerp(Vector3.Zero, impulseDampening * deltaTime);
+			impulseVector = impulseVector.Lerp(Vector3.Zero, impulseDampening * deltaTime);
 			if (impulseVector.LengthSquared() < 1f)
 				impulseVector = Vector3.Zero;
 		}

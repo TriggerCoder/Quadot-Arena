@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://w1e8feydse2o"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="1_5uawi"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/LightFade.cs" id="2_eeopm"]
+
+[node name="BurnMark" type="Sprite3D"]
+layers = 255
+sorting_offset = -3000.0
+texture_filter = 1
+render_priority = -128
+script = ExtResource("1_5uawi")
+spriteName = "gfx/damage/burn_med_mrk"
+spriteRadius = 8
+destroyTimer = 30.0
+alphaFade = true
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+layers = 255
+light_color = Color(1, 0.686275, 0, 1)
+light_energy = 5.0
+light_bake_mode = 0
+omni_shadow_mode = 0
+script = ExtResource("2_eeopm")
+destroyTimer = 3.0

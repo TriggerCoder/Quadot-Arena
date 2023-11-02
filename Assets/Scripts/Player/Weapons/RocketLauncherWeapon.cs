@@ -75,7 +75,7 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 
 			Projectile rocket = (Projectile)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(rocket);
-			rocket.owner = playerInfo.player;
+			rocket.owner = playerInfo.playerThing;
 			if (muzzleObject != null)
 				rocket.GlobalPosition = muzzleObject.GlobalPosition;
 			else

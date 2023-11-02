@@ -58,9 +58,14 @@ public static class SoundManager
 		else
 		{
 			if (bitDepth == 8)
+			{
 				audioStream.Format = AudioStreamWav.FormatEnum.Format8Bits;
+			}
 			else
+			{
 				audioStream.Format = AudioStreamWav.FormatEnum.Format16Bits;
+				totalSamples /= 2; //block size = 2;
+			}
 		}
 		audioStream.Data = fileBytes;
 		audioStream.MixRate = sampleRate;
@@ -72,7 +77,7 @@ public static class SoundManager
 			audioStream.LoopEnd = totalSamples;
 			audioStream.LoopMode = AudioStreamWav.LoopModeEnum.Forward;
 		}
-		GD.Print("AudioStreamWav " + name + " created. Channels " + channels + " sampleRate " + sampleRate + " totalSamples "+ totalSamples + " format " + FormatCode(audioFormat));
+		GD.Print("AudioStreamWav " + name + " created. Channels " + channels + " sampleRate " + sampleRate + " totalSamples "+ totalSamples + " format " + FormatCode(audioFormat) + (loop? " Loop" : " No Looping"));
 		return audioStream;
 	}
 	public static MultiAudioStream Create2DSound(AudioStream audio, Node3D parent = null, bool destroyAfterSound = true)

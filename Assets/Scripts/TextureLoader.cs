@@ -49,7 +49,7 @@ public static class TextureLoader
 		if (Textures.ContainsKey(upperName))
 			return Textures[upperName];
 
-		GD.Print("TextureLoader: No texture \"" + upperName + "\"");
+//		GD.Print("TextureLoader: No texture \"" + upperName + "\"");
 		return illegal;
 	}
 	public static void LoadTextures(List<QShader> mapTextures, bool ignoreShaders, ImageFormat imageFormat = ImageFormat.JPG)

@@ -5,13 +5,14 @@ using System.Collections.Generic;
 public partial class PlayerThing : CharacterBody3D, Damageable
 {
 	public PlayerInfo playerInfo;
+	[Export]
 	public PlayerControls playerControls;
 
 	public PlayerCamera playerCamera;
 
 	public string modelName = "sarge";
 	public string skinName = "default";
-	public Node3D player;
+
 //	public PlayerModel avatar;
 
 	public int Hitpoints { get { return hitpoints; } }
