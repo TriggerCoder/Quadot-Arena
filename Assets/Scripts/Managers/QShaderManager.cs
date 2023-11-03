@@ -148,7 +148,7 @@ public static class QShaderManager
 			GSFragmentRGBs += GetGenFunc(qShader, i, GenFuncType.RGB);
 			GSFragmentRGBs += GetGenFunc(qShader, i, GenFuncType.Alpha);
 			GSFragmentRGBs += GetAlphaFunc(qShader, i);
-			GSFragmentBlends += GetBlend(qShader, i);
+			GSFragmentBlends += GetBlend(qShader, i, ref alphaIsTransparent);
 		}
 
 		int totalTex = textures.Count;
@@ -266,8 +266,8 @@ public static class QShaderManager
 			code += "\tALPHA = color.a * vertx_color.a;\n";
 		code += "}\n\n";
 
-//		if (upperName.Contains("TIM_HELL"))
-//			GD.Print(code);
+		if (upperName.Contains("PLASMA_GLASS"))
+			GD.Print(code);
 
 		Shader shader = new Shader();
 		shader.Code = code;
@@ -300,7 +300,9 @@ public static class QShaderManager
 		}
 		else
 		{
-			if (qShader.qShaderStages[currentStage].map != null)
+			if (qShader.qShaderStages[currentStage].environment)
+				TcGen = "\tvec2 uv_" + currentStage + " = ((NORMAL * (2.0 * dot(VIEW,NORMAL))) - VIEW).yz * UV;\n";
+			else if (qShader.qShaderStages[currentStage].map != null)
 			{
 				if (qShader.qShaderStages[currentStage].map[0].Contains("$LIGHTMAP"))
 				{
@@ -460,7 +462,7 @@ public static class QShaderManager
 		AlphaFunc += "\t{\n\t\tdiscard;\n\t}\n";
 		return AlphaFunc;
 	}
-	public static string GetBlend(QShaderData qShader, int currentStage)
+	public static string GetBlend(QShaderData qShader, int currentStage, ref bool alphaIsTransparent)
 	{
 		string Blend = "";
 		if (qShader.qShaderStages[currentStage].blendFunc != null)
@@ -554,10 +556,27 @@ public static class QShaderManager
 						break;
 				}
 				//Horrible hack
-				if ((currentStage == 0) && (src == "GL_ZERO") && (dst == "GL_ONE_MINUS_SRC_COLOR"))
+				if (currentStage == 0)
 				{
-					Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
-					Blend += "\tcolor.a = Stage_" + currentStage + ".a; \n";
+					if (qShader.qShaderStages[currentStage].environment)
+					{
+						if ((src == "GL_ONE") && (dst == "GL_ONE"))
+						{
+							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
+							Blend += "\tcolor.a = 0.5; \n";
+							alphaIsTransparent = true;
+						}
+					}
+					else if ((src == "GL_ZERO") && (dst == "GL_ONE_MINUS_SRC_COLOR"))
+					{
+						Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
+						Blend += "\tcolor.a = Stage_" + currentStage + ".a; \n";
+					}
+					else
+					{
+						Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
+						Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + "; \n";
+					}
 				}
 				else
 				{
@@ -934,6 +953,7 @@ public class QShaderStage
 	public List<QShaderTCMod> tcMod = null;
 	public DepthFuncType depthFunc = DepthFuncType.LEQUAL;
 	public bool depthWrite = false;
+	public bool environment = false;
 	public AlphaFuncType alphaFunc = AlphaFuncType.NONE;
 
 	public void AddStageParams(string Params, string Value)
@@ -971,7 +991,16 @@ public class QShaderStage
 			case "TCGEN":
 				if (tcGen  == null)
 					tcGen = Value.Split(' ');
-				break;
+
+				switch (Value)
+				{
+					case "ENVIRONMENT":
+						environment = true;
+					break;
+					default:
+					break;
+				}
+			break;
 			case "TCMOD":
 			{
 				string[] keyValue = Value.Split(' ', 2);

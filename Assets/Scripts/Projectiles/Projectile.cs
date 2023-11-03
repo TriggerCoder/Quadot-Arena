@@ -34,6 +34,8 @@ public partial class Projectile : Node3D
 	[Export] 
 	public string decalMark;
 	[Export]
+	public string secondaryMark;
+	[Export]
 	public string SecondaryOnDeathSpawn;
 	[Export]
 	public string _onFlySound;
@@ -49,6 +51,8 @@ public partial class Projectile : Node3D
 	public bool goingUp = false;
 
 	float time = 0f;
+	private Rid Sphere;
+	private PhysicsShapeQueryParameters3D SphereCast;
 	public override void _Ready()
 	{
 		if (!string.IsNullOrEmpty(_onFlySound))
@@ -56,6 +60,9 @@ public partial class Projectile : Node3D
 			audioStream.Stream = SoundManager.LoadSound(_onFlySound, true);
 			audioStream.Play();
 		}
+		Sphere = PhysicsServer3D.SphereShapeCreate();
+		SphereCast = new PhysicsShapeQueryParameters3D();
+		SphereCast.ShapeRid = Sphere;
 	}
 	public override void _PhysicsProcess(double delta)
 	{
@@ -83,44 +90,46 @@ public partial class Projectile : Node3D
 		Vector3 Collision = Vector3.Zero;
 		Vector3 Normal = Vector3.Zero;
 		Vector3 d = GlobalTransform.Basis.Z;
+
+		var SpaceState = GetWorld3D().DirectSpaceState;
 		//check for collision
-		{
-			var Sphere = PhysicsServer3D.SphereShapeCreate();
+		{			
 			PhysicsServer3D.ShapeSetData(Sphere, projectileRadius);
-			var SphereCast = new PhysicsShapeQueryParameters3D();
-			SphereCast.ShapeRid = Sphere;
 			SphereCast.CollisionMask = ~GameManager.NoHitMask;
-			SphereCast.Motion = Vector3.Zero;
-			SphereCast.Transform = new Transform3D(GlobalTransform.Basis, GlobalTransform.Origin - d * speed * deltaTime);
-			var SpaceState = GetWorld3D().DirectSpaceState;
-			var hit = SpaceState.GetRestInfo(SphereCast);
-			if (hit.ContainsKey("collider_id"))
+			SphereCast.Motion = -d * speed * deltaTime;
+			SphereCast.Transform = GlobalTransform;
+			var result = SpaceState.CastMotion(SphereCast);
+
+			if (result[1] < 1)
 			{
-				CollisionObject3D collider = (CollisionObject3D)InstanceFromId((ulong)hit["collider_id"]);
-				if (collider != owner)
+				SphereCast.Transform = new Transform3D(GlobalTransform.Basis, GlobalTransform.Origin + (SphereCast.Motion * result[1]));
+				var hit = SpaceState.GetRestInfo(SphereCast);
+				if (hit.ContainsKey("collider_id"))
 				{
-					Vector3 collision = (Vector3)hit["point"];
-					Vector3 normal = (Vector3)hit["normal"];
-					Hit = collider;
-					Collision = collision;
-					Normal = normal;
-
-					if ((damageType == DamageType.Rocket) || (damageType == DamageType.Grenade) || (damageType == DamageType.Plasma) || (damageType == DamageType.BFGBall))
+					CollisionObject3D collider = (CollisionObject3D)InstanceFromId((ulong)hit["collider_id"]);
+					if (collider != owner)
 					{
-						Vector3 impulseDir = d.Normalized();
+						Collision = (Vector3)hit["point"];
+						Normal = (Vector3)hit["normal"];
+						Hit = collider;
 
-						if (Hit is Damageable damageable)
+						if ((damageType == DamageType.Rocket) || (damageType == DamageType.Grenade) || (damageType == DamageType.Plasma) || (damageType == DamageType.BFGBall))
 						{
-							switch (damageType)
+							Vector3 impulseDir = d.Normalized();
+
+							if (Hit is Damageable damageable)
 							{
-								case DamageType.BFGBall:
-									damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
-									damageable.Impulse(impulseDir, pushForce);
-								break;
-								default:
-									damageable.Damage(GD.RandRange(damageMin, damageMax), damageType, owner);
-									damageable.Impulse(impulseDir, pushForce);
-								break;
+								switch (damageType)
+								{
+									case DamageType.BFGBall:
+										damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
+										damageable.Impulse(impulseDir, pushForce);
+										break;
+									default:
+										damageable.Damage(GD.RandRange(damageMin, damageMax), damageType, owner);
+										damageable.Impulse(impulseDir, pushForce);
+										break;
+								}
 							}
 						}
 					}
@@ -128,17 +137,14 @@ public partial class Projectile : Node3D
 			}
 		}
 
+
 		//explosion
 		if (Hit != null)
 		{
-			var Sphere = PhysicsServer3D.SphereShapeCreate();
 			PhysicsServer3D.ShapeSetData(Sphere, explosionRadius);
-			var SphereCast = new PhysicsShapeQueryParameters3D();
-			SphereCast.ShapeRid = Sphere;
 			SphereCast.CollisionMask = GameManager.TakeDamageMask;
 			SphereCast.Motion = Vector3.Zero;
 			SphereCast.Transform = new Transform3D(GlobalTransform.Basis, Collision);
-			var SpaceState = GetWorld3D().DirectSpaceState;
 			var hits = SpaceState.IntersectShape(SphereCast);
 			var max = hits.Count;
 
@@ -191,12 +197,12 @@ public partial class Projectile : Node3D
 			{
 				Node3D DeathSpawn = (Node3D)ThingsManager.thingsPrefabs[OnDeathSpawn].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(DeathSpawn);
-				DeathSpawn.Position = Collision + (d * .5f);
+				DeathSpawn.Position = Collision + d;
 				DeathSpawn.LookAt(Collision - Normal, Vector3.Up);
 				DeathSpawn.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 			}
 
-			//Check if collider can be marked
+				//Check if collider can be marked
 			if (!MapLoader.noMarks.Contains(Hit))
 			{
 				Node3D DecalMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
@@ -204,6 +210,14 @@ public partial class Projectile : Node3D
 				DecalMark.Position = Collision + (d * .05f);
 				DecalMark.LookAt(Collision - Normal, Vector3.Up);
 				DecalMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+				if (!string.IsNullOrEmpty(secondaryMark))
+				{
+					Node3D SecondMark = (Node3D)ThingsManager.thingsPrefabs[secondaryMark].Instantiate();
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(SecondMark);
+					SecondMark.Position = Collision + (d * .03f);
+					SecondMark.LookAt(Collision - Normal, Vector3.Up);
+					SecondMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+				}
 			}
 			/*
 			if (damageType == DamageType.BFGBall)
@@ -283,7 +297,7 @@ public partial class Projectile : Node3D
 			cTransform.position = cTransform.position + cTransform.up * speed * deltaTime;
 		else
 		*/
-			Position -= d * speed * deltaTime;
+		Position -= d * speed * deltaTime;
 
 	}
 }

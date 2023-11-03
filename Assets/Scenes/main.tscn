@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=24 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Texture2D" uid="uid://dv1ug6ajvhega" path="res://Assets/Textures/Skyboxes/Gehenna/gehenna.png" id="1_si63v"]
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
@@ -17,6 +17,9 @@
 [ext_resource type="PackedScene" uid="uid://cbqf3w6nv54ds" path="res://Assets/Things/FX/WeaponHits/RocketExplosion.tscn" id="13_l5hcy"]
 [ext_resource type="PackedScene" uid="uid://bki6ifu2qtbfo" path="res://Assets/Player/PlayerViewPort.tscn" id="13_tu0mj"]
 [ext_resource type="PackedScene" uid="uid://w1e8feydse2o" path="res://Assets/Things/FX/Damage/BurnMark.tscn" id="14_ghmtc"]
+[ext_resource type="PackedScene" uid="uid://c5tu2rku1v7om" path="res://Assets/Things/Projectiles/PlasmaProjectile.tscn" id="15_rsp03"]
+[ext_resource type="PackedScene" uid="uid://bn0i6jh0khogi" path="res://Assets/Things/FX/WeaponHits/PlasmaExplosion.tscn" id="16_xhuyt"]
+[ext_resource type="PackedScene" uid="uid://3h6rlisfwi0r" path="res://Assets/Things/FX/Damage/PlasmaMark.tscn" id="17_xwyg6"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_7oboo"]
 panorama = ExtResource("1_si63v")
@@ -48,14 +51,14 @@ defaultMaterial = ExtResource("5_is83x")
 defaultTransparentMaterial = ExtResource("6_fojn5")
 defaultLightMapMaterial = ExtResource("6_i1nl1")
 defaultTransparentLightMapMaterial = ExtResource("7_wtcy7")
-_applyBillboard = PackedStringArray("rocketExplosion")
+_applyBillboard = PackedStringArray("rocketExplosion", "plasmaExplosion")
 
 [node name="ClusterPVSManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("8_vpkit")
 
 [node name="ThingsManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("9_71i1l")
-_ThingPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("11_m4ddm"), ExtResource("12_6703q"), ExtResource("13_l5hcy"), ExtResource("14_ghmtc")])
+_ThingPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("11_m4ddm"), ExtResource("12_6703q"), ExtResource("13_l5hcy"), ExtResource("14_ghmtc"), ExtResource("15_rsp03"), ExtResource("16_xhuyt"), ExtResource("17_xwyg6")])
 
 [node name="MultiAudioListener" type="AudioListener3D" parent="Quadot Arena"]
 current = true

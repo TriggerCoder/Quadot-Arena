@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://bn0i6jh0khogi"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="1_drdno"]
+
+[node name="PlasmaExplosion" type="Sprite3D"]
+layers = 255
+sorting_offset = -3000.0
+billboard = 1
+texture_filter = 1
+render_priority = -128
+script = ExtResource("1_drdno")
+spriteName = "plasmaExplosion"
+spriteRadius = 64
+destroyTimer = 0.5

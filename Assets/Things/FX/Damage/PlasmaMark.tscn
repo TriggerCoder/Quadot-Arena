@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://3h6rlisfwi0r"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="1_tjpw5"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/LightFade.cs" id="2_ir5ih"]
+
+[node name="PlasmaMark" type="Sprite3D"]
+layers = 255
+sorting_offset = -3000.0
+script = ExtResource("1_tjpw5")
+spriteName = "gfx/damage/plasma_mrk"
+spriteRadius = 32
+destroyTimer = 5.0
+alphaFade = true
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+layers = 255
+light_color = Color(0, 0.0980392, 1, 1)
+light_energy = 5.0
+light_bake_mode = 0
+omni_shadow_mode = 0
+script = ExtResource("2_ir5ih")
+destroyTimer = 1.5

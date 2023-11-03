@@ -378,8 +378,8 @@ public static class Mesher
 				md3Model.data[modelMesh.meshNum] = data;
 				model.readySurfaceArray.Add(surfaceArray);
 				model.readyMaterials.Add(material);
-				GD.Print("Adding Child: " + mesh.Name + " to: " + ownerObject.Name);
-				ownerObject.AddChild(mesh);
+				GD.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name);
+				modelObject.AddChild(mesh);
 				groupId++;
 			}
 		}
@@ -438,8 +438,8 @@ public static class Mesher
 					data.meshDataTool.CreateFromSurface(data.arrMesh, 0);
 					model.readySurfaceArray.Add(surfaceArray);
 					model.readyMaterials.Add(material);
-					GD.Print("Adding Child: " + mesh.Name + " to: " + ownerObject.Name);
-					ownerObject.AddChild(mesh);
+					GD.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name + " skin group name " + meshes[0].skins[0].name);
+					modelObject.AddChild(mesh);
 					groupId++;
 				}
 			}

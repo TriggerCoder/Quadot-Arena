@@ -30,8 +30,12 @@ public partial class PlayerWeapon : Node3D
 	public int DamageMin = 5;
 	[Export]
 	public int DamageMax = 15;
-
+	[Export]
 	public float swapSpeed = 6f;
+	[Export]
+	public float kickSpeed = 6f;
+	[Export]
+	public float KickOffSet = .1f;
 
 	public Vector2 Sensitivity = new Vector2(.015f, .01f);
 	public float rotateSpeed = 4f;
@@ -45,7 +49,7 @@ public partial class PlayerWeapon : Node3D
 
 	public float LowerOffset = -.3f;
 	public float LowerAmount = 1f;
-
+	public float KickAmount = 0f;
 	public int Noise = 0;
 
 	public bool putAway = false;
@@ -181,8 +185,12 @@ public partial class PlayerWeapon : Node3D
 		else
 			LowerAmount = Mathf.Lerp(LowerAmount, 0, deltaTime * swapSpeed);
 
-		Position = new Vector3(0, LowerOffset * LowerAmount, 0);
+		if (fireTime > 0)
+			KickAmount = Mathf.Lerp(KickAmount, 1, deltaTime * kickSpeed);
+		else
+			KickAmount = Mathf.Lerp(KickAmount, 0, deltaTime * kickSpeed);
 
+		Position = new Vector3(KickOffSet * KickAmount, LowerOffset * LowerAmount, 0);
 		OnUpdate();
 	}
 
