@@ -2,7 +2,6 @@ using Godot;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using ExtensionMethods;
 
 public class MD3GodotConverted
 {
@@ -150,10 +149,23 @@ public class MD3
 			Transform3D R = new Transform3D(column0, column1, column2, column3);
 			if (R.IsFinite())
 			{
-				tag.orientation = tag.orientation.QuakeToGodotConversion() * R * tag.orientation.QuakeToGodotConversion().Inverse();
-//				tag.rotation = tag.orientation.Basis.GetRotationQuaternion();
-				tag.rotation = tag.orientation.ExtractRotation();
-//				GD.Print(" X " + tag.rotation.X + " Y " + tag.rotation.Y + " Z " + tag.rotation.Z + " W "+ tag.rotation.W);
+				//https://gamedev.stackexchange.com/questions/203073/how-to-convert-a-4x4-matrix-transformation-to-another-coordinate-system
+				//We want to map +x to -x (-1 ,  0 ,  0)
+				//We want to map +y to +z ( 0 ,  0 ,  1)
+				//We want to map +z to +y ( 0 ,  1 ,  0)
+				//We want the origin, coordinate to survive unchanged (0, 0, 0)
+				//If we left-multiply this matrix by any homogeneous vector in our old coordinate system,
+				//it converts it to the corresponding vector in the new coordinate system:
+				//Vnew = T*Vold
+				Transform3D T = new Transform3D(-1, 0, 0, 
+												 0, 0, 1, 
+												 0, 1, 0, 
+												 0, 0, 0);
+
+				tag.orientation = T * R * T.Inverse();
+				Quaternion Rot = tag.orientation.Basis.GetRotationQuaternion();
+				if (Rot.IsNormalized())
+					tag.rotation = Rot.Inverse();
 			}
 			tag.QuakeToGodotCoordSystem();
 			if (!md3Model.tagsIdbyName.ContainsKey(tag.name))

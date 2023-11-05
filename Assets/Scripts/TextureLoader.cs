@@ -38,9 +38,11 @@ public static class TextureLoader
 	public static bool HasTexture(string textureName)
 	{
 		string upperName = textureName.ToUpper();
+
+		if (QShaderManager.HasShader(upperName))
+			return true;
 		if (Textures.ContainsKey(upperName))
 			return true;
-
 		return false;
 	}
 	public static ImageTexture GetTexture(string textureName)

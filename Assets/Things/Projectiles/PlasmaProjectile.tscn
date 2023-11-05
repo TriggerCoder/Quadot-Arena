@@ -24,6 +24,7 @@ audioStream = NodePath("MultiAudioStream")
 
 [node name="Plasma" type="Sprite3D" parent="."]
 layers = 255
+billboard = 1
 script = ExtResource("2_usudf")
 spriteName = "sprites/plasma1"
 spriteRadius = 16

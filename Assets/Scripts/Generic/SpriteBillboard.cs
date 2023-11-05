@@ -23,7 +23,10 @@ public partial class SpriteBillboard : Sprite3D
 			return;
 		}
 
-		if ((QShaderManager.HasShader(spriteName)) ||(TextureLoader.HasTexture(spriteName)))
+		if (Billboard != BaseMaterial3D.BillboardModeEnum.Disabled)
+			MaterialManager.AddBillBoard(spriteName);
+
+		if (TextureLoader.HasTexture(spriteName))
 			spriteMaterial = MaterialManager.GetMaterials(spriteName, -1, Transparent);
 		else
 		{

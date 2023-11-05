@@ -86,6 +86,7 @@ public static class QShaderManager
 			break;
 			case QShaderGlobal.CullType.Disable:
 				GSHeader += "cull_disabled;\n \n";
+				alphaIsTransparent = true;
 			break;
 		}
 		int lightmapStage = -1;
@@ -266,7 +267,7 @@ public static class QShaderManager
 			code += "\tALPHA = color.a * vertx_color.a;\n";
 		code += "}\n\n";
 
-		if (upperName.Contains("PLASMA_GLASS"))
+		if (upperName.Contains("ROCKFL"))
 			GD.Print(code);
 
 		Shader shader = new Shader();

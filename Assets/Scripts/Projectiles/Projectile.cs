@@ -4,7 +4,8 @@ using System;
 public partial class Projectile : Node3D
 {
 	public Node3D owner;
-//	public GameObject fx;
+	[Export]
+	public ParticlesController fx;
 	[Export]
 	public string projectileName;
 	[Export]
@@ -137,7 +138,6 @@ public partial class Projectile : Node3D
 			}
 		}
 
-
 		//explosion
 		if (Hit != null)
 		{
@@ -200,6 +200,11 @@ public partial class Projectile : Node3D
 				DeathSpawn.Position = Collision + d;
 				DeathSpawn.LookAt(Collision - Normal, Vector3.Up);
 				DeathSpawn.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+				if (fx != null)
+				{
+					fx.Reparent(DeathSpawn);
+					fx.enableLifeTime = true;
+				}
 			}
 
 				//Check if collider can be marked

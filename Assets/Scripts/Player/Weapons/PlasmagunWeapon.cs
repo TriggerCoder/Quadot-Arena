@@ -51,7 +51,7 @@ public partial class PlasmagunWeapon : PlayerWeapon
 					if (!muzzleObject.Visible)
 					{
 						muzzleObject.Visible = true;
-//						playerInfo.playerThing.avatar.MuzzleFlashSetActive(true);
+						playerInfo.playerThing.avatar.MuzzleFlashSetActive(true);
 					}
 			}
 		}

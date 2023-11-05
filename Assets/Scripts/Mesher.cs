@@ -318,7 +318,7 @@ public static class Mesher
 	{
 		return GenerateModelFromMeshes(model, layer, null, false, meshToSkin);
 	}
-	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, Node3D ownerObject = null, bool forceSkinAlpha = false, Dictionary<string, string> meshToSkin = null)
+	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer = GameManager.AllPlayerViewMask, Node3D ownerObject = null, bool forceSkinAlpha = false, Dictionary<string, string> meshToSkin = null)
 	{
 		if (model == null || model.meshes.Count == 0)
 		{
@@ -447,12 +447,12 @@ public static class Mesher
 		return md3Model;
 	}
 	
-	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, Dictionary<string, string> meshToSkin, uint layer)
+	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask)
 	{
 		return FillModelFromProcessedData(model, layer, null, meshToSkin);
 	}
 
-	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, Node3D ownerObject = null, Dictionary<string, string> meshToSkin = null)
+	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer = GameManager.AllPlayerViewMask, Node3D ownerObject = null, Dictionary<string, string> meshToSkin = null)
 	{
 		if (ownerObject == null)
 		{
@@ -571,17 +571,6 @@ public static class Mesher
 		return surfaceArray;
 	}
 
-	/*
-	public static void UpdateVertices(dataMeshes data, List<Vector3> vertex, List<Vector3> normals)
-	{
-		Material material = data.arrMesh.SurfaceGetMaterial(0);
-		data.surfaceArray[VertexInd] = vertex.ToArray();
-		data.surfaceArray[NormalInd] = normals.ToArray();
-		data.arrMesh.ClearSurfaces();
-		data.arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, data.surfaceArray);
-		data.arrMesh.SurfaceSetMaterial(0, material);
-	}
-	*/
 	public static void GenerateGroupBrushCollider(int indexId, Node3D holder, params QBrush[] brushes)
 	{
 		bool isTrigger = false;

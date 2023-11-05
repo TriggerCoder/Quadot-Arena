@@ -8,8 +8,6 @@ public partial class MaterialManager : Node
 	[Export]
 	public ShaderMaterial illegal;
 	[Export]
-	public ShaderMaterial skyHole;
-	[Export]
 	public ShaderMaterial opaqueMaterial;
 	[Export]
 	public ShaderMaterial defaultMaterial;
@@ -23,8 +21,6 @@ public partial class MaterialManager : Node
 	public ShaderMaterial defaultLightMapMaterial;
 	[Export]
 	public ShaderMaterial defaultTransparentLightMapMaterial;
-	[Export]
-	public string[] _applyBillboard;
 
 	public bool applyLightmaps = true;
 
@@ -48,9 +44,16 @@ public partial class MaterialManager : Node
 	public override void _Ready()
 	{
 		Instance = this;
-		foreach(string shaderName in _applyBillboard)
-			HasBillBoard.Add(shaderName.ToUpper());
 	}
+
+	public static void AddBillBoard(string shaderName)
+	{
+		shaderName = shaderName.ToUpper();
+		if (HasBillBoard.Contains(shaderName))
+			return;
+		HasBillBoard.Add(shaderName);
+	}
+
 	public static bool IsSkyTexture(string textureName)
 	{
 		if (textureName.ToUpper().Contains("/SKIES/"))

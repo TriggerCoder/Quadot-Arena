@@ -16,12 +16,14 @@ height = 1.5
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_aj4xj"]
 length = 0.991696
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("playerControls") groups=["Player"]]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("playerInfo", "playerControls", "player") groups=["Player"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 collision_layer = 64
 collision_mask = 125
 script = ExtResource("1_da8o2")
+playerInfo = NodePath("PlayerInfo")
 playerControls = NodePath("PlayerControls")
+player = NodePath("PlayerControls/PlayerModel")
 
 [node name="Torso" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.442, 0)
@@ -36,6 +38,9 @@ script = ExtResource("1_g37r6")
 playerInfo = NodePath("../PlayerInfo")
 playerThing = NodePath("..")
 playerCamera = NodePath("../MainCameras")
+
+[node name="PlayerModel" type="Node3D" parent="PlayerControls"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 
 [node name="PlayerInfo" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "playerCamera", "audioStream", "playerThing", "WeaponHand")]
 script = ExtResource("2_jjym4")

@@ -51,14 +51,16 @@ defaultMaterial = ExtResource("5_is83x")
 defaultTransparentMaterial = ExtResource("6_fojn5")
 defaultLightMapMaterial = ExtResource("6_i1nl1")
 defaultTransparentLightMapMaterial = ExtResource("7_wtcy7")
-_applyBillboard = PackedStringArray("rocketExplosion", "plasmaExplosion")
 
 [node name="ClusterPVSManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("8_vpkit")
 
 [node name="ThingsManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("9_71i1l")
-_ThingPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("11_m4ddm"), ExtResource("12_6703q"), ExtResource("13_l5hcy"), ExtResource("14_ghmtc"), ExtResource("15_rsp03"), ExtResource("16_xhuyt"), ExtResource("17_xwyg6")])
+_fxPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("13_l5hcy"), ExtResource("16_xhuyt")])
+_projectilesPrefabs = Array[PackedScene]([ExtResource("12_6703q"), ExtResource("15_rsp03")])
+_decalsPrefabs = Array[PackedScene]([ExtResource("11_m4ddm"), ExtResource("14_ghmtc"), ExtResource("17_xwyg6")])
+_itemsPrefabs = Array[PackedScene]([])
 
 [node name="MultiAudioListener" type="AudioListener3D" parent="Quadot Arena"]
 current = true

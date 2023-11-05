@@ -1,4 +1,3 @@
-using ExtensionMethods;
 using Godot;
 using System;
 public partial class PlayerWeapon : Node3D
@@ -47,7 +46,7 @@ public partial class PlayerWeapon : Node3D
 	public PlayerWeapon Instance;
 	public PlayerInfo playerInfo = null;
 
-	public float LowerOffset = -.3f;
+	public float LowerOffset = -.4f;
 	public float LowerAmount = 1f;
 	public float KickAmount = 0f;
 	public int Noise = 0;
@@ -104,8 +103,8 @@ public partial class PlayerWeapon : Node3D
 			else
 				Mesher.FillModelFromProcessedData(model, p.uiLayer, this);
 
-//			if (playerInfo.playerThing.avatar != null)
-//				playerInfo.playerThing.avatar.LoadWeapon(model, CompleteModelName, MuzzleModelName, playerInfo.playerLayer);
+			if (playerInfo.playerThing.avatar != null)
+				playerInfo.playerThing.avatar.LoadWeapon(model, CompleteModelName, MuzzleModelName, playerInfo.playerLayer);
 		}
 
 		if (model.tagsIdbyName.TryGetValue("tag_flash", out int tagId))
@@ -160,7 +159,7 @@ public partial class PlayerWeapon : Node3D
 							if (muzzleObject.Visible)
 							{
 								muzzleObject.Visible = false;
-//								playerInfo.playerThing.avatar.MuzzleFlashSetActive(false);
+								playerInfo.playerThing.avatar.MuzzleFlashSetActive(false);
 							}
 					}
 				}
@@ -175,8 +174,8 @@ public partial class PlayerWeapon : Node3D
 
 		if (putAway)
 		{
-//			if (playerInfo.playerThing.avatar != null)
-//				playerInfo.playerThing.avatar.UnloadWeapon();
+			if (playerInfo.playerThing.avatar != null)
+				playerInfo.playerThing.avatar.UnloadWeapon();
 
 			LowerAmount = Mathf.Lerp(LowerAmount, 1, deltaTime * swapSpeed);
 			if (LowerAmount > .99f)
@@ -239,9 +238,9 @@ public partial class PlayerWeapon : Node3D
 		Quaternion rotX = new Quaternion(Vector3.Forward, mouse.Y);
 		Quaternion rotY = new Quaternion(Vector3.Up, mouse.X);
 
-		Quaternion rotZ = GetRotate(delta);
+		Quaternion rotZ = GetRotate(delta).Normalized();
 
-//		playerInfo.playerThing.avatar.RotateBarrel(rotZ, rotateSpeed * delta);
+		playerInfo.playerThing.avatar.RotateBarrel(rotZ, rotateSpeed * delta);
 
 		Quaternion targetRot = rotX * rotY * rotZ;
 

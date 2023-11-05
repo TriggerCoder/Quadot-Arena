@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Globalization;
 
 public partial class PlayerControls : Node3D
 {
@@ -12,8 +13,8 @@ public partial class PlayerControls : Node3D
 	[Export]
 	public PlayerCamera playerCamera;
 
-	private Vector2 centerHeight = new Vector2(0.2f, -.05f); // character controller center height, x standing, y crouched
-	private Vector2 height = new Vector2(2.0f, 1.5f); // character controller height, x standing, y crouched
+	private Vector2 centerHeight = new Vector2(0.2f, -.05f);	// character controller center height, x standing, y crouched
+	private Vector2 height = new Vector2(2.0f, 1.5f);			// character controller height, x standing, y crouched
 	private float camerasHeight = .65f;
 	private float ccHeight = .05f;
 
@@ -26,11 +27,6 @@ public partial class PlayerControls : Node3D
 	public Vector3 jumpPadVel = Vector3.Zero;
 
 	public float impulseDampening = 4f;
-
-//	[Export]
-//	public CapsuleCollider capsuleCollider;
-//	[Export]
-//	public PlayerInput playerInput;
 
 	// Movement stuff
 	public float crouchSpeed = 3.0f;                // Crouch speed
@@ -118,6 +114,11 @@ public partial class PlayerControls : Node3D
 	{
 		if (GameManager.Paused)
 			return;
+		
+			float deltaTime = (float)delta;
+
+//		playerThing.avatar.ChangeView(viewDirection, deltaTime);
+//		playerThing.avatar.CheckLegTurn(playerCamera.CurrentCamera.GlobalTransform.Basis.Z);
 
 		controllerIsGrounded = playerThing.IsOnFloor();
 		//Player can only crounch if it is grounded
@@ -176,17 +177,16 @@ public partial class PlayerControls : Node3D
 		//Movement Checks
 		if (currentMoveType != MoveType.Crouch)
 			QueueJump();
-		/*
-				if (controllerIsGrounded)
-				{
-					if (playerThing.avatar.enableOffset)
-						playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed);
-					if (wishJump)
-						AnimateLegsOnJump();
-				}
-				else
-					playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed);
-		*/
+		if (controllerIsGrounded)
+		{
+			if (playerThing.avatar.enableOffset)
+				playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed);
+			if (wishJump)
+				AnimateLegsOnJump();
+		}
+//		else
+//			playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed);
+
 
 		if (Input.IsActionPressed("Action_Fire"))
 			wishFire = true;
@@ -207,6 +207,8 @@ public partial class PlayerControls : Node3D
 		}
 
 		CheckMouseWheelWeaponChange();
+
+		CheckWeaponChangeByIndex();
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -426,6 +428,15 @@ public partial class PlayerControls : Node3D
 		playerVelocity.Z *= speed;
 	}
 
+	public void AnimateLegsOnJump()
+	{
+		if (cMove.forwardSpeed <= 0)
+			playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.Jump;
+		else if (cMove.forwardSpeed > 0)
+			playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.JumpBack;
+		playerThing.avatar.enableOffset = false;
+//		playerThing.PlayModelSound("jump1");
+	}
 	public bool TrySwapWeapon(int weapon)
 	{
 		if (CurrentWeapon == weapon || SwapWeapon != -1)
@@ -526,6 +537,18 @@ public partial class PlayerControls : Node3D
 			}
 			if (!gotWeapon)
 				SwapToBestWeapon();
+		}
+	}
+
+	public void CheckWeaponChangeByIndex()
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			if (Input.IsActionJustPressed("Action_WeaponSwitch_"+i))
+			{
+				TrySwapWeapon(i);
+				break;
+			}
 		}
 	}
 }

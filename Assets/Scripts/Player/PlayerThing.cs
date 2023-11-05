@@ -4,16 +4,19 @@ using System.Collections.Generic;
 
 public partial class PlayerThing : CharacterBody3D, Damageable
 {
+	[Export]
 	public PlayerInfo playerInfo;
 	[Export]
 	public PlayerControls playerControls;
 
 	public PlayerCamera playerCamera;
 
-	public string modelName = "sarge";
+	public string modelName = "major";
 	public string skinName = "default";
 
-//	public PlayerModel avatar;
+	[Export]
+	public Node3D player;
+	public PlayerModel avatar;
 
 	public int Hitpoints { get { return hitpoints; } }
 	public bool Dead { get { return hitpoints <= 0; } }
@@ -38,13 +41,59 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-	}
+		if (GameManager.Paused)
+			return;
 
+		if (!ready)
+			InitPlayer();
+	}
+	public void InitPlayer()
+	{
+		avatar = new PlayerModel();
+		player.AddChild(avatar);
+		avatar.LoadPlayer(modelName, skinName, playerInfo.playerLayer, playerControls);
+/*
+		gameObject.layer = playerInfo.playerLayer;
+		Vector3 destination = SpawnerManager.FindSpawnLocation();
+		TeleporterThing.TelefragEverything(destination, gameObject);
+		transform.position = destination;
+		playerControls.teleportDest = destination;
+
+		playerControls.capsuleCollider.enabled = true;
+		playerControls.controller.enabled = true;
+		playerInfo.playerHUD.pickupFlashTime = 0f;
+		playerInfo.playerHUD.painFlashTime = 0f;
+
+		int playerLayer = ((1 << GameManager.Player1Layer) |
+							(1 << GameManager.Player2Layer) |
+							(1 << GameManager.Player3Layer) |
+							(1 << GameManager.Player4Layer)) & ~(1 << (playerInfo.playerLayer));
+
+		playerCamera.SkyholeCamera.cullingMask = (((1 << (GameManager.DefaultLayer)) |
+													(1 << (GameManager.DebrisLayer)) |
+													(1 << (GameManager.ThingsLayer)) |
+													(1 << (GameManager.RagdollLayer)) |
+													(1 << (GameManager.CombinesMapMeshesLayer)) |
+													(1 << (playerInfo.playerLayer - 5)) |
+													playerLayer));
+
+		if (playerControls.playerWeapon == null)
+			playerControls.SwapToBestWeapon();
+
+		playerInfo.playerHUD.HUDUpdateHealthNum();
+		playerInfo.playerHUD.HUDUpdateArmorNum();
+
+		playerCamera.ChangeThirdPersonCamera(false);
+
+		playerControls.enabled = true;
+*/		ready = true;
+	}
 	public void Impulse(Vector3 direction, float force)
 	{
 		float length = force / 80;
