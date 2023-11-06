@@ -12,7 +12,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public PlayerCamera playerCamera;
 
 	public string modelName = "major";
-	public string skinName = "default";
+	public string skinName = "daemia";
 
 	[Export]
 	public Node3D player;
@@ -57,7 +57,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	{
 		avatar = new PlayerModel();
 		player.AddChild(avatar);
-		avatar.LoadPlayer(modelName, skinName, playerInfo.playerLayer, playerControls);
+		avatar.LoadPlayer(modelName, skinName, (GameManager.AllPlayerViewMask & ~((uint)(playerInfo.viewLayer))), playerControls);
 /*
 		gameObject.layer = playerInfo.playerLayer;
 		Vector3 destination = SpawnerManager.FindSpawnLocation();

@@ -37,7 +37,7 @@ shape = SubResource("SeparationRayShape3D_aj4xj")
 script = ExtResource("1_g37r6")
 playerInfo = NodePath("../PlayerInfo")
 playerThing = NodePath("..")
-playerCamera = NodePath("../MainCameras")
+playerCamera = NodePath("../PlayerInfo/MainCameras")
 
 [node name="PlayerModel" type="Node3D" parent="PlayerControls"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
@@ -45,30 +45,31 @@ transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 
 [node name="PlayerInfo" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "playerCamera", "audioStream", "playerThing", "WeaponHand")]
 script = ExtResource("2_jjym4")
 playerControls = NodePath("../PlayerControls")
-playerCamera = NodePath("../MainCameras")
+playerCamera = NodePath("MainCameras")
 audioStream = NodePath("../MultiAudioStream")
 playerThing = NodePath("..")
-WeaponHand = NodePath("../MainCameras/UICamera/WeaponHand")
+WeaponHand = NodePath("MainCameras/UICamera/WeaponHand")
 WeaponPrefabs = [null, ExtResource("4_4obu3"), null, null, ExtResource("5_jwttf"), null, null, ExtResource("6_yhj32"), null]
 
-[node name="MainCameras" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "SkyholeCamera", "UICamera")]
+[node name="MainCameras" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("playerControls", "ThirdPerson", "SkyholeCamera", "UICamera")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 script = ExtResource("3_bs0x2")
-playerControls = NodePath("../PlayerControls")
+playerControls = NodePath("../../PlayerControls")
+ThirdPerson = NodePath("")
 SkyholeCamera = NodePath("SkyholeCamera")
 UICamera = NodePath("UICamera")
 
-[node name="SkyholeCamera" type="Camera3D" parent="MainCameras"]
+[node name="SkyholeCamera" type="Camera3D" parent="PlayerInfo/MainCameras"]
 cull_mask = 1
 near = 0.1
 far = 300.0
 
-[node name="UICamera" type="Camera3D" parent="MainCameras"]
+[node name="UICamera" type="Camera3D" parent="PlayerInfo/MainCameras"]
 cull_mask = 256
 near = 0.1
 far = 300.0
 
-[node name="WeaponHand" type="Node3D" parent="MainCameras/UICamera"]
+[node name="WeaponHand" type="Node3D" parent="PlayerInfo/MainCameras/UICamera"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 
 [node name="VirtualAudioListener" type="Node3D" parent="."]

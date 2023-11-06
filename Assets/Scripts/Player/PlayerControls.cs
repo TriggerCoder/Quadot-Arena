@@ -117,8 +117,8 @@ public partial class PlayerControls : Node3D
 		
 			float deltaTime = (float)delta;
 
-//		playerThing.avatar.ChangeView(viewDirection, deltaTime);
-//		playerThing.avatar.CheckLegTurn(playerCamera.CurrentCamera.GlobalTransform.Basis.Z);
+		playerThing.avatar.ChangeView(viewDirection, deltaTime);
+		playerThing.avatar.CheckLegTurn(playerCamera.CurrentCamera.GlobalTransform.Basis.Z);
 
 		controllerIsGrounded = playerThing.IsOnFloor();
 		//Player can only crounch if it is grounded
@@ -184,8 +184,8 @@ public partial class PlayerControls : Node3D
 			if (wishJump)
 				AnimateLegsOnJump();
 		}
-//		else
-//			playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed);
+		else
+			playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed);
 
 
 		if (Input.IsActionPressed("Action_Fire"))
@@ -217,7 +217,7 @@ public partial class PlayerControls : Node3D
 			return;
 
 		rotAngle.Y = viewDirection.Y;
-		playerThing.RotationDegrees = rotAngle;
+		playerInfo.RotationDegrees = rotAngle;
 
 		float deltaTime = (float)delta;
 		//Movement Checks
@@ -287,7 +287,7 @@ public partial class PlayerControls : Node3D
 		SetMovementDir();
 
 		wishdir = new Vector3(cMove.sidewaysSpeed, 0, cMove.forwardSpeed);
-		wishdir = playerThing.Transform.Basis * wishdir;
+		wishdir = playerInfo.Transform.Basis * wishdir;
 		wishdir = wishdir.Normalized();
 
 		float wishspeed = wishdir.Length();
@@ -362,7 +362,7 @@ public partial class PlayerControls : Node3D
 		SetMovementDir();
 
 		wishdir = new Vector3(cMove.sidewaysSpeed, 0, cMove.forwardSpeed);
-		wishdir = playerThing.Transform.Basis * wishdir;
+		wishdir = playerInfo.Transform.Basis * wishdir;
 		float wishspeed = wishdir.Length();
 		wishspeed *= moveSpeed;
 

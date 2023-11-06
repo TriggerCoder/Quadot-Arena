@@ -6,7 +6,7 @@ public partial class PlayerCamera : Node3D
 	[Export]
 	public PlayerControls playerControls;
 	[Export]
-	public Camera3D SkyboxCamera;
+	public Camera3D ThirdPerson;
 	[Export]
 	public Camera3D SkyholeCamera;
 	[Export]

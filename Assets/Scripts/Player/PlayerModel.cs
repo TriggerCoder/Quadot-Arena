@@ -17,6 +17,7 @@ public partial class PlayerModel : Node3D
 
 	private int airFrames = 0;
 	private const int readyToLand = 25;
+	private uint currentLayer;
 	public bool enableOffset { get { return _enableOffset; } set { _enableOffset = value; } }
 	public bool isGrounded { get { return _isGrounded; } set { if ((!_isGrounded) && (!value)) { airFrames++; if (airFrames > readyToLand) airFrames = readyToLand; } else airFrames = 0; _isGrounded = value; } }
 
@@ -136,7 +137,8 @@ public partial class PlayerModel : Node3D
 	private float lowerLerpTime = 0;
 	private float lowerCurrentLerpTime = 0;
 
-	private Vector3 turnTo = Vector3.Zero;
+	private Quaternion turnTo = new Quaternion(0, 0, 0, 0);
+	private List<MeshInstance3D> modelsMeshes = new List<MeshInstance3D>();
 
 	private int hitpoints = 50;
 
@@ -194,9 +196,7 @@ public partial class PlayerModel : Node3D
 		}
 
 		if (turnTo.LengthSquared() > 0)
-		{
-//			playerTransform.forward = Vector3.Slerp(playerTransform.forward, turnTo, rotationFPS * deltaTime);
-		}
+			playerModel.Quaternion = playerModel.Quaternion.Slerp(turnTo, rotationFPS * deltaTime);
 
 		{
 			nextUpper = upperAnim[upperAnimation];
@@ -272,8 +272,8 @@ public partial class PlayerModel : Node3D
 							{
 								if (turnTo.LengthSquared() > 0)
 								{
-//									playerTransform.forward = turnTo;
-									turnTo = Vector3.Zero;
+									playerModel.Quaternion = turnTo;
+									turnTo = new Quaternion(0, 0, 0, 0);
 								}
 								lowerAnimation = LowerAnimation.Idle;
 								_enableOffset = true;
@@ -323,15 +323,12 @@ public partial class PlayerModel : Node3D
 
 				tagHeadNode.Position = currentOffset;
 				tagHeadNode.Basis = new Basis(currentRotation);
-//				tagHeadTransform.SetLocalPositionAndRotation(currentOffset, currentRotation);
 
 				currentOffset = baseRotation * weaponOrigin;
 				currentRotation = baseRotation * weaponRotation;
 
 				weaponNode.Position = currentOffset;
 				weaponNode.Basis = new Basis(currentRotation);
-//				weaponTransform.SetLocalPositionAndRotation(currentOffset, currentRotation);
-
 
 //				if ((_enableOffset) || (ownerDead))
 				Position = lowerTorsoOrigin;
@@ -391,15 +388,14 @@ public partial class PlayerModel : Node3D
 		if (!_enableOffset)
 			return;
 
-		float vView = viewDirection.X;
-		float hView = viewDirection.Y;
+		float vView = -viewDirection.X;
+		float hView = viewDirection.Y - Mathf.RadToDeg(Quaternion.GetEuler().Y);
 
-		headBody.Basis = new Basis(headBody.Basis.GetRotationQuaternion().Slerp(Quaternion.FromEuler(new Vector3(0, hView + 90, vView)), rotationFPS * deltaTime));
-
+		headBody.Quaternion = headBody.Quaternion.Slerp(Quaternion.FromEuler(new Vector3(0, Mathf.DegToRad(hView), Mathf.DegToRad(vView))), rotationFPS * deltaTime);
 		int vAngle = (int)Mathf.Round((vView) / (360) * 32) % 32;
-		int hAngle = (int)Mathf.Round((hView + 90) / (360) * 32) % 32;
+		int hAngle = (int)Mathf.Round((hView) / (360) * 32) % 32;
 
-		upperBody.Basis = new Basis(upperBody.Basis.GetRotationQuaternion().Slerp(Quaternion.FromEuler(new Vector3(0, 11.25f * hAngle, 7.5f * vAngle)), rotationFPS * deltaTime));
+		upperBody.Quaternion = upperBody.Quaternion.Slerp(Quaternion.FromEuler(new Vector3(0, Mathf.DegToRad(11.25f * hAngle), Mathf.DegToRad(7.5f * vAngle))), rotationFPS * deltaTime);
 
 	}
 
@@ -410,16 +406,12 @@ public partial class PlayerModel : Node3D
 
 		Vector3 forward = Basis.Z;
 		int angle = (int)Mathf.Round((Mathf.Atan2(direction.X, direction.Z)) / (Mathf.Pi * 2) * 8) % 8;
-
-		//Player Models are rotated 90deg
-		angle += 2;
-		direction = Quaternion.FromEuler(new Vector3(0f, angle * 45f, 0f)) * Vector3.Forward;
+		Quaternion dir = Quaternion.FromEuler(new Vector3(0f, Mathf.DegToRad(angle * 45f), 0f));
 
 		angle = (int)Mathf.Round(((Mathf.Atan2((forward.Z * direction.X) - (direction.Z * forward.X), (forward.X * direction.X) + (forward.Z * direction.Z)))) / (Mathf.Pi * 2) * 8) % 8;
-
 		if (angle != 0)
 		{
-			turnTo = direction;
+			turnTo = dir;
 			if (lowerAnimation == LowerAnimation.Idle)
 				lowerAnimation = LowerAnimation.Turn;
 		}
@@ -567,9 +559,9 @@ public partial class PlayerModel : Node3D
 					break;
 			}
 			if (sideMove > 0)
-				rotate = new Quaternion(Basis.Y, 30f);
+				rotate = new Quaternion(Basis.Y, Mathf.DegToRad(-30f));
 			else if (sideMove < 0)
-				rotate = new Quaternion(Basis.Y, -30f);
+				rotate = new Quaternion(Basis.Y, Mathf.DegToRad(30f));
 		}
 		else if (forwardMove > 0)
 		{
@@ -587,9 +579,9 @@ public partial class PlayerModel : Node3D
 					break;
 			}
 			if (sideMove > 0)
-				rotate = new Quaternion(Basis.Y, -30f);
+				rotate = new Quaternion(Basis.Y, Mathf.DegToRad(30f));
 			else if (sideMove < 0)
-				rotate = new Quaternion(Basis.Y, 30f);
+				rotate = new Quaternion(Basis.Y, Mathf.DegToRad(-30f));
 		}
 		else if (sideMove != 0)
 		{
@@ -607,9 +599,9 @@ public partial class PlayerModel : Node3D
 					break;
 			}
 			if (sideMove > 0)
-				rotate = new Quaternion(Basis.Y, 50f);
+				rotate = new Quaternion(Basis.Y, Mathf.DegToRad(-50f));
 			else if (sideMove < 0)
-				rotate = new Quaternion(Basis.Y, -50f);
+				rotate = new Quaternion(Basis.Y, Mathf.DegToRad(50f));
 		}
 		else if (lowerAnimation != LowerAnimation.Turn)
 		{
@@ -644,6 +636,7 @@ public partial class PlayerModel : Node3D
 		if (weaponModel != null)
 			if (weaponModel.node != null)
 			{
+				RemoveAllMeshInstance3D(weaponNode);
 				weaponModel.node.QueueFree();
 				weaponModel.node = null;
 			}
@@ -658,12 +651,11 @@ public partial class PlayerModel : Node3D
 			weapon = newWeapon;
 
 		if (weapon.readySurfaceArray.Count == 0)
-			weaponModel = Mesher.GenerateModelFromMeshes(weapon);
+			weaponModel = Mesher.GenerateModelFromMeshes(weapon, currentLayer);
 		else
-			weaponModel = Mesher.FillModelFromProcessedData(weapon);
+			weaponModel = Mesher.FillModelFromProcessedData(weapon, currentLayer);
 		weaponModel.node.Name = "weapon";
 		weaponNode.AddChild(weaponModel.node);
-//		weaponModel.go.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
 		if (!string.IsNullOrEmpty(completeModelName))
 		{
@@ -671,22 +663,21 @@ public partial class PlayerModel : Node3D
 			barrel = new Node3D();
 			barrel.Name = "barrel_weapon";
 			if (newWeapon.readySurfaceArray.Count == 0)
-				Mesher.GenerateModelFromMeshes(newWeapon, GameManager.AllPlayerViewMask, barrel);
+				Mesher.GenerateModelFromMeshes(newWeapon, currentLayer, barrel);
 			else
-				Mesher.FillModelFromProcessedData(newWeapon, GameManager.AllPlayerViewMask, barrel);
+				Mesher.FillModelFromProcessedData(newWeapon, currentLayer, barrel);
 			weaponModel.node.AddChild(barrel);
 
 			if (weapon.tagsIdbyName.TryGetValue("tag_barrel", out int tagId))
 				OffSet = weapon.tagsbyId[tagId][0].origin;
 			barrel.Position = OffSet;
-//			barrel.transform.SetLocalPositionAndRotation(OffSet, Quaternion.identity);
 		}
 
 		upperAnimation = UpperAnimation.Raise;
 
 		if (!string.IsNullOrEmpty(muzzleModelName))
 		{
-			MD3GodotConverted muzzleUnityConverted;
+			MD3GodotConverted muzzleGodotConverted;
 			Vector3 OffSet = Vector3.Zero;
 			MD3 weaponModelTags;
 			muzzleFlash = new Node3D();
@@ -697,9 +688,9 @@ public partial class PlayerModel : Node3D
 				return;
 
 			if (muzzle.readySurfaceArray.Count == 0)
-				muzzleUnityConverted = Mesher.GenerateModelFromMeshes(muzzle, GameManager.AllPlayerViewMask, muzzleFlash, true);
+				muzzleGodotConverted = Mesher.GenerateModelFromMeshes(muzzle, currentLayer, muzzleFlash, true);
 			else
-				muzzleUnityConverted = Mesher.FillModelFromProcessedData(muzzle, GameManager.AllPlayerViewMask, muzzleFlash);
+				muzzleGodotConverted = Mesher.FillModelFromProcessedData(muzzle, currentLayer, muzzleFlash);
 
 			//Muzzle Flash never cast shadow
 //			for (int i = 0; i < muzzle.readyMeshes.Count; i++)
@@ -721,11 +712,8 @@ public partial class PlayerModel : Node3D
 				OffSet = weaponModelTags.tagsbyId[tagId][0].origin;
 			muzzleFlash.Position = OffSet;
 			muzzleFlash.Visible = false;
-//			muzzleFlash.transform.SetLocalPositionAndRotation(OffSet, Quaternion.Identity);
-//			muzzleFlash.SetActive(false);
 		}
-
-//		GameManager.SetLayerAllChildren(weaponTransform, layer);
+		AddAllMeshInstance3D(weaponNode);
 	}
 
 	public void UnloadWeapon()
@@ -736,6 +724,7 @@ public partial class PlayerModel : Node3D
 		if (weaponModel != null)
 			if (weaponModel.node != null)
 			{
+				RemoveAllMeshInstance3D(weaponNode);
 				weaponModel.node.QueueFree();
 				weaponModel.node = null;
 			}
@@ -812,24 +801,24 @@ public partial class PlayerModel : Node3D
 			tagHeadNode.AddChild(headBody);
 
 			if (upper.readySurfaceArray.Count == 0)
-				upperModel = Mesher.GenerateModelFromMeshes(upper, meshToSkin);
+				upperModel = Mesher.GenerateModelFromMeshes(upper, meshToSkin, layer);
 			else
-				upperModel = Mesher.FillModelFromProcessedData(upper, meshToSkin);
+				upperModel = Mesher.FillModelFromProcessedData(upper, meshToSkin, layer);
 			upperModel.node.Name = "upper_body";
 			upperBody.AddChild(upperModel.node);
 
 			if (head.readySurfaceArray.Count == 0)
-				headModel = Mesher.GenerateModelFromMeshes(head, meshToSkin);
+				headModel = Mesher.GenerateModelFromMeshes(head, meshToSkin, layer);
 			else
-				headModel = Mesher.FillModelFromProcessedData(head, meshToSkin);
+				headModel = Mesher.FillModelFromProcessedData(head, meshToSkin, layer);
 
 			headModel.node.Name = "head";
 			headBody.AddChild(headModel.node);
 
 			if (lower.readySurfaceArray.Count == 0)
-				lowerModel = Mesher.GenerateModelFromMeshes(lower, meshToSkin);
+				lowerModel = Mesher.GenerateModelFromMeshes(lower, meshToSkin, layer);
 			else
-				lowerModel = Mesher.FillModelFromProcessedData(lower, meshToSkin);
+				lowerModel = Mesher.FillModelFromProcessedData(lower, meshToSkin, layer);
 			lowerModel.node.Name = "lower_body";
 			lowerNode = lowerModel.node;
 			playerModel.AddChild(lowerModel.node);
@@ -837,8 +826,32 @@ public partial class PlayerModel : Node3D
 			loaded = true;
 		}
 		playerControls = control;
-
+		currentLayer = layer;
+		AddAllMeshInstance3D(playerModel);
 		return true;
+	}
+
+	private void AddAllMeshInstance3D(Node parent)
+	{		
+		var Childrens = GameManager.GetAllChildrens(parent);
+		foreach(var child in Childrens)
+		{
+			if (child is MeshInstance3D mesh)
+				modelsMeshes.Add(mesh);
+		}
+	}
+	private void RemoveAllMeshInstance3D(Node parent)
+	{
+		var Childrens = GameManager.GetAllChildrens(parent);
+		foreach (var child in Childrens)
+		{
+			if (child is MeshInstance3D mesh)
+			{
+				if (!modelsMeshes.Contains(mesh))
+					continue;
+				modelsMeshes.Remove(mesh);
+			}
+		}
 	}
 
 	private bool LoadAnimations(string fileName, List<ModelAnimation> upper, List<ModelAnimation> lower)
@@ -925,16 +938,16 @@ public partial class PlayerModel : Node3D
 			name = strWord.Split(separators);
 			animations[currentAnim].strName = name[0];
 
-			if (IsInString(animations[currentAnim].strName, "BOTH"))
+			if (animations[currentAnim].strName.Contains("BOTH"))
 			{
 				upper.Add(animations[currentAnim]);
 				lower.Add(animations[currentAnim]);
 			}
-			else if (IsInString(animations[currentAnim].strName, "TORSO"))
+			else if (animations[currentAnim].strName.Contains("TORSO"))
 			{
 				upper.Add(animations[currentAnim]);
 			}
-			else if (IsInString(animations[currentAnim].strName, "LEGS"))
+			else if (animations[currentAnim].strName.Contains("LEGS"))
 			{
 				if (torsoOffset == 0)
 					torsoOffset = animations[(int)UpperAnimation.Stand2 + 1].startFrame - animations[(int)LowerAnimation.WalkCR].startFrame;
@@ -1012,36 +1025,26 @@ public partial class PlayerModel : Node3D
 			return false;
 		}
 
-		// These 2 variables are for reading in each line from the file, then storing
-		// the index of where the bitmap name starts after the ',' character.
 		string strLine;
 		int textureNameStart = 0;
 
-		// Go through every line in the .skin file
 		while (!SkinFile.EndOfStream)
 		{
 			strLine = SkinFile.ReadLine();
 
-			// Loop through all of our objects to test if their name is in this line
 			for (int i = 0; i < model.meshes.Count; i++)
 			{
-				// Check if the name of this mesh appears in this line from the skin file
-				if (IsInString(strLine, model.meshes[i].name))
+				if (strLine.Contains(model.meshes[i].name))
 				{
-					// To abstract the texture name, we loop through the string, starting
-					// at the end of it until we find a '/' character, then save that index + 1.
 					for (int j = strLine.Length - 1; j > 0; j--)
 					{
-						// If this character is a ',', save the index + 1
 						if (strLine[j] == ',')
 						{
-							// Save the index + 1 (the start of the texture name) and break
 							textureNameStart = j + 1;
 							break;
 						}
 					}
 					string skin = strLine.Substring(textureNameStart);
-					//Need to strip extension
 					string[] fullName = skin.Split('.');
 
 					//Check if skin texture exist, if not add it
@@ -1054,22 +1057,5 @@ public partial class PlayerModel : Node3D
 		}
 		SkinFile.Close();
 		return true;
-	}
-
-	private bool IsInString(string strString, string strSubString)
-	{
-		// Make sure both of these strings are valid, return false if any are empty
-		if (string.IsNullOrEmpty(strString) || string.IsNullOrEmpty(strSubString))
-			return false;
-
-		// grab the starting index where the sub string is in the original string
-		uint index = (uint)strString.IndexOf(strSubString);
-
-		// Make sure the index returned was valid
-		if (index >= 0 && index < strString.Length)
-			return true;
-
-		// The sub string does not exist in strString.
-		return false;
 	}
 }

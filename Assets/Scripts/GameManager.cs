@@ -80,7 +80,7 @@ public partial class GameManager : Node
 
 	//Rendering Masks
 	public const int InvisibleMask = 0;
-	public const int AllPlayerViewMask = ((1 << Player1ViewLayer) | (1 << Player2ViewLayer) | (1 << Player3ViewLayer) | (1 << Player4ViewLayer) | (1 << Player5ViewLayer) | (1 << Player6ViewLayer) | (1 << Player7ViewLayer) | (1 << Player8ViewLayer));
+	public const uint AllPlayerViewMask = ((1 << Player1ViewLayer) | (1 << Player2ViewLayer) | (1 << Player3ViewLayer) | (1 << Player4ViewLayer) | (1 << Player5ViewLayer) | (1 << Player6ViewLayer) | (1 << Player7ViewLayer) | (1 << Player8ViewLayer));
 
 	public bool paused = true;
 	public static bool Paused { get { return Instance.paused; } }
@@ -190,5 +190,16 @@ public partial class GameManager : Node
 		var viewPortRID = viewPort.GetViewportRid();
 //		camera.Reparent(viewPort);
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
+	}
+
+	public static List<Node> GetAllChildrens(Node parent)
+	{
+		List<Node> list = new List<Node>();
+
+		var Childrens = parent.GetChildren();
+		list.AddRange(Childrens);
+		foreach (var child in Childrens)
+			list.AddRange(GetAllChildrens(child));
+		return list;
 	}
 }
