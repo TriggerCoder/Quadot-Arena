@@ -261,13 +261,12 @@ public static class QShaderManager
 			code += "\tEMISSION = mix((Stage_" + lightmapStage + ".rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n";
 		else
 			code += "\tEMISSION = mix((ambient.rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n";
-		
 
 		if (alphaIsTransparent)
 			code += "\tALPHA = color.a * vertx_color.a;\n";
 		code += "}\n\n";
 
-		if (upperName.Contains("MACHAMMO"))
+		if (upperName.Contains("ARMOR"))
 			GD.Print(code);
 
 		Shader shader = new Shader();
@@ -530,6 +529,9 @@ public static class QShaderManager
 					case "GL_ONE":
 						cdst = " 1.0 ";
 						adst = " 1.0 ";
+						//Horrible hack
+						if (currentStage == 0)
+							alphaIsTransparent = true;
 						break;
 					case "GL_ZERO":
 						cdst = " 0.0 ";
@@ -573,32 +575,32 @@ public static class QShaderManager
 						}
 						else
 						{
-							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
-							Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + "; \n";
+							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
+							Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
 						}
 					}
 					else if ((src == "GL_ZERO") && (dst == "GL_ONE_MINUS_SRC_COLOR"))
 					{
-						Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
+						Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
 						Blend += "\tcolor.a = Stage_" + currentStage + ".a; \n";
 					}
 					else
 					{
-						Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
-						Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + "; \n";
+						Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
+						Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
 					}
 				}
 				else
 				{
-					Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
-					Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + "; \n";
+					Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
+					Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
 				}
 			}
 		}
 		else
-			Blend = "\tcolor = Stage_" + currentStage + "; \n";
+			Blend = "\tcolor = Stage_" + currentStage + ";\n";
 
-		Blend += "\tcolor = clamp(color,black,white); \n";
+		Blend += "\tcolor = clamp(color,black,white);\n";
 		return Blend;
 	}
 

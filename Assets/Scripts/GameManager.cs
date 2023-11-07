@@ -99,9 +99,17 @@ public partial class GameManager : Node
 	private Godot.Environment environment;
 	private Color ambientLightColor;
 
-	public bool ready = false;
 	public int skipFrames = 5;
 	public Node3D TemporaryObjectsHolder;
+
+	public enum FuncState
+	{
+		None,
+		Ready,
+		Start
+	}
+
+	private FuncState currentState = FuncState.None;
 	public override void _Ready()
 	{
 		GD.Randomize();
@@ -127,7 +135,7 @@ public partial class GameManager : Node
 			MapLoader.GenerateSurfaces();
 			ThingsManager.AddThingsToMap();
 		}
-		ready = true;
+		currentState = FuncState.Start;
 		return;
 	}
 
@@ -168,15 +176,20 @@ public partial class GameManager : Node
 			timeMs += (float)delta;
 			RenderingServer.GlobalShaderParameterSet("MsTime", CurrentTimeMsec);
 		}
-		//skip frames are used to easen up deltaTime after loading
-		if (ready)
+
+		switch(currentState)
 		{
-			if (skipFrames > 0)
-			{
-				skipFrames--;
-				if (skipFrames == 0)
-					paused = false;
-			}
+			default:
+			break;
+			case FuncState.Start:
+				//skip frames are used to easen up deltaTime after loading
+				if (skipFrames > 0)
+				{
+					skipFrames--;
+					if (skipFrames == 0)
+						paused = false;
+				}
+			break;
 		}
 	}
 

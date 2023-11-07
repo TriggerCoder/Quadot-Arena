@@ -93,6 +93,7 @@ public static class SoundManager
 		
 		parent.AddChild(sound);
 		sound.GlobalPosition = position;
+		sound.Bus = "FXBus";
 		sound.Stream = audio;
 		sound.DestroyAfterSoundPlayed = destroyAfterSound;
 		sound.Play();

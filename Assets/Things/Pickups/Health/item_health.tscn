@@ -1,0 +1,66 @@
+[gd_scene load_steps=9 format=3 uid="uid://1aju6wu5vmtu"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_f4lh1"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_64n7k"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="3_4xfec"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="4_g62si"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_gm74f"]
+
+[sub_resource type="Resource" id="Resource_h1upd"]
+script = ExtResource("4_g62si")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_sejmd"]
+script = ExtResource("4_g62si")
+fps = 0.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+
+[node name="item_health" type="Node3D"]
+script = ExtResource("1_f4lh1")
+respawnTime = 15.0
+thingType = 2
+
+[node name="Sphere" type="Node3D" parent="."]
+script = ExtResource("3_4xfec")
+modelName = "powerups/health/medium_sphere"
+modelAnimation = SubResource("Resource_h1upd")
+textureAnimation = SubResource("Resource_sejmd")
+
+[node name="NodeAnimation" type="Node3D" parent="Sphere"]
+script = ExtResource("2_64n7k")
+rotEnable = true
+rotFPS = 20.0
+rotClockwise = true
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Cross" type="Node3D" parent="."]
+script = ExtResource("3_4xfec")
+modelName = "powerups/health/medium_cross"
+modelAnimation = SubResource("Resource_h1upd")
+textureAnimation = SubResource("Resource_sejmd")
+
+[node name="NodeAnimation" type="Node3D" parent="Cross"]
+script = ExtResource("2_64n7k")
+rotEnable = true
+rotFPS = 100.0
+rotClockwise = true
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("5_gm74f")
+thingController = NodePath("..")
+amount = 25
+PickupSound = "items/n_health"
+PickupIcon = "icons/iconh_yellow"
+PickupText = "25 Health"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

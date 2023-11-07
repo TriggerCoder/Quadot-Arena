@@ -18,6 +18,8 @@ public partial class ItemPickup : Area3D
 		Bfgammo,
 	}
 	[Export]
+	public ThingController thingController;
+	[Export]
 	public ItemType itemType;
 	[Export]
 	public int amount;
@@ -31,8 +33,16 @@ public partial class ItemPickup : Area3D
 	public string PickupIcon;
 	[Export]
 	public string PickupText;
-	void OnItemPickupBodyEntered(PhysicsBody3D other)
+
+	public override void _Ready()
 	{
+		BodyEntered += OnBodyEntered;
+	}
+	void OnBodyEntered(Node3D other)
+	{
+		if (thingController.disabled)
+			return;
+
 		if (other is PlayerThing player)
 		{
 			//Dead player don't pick up stuff
@@ -181,10 +191,9 @@ public partial class ItemPickup : Area3D
 			if (disable)
 			{
 //				player.playerInfo.playerHUD.pickupFlashTime = .5f;
-
+				thingController.DisableThing();
 				if (!string.IsNullOrEmpty(PickupSound))
-					SoundManager.Create3DSound(Position, SoundManager.LoadSound(PickupSound));
-
+					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(PickupSound));
 //				player.playerInfo.playerHUD.HUDUpdateAmmoNum();
 //				player.playerInfo.playerHUD.HUDUpdateHealthNum();
 //				player.playerInfo.playerHUD.HUDUpdateArmorNum();
