@@ -1,0 +1,37 @@
+[gd_scene load_steps=7 format=3 uid="uid://vbdxg44bm8su"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/DestroyAfterTime.cs" id="1_36ujv"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="1_ntifi"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="2_q37bc"]
+
+[sub_resource type="Resource" id="Resource_3dopq"]
+script = ExtResource("2_q37bc")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_u44j0"]
+script = ExtResource("2_q37bc")
+fps = 0.0
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_h38lu"]
+radius = 0.015
+height = 0.12
+
+[node name="MachineGunAmmoCase" type="RigidBody3D"]
+collision_layer = 32768
+collision_mask = 32772
+input_ray_pickable = false
+mass = 0.1
+
+[node name="DestroyAfterTime" type="Node" parent="."]
+script = ExtResource("1_36ujv")
+destroyTimer = 10.0
+
+[node name="Case" type="Node3D" parent="."]
+script = ExtResource("1_ntifi")
+modelName = "weapons2/shells/m_shell"
+castShadow = false
+modelAnimation = SubResource("Resource_3dopq")
+textureAnimation = SubResource("Resource_u44j0")
+
+[node name="Capsule" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_h38lu")

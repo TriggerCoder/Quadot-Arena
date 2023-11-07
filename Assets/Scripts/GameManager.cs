@@ -94,6 +94,8 @@ public partial class GameManager : Node
 	public float terminalVelocity = 100f;
 	public float barrierVelocity = 1024f;
 
+	public float PlayerDamageReceive = 1f;
+	public int PlayerAmmoReceive = 1;
 	private Godot.Environment environment;
 	private Color ambientLightColor;
 
@@ -123,6 +125,7 @@ public partial class GameManager : Node
 			ClusterPVSManager.Instance.ResetClusterList();
 			MapLoader.GenerateMapCollider();
 			MapLoader.GenerateSurfaces();
+			ThingsManager.AddThingsToMap();
 		}
 		ready = true;
 		return;

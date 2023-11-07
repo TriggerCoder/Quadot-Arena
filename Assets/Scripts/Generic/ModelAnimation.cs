@@ -105,7 +105,8 @@ public partial class ModelAnimation : Node3D
 				materials.Add(i, frames);
 			}
 		}
-
+		if ((modelAnimation.fps == 0) && (textureAnimation.fps == 0))
+			SetProcess(false);
 		modelCurrentFrame = 0;
 	}
 

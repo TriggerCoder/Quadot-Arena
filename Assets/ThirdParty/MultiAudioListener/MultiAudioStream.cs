@@ -7,7 +7,7 @@ public partial class MultiAudioStream : Node3D
 	//Properties from the normal AudioStreamPlayer3D
 
 	private AudioStream _stream = null;
-
+	[Export]
 	public AudioStream Stream
 	{
 		get { return _stream; }
@@ -22,6 +22,7 @@ public partial class MultiAudioStream : Node3D
 	}
 
 	private uint _areaMask = 1;
+	[Export]
 	public uint AreaMask
 	{
 		get { return _areaMask; }
@@ -36,6 +37,7 @@ public partial class MultiAudioStream : Node3D
 	}
 
 	private float _attenuationFilterCutoffHz = 5000.0f;
+	[Export]
 	public float AttenuationFilterCutoffHz
 	{
 		get { return _attenuationFilterCutoffHz; }
@@ -50,6 +52,7 @@ public partial class MultiAudioStream : Node3D
 	}
 
 	private float _attenuationFilterDb = -24.0f;
+	[Export]
 	public float AttenuationFilterDb
 	{
 		get { return _attenuationFilterDb; }
@@ -64,6 +67,7 @@ public partial class MultiAudioStream : Node3D
 	}
 
 	private AudioStreamPlayer3D.AttenuationModelEnum _attenuationModel = AudioStreamPlayer3D.AttenuationModelEnum.InverseDistance;
+	[Export]
 	public AudioStreamPlayer3D.AttenuationModelEnum AttenuationModel
 	{
 		get { return _attenuationModel; }
@@ -78,6 +82,7 @@ public partial class MultiAudioStream : Node3D
 	}
 
 	private string _bus = "Master";
+	[Export]
 	public string Bus
 	{
 		get { return _bus; }
@@ -92,6 +97,7 @@ public partial class MultiAudioStream : Node3D
 	}
 
 	private float _emissionAngleDegrees = 45.0f;
+	[Export]
 	public float EmissionAngleDegrees
 	{
 		get { return _emissionAngleDegrees; }
@@ -106,6 +112,7 @@ public partial class MultiAudioStream : Node3D
 	}
 
 	private bool _emissionAngleEnabled = false;
+	[Export]
 	public bool EmissionAngleEnabled
 	{
 		get { return _emissionAngleEnabled; }
@@ -120,6 +127,7 @@ public partial class MultiAudioStream : Node3D
 	}
 
 	private float _emissionAngleFilterAttenuationDb = -12.0f;
+	[Export]
 	public float EmissionAngleFilterAttenuationDb
 	{
 		get { return _emissionAngleFilterAttenuationDb; }
@@ -134,6 +142,7 @@ public partial class MultiAudioStream : Node3D
 	}
 
 	private float _maxDb = 3.0f;
+	[Export]
 	public float MaxDb
 	{
 		get { return _maxDb; }
@@ -148,6 +157,7 @@ public partial class MultiAudioStream : Node3D
 	}
 	
 	private float _maxDistance = 0.0f;
+	[Export]
 	public float MaxDistance
 	{
 		get { return _maxDistance; }
@@ -162,6 +172,7 @@ public partial class MultiAudioStream : Node3D
 	}
 	
 	private int _maxPolyphony = 1;
+	[Export]
 	public int MaxPolyphony
 	{
 		get { return _maxPolyphony; }
@@ -176,6 +187,7 @@ public partial class MultiAudioStream : Node3D
 	}
 	
 	private float _panningStrength = 1.0f;
+	[Export]
 	public float PanningStrength
 	{
 		get { return _panningStrength; }
@@ -190,6 +202,7 @@ public partial class MultiAudioStream : Node3D
 	}
 	
 	private float _pitchScale = 1.0f;
+	[Export]
 	public float PitchScale
 	{
 		get { return _pitchScale; }
@@ -204,6 +217,7 @@ public partial class MultiAudioStream : Node3D
 	}
 	
 	private float _unitSize = 10.0f;
+	[Export]
 	public float UnitSize
 	{
 		get { return _unitSize; }
@@ -218,6 +232,7 @@ public partial class MultiAudioStream : Node3D
 	}
 
 	private float _volumeDb = 0.0f;
+	[Export]
 	public float VolumeDb
 	{
 		get { return _volumeDb; }

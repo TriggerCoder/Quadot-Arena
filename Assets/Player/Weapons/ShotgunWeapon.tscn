@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3 uid="uid://impqrfmfsvha"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/ShotgunWeapon.cs" id="1_en8eg"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_ebg2o"]
+
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("audioStream", "muzzleLight")]
+script = ExtResource("1_en8eg")
+Offset = Vector3(0.2, -0.2, 0.14)
+audioStream = NodePath("WeaponAudioStream")
+_sounds = PackedStringArray("weapons/shotgun/sshotf1b", "weapons/noammo", "weapons/change")
+UIModelName = "weapons2/shotgun/shotgun"
+MuzzleModelName = "weapons2/shotgun/shotgun_flash"
+DamageMin = 8
+DamageMax = 11
+_fireRate = 0.95
+muzzleLight = NodePath("OmniLight3D")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+layers = 255
+light_color = Color(1, 0.686275, 0, 1)
+light_bake_mode = 0
+omni_shadow_mode = 0
+
+[node name="WeaponAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_ebg2o")
+Bus = "FXBus"

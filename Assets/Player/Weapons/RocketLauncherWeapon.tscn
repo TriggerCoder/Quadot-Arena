@@ -7,7 +7,7 @@
 script = ExtResource("1_wifqd")
 AttackProjectileName = "RocketProjectile"
 Offset = Vector3(0.2, -0.3, 0.2)
-audioStream = NodePath("MultiAudioStream")
+audioStream = NodePath("WeaponAudioStream")
 _sounds = PackedStringArray("weapons/rocket/rocklf1a", "weapons/noammo", "weapons/change")
 UIModelName = "weapons2/rocketl/rocketl"
 MuzzleModelName = "weapons2/rocketl/rocketl_flash"
@@ -21,5 +21,6 @@ light_color = Color(1, 0.686275, 0, 1)
 light_bake_mode = 0
 omni_shadow_mode = 0
 
-[node name="MultiAudioStream" type="Node3D" parent="."]
+[node name="WeaponAudioStream" type="Node3D" parent="."]
 script = ExtResource("2_laujj")
+Bus = "FXBus"

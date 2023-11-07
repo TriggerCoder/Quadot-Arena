@@ -5,7 +5,7 @@
 
 [node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("audioStream", "muzzleLight")]
 script = ExtResource("1_pbxxv")
-audioStream = NodePath("MultiAudioStream")
+audioStream = NodePath("WeaponAudioStream")
 _sounds = PackedStringArray("weapons/machinegun/machgf1b", "weapons/noammo", "weapons/change", "weapons/machinegun/ric1", "weapons/machinegun/ric2", "weapons/machinegun/ric3")
 UIModelName = "weapons2/machinegun/machinegun_barrel"
 CompleteModelName = "weapons2/machinegun/machinegun"
@@ -20,5 +20,6 @@ light_color = Color(1, 0.686275, 0, 1)
 light_bake_mode = 0
 omni_shadow_mode = 0
 
-[node name="MultiAudioStream" type="Node3D" parent="."]
+[node name="WeaponAudioStream" type="Node3D" parent="."]
 script = ExtResource("2_450qi")
+Bus = "FXBus"

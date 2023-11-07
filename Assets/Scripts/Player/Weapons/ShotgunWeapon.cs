@@ -1,24 +1,21 @@
 using Godot;
 using System;
-using System.Diagnostics;
 
-public partial class MachineGunWeapon : PlayerWeapon
+public partial class ShotgunWeapon : PlayerWeapon
 {
-	public override float avgDispersion { get { return .017f; } } // tan(2) / 2
-	public override float maxDispersion { get { return .049f; } } // tan(5.6) / 2
+	public override float avgDispersion { get { return .049f; } } // tan(4) / 2
+	public override float maxDispersion { get { return .062f; } } //tan(7.1) / 2
 
-	public string caseName = "MachineGunAmmoCase";
+	public string caseName = "ShotgunShell";
 	public string onDeathSpawn = "BulletHit";
-	public string decalMark = "BulletMark";
+	public string decalMark = "ShotMark";
+
+	public float vDispersion = .7f;
 	public float maxRange = 400f;
-
-	public float barrelSpeed = 10;
-
-	private float currentRotSpeed = 0;
-
+	public float pushForce = 350;
 	protected override void OnUpdate()
 	{
-		if (playerInfo.Ammo[0] <= 0 && fireTime < .1f)
+		if (playerInfo.Ammo[1] <= 0 && fireTime < .1f)
 		{
 			if ((!putAway) && (Sounds.Length > 1))
 			{
@@ -47,10 +44,10 @@ public partial class MachineGunWeapon : PlayerWeapon
 		if (fireTime > 0.05f)
 			return false;
 
-		if (playerInfo.Ammo[0] <= 0)
+		if (playerInfo.Ammo[1] <= 0)
 			return false;
 
-		playerInfo.Ammo[0]--;
+		playerInfo.Ammo[1]--;
 
 		if (GameOptions.UseMuzzleLight)
 		{
@@ -74,11 +71,13 @@ public partial class MachineGunWeapon : PlayerWeapon
 			audioStream.Stream = Sounds[0];
 			audioStream.Play();
 		}
-		
+
 		//Hitscan attack
+		Transform3D global = playerInfo.playerCamera.CurrentCamera.GlobalTransform;
+		Vector3 d = global.Basis.Z;
+
+		for (int i = 0; i < 11; i++)
 		{
-			Transform3D global = playerInfo.playerCamera.CurrentCamera.GlobalTransform;
-			Vector3 d = global.Basis.Z;
 			Vector2 r = GetDispersion();
 			d += global.Basis.X * r.X + global.Basis.Y * r.Y;
 			d = d.Normalized();
@@ -115,22 +114,14 @@ public partial class MachineGunWeapon : PlayerWeapon
 		//Case Drop
 		if (!string.IsNullOrEmpty(caseName))
 		{
-			RigidBody3D ammocase = (RigidBody3D)ThingsManager.thingsPrefabs[caseName].Instantiate();
-			GameManager.Instance.TemporaryObjectsHolder.AddChild(ammocase);
-			ammocase.Position = GlobalPosition;
-			ammocase.Quaternion = new Quaternion(Vector3.Right, currentRotSpeed);
-			ammocase.ApplyImpulse(new Vector3((float)GD.RandRange(-.2f, .02f), (float)GD.RandRange(.2f, .4f), (float)GD.RandRange(-.2f, .2f)));
+			for (int i = 0; i < 2; i++)
+			{
+				RigidBody3D ammocase = (RigidBody3D)ThingsManager.thingsPrefabs[caseName].Instantiate();
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(ammocase);
+				ammocase.Position = GlobalPosition;
+				ammocase.ApplyImpulse(new Vector3((float)GD.RandRange(-.2f, .02f), (float)GD.RandRange(.2f, .4f), (float)GD.RandRange(-.2f, .2f)));
+			}
 		}
 		return true;
-	}
-	protected override Quaternion GetRotate(float deltaTime)
-	{
-		if (fireTime > 0f)
-		{
-			currentRotSpeed += barrelSpeed * deltaTime;
-			if (currentRotSpeed >= 360)
-				currentRotSpeed -= 360;
-		}
-		return new Quaternion(Vector3.Left, currentRotSpeed);
 	}
 }

@@ -267,7 +267,7 @@ public static class QShaderManager
 			code += "\tALPHA = color.a * vertx_color.a;\n";
 		code += "}\n\n";
 
-		if (upperName.Contains("ROCKFL"))
+		if (upperName.Contains("MACHAMMO"))
 			GD.Print(code);
 
 		Shader shader = new Shader();
@@ -470,7 +470,11 @@ public static class QShaderManager
 		{
 			string BlendWhat = qShader.qShaderStages[currentStage].blendFunc[0];
 			if (BlendWhat.Contains("ADD"))
+			{
 				Blend = "\tcolor = Stage_" + currentStage + " + color; \n";
+				if (currentStage == 0)
+					alphaIsTransparent = true;
+			}
 			else if (BlendWhat.Contains("FILTER"))
 				Blend = "\tcolor = Stage_" + currentStage + " * color; \n";
 			else if (BlendWhat.Contains("BLEND"))
@@ -566,6 +570,11 @@ public static class QShaderManager
 							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
 							Blend += "\tcolor.a = 0.5; \n";
 							alphaIsTransparent = true;
+						}
+						else
+						{
+							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
+							Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + "; \n";
 						}
 					}
 					else if ((src == "GL_ZERO") && (dst == "GL_ONE_MINUS_SRC_COLOR"))

@@ -7,7 +7,7 @@
 script = ExtResource("1_suyxv")
 AttackProjectileName = "PlasmaProjectile"
 Offset = Vector3(0.35, -0.35, -0.15)
-audioStream = NodePath("MultiAudioStream")
+audioStream = NodePath("WeaponAudioStream")
 _sounds = PackedStringArray("weapons/plasma/hyprbf1a", "weapons/noammo", "weapons/change")
 UIModelName = "weapons2/plasma/plasma"
 MuzzleModelName = "weapons2/plasma/plasma_flash"
@@ -21,5 +21,6 @@ light_color = Color(0.313726, 0.631373, 0.803922, 1)
 light_bake_mode = 0
 omni_shadow_mode = 0
 
-[node name="MultiAudioStream" type="Node3D" parent="."]
+[node name="WeaponAudioStream" type="Node3D" parent="."]
 script = ExtResource("2_2durh")
+Bus = "FXBus"

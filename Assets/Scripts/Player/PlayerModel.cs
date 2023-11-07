@@ -137,6 +137,7 @@ public partial class PlayerModel : Node3D
 	private float lowerLerpTime = 0;
 	private float lowerCurrentLerpTime = 0;
 
+	private Quaternion QuaternionZero = new Quaternion(0, 0, 0, 0);
 	private Quaternion turnTo = new Quaternion(0, 0, 0, 0);
 	private List<MeshInstance3D> modelsMeshes = new List<MeshInstance3D>();
 
@@ -273,7 +274,7 @@ public partial class PlayerModel : Node3D
 								if (turnTo.LengthSquared() > 0)
 								{
 									playerModel.Quaternion = turnTo;
-									turnTo = new Quaternion(0, 0, 0, 0);
+									turnTo = QuaternionZero;
 								}
 								lowerAnimation = LowerAnimation.Idle;
 								_enableOffset = true;
@@ -831,6 +832,13 @@ public partial class PlayerModel : Node3D
 		return true;
 	}
 
+	public void ChangeLayer(uint layer)
+	{
+		for (int i = 0; i < modelsMeshes.Count; i++)
+			modelsMeshes[i].Layers = layer;
+		currentLayer = layer;
+	}
+
 	private void AddAllMeshInstance3D(Node parent)
 	{		
 		var Childrens = GameManager.GetAllChildrens(parent);
@@ -886,7 +894,7 @@ public partial class PlayerModel : Node3D
 		string strWord;
 		int currentAnim = 0;
 		int torsoOffset = 0;
-		int legsOffset = (int)LowerAnimation.WalkCR + 1;
+		int legsOffset = LowerAnimation.WalkCR + 1;
 		char[] separators = new char[2] { '\t', '(' };
 		while (!animFile.EndOfStream)
 		{
@@ -950,7 +958,7 @@ public partial class PlayerModel : Node3D
 			else if (animations[currentAnim].strName.Contains("LEGS"))
 			{
 				if (torsoOffset == 0)
-					torsoOffset = animations[(int)UpperAnimation.Stand2 + 1].startFrame - animations[(int)LowerAnimation.WalkCR].startFrame;
+					torsoOffset = animations[UpperAnimation.Stand2 + 1].startFrame - animations[LowerAnimation.WalkCR].startFrame;
 
 				animations[currentAnim].startFrame -= torsoOffset;
 				animations[currentAnim].endFrame -= torsoOffset;
@@ -960,37 +968,37 @@ public partial class PlayerModel : Node3D
 			currentAnim++;
 		}
 		//Add Walk Crounched Back 
-		animations[currentAnim] = new ModelAnimation((int)LowerAnimation.WalkCRBack);
-		animations[currentAnim].startFrame = lowerAnim[(int)LowerAnimation.WalkCR].endFrame - 1;
-		animations[currentAnim].endFrame = lowerAnim[(int)LowerAnimation.WalkCR].startFrame - 1;
-		animations[currentAnim].loopingFrames = lowerAnim[(int)LowerAnimation.WalkCR].loopingFrames;
-		animations[currentAnim].fps = lowerAnim[(int)LowerAnimation.WalkCR].fps;
+		animations[currentAnim] = new ModelAnimation(LowerAnimation.WalkCRBack);
+		animations[currentAnim].startFrame = lowerAnim[LowerAnimation.WalkCR].endFrame - 1;
+		animations[currentAnim].endFrame = lowerAnim[LowerAnimation.WalkCR].startFrame - 1;
+		animations[currentAnim].loopingFrames = lowerAnim[LowerAnimation.WalkCR].loopingFrames;
+		animations[currentAnim].fps = lowerAnim[LowerAnimation.WalkCR].fps;
 		animations[currentAnim].nextFrame = -1;
 		lower.Add(animations[currentAnim++]);
 
 		//Add Fall
-		animations[currentAnim] = new ModelAnimation((int)LowerAnimation.Fall);
-		animations[currentAnim].startFrame = lowerAnim[(int)LowerAnimation.Land].endFrame - 1;
-		animations[currentAnim].endFrame = lowerAnim[(int)LowerAnimation.Land].endFrame;
+		animations[currentAnim] = new ModelAnimation(LowerAnimation.Fall);
+		animations[currentAnim].startFrame = lowerAnim[LowerAnimation.Land].endFrame - 1;
+		animations[currentAnim].endFrame = lowerAnim[LowerAnimation.Land].endFrame;
 		animations[currentAnim].loopingFrames = 0;
-		animations[currentAnim].fps = lowerAnim[(int)LowerAnimation.Land].fps;
+		animations[currentAnim].fps = lowerAnim[LowerAnimation.Land].fps;
 		lower.Add(animations[currentAnim++]);
 
 		//Add Walk Back
-		animations[currentAnim] = new ModelAnimation((int)LowerAnimation.WalkBack);
-		animations[currentAnim].startFrame = lowerAnim[(int)LowerAnimation.Walk].endFrame - 1;
-		animations[currentAnim].endFrame = lowerAnim[(int)LowerAnimation.Walk].startFrame - 1;
-		animations[currentAnim].loopingFrames = lowerAnim[(int)LowerAnimation.Walk].loopingFrames;
-		animations[currentAnim].fps = lowerAnim[(int)LowerAnimation.Walk].fps;
+		animations[currentAnim] = new ModelAnimation(LowerAnimation.WalkBack);
+		animations[currentAnim].startFrame = lowerAnim[LowerAnimation.Walk].endFrame - 1;
+		animations[currentAnim].endFrame = lowerAnim[LowerAnimation.Walk].startFrame - 1;
+		animations[currentAnim].loopingFrames = lowerAnim[LowerAnimation.Walk].loopingFrames;
+		animations[currentAnim].fps = lowerAnim[LowerAnimation.Walk].fps;
 		animations[currentAnim].nextFrame = -1;
 		lower.Add(animations[currentAnim++]);
 
 		//Add Fall Back
-		animations[currentAnim] = new ModelAnimation((int)LowerAnimation.FallBack);
-		animations[currentAnim].startFrame = lowerAnim[(int)LowerAnimation.LandBack].endFrame - 1;
-		animations[currentAnim].endFrame = lowerAnim[(int)LowerAnimation.LandBack].endFrame;
+		animations[currentAnim] = new ModelAnimation(LowerAnimation.FallBack);
+		animations[currentAnim].startFrame = lowerAnim[LowerAnimation.LandBack].endFrame - 1;
+		animations[currentAnim].endFrame = lowerAnim[LowerAnimation.LandBack].endFrame;
 		animations[currentAnim].loopingFrames = 0;
-		animations[currentAnim].fps = lowerAnim[(int)LowerAnimation.LandBack].fps;
+		animations[currentAnim].fps = lowerAnim[LowerAnimation.LandBack].fps;
 		lower.Add(animations[currentAnim]);
 
 		animFile.Close();
@@ -1049,7 +1057,11 @@ public partial class PlayerModel : Node3D
 
 					//Check if skin texture exist, if not add it
 					if (!TextureLoader.HasTexture(fullName[0]))
+					{
+						GD.Print("Skin: " + fullName[0]);
 						TextureLoader.AddNewTexture(fullName[0], false);
+					}
+
 
 					meshToSkin.Add(model.meshes[i].name, fullName[0]);
 				}

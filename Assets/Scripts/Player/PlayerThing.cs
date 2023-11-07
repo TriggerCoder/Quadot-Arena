@@ -8,8 +8,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public PlayerInfo playerInfo;
 	[Export]
 	public PlayerControls playerControls;
-
-	public PlayerCamera playerCamera;
+	[Export]
+	public MultiAudioStream audioStream;
 
 	public string modelName = "major";
 	public string skinName = "daemia";
@@ -93,6 +93,12 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 		playerControls.enabled = true;
 */		ready = true;
+	}
+	public void PlayModelSound(string soundName)
+	{
+		soundName = "player/" + modelName + "/" + soundName;
+		audioStream.Stream = SoundManager.LoadSound(soundName);
+		audioStream.Play();
 	}
 	public void Impulse(Vector3 direction, float force)
 	{

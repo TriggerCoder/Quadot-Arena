@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://c0xqge0e4igql"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="1_y7hvl"]
+
+[node name="ShotMark" type="Sprite3D"]
+layers = 255
+sorting_offset = -3000.0
+texture_filter = 1
+render_priority = -128
+script = ExtResource("1_y7hvl")
+spriteName = "gfx/damage/bullet_mrk"
+spriteRadius = 16
+destroyTimer = 20.0
+alphaFade = true

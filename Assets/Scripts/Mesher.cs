@@ -318,7 +318,7 @@ public static class Mesher
 	{
 		return GenerateModelFromMeshes(model, layer, null, false, meshToSkin);
 	}
-	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer = GameManager.AllPlayerViewMask, Node3D ownerObject = null, bool forceSkinAlpha = false, Dictionary<string, string> meshToSkin = null)
+	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, Node3D ownerObject = null, bool forceSkinAlpha = false, Dictionary<string, string> meshToSkin = null)
 	{
 		if (model == null || model.meshes.Count == 0)
 		{
@@ -452,7 +452,7 @@ public static class Mesher
 		return FillModelFromProcessedData(model, layer, null, meshToSkin);
 	}
 
-	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer = GameManager.AllPlayerViewMask, Node3D ownerObject = null, Dictionary<string, string> meshToSkin = null)
+	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, Node3D ownerObject = null, Dictionary<string, string> meshToSkin = null)
 	{
 		if (ownerObject == null)
 		{
@@ -623,7 +623,7 @@ public static class Mesher
 		if ((surfaceType.value & NoMarks) != 0)
 			MapLoader.noMarks.Add(objCollider);
 
-		objCollider.CollisionMask = GameManager.TakeDamageMask;
+		objCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
 		objCollider.AddChild(surfaceType);
 	}
 	public static ConvexPolygonShape3D GenerateBrushCollider(QBrush brush)
@@ -764,7 +764,7 @@ public static class Mesher
 			holder.AddChild(objCollider);
 		}
 		objCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
-		objCollider.CollisionMask = GameManager.TakeDamageMask;
+		objCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
 		objCollider.AddChild(contentType); 
 
 		CollisionShape3D mc = new CollisionShape3D();

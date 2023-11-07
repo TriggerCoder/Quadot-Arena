@@ -14,6 +14,7 @@ public partial class PlayerCamera : Node3D
 
 	public Camera3D CurrentCamera;
 	private Vector3 rotAngle = Vector3.Zero;
+	public bool currentThirdPerson = false;
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -28,5 +29,22 @@ public partial class PlayerCamera : Node3D
 		rotAngle.X = playerControls.viewDirection.X;
 
 		RotationDegrees = rotAngle;
+	}
+
+	public void ChangeThirdPersonCamera(bool enable)
+	{
+		currentThirdPerson = enable;
+		if (enable)
+		{
+			CurrentCamera = ThirdPerson;
+			GameManager.Instance.SetViewPortToCamera(ThirdPerson);
+			UICamera.CullMask = 0;
+			playerControls.playerThing.avatar.ChangeLayer(GameManager.AllPlayerViewMask);
+			return;
+		}
+		CurrentCamera = SkyholeCamera;
+		GameManager.Instance.SetViewPortToCamera(SkyholeCamera);
+		UICamera.CullMask = playerControls.playerInfo.uiLayer;
+		playerControls.playerThing.avatar.ChangeLayer(GameManager.AllPlayerViewMask & ~((uint)(playerControls.playerInfo.viewLayer)));
 	}
 }

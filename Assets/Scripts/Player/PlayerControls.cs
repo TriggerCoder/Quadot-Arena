@@ -115,7 +115,10 @@ public partial class PlayerControls : Node3D
 		if (GameManager.Paused)
 			return;
 		
-			float deltaTime = (float)delta;
+		float deltaTime = (float)delta;
+
+		if (Input.IsActionJustPressed("Action_CameraSwitch"))
+			playerCamera.ChangeThirdPersonCamera(!playerCamera.currentThirdPerson);
 
 		playerThing.avatar.ChangeView(viewDirection, deltaTime);
 		playerThing.avatar.CheckLegTurn(playerCamera.CurrentCamera.GlobalTransform.Basis.Z);
@@ -235,7 +238,7 @@ public partial class PlayerControls : Node3D
 			if (playerWeapon.Fire())
 			{
 //				playerInfo.playerHUD.HUDUpdateAmmoNum();
-//				playerThing.avatar.Attack();
+				playerThing.avatar.Attack();
 			}
 		}
 	}
@@ -435,7 +438,7 @@ public partial class PlayerControls : Node3D
 		else if (cMove.forwardSpeed > 0)
 			playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.JumpBack;
 		playerThing.avatar.enableOffset = false;
-//		playerThing.PlayModelSound("jump1");
+		playerThing.PlayModelSound("jump1");
 	}
 	public bool TrySwapWeapon(int weapon)
 	{
