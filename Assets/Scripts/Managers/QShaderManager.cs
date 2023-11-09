@@ -49,7 +49,6 @@ public static class QShaderManager
 		string GSLateFragmentTexs = "";
 		string GSFragmentRGBs = "\tvec4 vertx_color = COLOR;\n";
 		string GSFragmentBlends = "";
-		string GSFragmentEnd = "\tALBEDO = (color.rgb * vertx_color.rgb);\n";
 		string GSAnimation = "";
 
 		List<string> textures = new List<string>();
@@ -236,7 +235,9 @@ public static class QShaderManager
 		code += GSLateFragmentTexs;
 		code += GSFragmentRGBs;
 
-		if (lightmapStage < 0)
+		if (qShader.qShaderGlobal.isSky)
+			code += "\tvec4 ambient = vec4(" + GameManager.ambientLight.R.ToString("0.00") + "," + GameManager.ambientLight.G.ToString("0.00") + "," + GameManager.ambientLight.B.ToString("0.00") + ", 1.0 );\n";
+		else if (lightmapStage < 0)
 			code += "\tvec4 ambient = vec4("+ GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.R.ToString("0.00") + ","+ GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.G.ToString("0.00") + ","+ GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.B.ToString("0.00") + ", 1.0 );\n";
 
 		if (lightmapStage >= 0)
@@ -255,19 +256,27 @@ public static class QShaderManager
 		code += "\tvec4 black = vec4(0.0, 0.0, 0.0, 0.0);\n";
 		code += "\tvec4 white = vec4(1.0, 1.0, 1.0, 1.0);\n";
 		code += GSFragmentBlends;
-		code += GSFragmentEnd;
 
-		if (lightmapStage >= 0)
-			code += "\tEMISSION = mix((Stage_" + lightmapStage + ".rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n";
+		if (!qShader.qShaderGlobal.isSky)
+		{
+			code += "\tALBEDO = (color.rgb * vertx_color.rgb);\n";
+			if (lightmapStage >= 0)
+				code += "\tEMISSION = mix((Stage_" + lightmapStage + ".rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n";
+			else
+				code += "\tEMISSION = mix((ambient.rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n";
+		}
 		else
-			code += "\tEMISSION = mix((ambient.rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n";
+		{
+			code += "\tALBEDO = (color.rgb * ambient.rgb);\n";
+			code += "\tEMISSION = ambient.rgb;\n";
+		}
 
 		if (alphaIsTransparent)
 			code += "\tALPHA = color.a * vertx_color.a;\n";
 		code += "}\n\n";
 
-		if (upperName.Contains("ARMOR"))
-			GD.Print(code);
+//		if (upperName.Contains("SKIES"))
+//			GD.Print(code);
 
 		Shader shader = new Shader();
 		shader.Code = code;

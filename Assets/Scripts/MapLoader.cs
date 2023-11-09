@@ -2,8 +2,8 @@ using Godot;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Linq;
+
 public static class MapLoader
 {
 	public static string CurrentMap;
@@ -408,6 +408,34 @@ public static class MapLoader
 				int index = groupVerteces[i].vertId;
 				verts[index].color = color;
 			}
+		}
+	}
+
+	public static void GenerateGeometricCollider(Node3D node, CollisionObject3D collider, int num, uint contentFlags = 0, bool isTrigger = true)
+	{
+		List<QBrush> listBrushes = new List<QBrush>();
+
+		for (int i = 0; i < models[num].numBrushes; i++)
+			listBrushes.Add(brushes[models[num].firstBrush + i]);
+
+		Mesher.GenerateGroupBrushCollider(num, node, listBrushes.ToArray(), collider, contentFlags);
+	}
+	public static void GenerateJumpPadCollider(Area3D jumpPad, int num)
+	{
+		for (int i = 0; i < models[num].numBrushes; i++)
+		{
+			if (!Mesher.GenerateBrushCollider(brushes[models[num].firstBrush + i], ColliderGroup, jumpPad, false, ContentFlags.JumpPad))
+				continue;
+
+			CollisionShape3D mc = jumpPad.GetChild<CollisionShape3D>(0);
+			Shape3D boxShape = mc.Shape;
+			Aabb box = boxShape.GetDebugMesh().GetAabb();
+			Vector3 center = box.GetCenter();
+			float max = box.GetLongestAxisSize();
+			SphereShape3D jumpPadCollider = new SphereShape3D();
+			jumpPadCollider.Radius = max * .5f;
+			mc.Shape = jumpPadCollider;
+			jumpPad.GlobalPosition = center;
 		}
 	}
 	public static void GetMapTextures()

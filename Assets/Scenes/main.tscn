@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=43 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Texture2D" uid="uid://dv1ug6ajvhega" path="res://Assets/Textures/Skyboxes/Gehenna/gehenna.png" id="1_si63v"]
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
@@ -37,6 +37,8 @@
 [ext_resource type="PackedScene" uid="uid://bmyv04u863exh" path="res://Assets/Things/GamePlay/target_position.tscn" id="32_b20ey"]
 [ext_resource type="PackedScene" uid="uid://dcd4jomshlogt" path="res://Assets/Things/GamePlay/info_player_deathmatch.tscn" id="33_epjyi"]
 [ext_resource type="PackedScene" uid="uid://bqw0rqw0imck6" path="res://Assets/Things/GamePlay/func_timer.tscn" id="34_nkc1v"]
+[ext_resource type="PackedScene" uid="uid://7xtnpc5tfejv" path="res://Assets/Things/GamePlay/trigger_push.tscn" id="35_1ytnq"]
+[ext_resource type="PackedScene" uid="uid://b4tn1bjywoe4s" path="res://Assets/Things/GamePlay/trigger_teleport.tscn" id="36_7m5u6"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_7oboo"]
 panorama = ExtResource("1_si63v")
@@ -57,10 +59,12 @@ glow_enabled = true
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_rcj1l")
 
-[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "playerViewPort")]
+[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "playerViewPort", "Players")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
+autoloadMap = "q3dm7"
 playerViewPort = NodePath("SplitScreen/PlayerViewPort")
+Players = [NodePath("../Player")]
 
 [node name="MaterialManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("3_amftv")
@@ -82,7 +86,7 @@ _debrisPrefabs = Array[PackedScene]([ExtResource("18_dkfmq"), ExtResource("19_fl
 _weaponsPrefabs = Array[PackedScene]([ExtResource("24_5ts3k"), ExtResource("25_5i6m0"), ExtResource("26_6gxqa")])
 _healthsPrefabs = Array[PackedScene]([ExtResource("27_5pqil"), ExtResource("28_dpe7f")])
 _armorPrefabs = Array[PackedScene]([ExtResource("29_slqlw"), ExtResource("30_8nwr7")])
-_gameplayPrefabs = Array[PackedScene]([ExtResource("31_tr8jk"), ExtResource("32_b20ey"), ExtResource("33_epjyi"), ExtResource("34_nkc1v")])
+_gameplayPrefabs = Array[PackedScene]([ExtResource("31_tr8jk"), ExtResource("32_b20ey"), ExtResource("33_epjyi"), ExtResource("34_nkc1v"), ExtResource("35_1ytnq"), ExtResource("36_7m5u6")])
 
 [node name="MultiAudioListener" type="AudioListener3D" parent="Quadot Arena"]
 current = true
@@ -99,6 +103,6 @@ grow_vertical = 2
 layout_mode = 2
 
 [node name="Player" parent="." instance=ExtResource("7_rdgk2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 1, 20)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 axis_lock_angular_x = true
 axis_lock_angular_z = true

@@ -223,6 +223,7 @@ public partial class PlayerControls : Node3D
 		playerInfo.RotationDegrees = rotAngle;
 
 		float deltaTime = (float)delta;
+
 		//Movement Checks
 		if (controllerIsGrounded)
 			GroundMove(deltaTime);
@@ -232,9 +233,20 @@ public partial class PlayerControls : Node3D
 		//apply move
 		ApplyMove(deltaTime);
 
+		//dampen jump pad impulse
+		if (jumpPadVel.LengthSquared() > 0)
+		{
+			jumpPadVel.Y -= (GameManager.Instance.gravity * deltaTime);
+			if ((jumpPadVel.Y < 0) && (controllerIsGrounded))
+				jumpPadVel = Vector3.Zero;
+		}
+
 		if (wishFire)
 		{
 			wishFire = false;
+			if (playerWeapon == null)
+				return;
+
 			if (playerWeapon.Fire())
 			{
 //				playerInfo.playerHUD.HUDUpdateAmmoNum();
@@ -245,7 +257,6 @@ public partial class PlayerControls : Node3D
 
 	void ApplyMove(float deltaTime)
 	{
-		//		lastPosition = cTransform.position;
 		playerThing.Velocity = (playerVelocity + impulseVector + jumpPadVel);
 		playerThing.MoveAndSlide();
 

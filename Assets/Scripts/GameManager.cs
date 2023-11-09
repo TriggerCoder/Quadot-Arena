@@ -2,7 +2,6 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-
 public partial class GameManager : Node
 {
 	[Export]
@@ -102,6 +101,9 @@ public partial class GameManager : Node
 	public int skipFrames = 5;
 	public Node3D TemporaryObjectsHolder;
 
+	[Export]
+	public PlayerThing[] Players;
+
 	public enum FuncState
 	{
 		None,
@@ -135,7 +137,7 @@ public partial class GameManager : Node
 			MapLoader.GenerateSurfaces();
 			ThingsManager.AddThingsToMap();
 		}
-		currentState = FuncState.Start;
+		currentState = FuncState.Ready;
 		return;
 	}
 
@@ -181,15 +183,19 @@ public partial class GameManager : Node
 		{
 			default:
 			break;
-			case FuncState.Start:
+			case FuncState.Ready:
 				//skip frames are used to easen up deltaTime after loading
 				if (skipFrames > 0)
 				{
 					skipFrames--;
 					if (skipFrames == 0)
+					{
+						Players[0].InitPlayer();
 						paused = false;
+						currentState = FuncState.Start;
+					}
 				}
-			break;
+				break;
 		}
 	}
 
@@ -204,7 +210,6 @@ public partial class GameManager : Node
 			viewPort = playerViewPort.UI;
 
 		var viewPortRID = viewPort.GetViewportRid();
-//		camera.Reparent(viewPort);
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 	}
 

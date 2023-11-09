@@ -11,8 +11,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	[Export]
 	public MultiAudioStream audioStream;
 
-	public string modelName = "major";
-	public string skinName = "daemia";
+	public string modelName = "crash";
+	public string skinName = "default";
 
 	[Export]
 	public Node3D player;
@@ -50,49 +50,23 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		if (GameManager.Paused)
 			return;
 
-		if (!ready)
-			InitPlayer();
 	}
 	public void InitPlayer()
 	{
 		avatar = new PlayerModel();
 		player.AddChild(avatar);
 		avatar.LoadPlayer(modelName, skinName, (GameManager.AllPlayerViewMask & ~((uint)(playerInfo.viewLayer))), playerControls);
-/*
-		gameObject.layer = playerInfo.playerLayer;
+
 		Vector3 destination = SpawnerManager.FindSpawnLocation();
-		TeleporterThing.TelefragEverything(destination, gameObject);
-		transform.position = destination;
+		TeleporterThing.TelefragEverything(destination, this);
+		GlobalPosition = destination;
 		playerControls.teleportDest = destination;
-
-		playerControls.capsuleCollider.enabled = true;
-		playerControls.controller.enabled = true;
-		playerInfo.playerHUD.pickupFlashTime = 0f;
-		playerInfo.playerHUD.painFlashTime = 0f;
-
-		int playerLayer = ((1 << GameManager.Player1Layer) |
-							(1 << GameManager.Player2Layer) |
-							(1 << GameManager.Player3Layer) |
-							(1 << GameManager.Player4Layer)) & ~(1 << (playerInfo.playerLayer));
-
-		playerCamera.SkyholeCamera.cullingMask = (((1 << (GameManager.DefaultLayer)) |
-													(1 << (GameManager.DebrisLayer)) |
-													(1 << (GameManager.ThingsLayer)) |
-													(1 << (GameManager.RagdollLayer)) |
-													(1 << (GameManager.CombinesMapMeshesLayer)) |
-													(1 << (playerInfo.playerLayer - 5)) |
-													playerLayer));
 
 		if (playerControls.playerWeapon == null)
 			playerControls.SwapToBestWeapon();
 
-		playerInfo.playerHUD.HUDUpdateHealthNum();
-		playerInfo.playerHUD.HUDUpdateArmorNum();
-
-		playerCamera.ChangeThirdPersonCamera(false);
-
-		playerControls.enabled = true;
-*/		ready = true;
+//		playerInfo.playerHUD.HUDUpdateHealthNum();
+//		playerInfo.playerHUD.HUDUpdateArmorNum();
 	}
 	public void PlayModelSound(string soundName)
 	{
@@ -116,5 +90,28 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	{
 		if (Dead)
 			return;
+	}
+	public void JumpPadDest(Vector3 destination)
+	{
+		Vector3 position = GlobalPosition;
+		Vector3 horizontalVelocity = destination - position;
+		float height = destination.Y - position.Y;
+
+		if (height <= 0)
+		{
+			playerControls.jumpPadVel = Vector3.Zero;
+			return;
+		}
+
+		float time = Mathf.Sqrt((2 * height) / GameManager.Instance.gravity);
+		float verticalVelocity = time * GameManager.Instance.gravity;
+
+		horizontalVelocity.Y = 0;
+		float forward = horizontalVelocity.Length() / time;
+		horizontalVelocity = horizontalVelocity.Normalized() * forward;
+		playerControls.jumpPadVel = horizontalVelocity;
+		playerControls.jumpPadVel.Y = verticalVelocity;
+		playerControls.playerVelocity = Vector3.Zero;
+		playerControls.AnimateLegsOnJump();
 	}
 }

@@ -358,7 +358,7 @@ public partial class MultiAudioStream : Node3D
 			return;
 		// Get the position of the object relative to the virtual listener
 		Vector3 localPos = GlobalPosition - virtualListener.GlobalPosition;
-		subAudioStream.Position = localPos;
+		subAudioStream.Position = virtualListener.Quaternion * localPos;
 	}
 
 	private AudioStreamPlayer3D CreateAudioStream(string nameSubAudioStream, ref bool hardwareChannelsLeft)
@@ -424,7 +424,7 @@ public partial class MultiAudioStream : Node3D
 	{
 	}
 
-	public override void _PhysicsProcess(double delta)
+	public void LatePhysicsUpdate()
 	{
 		if (_Playing)
 		{
@@ -459,5 +459,9 @@ public partial class MultiAudioStream : Node3D
 			if (!isCurrentlyPlaying)
 				Stop();
 		}
+	}
+	public override void _PhysicsProcess(double delta)
+	{
+		CallDeferred("LatePhysicsUpdate");
 	}
 }

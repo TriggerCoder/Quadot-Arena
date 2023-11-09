@@ -52,6 +52,9 @@ public static class SoundManager
 		int headerOffset = 16 + 4 + subchunk1 + 4;
 		int totalSamples = BitConverter.ToInt32(fileBytes, headerOffset);
 
+		var byteArray = new byte[totalSamples];
+		Buffer.BlockCopy(fileBytes, 44, byteArray, 0, byteArray.Length);
+
 		AudioStreamWav audioStream= new AudioStreamWav();
 		if (audioFormat == 2)
 			audioStream.Format = AudioStreamWav.FormatEnum.ImaAdpcm;
@@ -60,6 +63,9 @@ public static class SoundManager
 			if (bitDepth == 8)
 			{
 				audioStream.Format = AudioStreamWav.FormatEnum.Format8Bits;
+				//Change data to Signed PCM8
+				for (int i = 0; i < byteArray.Length; i++)
+					byteArray[i] -= 128;
 			}
 			else
 			{
@@ -67,7 +73,7 @@ public static class SoundManager
 				totalSamples /= 2; //block size = 2;
 			}
 		}
-		audioStream.Data = fileBytes;
+		audioStream.Data = byteArray;
 		audioStream.MixRate = sampleRate;
 		if (channels == 2)
 			audioStream.Stereo = true;

@@ -84,7 +84,7 @@ cull_mask = 1
 near = 0.1
 far = 300.0
 
-[node name="VirtualAudioListener" type="Node3D" parent="."]
+[node name="VirtualAudioListener" type="Node3D" parent="PlayerInfo"]
 script = ExtResource("6_ve4m7")
 
 [node name="PlayerVoiceAudioStream" type="Node3D" parent="."]

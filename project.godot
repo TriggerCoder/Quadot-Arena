@@ -15,6 +15,10 @@ run/main_scene="res://Assets/Scenes/main.tscn"
 config/features=PackedStringArray("4.1", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
+[audio]
+
+driver/mix_rate=48000
+
 [display]
 
 window/size/viewport_width=1280

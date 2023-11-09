@@ -537,37 +537,33 @@ public partial class ThingsManager : Node
 				}
 				break;
 */				//JumpPad
-/*				case "trigger_push":
+				case "trigger_push":
 				{
-					JumpPadThing thing = thingObject.GetComponent<JumpPadThing>();
-					if (thing == null)
-						continue;
-
+					JumpPadThing jumpPad = new JumpPadThing();
+					thingObject.AddChild(jumpPad);
 					strWord = entity.entityData["model"];
 					int model = int.Parse(strWord.Trim('*'));
 					string target = entity.entityData["target"];
 					Vector3 destination = targetsOnMap[target].destination;
-					MapLoader.GenerateJumpPadCollider(thingObject, model);
-					thing.Init(destination);
+					MapLoader.GenerateJumpPadCollider(jumpPad, model);
+					jumpPad.Init(destination);
 				}
 				break;
-*/				//Teleporter
-/*				case "trigger_teleport":
+				//Teleporter
+				case "trigger_teleport":
 				{
-					TeleporterThing thing = thingObject.GetComponent<TeleporterThing>();
-					if (thing == null)
-						continue;
-
+					TeleporterThing teleporter = new  TeleporterThing();
+					thingObject.AddChild(teleporter);
 					strWord = entity.entityData["model"];
 					int model = int.Parse(strWord.Trim('*'));
 					string target = entity.entityData["target"];
 					Vector3 destination = targetsOnMap[target].destination;
 					int angle = targetsOnMap[target].angle;
-					MapLoader.GenerateGeometricCollider(thingObject, model, ContentFlags.Teleporter);
-					thing.Init(destination, angle);
+					MapLoader.GenerateGeometricCollider(thingObject, teleporter, model, ContentFlags.Teleporter);
+					teleporter.Init(destination, angle);
 				}
 				break;
-*/				//Speaker
+				//Speaker
 				case "target_speaker":
 				{
 					strWord = entity.entityData["noise"];

@@ -571,10 +571,9 @@ public static class Mesher
 		return surfaceArray;
 	}
 
-	public static void GenerateGroupBrushCollider(int indexId, Node3D holder, params QBrush[] brushes)
+	public static void GenerateGroupBrushCollider(int indexId, Node3D holder, QBrush[] brushes, CollisionObject3D objCollider = null, uint extraContentFlag = 0)
 	{
 		bool isTrigger = false;
-		CollisionObject3D objCollider;
 		uint type = MapLoader.mapTextures[brushes[0].shaderId].contentsFlags;
 		uint stype = MapLoader.mapTextures[brushes[0].shaderId].surfaceFlags;
 		if (((type & ContentFlags.Details) != 0) || ((type & ContentFlags.Structural) != 0))
@@ -589,18 +588,21 @@ public static class Mesher
 			return;
 		}
 */		ContentType contentType = new ContentType();
-		contentType.Init(type);
+		contentType.Init(type | extraContentFlag);
 
 		if ((contentType.value & MaskPlayerSolid) == 0)
 			isTrigger = true;
 
-		if (isTrigger)
-			objCollider = new Area3D();
-		else
-			objCollider = new StaticBody3D();
+		if (objCollider == null)
+		{
+			if (isTrigger)
+				objCollider = new Area3D();
+			else
+				objCollider = new StaticBody3D();
 
-		objCollider.Name = "Polygon_" + indexId + "_collider";
-		holder.AddChild(objCollider);
+			objCollider.Name = "Polygon_" + indexId + "_collider";
+			holder.AddChild(objCollider);
+		}
 		objCollider.AddChild(contentType);
 
 		uint OwnerShapeId = objCollider.CreateShapeOwner(holder);
@@ -684,7 +686,7 @@ public static class Mesher
 
 		return convexHull;
 	}
-	public static bool GenerateBrushCollider(QBrush brush, Node3D holder, CollisionObject3D objCollider = null, bool addRigidBody = false)
+	public static bool GenerateBrushCollider(QBrush brush, Node3D holder, CollisionObject3D objCollider = null, bool addRigidBody = false, uint extraContentFlag = 0)
 	{
 		bool isTrigger = false;
 		//Remove brushed used for BSP Generations and for Details
@@ -747,7 +749,7 @@ public static class Mesher
 		}
 
 		ContentType contentType = new ContentType();
-		contentType.Init(type);
+		contentType.Init(type | extraContentFlag);
 
 		if ((contentType.value & MaskPlayerSolid) == 0)
 			isTrigger = true;
@@ -765,11 +767,12 @@ public static class Mesher
 		}
 		objCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
 		objCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
-		objCollider.AddChild(contentType); 
 
 		CollisionShape3D mc = new CollisionShape3D();
 		mc.Name = "brushSide: " + brush.brushSide;
 		objCollider.AddChild(mc);
+		objCollider.AddChild(contentType);
+
 		ConvexPolygonShape3D convexHull = new ConvexPolygonShape3D();
 		convexHull.Points = intersectPoint.ToArray();
 		mc.Shape = convexHull;

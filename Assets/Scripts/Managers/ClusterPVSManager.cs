@@ -2,7 +2,6 @@ using Godot;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-
 public partial class ClusterPVSManager : Node
 {
 	public static ClusterPVSManager Instance;
@@ -41,7 +40,7 @@ public partial class ClusterPVSManager : Node
 		MeshInstance3D cluster = SurfaceToCluster[surface];
 		if (cluster == null)
 		{
-			GD.Print("Cluster not found for surface: " + surface);
+//			GD.Print("Cluster not found for surface: " + surface);
 			return;
 		}
 		cluster.Layers |= layer;
