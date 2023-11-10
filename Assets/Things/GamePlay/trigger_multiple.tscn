@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bddv7ddaa8jd0"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_2r1cx"]
+
+[node name="trigger_multiple" type="Node3D"]
+script = ExtResource("1_2r1cx")
+respawnSound = ""
+thingType = 6

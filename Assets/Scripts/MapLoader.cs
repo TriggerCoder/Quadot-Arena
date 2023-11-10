@@ -346,7 +346,7 @@ public static class MapLoader
 						break;
 					case QSurfaceType.Polygon:
 					case QSurfaceType.Mesh:
-						Mesher.GeneratePolygonObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
+						Mesher.GeneratePolygonObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, holder, groupSurfaces);
 						break;
 					case QSurfaceType.Billboard:
 	//					Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
@@ -410,16 +410,52 @@ public static class MapLoader
 			}
 		}
 	}
+	public static void GenerateGeometricSurface(Node3D holder, int num)
+	{
+		List<QSurface> staticGeometry = new List<QSurface>();
+		for (int i = 0; i < models[num].numSurfaces; i++)
+			staticGeometry.Add(surfaces[models[num].firstSurface + i]);
 
-	public static void GenerateGeometricCollider(Node3D node, CollisionObject3D collider, int num, uint contentFlags = 0, bool isTrigger = true)
+		// Each surface group is its own gameobject
+		var groups = staticGeometry.GroupBy(x => new { x.type, x.shaderId, x.lightMapID });
+		int groupId = 0;
+		foreach (var group in groups)
+		{
+			QSurface[] groupSurfaces = group.ToArray();
+			if (groupSurfaces.Length == 0)
+				continue;
+
+			groupId++;
+
+			switch (group.Key.type)
+			{
+				case QSurfaceType.Patch:
+					Mesher.GenerateBezObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces, false);
+					break;
+				case QSurfaceType.Polygon:
+				case QSurfaceType.Mesh:
+					Mesher.GeneratePolygonObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, holder, groupSurfaces, false);
+					break;
+				case QSurfaceType.Billboard:
+//					Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, modelObject, groupSurfaces);
+					break;
+				default:
+					GD.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + group.Key.type + ").");
+					break;
+			}
+		}
+	}
+	public static uint GenerateGeometricCollider(Node3D node, CollisionObject3D collider, int num, uint contentFlags = 0, bool isTrigger = true)
 	{
 		List<QBrush> listBrushes = new List<QBrush>();
 
 		for (int i = 0; i < models[num].numBrushes; i++)
 			listBrushes.Add(brushes[models[num].firstBrush + i]);
 
-		Mesher.GenerateGroupBrushCollider(num, node, listBrushes.ToArray(), collider, contentFlags);
+		uint OwnerShapeId = Mesher.GenerateGroupBrushCollider(num, node, listBrushes.ToArray(), collider, contentFlags);
+		return OwnerShapeId;
 	}
+
 	public static void GenerateJumpPadCollider(Area3D jumpPad, int num)
 	{
 		for (int i = 0; i < models[num].numBrushes; i++)

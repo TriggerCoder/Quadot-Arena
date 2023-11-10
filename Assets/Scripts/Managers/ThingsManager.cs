@@ -240,43 +240,42 @@ public partial class ThingsManager : Node
 	}
 	public static void AddThingsToMap()
 	{
-//		AddTriggersOnMap();
+		AddTriggersOnMap();
 		AddEntitiesToMap();
 		AddTimersToMap();
 	}
-	/*
-		public static void AddTriggersOnMap()
+
+	public static void AddTriggersOnMap()
+	{
+		foreach (KeyValuePair<string, Dictionary<string, string>> trigger in triggersOnMap)
 		{
-			foreach (KeyValuePair<string, Dictionary<string, string>> trigger in triggersOnMap)
+			string target = trigger.Key;
+			Dictionary<string, string> entityData = trigger.Value;
+			ThingController thingObject = (ThingController)thingsPrefabs[entityData["classname"]].Instantiate();
+			if (thingObject == null)
+				continue;
+			GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
+			thingObject.Name = "Trigger " + target;
+			TriggerController tc = new TriggerController();
+			thingObject.AddChild(tc);
+
+			string strWord = entityData["model"];
+			int model = int.Parse(strWord.Trim('*'));
+			float wait;
+
+			if (entityData.TryGetNumValue("wait", out wait))
 			{
-				string target = trigger.Key;
-				Dictionary<string, string> entityData = trigger.Value;
-				GameObject thingObject = Instantiate(thingsPrefabs[entityData["classname"]]);
-				if (thingObject == null)
-					continue;
-				thingObject.name = "Trigger " + target;
-
-				TriggerController tc = thingObject.GetComponent<TriggerController>();
-				if (tc == null)
-					continue;
-
-				string strWord = entityData["model"];
-				int model = int.Parse(strWord.Trim('*'));
-				float wait;
-
-				if (entityData.TryGetNumValue("wait", out wait))
-				{
-					tc.AutoReturn = true;
-					tc.AutoReturnTime = wait;
-				}
-
-				MapLoader.GenerateGeometricCollider(thingObject, model, ContentFlags.Trigger);
-				triggerToActivate.Add(target, tc);
-				thingObject.transform.SetParent(GameManager.Instance.TemporaryObjectsHolder);
-				thingObject.SetActive(true);
+				tc.AutoReturn = true;
+				tc.AutoReturnTime = wait;
 			}
+			Area3D objCollider = new Area3D();
+			thingObject.AddChild(objCollider);
+			MapLoader.GenerateGeometricCollider(thingObject, objCollider, model, ContentFlags.Trigger);
+			objCollider.BodyEntered += tc.OnBodyEntered;
+			triggerToActivate.Add(target, tc);
 		}
-	*/
+	}
+
 
 	public static void AddTimersToMap()
 	{
@@ -318,7 +317,7 @@ public partial class ThingsManager : Node
 				default:
 					thingObject.GlobalPosition = entity.origin;
 				break;
-/*				//Switch
+				//Switch
 				case "func_button":
 				{
 					strWord = entity.entityData["model"];
@@ -326,9 +325,12 @@ public partial class ThingsManager : Node
 					int angle = 0, hitpoints = 0, speed = 40, lip = 4;
 					float wait;
 
-					SwitchController sw = thingObject.GetComponent<SwitchController>();
-					if (sw == null)
-						sw = thingObject.AddComponent<SwitchController>();
+					SwitchController sw = new SwitchController();
+					thingObject.AddChild(sw);
+
+					sw.startSound = "movers/switches/butn2";
+					sw.endSound = "";
+
 					if (entity.entityData.TryGetValue("angle", out strWord))
 						angle = int.Parse(strWord);
 					if (entity.entityData.TryGetValue("health", out strWord))
@@ -340,31 +342,41 @@ public partial class ThingsManager : Node
 					if (entity.entityData.TryGetValue("lip", out strWord))
 						lip = int.Parse(strWord);
 
-					MapLoader.GenerateGeometricSurface(thingObject, model);
-					//As dynamic surface don't have bsp data, assign it to the always visible layer 
-					GameManager.SetLayerAllChildren(currentTransform, GameManager.CombinesMapMeshesLayer);
-					MapLoader.GenerateGeometricCollider(currentTransform, model);
-
-					MeshFilter[] meshFilterChildren = thingObject.GetComponentsInChildren<MeshFilter>(includeInactive: true);
-					CombineInstance[] combine = new CombineInstance[meshFilterChildren.Length];
-					for (int i = 0; i < combine.Length; i++)
-						combine[i].mesh = meshFilterChildren[i].mesh;
-
-					var mesh = new Mesh();
-					mesh.CombineMeshes(combine, true, false, false);
-					Bounds bounds = mesh.bounds;
-					sw.Init(angle, hitpoints, speed, wait, lip, bounds);
+					MapLoader.GenerateGeometricSurface(sw, model);
+					uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, sw, model, 0, false);
+					int shapes = sw.ShapeOwnerGetShapeCount(OwnerShapeId);
+					Aabb BigBox = new Aabb();
+					for (int i = 0; i < shapes; i++)
+					{
+						Shape3D boxShape = sw.ShapeOwnerGetShape(OwnerShapeId, i);
+						Aabb box = boxShape.GetDebugMesh().GetAabb();
+						if (i == 0)
+							BigBox = new Aabb(box.Position, box.Size);
+						else
+							BigBox = BigBox.Merge(box);
+					}
+					GD.Print("Switch Angle "+angle);
+					sw.Init(angle, hitpoints, speed, wait, lip, BigBox);
 
 					//If it's not damagable, then create trigger collider
 					if (hitpoints == 0)
 					{
-						float max = Mathf.Max(bounds.extents.x, bounds.extents.y, bounds.extents.z);
-						SphereCollider sc = thingObject.AddComponent<SphereCollider>();
-						sc.radius = max;
-						sc.isTrigger = true;
+						float max = BigBox.GetLongestAxisSize();
+						Area3D triggerCollider = new Area3D();
+						sw.AddChild(triggerCollider);
+						CollisionShape3D mc = new CollisionShape3D();
+						mc.Name = "Switch Trigger";
+						triggerCollider.AddChild(mc);
+						triggerCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
+						triggerCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+						SphereShape3D sphere = new SphereShape3D();
+						sphere.Radius = max;
+						mc.Shape = sphere;
+						triggerCollider.GlobalPosition = BigBox.GetCenter();
+						triggerCollider.BodyEntered += sw.internalSwitch.OnBodyEntered;
 					}
 					//If it is, then we need to create a damage interface for the colliders
-					else
+/*					else
 					{
 						Collider[] collidersChildren = thingObject.GetComponentsInChildren<Collider>(includeInactive: true);
 						for (var i = 0; i < collidersChildren.Length; i++)
@@ -373,11 +385,10 @@ public partial class ThingsManager : Node
 							parentIsDamageable.parent = sw;
 						}
 					}
-
+*/
 					if (entity.entityData.TryGetValue("target", out strWord))
 					{
 						string target = strWord;
-
 						TriggerController tc;
 						if (!triggerToActivate.TryGetValue(target, out tc))
 							tc = null;
@@ -398,16 +409,15 @@ public partial class ThingsManager : Node
 					}
 				}
 				break;
-*/				//Door
-/*				case "func_door":
+				//Door
+				case "func_door":
 				{
 					strWord = entity.entityData["model"];
 					int model = int.Parse(strWord.Trim('*'));
 					int angle = 0, hitpoints = 0, speed = 200, lip = 8, dmg = 4;
 					float wait;
-					DoorController door = thingObject.GetComponent<DoorController>();
-					if (door == null)
-						door = thingObject.AddComponent<DoorController>();
+					DoorController door = new DoorController();
+					thingObject.AddChild(door);
 					if (entity.entityData.TryGetValue("angle", out strWord))
 						angle = int.Parse(strWord);
 					if (entity.entityData.TryGetValue("health", out strWord))
@@ -421,32 +431,20 @@ public partial class ThingsManager : Node
 					if (entity.entityData.TryGetValue("dmg", out strWord))
 						dmg = int.Parse(strWord);
 
-					MapLoader.GenerateGeometricSurface(thingObject, model);
-					//As dynamic surface don't have bsp data, assign it to the always visible layer 
-					GameManager.SetLayerAllChildren(currentTransform, GameManager.CombinesMapMeshesLayer);
-					MapLoader.GenerateGeometricCollider(currentTransform, model);
-
-					MeshFilter[] meshFilterChildren = thingObject.GetComponentsInChildren<MeshFilter>(includeInactive: true);
-					CombineInstance[] combine = new CombineInstance[meshFilterChildren.Length];
-					for (var i = 0; i < combine.Length; i++)
-						combine[i].mesh = meshFilterChildren[i].mesh;
-
-					var mesh = new Mesh();
-					mesh.CombineMeshes(combine, true, false, false);
-					Bounds bounds = mesh.bounds;
-					door.Init(angle, hitpoints, speed, wait, lip, bounds, dmg);
-
-					//Need to change the rb to non kinematics in order for collision detection to work
-					Rigidbody[] rigidbodiesChildren = thingObject.GetComponentsInChildren<Rigidbody>(includeInactive: true);
-					for (int i = 0; i < rigidbodiesChildren.Length; i++)
+					MapLoader.GenerateGeometricSurface(door, model);
+					uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, door, model, 0, false);
+					int shapes = door.ShapeOwnerGetShapeCount(OwnerShapeId);
+					Aabb BigBox = new Aabb();
+					for (int i = 0; i < shapes; i++)
 					{
-						rigidbodiesChildren[i].useGravity = false;
-						rigidbodiesChildren[i].isKinematic = false;
-						rigidbodiesChildren[i].constraints = RigidbodyConstraints.FreezeAll;
-						DoorCollider doorCollider = rigidbodiesChildren[i].gameObject.AddComponent<DoorCollider>();
-						doorCollider.door = door;
+						Shape3D boxShape = door.ShapeOwnerGetShape(OwnerShapeId, i);
+						Aabb box = boxShape.GetDebugMesh().GetAabb();
+						if (i == 0)
+							BigBox = new Aabb(box.Position, box.Size);
+						else
+							BigBox = BigBox.Merge(box);
 					}
-
+					door.Init(angle, hitpoints, speed, wait, lip, BigBox, dmg);
 					if (entity.entityData.TryGetValue("targetname", out strWord))
 					{
 						string target = strWord;
@@ -454,7 +452,8 @@ public partial class ThingsManager : Node
 						TriggerController tc;
 						if (!triggerToActivate.TryGetValue(target, out tc))
 						{
-							tc = thingObject.AddComponent<TriggerController>();
+							tc = new TriggerController();
+							thingObject.AddChild(tc);
 							triggerToActivate.Add(target, tc);
 						}
 						tc.Repeatable = true;
@@ -469,12 +468,18 @@ public partial class ThingsManager : Node
 					{
 						if (hitpoints == 0)//If  not damagable, then create a trigger and collider
 						{
-							float max = Mathf.Max(bounds.extents.x, bounds.extents.y, bounds.extents.z);
-							SphereCollider sc = thingObject.AddComponent<SphereCollider>();
-							sc.radius = max;
-							sc.isTrigger = true;
+							float max = BigBox.GetLongestAxisSize();
+							Area3D triggerCollider = new Area3D();
+							door.AddChild(triggerCollider);
+							CollisionShape3D mc = new CollisionShape3D();
+							mc.Name = "Door Trigger";
+							triggerCollider.AddChild(mc);
+							SphereShape3D sphere = new SphereShape3D();
+							sphere.Radius = max * .5f;
+							mc.Shape = sphere;
 
-							TriggerController tc = thingObject.AddComponent<TriggerController>();
+							TriggerController tc = new TriggerController();
+							thingObject.AddChild(tc);
 							tc.Repeatable = true;
 							tc.AutoReturn = true;
 							tc.AutoReturnTime = wait;
@@ -483,7 +488,7 @@ public partial class ThingsManager : Node
 								door.CurrentState = DoorController.State.Opening;
 							});
 						}
-						else //If it is, then we need to create a damage interface for the colliders
+/*						else //If it is, then we need to create a damage interface for the colliders
 						{
 							for (int i = 0; i < rigidbodiesChildren.Length; i++)
 							{
@@ -491,10 +496,10 @@ public partial class ThingsManager : Node
 								parentIsDamageable.parent = door;
 							}
 						}
-					}
+*/					}
 				}
 				break;
-*/				//Trigger Hurt
+				//Trigger Hurt
 /*				case "trigger_hurt":
 				{
 					int dmg = 9999;

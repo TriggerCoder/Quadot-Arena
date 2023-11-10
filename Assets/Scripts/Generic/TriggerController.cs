@@ -54,11 +54,12 @@ public partial class TriggerController : Node3D
 				activated = !activated;
 		}
 	}
-	void OnTriggerEnter(Node3D other)
+	public void OnBodyEntered(Node3D other)
 	{
 		if (GameManager.Paused)
 			return;
 
+		GD.Print("Someone "+ other.Name + "activated this " + Name);
 		if (other is PlayerThing player)
 		{
 			//Dead player don't activate stuff

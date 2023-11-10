@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bv34dp76ma2dk"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_2qph5"]
+
+[node name="misc_teleporter_dest" type="Node3D"]
+script = ExtResource("1_2qph5")
+respawnSound = ""
+thingType = 5

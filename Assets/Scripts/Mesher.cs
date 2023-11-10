@@ -46,11 +46,7 @@ public static class Mesher
 		BezierMesh.ClearCaches();
 	}
 
-	public static void GenerateBezObject(string textureName, int lmIndex, int indexId, Node3D holder, params QSurface[] surfaces)
-	{
-		GenerateBezObject(textureName, lmIndex, indexId, holder, null, true, surfaces);
-	}
-	public static void GenerateBezObject(string textureName, int lmIndex, int indexId, Node3D holder, Node3D bezObj, bool addPVS, params QSurface[] surfaces)
+	public static void GenerateBezObject(string textureName, int lmIndex, int indexId, Node3D holder, QSurface[] surfaces, bool addPVS = true)
 	{
 		if (surfaces == null || surfaces.Length == 0)
 			return;
@@ -84,7 +80,10 @@ public static class Mesher
 		BezierMesh.FinalizeBezierMesh(arrMesh);
 		arrMesh.SurfaceSetMaterial(0, material);
 		holder.AddChild(mesh);
-		mesh.Layers = GameManager.InvisibleMask;
+		if (addPVS)
+			mesh.Layers = GameManager.InvisibleMask;
+		else //As dynamic surface don't have bsp data, assign it to the always visible layer 
+			mesh.Layers = GameManager.AllPlayerViewMask;
 		mesh.Name = Name;
 		mesh.Mesh = arrMesh;
 
@@ -220,11 +219,7 @@ public static class Mesher
 
 		return;
 	}
-	public static void GeneratePolygonObject(string textureName, int lmIndex, int indexId, Node3D holder, params QSurface[] surfaces)
-	{
-		GeneratePolygonObject(textureName, lmIndex, indexId, holder, null, true, surfaces);
-	}
-	public static void GeneratePolygonObject(string textureName, int lmIndex, int indexId, Node3D holder, Node3D obj, bool addPVS, params QSurface[] surfaces)
+	public static void GeneratePolygonObject(string textureName, int lmIndex, Node3D holder, QSurface[] surfaces, bool addPVS = true)
 	{
 		if (surfaces == null || surfaces.Length == 0)
 		{
@@ -246,7 +241,10 @@ public static class Mesher
 		FinalizePolygonMesh(arrMesh);
 		arrMesh.SurfaceSetMaterial(0, material);
 		holder.AddChild(mesh);
-		mesh.Layers = GameManager.InvisibleMask;
+		if (addPVS)
+			mesh.Layers = GameManager.InvisibleMask;
+		else //As dynamic surface don't have bsp data, assign it to the always visible layer 
+			mesh.Layers = GameManager.AllPlayerViewMask;
 		mesh.Name = Name;
 		mesh.Mesh = arrMesh;
 
@@ -571,7 +569,7 @@ public static class Mesher
 		return surfaceArray;
 	}
 
-	public static void GenerateGroupBrushCollider(int indexId, Node3D holder, QBrush[] brushes, CollisionObject3D objCollider = null, uint extraContentFlag = 0)
+	public static uint GenerateGroupBrushCollider(int indexId, Node3D holder, QBrush[] brushes, CollisionObject3D objCollider = null, uint extraContentFlag = 0)
 	{
 		bool isTrigger = false;
 		uint type = MapLoader.mapTextures[brushes[0].shaderId].contentsFlags;
@@ -579,7 +577,7 @@ public static class Mesher
 		if (((type & ContentFlags.Details) != 0) || ((type & ContentFlags.Structural) != 0))
 		{
 			GD.Print("brushes: " + indexId + " Not used for collisions, Content Type is: " + type);
-			return;
+			return 0;
 		}
 
 /*		if ((stype & SurfaceFlags.NonSolid) != 0)
@@ -627,6 +625,8 @@ public static class Mesher
 
 		objCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
 		objCollider.AddChild(surfaceType);
+
+		return OwnerShapeId;
 	}
 	public static ConvexPolygonShape3D GenerateBrushCollider(QBrush brush)
 	{
