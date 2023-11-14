@@ -80,6 +80,7 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 				rocket.GlobalPosition = muzzleObject.GlobalPosition;
 			else
 				rocket.GlobalPosition = playerInfo.playerCamera.CurrentCamera.GlobalPosition;
+			rocket.ignoreSelfLayer = playerInfo.playerLayer;
 			rocket.LookAt(rocket.GlobalPosition - d, Vector3.Up);
 		}
 

@@ -80,6 +80,7 @@ public partial class PlasmagunWeapon : PlayerWeapon
 				plasma.GlobalPosition = muzzleObject.GlobalPosition;
 			else
 				plasma.GlobalPosition = playerInfo.playerCamera.CurrentCamera.GlobalPosition;
+			plasma.ignoreSelfLayer = playerInfo.playerLayer;
 			plasma.LookAt(plasma.GlobalPosition - d, Vector3.Up);
 		}
 

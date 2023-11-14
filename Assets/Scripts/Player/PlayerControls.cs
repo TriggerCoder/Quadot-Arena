@@ -13,6 +13,8 @@ public partial class PlayerControls : Node3D
 	[Export]
 	public PlayerCamera playerCamera;
 
+	public SeparationRayShape3D feetRay;
+
 	private Vector2 centerHeight = new Vector2(0.2f, -.05f);	// character controller center height, x standing, y crouched
 	private Vector2 height = new Vector2(2.0f, 1.5f);			// character controller height, x standing, y crouched
 	private float camerasHeight = .65f;
@@ -116,6 +118,36 @@ public partial class PlayerControls : Node3D
 			return;
 		
 		float deltaTime = (float)delta;
+
+		if (playerThing.Dead)
+		{
+//			if (playerCamera != null)
+//				playerCamera.bopActive = false;
+
+			if (deathTime < respawnDelay)
+				deathTime += deltaTime;
+			else
+			{
+				if (Input.IsActionJustPressed("Action_Jump") || Input.IsActionJustPressed("Action_Fire"))
+				{
+					deathTime = 0;
+					viewDirection = Vector2.Zero;
+
+					if (playerWeapon != null)
+					{
+						playerWeapon.QueueFree();
+						playerWeapon = null;
+					}
+
+					playerInfo.Reset();
+					playerThing.InitPlayer();
+				}
+			}
+			return;
+		}
+
+		if (!playerThing.ready)
+			return;
 
 		if (Input.IsActionJustPressed("Action_CameraSwitch"))
 			playerCamera.ChangeThirdPersonCamera(!playerCamera.currentThirdPerson);
@@ -221,8 +253,24 @@ public partial class PlayerControls : Node3D
 
 		rotAngle.Y = viewDirection.Y;
 		playerInfo.RotationDegrees = rotAngle;
-
+		Vector3 weaponColliderAngles = playerThing.weaponCollider.RotationDegrees;
+		playerThing.weaponCollider.RotationDegrees = new Vector3(weaponColliderAngles.X, rotAngle.Y, weaponColliderAngles.Z);
+		playerThing.weaponCollider.Position = playerThing.weaponCollider.Quaternion * new Vector3(.5f, -.7f, -.4f);
 		float deltaTime = (float)delta;
+
+		if (playerThing.Dead)
+		{
+//			if (controller.enabled)
+			{
+				// Reset the gravity velocity
+				playerVelocity = Vector3.Down * GameManager.Instance.gravity;
+				ApplyMove(deltaTime);
+			}
+			return;
+		}
+
+		if (!playerThing.ready)
+			return;
 
 		//Movement Checks
 		if (controllerIsGrounded)

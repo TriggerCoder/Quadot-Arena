@@ -157,29 +157,36 @@ public partial class PlayerModel : Node3D
 	public override void _Ready()
 	{
 	}
-	/*
-		void ApplySimpleMove()
-		{
-			float gravityAccumulator;
-			Vector3 currentPosition = playerTransform.position;
-			isGrounded = Physics.CheckSphere(currentPosition, .5f, (1 << GameManager.ColliderLayer), QueryTriggerInteraction.Ignore);
-			if (isGrounded)
-				gravityAccumulator = 0f;
-			else
-				gravityAccumulator = GameManager.Instance.gravity;
-			Vector3 gravity = Vector3.down * gravityAccumulator;
-			currentPosition += (gravity + impulseVector) * Time.deltaTime;
+	void ApplySimpleMove(float deltaTime)
+	{
+		float gravityAccumulator;
+		Vector3 currentPosition = Position;
 
-			//dampen impulse
-			if (impulseVector.sqrMagnitude > 0)
-			{
-				impulseVector = Vector3.Lerp(impulseVector, Vector3.zero, impulseDampening * Time.deltaTime);
-				if (impulseVector.sqrMagnitude < 1f)
-					impulseVector = Vector3.zero;
-			}
-			rb.MovePosition(currentPosition);
+		Rid Sphere = PhysicsServer3D.SphereShapeCreate();
+		PhysicsShapeQueryParameters3D SphereCast = new PhysicsShapeQueryParameters3D();
+		SphereCast.ShapeRid = Sphere;
+		PhysicsServer3D.ShapeSetData(Sphere, .5f);
+		SphereCast.CollisionMask = (1 << GameManager.ColliderLayer);
+		SphereCast.Motion = Vector3.Zero;
+		SphereCast.Transform = new Transform3D(Basis.Identity, Position);
+		var SpaceState = GetWorld3D().DirectSpaceState;
+		var hit = SpaceState.GetRestInfo(SphereCast);
+		if (hit.ContainsKey("collider_id"))
+			gravityAccumulator = 0f;
+		else
+			gravityAccumulator = GameManager.Instance.gravity;
+		Vector3 gravity = Vector3.Down * gravityAccumulator;
+		currentPosition += (gravity + impulseVector) * deltaTime;
+
+		//dampen impulse
+		if (impulseVector.LengthSquared() > 0)
+		{
+			impulseVector = impulseVector.Lerp(Vector3.Zero, impulseDampening * deltaTime);
+			if (impulseVector.LengthSquared() < 1f)
+				impulseVector = Vector3.Zero;
 		}
-	*/
+		Position = (currentPosition);
+	}
 	public override void _Process(double delta)
 	{
 		if (GameManager.Paused)
@@ -192,7 +199,7 @@ public partial class PlayerModel : Node3D
 
 		if (ragDoll)
 		{
-//			ApplySimpleMove();
+			ApplySimpleMove(deltaTime);
 			return;
 		}
 
@@ -220,7 +227,7 @@ public partial class PlayerModel : Node3D
 							upperAnimation++;
 							nextUpper = upperAnim[upperAnimation];
 							nextFrameUpper = nextUpper.startFrame;
-//							ChangeToRagDoll();
+							ChangeToRagDoll();
 							return;
 						case UpperAnimation.Attack:
 						case UpperAnimation.Raise:
@@ -424,78 +431,62 @@ public partial class PlayerModel : Node3D
 
 		upperAnimation = UpperAnimation.Attack;
 	}
-	/*
+	
 	private void ChangeToRagDoll()
 	{
-		Vector3 currentPosition = playerTransform.position;
-		Quaternion currentRotation = playerTransform.rotation;
+		AnimatableBody3D modelCollider = new AnimatableBody3D();
 
-		//Need to change head mesh from transform position and rotation offsets to vertex to get a correct collider
-		Vector3 headOffset = tagHeadTransform.localPosition;
-		Quaternion headRotation = tagHeadTransform.localRotation;
+		modelCollider.Name = "Player_collider";
+		AddChild(modelCollider);
+
+		uint OwnerShapeId = modelCollider.CreateShapeOwner(this);
+		for (int i = 0; i < upper.meshes.Count; i++)
+		{
+			MD3Mesh currentMesh = upper.meshes[i];
+			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
+			modelColliderShape.Data = upperModel.data[i].arrMesh.GetFaces();
+			modelCollider.ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
+		}
 
 		for (int i = 0; i < head.meshes.Count; i++)
 		{
 			MD3Mesh currentMesh = head.meshes[i];
-			currentVect.Clear();
-			nextVect.Clear();
-			//Head has only 1 frame
-			currentVect.AddRange(currentMesh.verts[0]);
-			for (int j = 0; j < currentVect.Count; j++)
-			{
-				currentVect[j] = headRotation * currentVect[j];
-				currentVect[j] += headOffset;
-			}
-
-			headModel.data[i].meshFilter.mesh.SetVertices(currentVect);
-			headModel.data[i].meshFilter.mesh.RecalculateNormals();
+			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
+			modelColliderShape.Data = headModel.data[i].arrMesh.GetFaces();
+			modelCollider.ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
 		}
 
-		playerTransform.SetParent(GameManager.Instance.TemporaryObjectsHolder);
-		playerTransform.SetPositionAndRotation(currentPosition, currentRotation);
-		tagHeadTransform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+		for (int i = 0; i < lower.meshes.Count; i++)
+		{
+			MD3Mesh currentMesh = lower.meshes[i];
+			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
+			modelColliderShape.Data = lowerModel.data[i].arrMesh.GetFaces();
+			modelCollider.ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
+		}
 
-		var meshFilterChildren = playerTransform.GetComponentsInChildren<MeshFilter>(includeInactive: true);
-		CombineInstance[] combine = new CombineInstance[meshFilterChildren.Length];
-		for (var i = 0; i < combine.Length; i++)
-			combine[i].mesh = meshFilterChildren[i].mesh;
-
-		var mesh = new Mesh();
-		mesh.CombineMeshes(combine, true, false, false);
-		mesh.RecalculateNormals();
-
-		MeshCollider mc = playerTransform.gameObject.AddComponent<MeshCollider>();
-		mc.sharedMesh = mesh;
-		mc.convex = true;
-		rb = playerTransform.gameObject.AddComponent<Rigidbody>();
-		rb.useGravity = false;
-		rb.isKinematic = true;
-
-
+		modelCollider.CollisionLayer = (1 << GameManager.RagdollLayer);
 		impulseVector = playerControls.impulseVector;
-		playerControls.EnableColliders(false);
+		playerControls.playerThing.CollisionLayer = (1 << GameManager.NoCollisionLayer);
+//		playerControls.EnableColliders(false);
 		ragDoll = true;
-
-		DestroyAfterTime destroyAfterTime = playerTransform.gameObject.AddComponent<DestroyAfterTime>();
-		destroyAfterTime._lifeTime = 10;
+		Reparent(GameManager.Instance.TemporaryObjectsHolder);
+//		DestroyAfterTime destroyAfterTime = playerTransform.gameObject.AddComponent<DestroyAfterTime>();
+//		destroyAfterTime._lifeTime = 10;
 	}
 
 	public void Die()
 	{
 		//Need to reset the torso and head view
-		headTransform.localRotation = Quaternion.identity;
-		upperTransform.localRotation = Quaternion.identity;
+		headBody.Basis = new Basis(Quaternion.Identity);
+		upperBody.Basis = new Basis(Quaternion.Identity);
 
-		int deathNum = 2 * UnityEngine.Random.Range(0, 3);
+		int deathNum = 2 * GD.RandRange(0, 2);
 		upperAnimation = deathNum;
 		lowerAnimation = deathNum;
 
-		gameObject.layer = GameManager.RagdollLayer;
-		GameManager.SetLayerAllChildren(playerTransform, GameManager.RagdollLayer);
-
 		ownerDead = true;
 	}
-	*/
+
 	public void TurnLegsOnJump(float sideMove)
 	{
 		Quaternion rotate = Quaternion.Identity;

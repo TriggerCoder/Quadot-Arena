@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://xi3ybp7mrio2"]
+[gd_scene load_steps=14 format=3 uid="uid://xi3ybp7mrio2"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerThing.cs" id="1_da8o2"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerControls.cs" id="1_g37r6"]
@@ -17,13 +17,19 @@ height = 1.5
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_aj4xj"]
 length = 0.991696
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("playerInfo", "playerControls", "audioStream", "player") groups=["Player"]]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3xr2m"]
+radius = 0.2
+height = 1.0
+
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Feets", "playerInfo", "playerControls", "weaponCollider", "audioStream", "player") groups=["Player"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 collision_layer = 64
 collision_mask = 125
 script = ExtResource("1_da8o2")
+Feets = NodePath("Feets")
 playerInfo = NodePath("PlayerInfo")
 playerControls = NodePath("PlayerControls")
+weaponCollider = NodePath("Weapon")
 audioStream = NodePath("PlayerVoiceAudioStream")
 player = NodePath("PlayerControls/PlayerModel")
 
@@ -34,6 +40,10 @@ shape = SubResource("CapsuleShape3D_3kcwc")
 [node name="Feets" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 shape = SubResource("SeparationRayShape3D_aj4xj")
+
+[node name="Weapon" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+shape = SubResource("CapsuleShape3D_3xr2m")
 
 [node name="PlayerControls" type="Node3D" parent="." node_paths=PackedStringArray("playerInfo", "playerThing", "playerCamera")]
 script = ExtResource("1_g37r6")
@@ -50,28 +60,22 @@ playerControls = NodePath("../PlayerControls")
 playerCamera = NodePath("MainCameras")
 audioStream = NodePath("../PlayerVoiceAudioStream")
 playerThing = NodePath("..")
-WeaponHand = NodePath("MainCameras/UICamera/WeaponHand")
+WeaponHand = NodePath("MainCameras/ViewCamera/WeaponHand")
 WeaponPrefabs = [null, ExtResource("4_4obu3"), ExtResource("5_mrmdb"), null, ExtResource("5_jwttf"), null, null, ExtResource("6_yhj32"), null]
 
-[node name="MainCameras" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("playerControls", "ThirdPerson", "SkyholeCamera", "UICamera")]
+[node name="MainCameras" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("playerControls", "ThirdPerson", "ViewCamera")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 script = ExtResource("3_bs0x2")
 playerControls = NodePath("../../PlayerControls")
 ThirdPerson = NodePath("SpringArm3D/ThirdPersonCamera")
-SkyholeCamera = NodePath("SkyholeCamera")
-UICamera = NodePath("UICamera")
+ViewCamera = NodePath("ViewCamera")
 
-[node name="SkyholeCamera" type="Camera3D" parent="PlayerInfo/MainCameras"]
-cull_mask = 1
+[node name="ViewCamera" type="Camera3D" parent="PlayerInfo/MainCameras"]
+cull_mask = 257
 near = 0.1
 far = 300.0
 
-[node name="UICamera" type="Camera3D" parent="PlayerInfo/MainCameras"]
-cull_mask = 256
-near = 0.1
-far = 300.0
-
-[node name="WeaponHand" type="Node3D" parent="PlayerInfo/MainCameras/UICamera"]
+[node name="WeaponHand" type="Node3D" parent="PlayerInfo/MainCameras/ViewCamera"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 
 [node name="SpringArm3D" type="SpringArm3D" parent="PlayerInfo/MainCameras"]

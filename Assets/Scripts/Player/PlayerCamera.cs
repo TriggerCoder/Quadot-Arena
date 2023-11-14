@@ -8,9 +8,7 @@ public partial class PlayerCamera : Node3D
 	[Export]
 	public Camera3D ThirdPerson;
 	[Export]
-	public Camera3D SkyholeCamera;
-	[Export]
-	public Camera3D UICamera;
+	public Camera3D ViewCamera;
 
 	public Camera3D CurrentCamera;
 	private Vector3 rotAngle = Vector3.Zero;
@@ -18,9 +16,8 @@ public partial class PlayerCamera : Node3D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		CurrentCamera = SkyholeCamera;
-		GameManager.Instance.SetViewPortToCamera(SkyholeCamera);
-		GameManager.Instance.SetViewPortToCamera(UICamera,true);
+		CurrentCamera = ViewCamera;
+		GameManager.Instance.SetViewPortToCamera(ViewCamera);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -38,13 +35,11 @@ public partial class PlayerCamera : Node3D
 		{
 			CurrentCamera = ThirdPerson;
 			GameManager.Instance.SetViewPortToCamera(ThirdPerson);
-			UICamera.CullMask = 0;
 			playerControls.playerThing.avatar.ChangeLayer(GameManager.AllPlayerViewMask);
 			return;
 		}
-		CurrentCamera = SkyholeCamera;
-		GameManager.Instance.SetViewPortToCamera(SkyholeCamera);
-		UICamera.CullMask = playerControls.playerInfo.uiLayer;
+		CurrentCamera = ViewCamera;
+		GameManager.Instance.SetViewPortToCamera(ViewCamera);
 		playerControls.playerThing.avatar.ChangeLayer(GameManager.AllPlayerViewMask & ~((uint)(playerControls.playerInfo.viewLayer)));
 	}
 }

@@ -66,7 +66,6 @@ environment = SubResource("Environment_rcj1l")
 [node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "playerViewPort", "Players")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
-autoloadMap = "map20"
 playerViewPort = NodePath("SplitScreen/PlayerViewPort")
 Players = [NodePath("../Player")]
 
@@ -110,3 +109,9 @@ layout_mode = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 axis_lock_angular_x = true
 axis_lock_angular_z = true
+
+[node name="SunLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.642788, -0.492404, 0.586824, 0, 0.766044, 0.642788, -0.766044, 0.413176, -0.492404, 0, 0, 0)
+layers = 255
+light_color = Color(0, 0, 0, 1)
+shadow_enabled = true

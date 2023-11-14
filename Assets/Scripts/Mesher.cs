@@ -86,6 +86,7 @@ public static class Mesher
 			mesh.Layers = GameManager.AllPlayerViewMask;
 		mesh.Name = Name;
 		mesh.Mesh = arrMesh;
+//		mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 
 		//PVS only add on Static Geometry, as it has BSP Nodes
 		if (addPVS)
@@ -247,7 +248,7 @@ public static class Mesher
 			mesh.Layers = GameManager.AllPlayerViewMask;
 		mesh.Name = Name;
 		mesh.Mesh = arrMesh;
-
+//		mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 		//PVS only add on Static Geometry, as it has BSP Nodes
 		if (addPVS)
 			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(mesh, surfaces);

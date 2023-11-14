@@ -4,9 +4,7 @@ using System;
 public partial class PlayerViewPort : Node
 {
 	[Export]
-	public SubViewport Skyhole;
-	[Export]
-	public SubViewport UI;
+	public SubViewport viewPort;
 	public override void _Ready()
 	{
 	}

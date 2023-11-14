@@ -24,7 +24,7 @@ public partial class GameManager : Node
 
 	//Physic Layers
 	public const short DefaultLayer = 0;
-	public const short FXLayer = 1;
+	public const short NoCollisionLayer = 1;
 
 	public const short ColliderLayer = 2;
 	public const short InvisibleBlockerLayer = 3;
@@ -72,7 +72,7 @@ public partial class GameManager : Node
 										(1 << Player7Layer) | 
 										(1 << Player8Layer));
 
-	public const uint NoHitMask = ((1 << FXLayer) | 
+	public const uint NoHitMask = ((1 << NoCollisionLayer) | 
 									(1 << InvisibleBlockerLayer) | 
 									(1 << WalkTriggerLayer) | 
 									(1 << ThingsLayer));
@@ -199,17 +199,12 @@ public partial class GameManager : Node
 		}
 	}
 
-	public void SetViewPortToCamera(Camera3D camera, bool ui = false)
+	public void SetViewPortToCamera(Camera3D camera)
 	{
 		var CamRID = camera.GetCameraRid();
-		SubViewport viewPort;
 
-		if (!ui)
-			viewPort = playerViewPort.Skyhole;
-		else
-			viewPort = playerViewPort.UI;
-
-		var viewPortRID = viewPort.GetViewportRid();
+//		playerViewPort.viewPort.DebugDraw = Viewport.DebugDrawEnum.DirectionalShadowAtlas;
+		var viewPortRID = playerViewPort.viewPort.GetViewportRid();
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 	}
 

@@ -45,6 +45,8 @@ public partial class Projectile : Node3D
 	[Export]
 	public MultiAudioStream audioStream;
 
+	public uint ignoreSelfLayer = 0;
+
 	//Needed for homing projectires
 	public Node3D target = null;
 	const float capAngle = 16.875f;
@@ -96,7 +98,7 @@ public partial class Projectile : Node3D
 		//check for collision
 		{			
 			PhysicsServer3D.ShapeSetData(Sphere, projectileRadius);
-			SphereCast.CollisionMask = ~GameManager.NoHitMask;
+			SphereCast.CollisionMask = ~(GameManager.NoHitMask | ignoreSelfLayer);
 			SphereCast.Motion = -d * speed * deltaTime;
 			SphereCast.Transform = GlobalTransform;
 			var result = SpaceState.CastMotion(SphereCast);
@@ -155,6 +157,7 @@ public partial class Projectile : Node3D
 					continue;
 				
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
+
 				if (collider is Damageable damageable)
 				{
 					Vector3 hPosition = collider.Position;
@@ -170,13 +173,13 @@ public partial class Projectile : Node3D
 							damageable.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, lenght / explosionRadius));
 						break;
 						case DamageType.Plasma:
-							if (collider != owner) //Plasma never does self damage
+							if (collider == owner) //Plasma never does self damage
 								continue;
 							else
 								damageable.Damage(GD.RandRange(damageMin, damageMax), damageType, owner);
 						break;
 						case DamageType.BFGBall:
-							if (collider != owner) //BFG never does self damage
+							if (collider == owner) //BFG never does self damage
 								continue;
 							else
 								damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
@@ -230,7 +233,7 @@ public partial class Projectile : Node3D
 				PlayerInfo playerInfo = owner.GetComponent<PlayerInfo>();
 				if (playerInfo != null)
 				{
-					Camera rayCaster = playerInfo.playerCamera.SkyholeCamera;
+					Camera rayCaster = playerInfo.playerCamera.ViewCamera;
 					Quaternion Camerarotation;
 					RaycastHit[] hitRays = new RaycastHit[3];
 					Ray r;

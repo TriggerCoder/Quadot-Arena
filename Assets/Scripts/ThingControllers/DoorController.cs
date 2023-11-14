@@ -183,22 +183,21 @@ public partial class DoorController : AnimatableBody3D, Damageable
 		if (angle < 0)
 		{
 			if (angle == -1)
-				dirVector = Vector3.Down;
-			else
 				dirVector = Vector3.Up;
+			else
+				dirVector = Vector3.Down;
 			return;
 		}
-		Quaternion rotation = new Quaternion(Vector3.Up, Mathf.DegToRad(angle));
-		Quaternion forwardRotation = Transform.LookingAt(Vector3.Left, Vector3.Up).Basis.GetRotationQuaternion();
-		Quaternion finalRotation = rotation * forwardRotation;
-		dirVector = finalRotation * Vector3.Forward;
+		//Remember angles are rotated 90
+		Quaternion rotation = new Quaternion(Vector3.Up, Mathf.DegToRad(angle + 90));
+		dirVector = rotation * Vector3.Forward;
 	}
 
 	public void SetBounds(Aabb box)
 	{
 		door = box;
 		closedPosition = Position;
-		Vector3 extension = new Vector3(dirVector.X * (box.Size.X - lip), dirVector.Y * (box.Size.Y - lip), dirVector.Z * (box.Size.Z - lip));
+		Vector3 extension = new Vector3(dirVector.X * (door.Size.X - lip), dirVector.Y * (door.Size.Y - lip), dirVector.Z * (door.Size.Z - lip));
 		openPosition = closedPosition + extension;
 		openSqrMagnitude = (openPosition - closedPosition).LengthSquared();
 	}
