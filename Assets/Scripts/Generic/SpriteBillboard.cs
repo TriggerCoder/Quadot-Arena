@@ -22,16 +22,16 @@ public partial class SpriteBillboard : Sprite3D
 			QueueFree();
 			return;
 		}
-
+		bool isTransparent = Transparent;
 		if (Billboard != BaseMaterial3D.BillboardModeEnum.Disabled)
 			MaterialManager.AddBillBoard(spriteName);
 
 		if (TextureLoader.HasTexture(spriteName))
-			spriteMaterial = MaterialManager.GetMaterials(spriteName, -1, Transparent);
+			spriteMaterial = MaterialManager.GetMaterials(spriteName, -1, ref isTransparent);
 		else
 		{
-			TextureLoader.AddNewTexture(spriteName, Transparent);
-			spriteMaterial = MaterialManager.GetMaterials(spriteName, -1, Transparent);
+			TextureLoader.AddNewTexture(spriteName, isTransparent);
+			spriteMaterial = MaterialManager.GetMaterials(spriteName, -1, ref isTransparent);
 		}
 		PixelSize = .5f * 1 / spriteRadius;
 		Texture = (Texture2D)spriteMaterial.Get("shader_parameter/Tex_0");

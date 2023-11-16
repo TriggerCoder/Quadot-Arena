@@ -643,9 +643,9 @@ public partial class PlayerModel : Node3D
 			weapon = newWeapon;
 
 		if (weapon.readySurfaceArray.Count == 0)
-			weaponModel = Mesher.GenerateModelFromMeshes(weapon, currentLayer);
+			weaponModel = Mesher.GenerateModelFromMeshes(weapon, currentLayer, null, false, false);
 		else
-			weaponModel = Mesher.FillModelFromProcessedData(weapon, currentLayer);
+			weaponModel = Mesher.FillModelFromProcessedData(weapon, currentLayer, null, false);
 		weaponModel.node.Name = "weapon";
 		weaponNode.AddChild(weaponModel.node);
 
@@ -655,9 +655,9 @@ public partial class PlayerModel : Node3D
 			barrel = new Node3D();
 			barrel.Name = "barrel_weapon";
 			if (newWeapon.readySurfaceArray.Count == 0)
-				Mesher.GenerateModelFromMeshes(newWeapon, currentLayer, barrel);
+				Mesher.GenerateModelFromMeshes(newWeapon, currentLayer, barrel, false, false);
 			else
-				Mesher.FillModelFromProcessedData(newWeapon, currentLayer, barrel);
+				Mesher.FillModelFromProcessedData(newWeapon, currentLayer, barrel, false);
 			weaponModel.node.AddChild(barrel);
 
 			if (weapon.tagsIdbyName.TryGetValue("tag_barrel", out int tagId))
@@ -669,7 +669,6 @@ public partial class PlayerModel : Node3D
 
 		if (!string.IsNullOrEmpty(muzzleModelName))
 		{
-			MD3GodotConverted muzzleGodotConverted;
 			Vector3 OffSet = Vector3.Zero;
 			MD3 weaponModelTags;
 			muzzleFlash = new Node3D();
@@ -680,9 +679,9 @@ public partial class PlayerModel : Node3D
 				return;
 
 			if (muzzle.readySurfaceArray.Count == 0)
-				muzzleGodotConverted = Mesher.GenerateModelFromMeshes(muzzle, currentLayer, muzzleFlash, true);
+				Mesher.GenerateModelFromMeshes(muzzle, currentLayer, muzzleFlash, true, false);
 			else
-				muzzleGodotConverted = Mesher.FillModelFromProcessedData(muzzle, currentLayer, muzzleFlash);
+				Mesher.FillModelFromProcessedData(muzzle, currentLayer, muzzleFlash, false);
 
 			//Muzzle Flash never cast shadow
 //			for (int i = 0; i < muzzle.readyMeshes.Count; i++)

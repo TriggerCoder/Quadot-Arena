@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://b4vtbenctmy85"]
+
+[ext_resource type="Shader" uid="uid://bxg5jpjlc2ym6" path="res://Assets/Shaders/decals.tres" id="1_j20jb"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_j20jb")

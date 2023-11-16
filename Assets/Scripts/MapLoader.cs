@@ -47,6 +47,18 @@ public static class MapLoader
 
 	//Don't add decals nor marks to these surfaces
 	public static HashSet<CollisionObject3D> noMarks;
+
+	//Map Data Limits
+	public static int minX = int.MaxValue;
+	public static int maxX = int.MinValue;
+	public static int minY = int.MaxValue;
+	public static int maxY = int.MinValue;
+	public static int minZ = int.MaxValue;
+	public static int maxZ = int.MinValue;
+
+	public static Vector3 mapMinCoord;
+	public static Vector3 mapMaxCoord;
+
 	public static bool Load(string mapName)
 	{
 
@@ -201,7 +213,17 @@ public static class MapLoader
 				verts.Add(new QVertex(i, new Vector3(BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle()),
 													BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle(),
 													new Vector3(BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle()), BSPMap.ReadBytes(4)));
+				Vector3 vertex = verts[i].position;
+				//Set Limits
+				if (vertex.X < minX) minX = Mathf.FloorToInt(vertex.X);
+				if (vertex.X > maxX) maxX = Mathf.CeilToInt(vertex.X);
+				if (vertex.Y < minY) minY = Mathf.FloorToInt(vertex.Y);
+				if (vertex.Y > maxY) maxY = Mathf.CeilToInt(vertex.Y);
+				if (vertex.Z < minZ) minZ = Mathf.FloorToInt(vertex.Z);
+				if (vertex.Z > maxZ) maxZ = Mathf.CeilToInt(vertex.Z);
 			}
+			mapMinCoord = new Vector3(minX, minY, minZ);
+			mapMaxCoord = new Vector3(maxX, maxY, maxZ);
 		}
 
 		//vertex indices

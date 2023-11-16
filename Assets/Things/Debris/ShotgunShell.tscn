@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://bt2wbekblvsnd"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/DestroyAfterTime.cs" id="1_cffyq"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/DestroyAfterTime.cs" id="1_3u8pq"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="2_ctrif"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_bcuy2"]
 
@@ -22,14 +22,14 @@ collision_mask = 32772
 input_ray_pickable = false
 mass = 0.1
 
-[node name="DestroyAfterTime" type="Node" parent="."]
-script = ExtResource("1_cffyq")
-destroyTimer = 10.0
+[node name="Destroy" type="Node" parent="."]
+script = ExtResource("1_3u8pq")
 
 [node name="Case" type="Node3D" parent="."]
 script = ExtResource("2_ctrif")
 modelName = "weapons2/shells/s_shell"
 castShadow = false
+useLowCountMultiMesh = false
 modelAnimation = SubResource("Resource_3dopq")
 textureAnimation = SubResource("Resource_u44j0")
 

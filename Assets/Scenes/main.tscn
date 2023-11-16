@@ -1,4 +1,4 @@
-[gd_scene load_steps=47 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=48 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Texture2D" uid="uid://dv1ug6ajvhega" path="res://Assets/Textures/Skyboxes/Gehenna/gehenna.png" id="1_si63v"]
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
@@ -8,6 +8,7 @@
 [ext_resource type="Material" uid="uid://bxnkqiouvmut0" path="res://Assets/Materials/defaultLightMap.tres" id="6_i1nl1"]
 [ext_resource type="PackedScene" uid="uid://xi3ybp7mrio2" path="res://Assets/Player/Player.tscn" id="7_rdgk2"]
 [ext_resource type="Material" uid="uid://b4co3lx7imeoo" path="res://Assets/Materials/transparentLightMap.tres" id="7_wtcy7"]
+[ext_resource type="Material" uid="uid://b4vtbenctmy85" path="res://Assets/Materials/decals.tres" id="8_4a5o0"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/ClusterPVSManager.cs" id="8_vpkit"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/ThingsManager.cs" id="9_71i1l"]
 [ext_resource type="PackedScene" uid="uid://dgacpbgus4c07" path="res://Assets/Things/FX/Damage/BulletMark.tscn" id="11_m4ddm"]
@@ -16,12 +17,12 @@
 [ext_resource type="PackedScene" uid="uid://dw2it7pnea5rd" path="res://Assets/Things/Projectiles/RocketProjectile.tscn" id="12_6703q"]
 [ext_resource type="PackedScene" uid="uid://cbqf3w6nv54ds" path="res://Assets/Things/FX/WeaponHits/RocketExplosion.tscn" id="13_l5hcy"]
 [ext_resource type="PackedScene" uid="uid://bki6ifu2qtbfo" path="res://Assets/Player/PlayerViewPort.tscn" id="13_tu0mj"]
-[ext_resource type="PackedScene" uid="uid://w1e8feydse2o" path="res://Assets/Things/FX/Damage/BurnMark.tscn" id="14_ghmtc"]
 [ext_resource type="PackedScene" uid="uid://c5tu2rku1v7om" path="res://Assets/Things/Projectiles/PlasmaProjectile.tscn" id="15_rsp03"]
 [ext_resource type="PackedScene" uid="uid://bn0i6jh0khogi" path="res://Assets/Things/FX/WeaponHits/PlasmaExplosion.tscn" id="16_xhuyt"]
 [ext_resource type="PackedScene" uid="uid://3h6rlisfwi0r" path="res://Assets/Things/FX/Damage/PlasmaMark.tscn" id="17_xwyg6"]
 [ext_resource type="PackedScene" uid="uid://vbdxg44bm8su" path="res://Assets/Things/Debris/MachineGunAmmoCase.tscn" id="18_dkfmq"]
 [ext_resource type="PackedScene" uid="uid://c0xqge0e4igql" path="res://Assets/Things/FX/Damage/ShotMark.tscn" id="18_t27a7"]
+[ext_resource type="PackedScene" uid="uid://d3pnedvoe1l1p" path="res://Assets/Things/FX/WeaponHits/BurnMark.tscn" id="19_chq50"]
 [ext_resource type="PackedScene" uid="uid://bt2wbekblvsnd" path="res://Assets/Things/Debris/ShotgunShell.tscn" id="19_flqi0"]
 [ext_resource type="PackedScene" uid="uid://wfrbjpq2b7t7" path="res://Assets/Things/Pickups/Ammo/ammo_bullets.tscn" id="19_qacws"]
 [ext_resource type="PackedScene" uid="uid://bvxapvmn28o6t" path="res://Assets/Things/Pickups/Ammo/ammo_shells.tscn" id="20_88qir"]
@@ -75,6 +76,8 @@ defaultMaterial = ExtResource("5_is83x")
 defaultTransparentMaterial = ExtResource("6_fojn5")
 defaultLightMapMaterial = ExtResource("6_i1nl1")
 defaultTransparentLightMapMaterial = ExtResource("7_wtcy7")
+decalsMapMaterial = ExtResource("8_4a5o0")
+_decalsNames = PackedStringArray("gfx/damage/burn_med_mrk")
 
 [node name="ClusterPVSManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("8_vpkit")
@@ -83,7 +86,7 @@ script = ExtResource("8_vpkit")
 script = ExtResource("9_71i1l")
 _fxPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("13_l5hcy"), ExtResource("16_xhuyt")])
 _projectilesPrefabs = Array[PackedScene]([ExtResource("12_6703q"), ExtResource("15_rsp03")])
-_decalsPrefabs = Array[PackedScene]([ExtResource("11_m4ddm"), ExtResource("14_ghmtc"), ExtResource("17_xwyg6"), ExtResource("18_t27a7")])
+_decalsPrefabs = Array[PackedScene]([ExtResource("11_m4ddm"), ExtResource("17_xwyg6"), ExtResource("18_t27a7"), ExtResource("19_chq50")])
 _itemsPrefabs = Array[PackedScene]([ExtResource("19_qacws"), ExtResource("20_88qir"), ExtResource("21_gcmhg")])
 _debrisPrefabs = Array[PackedScene]([ExtResource("18_dkfmq"), ExtResource("19_flqi0")])
 _weaponsPrefabs = Array[PackedScene]([ExtResource("24_5ts3k"), ExtResource("25_5i6m0"), ExtResource("26_6gxqa")])
@@ -109,9 +112,3 @@ layout_mode = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 axis_lock_angular_x = true
 axis_lock_angular_z = true
-
-[node name="SunLight" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.642788, -0.492404, 0.586824, 0, 0.766044, 0.642788, -0.766044, 0.413176, -0.492404, 0, 0, 0)
-layers = 255
-light_color = Color(0, 0, 0, 1)
-shadow_enabled = true

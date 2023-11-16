@@ -12,6 +12,8 @@ public partial class ModelAnimation : Node3D
 	public bool isTransparent = false;
 	[Export]
 	public bool castShadow = true;
+	[Export]
+	public bool useLowCountMultiMesh = true;
 
 	private MD3 md3Model;
 
@@ -23,6 +25,7 @@ public partial class ModelAnimation : Node3D
 	[Export]
 	public DestroyType destroyType;
 
+	public List<MultiMeshData> multiMeshDataList = new List<MultiMeshData>();
 	private List<int> modelAnim = new List<int>();
 	private List<int> textureAnim = new List<int>();
 	private Dictionary<int, ShaderMaterial[]> materials = new Dictionary<int, ShaderMaterial[]>();
@@ -38,6 +41,8 @@ public partial class ModelAnimation : Node3D
 
 	private float TextureLerpTime = 0;
 	private float TextureCurrentLerpTime = 0;
+
+	private GameManager.FuncState currentState = GameManager.FuncState.None;
 	public enum DestroyType
 	{
 		NoDestroy,
@@ -73,9 +78,9 @@ public partial class ModelAnimation : Node3D
 		}
 
 		if (md3Model.readySurfaceArray.Count == 0)
-			model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, currentObject, isTransparent, meshToSkin);
+			model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, currentObject, isTransparent, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, useLowCountMultiMesh);
 		else
-			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, currentObject);
+			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, currentObject, ((modelAnimation.fps == 0) && !isTransparent));
 
 		for (int i = 0; i < md3Model.meshes.Count; i++)
 		{
@@ -92,12 +97,13 @@ public partial class ModelAnimation : Node3D
 				for (int j = 0; j < modelMesh.numSkins; j++)
 				{
 					string texName = modelMesh.skins[j].name;
+					bool currentTransparent = isTransparent;
 					if (TextureLoader.HasTexture(texName))
-						frames[j] = MaterialManager.GetMaterials(texName, -1, isTransparent);
+						frames[j] = MaterialManager.GetMaterials(texName, -1, ref currentTransparent);
 					else
 					{
 						TextureLoader.AddNewTexture(texName, isTransparent);
-						frames[j] = MaterialManager.GetMaterials(texName, -1, isTransparent);
+						frames[j] = MaterialManager.GetMaterials(texName, -1, ref currentTransparent);
 					}
 				}
 				textureAnim.Add(i);
@@ -105,9 +111,9 @@ public partial class ModelAnimation : Node3D
 				materials.Add(i, frames);
 			}
 		}
-		if ((modelAnimation.fps == 0) && (textureAnimation.fps == 0))
-			SetProcess(false);
+
 		modelCurrentFrame = 0;
+		currentState = GameManager.FuncState.Ready;
 	}
 
 	void AnimateModel(float deltaTime)
@@ -167,15 +173,54 @@ public partial class ModelAnimation : Node3D
 		if (TextureCurrentLerpTime >= 1.0f)
 			TextureCurrentLerpTime -= 1.0f;
 	}
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
+	public void Start()
+	{
+		if (modelAnimation.fps == 0)
+		{
+			for (int i = 0; i < model.data.Length; i++)
+			{
+				if (model.data[i] == null)
+					continue;
+				if (model.data[i].isTransparent)
+					continue;
+
+				if (Mesher.MultiMeshes.ContainsKey(model.data[i].multiMesh))
+				{
+					MultiMeshData multiMeshData = new MultiMeshData();
+					multiMeshData.multiMesh = model.data[i].multiMesh;
+					 Mesher.AddNodeToMultiMeshes(model.data[i].multiMesh, this);
+					multiMeshData.owner = this;
+					multiMeshDataList.Add(multiMeshData);
+				}
+			}
+		}
+
+		currentState = GameManager.FuncState.Start;
+	}
+
+	void UpdateMultiMesh()
+	{
+		for (int i = 0; i < multiMeshDataList.Count; i++)
+			Mesher.UpdateInstanceMultiMesh(multiMeshDataList[i].multiMesh, this);
+	}
 	public override void _Process(double delta)
 	{
 		if (GameManager.Paused)
 			return;
 
+		switch (currentState)
+		{
+			default:
+			break;
+			case GameManager.FuncState.Ready:
+				Start();
+			break;
+		}
+
 		float deltaTime = (float)delta;
 
 		AnimateModel(deltaTime);
 		AnimateTexture(deltaTime);
+		UpdateMultiMesh();
 	}
 }

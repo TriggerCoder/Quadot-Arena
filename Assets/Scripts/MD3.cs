@@ -12,7 +12,15 @@ public class MD3GodotConverted
 	{
 		public MeshDataTool meshDataTool = new MeshDataTool();
 		public ArrayMesh arrMesh = new ArrayMesh();
+		public bool isTransparent;
+		public MultiMesh multiMesh;
 	}
+}
+
+public class MultiMeshData
+{
+	public Node3D owner;
+	public MultiMesh multiMesh;
 }
 public class MD3
 {
@@ -28,7 +36,9 @@ public class MD3
 	public List<List<MD3Tag>> tagsbyId = new List<List<MD3Tag>>();					// The list of tags in the model by Id
 	public List<MD3Mesh> meshes;													// The list of meshes in the model
 	public List<MD3Skin> skins;														// The list of skins in the model
-	public List<Godot.Collections.Array> readySurfaceArray = new List<Godot.Collections.Array>();			// This is the processed Godot Mesh
+	public List<Godot.Collections.Array> readySurfaceArray = new List<Godot.Collections.Array>();           // This is the processed Godot Mesh
+	public List<MultiMesh> commonMesh = new List<MultiMesh>();           // This is the common processed Godot Mesh
+	public List<bool> useTransparent = new List<bool>();				// This is bool for the transparent surface
 	public List<ShaderMaterial> readyMaterials = new List<ShaderMaterial>();		// This is the processed Material
 	public static MD3 ImportModel(string modelName, bool forceSkinAlpha)
 	{

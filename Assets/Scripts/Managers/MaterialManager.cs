@@ -21,6 +21,10 @@ public partial class MaterialManager : Node
 	public ShaderMaterial defaultLightMapMaterial;
 	[Export]
 	public ShaderMaterial defaultTransparentLightMapMaterial;
+	[Export]
+	public ShaderMaterial decalsMapMaterial;
+	[Export]
+	public string[] _decalsNames;
 
 	public bool applyLightmaps = true;
 
@@ -29,6 +33,7 @@ public partial class MaterialManager : Node
 	public static string colorProperty = "shader_parameter/AmbientColor";
 	public static string mixBrightness = "shader_parameter/mixBrightness";
 
+	public static List<string> Decals = new List<string>();
 	public static List<string> HasBillBoard = new List<string>();
 	public static List<ShaderMaterial> AllMaterials = new List<ShaderMaterial>();	
 	public static Dictionary<string, ShaderMaterial> Materials = new Dictionary<string, ShaderMaterial>();
@@ -44,6 +49,12 @@ public partial class MaterialManager : Node
 	public override void _Ready()
 	{
 		Instance = this;
+		foreach (string name in _decalsNames)
+		{
+			string upperName = name.ToUpper();
+			GD.Print("Decal Texture Name: " + upperName);
+			Decals.Add(upperName);
+		}
 	}
 
 	public static void AddBillBoard(string shaderName)
@@ -66,8 +77,13 @@ public partial class MaterialManager : Node
 		if (!AditionalTextures.ContainsKey(textureName))
 			AditionalTextures.Add(textureName, shader);
 	}
-	
-	public static ShaderMaterial GetMaterials(string textureName, int lm_index = -1, bool forceSkinAlpha = false)
+	public static ShaderMaterial GetMaterials(string textureName, int lm_index = -1)
+	{
+		bool forceSkinAlpha = false;
+		return GetMaterials(textureName, lm_index, ref forceSkinAlpha);
+	}
+
+	public static ShaderMaterial GetMaterials(string textureName, int lm_index , ref bool forceSkinAlpha)
 	{
 //		if (IsSkyTexture(textureName))
 //			return Instance.skyHole;
@@ -83,8 +99,8 @@ public partial class MaterialManager : Node
 		{
 			if (Materials.ContainsKey(textureName + lm_index.ToString()))
 				return Materials[textureName + lm_index.ToString()];
-
-			mat = QShaderManager.GetShadedMaterial(textureName, lm_index);
+			bool useTransparent = false;
+			mat = QShaderManager.GetShadedMaterial(textureName, lm_index, ref useTransparent);
 			if (mat == null)
 			{
 				// Lightmapping
@@ -98,6 +114,7 @@ public partial class MaterialManager : Node
 				mat.Set(lightMapProperty, lmap);
 				mat.Set(mixBrightness, GameManager.Instance.mixBrightness);
 			}
+			forceSkinAlpha = useTransparent;
 			Materials.Add(textureName + lm_index.ToString(), mat);
 			return mat;
 		}
@@ -105,7 +122,21 @@ public partial class MaterialManager : Node
 		if (Materials.ContainsKey(textureName))
 			return Materials[textureName];
 
-		mat = QShaderManager.GetShadedMaterial(textureName, 0, forceSkinAlpha);
+		if (Decals.Contains(textureName))
+		{
+			GD.Print("Decal found: " + textureName);
+			if (!TextureLoader.Textures.ContainsKey(textureName))
+			{
+				TextureLoader.AddNewTexture(textureName, false);
+				tex = TextureLoader.GetTexture(textureName);
+			}
+			mat = (ShaderMaterial)Instance.decalsMapMaterial.Duplicate(true);
+			mat.Set(opaqueTexProperty, tex);
+			mat.Set(colorProperty, GameManager.ambientLight);
+			mat.Set(mixBrightness, GameManager.Instance.mixBrightness);
+		}
+		else
+			mat = QShaderManager.GetShadedMaterial(textureName, 0, ref forceSkinAlpha);
 		if (mat == null)
 		{
 			// Lightmapping is off, so don't.
@@ -113,7 +144,6 @@ public partial class MaterialManager : Node
 				mat = (ShaderMaterial)Instance.defaultTransparentMaterial.Duplicate(true);
 			else
 				mat = (ShaderMaterial)Instance.defaultMaterial.Duplicate(true);
-
 			mat.Set(opaqueTexProperty, tex);
 			mat.Set(colorProperty, GameManager.ambientLight);
 			mat.Set(mixBrightness, GameManager.Instance.mixBrightness);

@@ -217,6 +217,7 @@ public partial class Projectile : Node3D
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
 				DecalMark.Position = Collision + (d * .05f);
 				DecalMark.LookAt(Collision - Normal, Vector3.Up);
+				DecalMark.Rotate((DecalMark.Basis.Y).Normalized(), -Mathf.Pi * .5f);
 				DecalMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				if (!string.IsNullOrEmpty(secondaryMark))
 				{

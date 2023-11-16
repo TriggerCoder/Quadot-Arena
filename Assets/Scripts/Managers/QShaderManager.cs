@@ -36,7 +36,7 @@ public static class QShaderManager
 
 		return false;
 	}
-	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, bool alphaIsTransparent = false)
+	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, ref bool alphaIsTransparent)
 	{
 		string code = "";
 		string GSHeader = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, ";

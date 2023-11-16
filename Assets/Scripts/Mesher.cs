@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +24,9 @@ public static class Mesher
 
 	public const float APROX_ERROR = 0.001f;
 
+	public const int LOW_USE_MULTIMESHES = 128;
+	public const int HIGH_USE_MULTIMESHES = 1024;
+
 	public const uint MaskSolid = ContentFlags.Solid;
 	public const uint MaskPlayerSolid = ContentFlags.Solid | ContentFlags.PlayerClip | ContentFlags.Body;
 	public const uint MaskDeadSolid = ContentFlags.Solid | ContentFlags.PlayerClip;
@@ -34,6 +36,9 @@ public static class Mesher
 
 	public const uint MaskTransparent = SurfaceFlags.NonSolid | SurfaceFlags.Sky;
 	public const uint NoMarks = SurfaceFlags.NoImpact | SurfaceFlags.NoMarks;
+
+	public static Dictionary<MultiMesh, List<Node3D>> MultiMeshes = new Dictionary<MultiMesh, List<Node3D>>();
+	public static Dictionary<MultiMesh, MultiMeshInstance3D> MultiMeshesInstances = new Dictionary<MultiMesh, MultiMeshInstance3D>();
 
 	public static void ClearMesherCache()
 	{
@@ -315,9 +320,9 @@ public static class Mesher
 	}
 	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask)
 	{
-		return GenerateModelFromMeshes(model, layer, null, false, meshToSkin);
+		return GenerateModelFromMeshes(model, layer, null, false, false, meshToSkin);
 	}
-	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, Node3D ownerObject = null, bool forceSkinAlpha = false, Dictionary<string, string> meshToSkin = null)
+	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true)
 	{
 		if (model == null || model.meshes.Count == 0)
 		{
@@ -342,7 +347,6 @@ public static class Mesher
 		{
 			foreach (MD3Mesh modelMesh in model.meshes)
 			{
-				MeshInstance3D mesh = new MeshInstance3D();
 				dataMeshes data = new dataMeshes();
 				var surfaceArray = GenerateModelMesh(modelMesh);
 				data.arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
@@ -365,20 +369,51 @@ public static class Mesher
 					skinName = modelMesh.skins[0].name;
 				else
 					skinName = meshToSkin[modelMesh.name];
-
-				material = MaterialManager.GetMaterials(skinName, -1, forceSkinAlpha);
-
-				mesh.Name = modelMesh.name;
-				mesh.Mesh = data.arrMesh;
-				mesh.Layers = layer;
+				bool currentTransparent = forceSkinAlpha;
+				material = MaterialManager.GetMaterials(skinName, -1, ref currentTransparent);
 
 				data.arrMesh.SurfaceSetMaterial(0, material);
 				data.meshDataTool.CreateFromSurface(data.arrMesh, 0);
 				md3Model.data[modelMesh.meshNum] = data;
 				model.readySurfaceArray.Add(surfaceArray);
+				MultiMesh multiMesh = new MultiMesh();
+				data.multiMesh = multiMesh;
+				multiMesh.Mesh = data.arrMesh;
+				multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
+				if (useLowMultimeshes)
+					multiMesh.InstanceCount = LOW_USE_MULTIMESHES;
+				else
+					multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
+				model.commonMesh.Add(multiMesh);
+				model.useTransparent.Add(currentTransparent);
 				model.readyMaterials.Add(material);
-				GD.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name);
-				modelObject.AddChild(mesh);
+				if (!MultiMeshes.ContainsKey(multiMesh))
+				{
+					List<Node3D> list = new List<Node3D> ();
+					MultiMeshes.Add(multiMesh, list);
+				}
+
+				if (useCommon && !currentTransparent)
+				{
+					MultiMeshInstance3D mesh = new MultiMeshInstance3D();
+					mesh.Name = modelMesh.name;
+					mesh.Multimesh = multiMesh;
+					mesh.Layers = layer;
+					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
+					MultiMeshesInstances.Add(multiMesh, mesh);
+					GD.Print("Adding MultiMesh : " + mesh.Name);
+				}
+				else
+				{
+					MeshInstance3D mesh = new MeshInstance3D();
+					mesh.Name = modelMesh.name;
+					mesh.Mesh = data.arrMesh;
+					mesh.Layers = layer;
+					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+					modelObject.AddChild(mesh);
+					GD.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name);
+				}
 				groupId++;
 			}
 		}
@@ -398,7 +433,6 @@ public static class Mesher
 					if (meshes.Length == 0)
 						continue;
 
-					MeshInstance3D mesh = new MeshInstance3D();
 					string Name = "Mesh_";
 					int offset = 0;
 					for (int i = 0; i < meshes.Length; i++)
@@ -423,22 +457,53 @@ public static class Mesher
 						ownerObject.AddChild(modelObject);
 						modelObject.Position = Vector3.Zero;
 					}
-
-					ShaderMaterial material = MaterialManager.GetMaterials(meshes[0].skins[0].name, -1, forceSkinAlpha);
+					bool currentTransparent = forceSkinAlpha;
+					ShaderMaterial material = MaterialManager.GetMaterials(meshes[0].skins[0].name, -1, ref currentTransparent);
 
 					for (int i = 0; i < meshes.Length; i++)
 						md3Model.data[meshes[i].meshNum] = data;
 
-					mesh.Name = Name;
-					mesh.Mesh = data.arrMesh;
-					mesh.Layers = layer;
-
 					data.arrMesh.SurfaceSetMaterial(0, material);
 					data.meshDataTool.CreateFromSurface(data.arrMesh, 0);
 					model.readySurfaceArray.Add(surfaceArray);
+					MultiMesh multiMesh = new MultiMesh();
+					data.multiMesh = multiMesh;
+					multiMesh.Mesh = data.arrMesh;
+					multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
+					if (useLowMultimeshes)
+						multiMesh.InstanceCount = LOW_USE_MULTIMESHES;
+					else
+						multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
+					model.commonMesh.Add(multiMesh);
+					model.useTransparent.Add(currentTransparent);
 					model.readyMaterials.Add(material);
-					GD.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name + " skin group name " + meshes[0].skins[0].name);
-					modelObject.AddChild(mesh);
+					if (!MultiMeshes.ContainsKey(multiMesh))
+					{
+						List<Node3D> list = new List<Node3D>();
+						MultiMeshes.Add(multiMesh, list);
+					}
+
+					if (useCommon && !currentTransparent)
+					{
+						MultiMeshInstance3D mesh = new MultiMeshInstance3D();
+						mesh.Name = Name;
+						mesh.Multimesh = multiMesh;
+						mesh.Layers = layer;
+						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+						GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
+						MultiMeshesInstances.Add(multiMesh, mesh);
+						GD.Print("Adding MultiMesh : " + mesh.Name + " skin group name " + meshes[0].skins[0].name);
+					}
+					else
+					{
+						MeshInstance3D mesh = new MeshInstance3D();
+						mesh.Name = Name;
+						mesh.Mesh = data.arrMesh;
+						mesh.Layers = layer;
+						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+						modelObject.AddChild(mesh);
+						GD.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name + " skin group name " + meshes[0].skins[0].name);
+					}
 					groupId++;
 				}
 			}
@@ -448,10 +513,10 @@ public static class Mesher
 	
 	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask)
 	{
-		return FillModelFromProcessedData(model, layer, null, meshToSkin);
+		return FillModelFromProcessedData(model, layer, null, false, meshToSkin);
 	}
 
-	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, Node3D ownerObject = null, Dictionary<string, string> meshToSkin = null)
+	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, Node3D ownerObject = null, bool useCommon = true, Dictionary<string, string> meshToSkin = null)
 	{
 		if (ownerObject == null)
 		{
@@ -477,17 +542,34 @@ public static class Mesher
 				modelObject.Position = Vector3.Zero;
 			}
 
-			MeshInstance3D mesh = new MeshInstance3D();
 			md3Model.data[model.meshes[i].meshNum] = new dataMeshes();
-			var surfaceArray = model.readySurfaceArray[i];
-			md3Model.data[model.meshes[i].meshNum].arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
-			md3Model.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, model.readyMaterials[i]);
-			md3Model.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(md3Model.data[model.meshes[i].meshNum].arrMesh, 0);
-			
-			mesh.Mesh = md3Model.data[model.meshes[i].meshNum].arrMesh;
-			mesh.Layers = layer;
-			modelObject.AddChild(mesh);
-			mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+			bool useTransparent = model.useTransparent[i];
+			md3Model.data[model.meshes[i].meshNum].isTransparent = useTransparent;
+			if (useCommon && !useTransparent)
+			{
+				md3Model.data[model.meshes[i].meshNum].multiMesh = model.commonMesh[i];
+				if (!MultiMeshesInstances.ContainsKey(model.commonMesh[i]))
+				{
+					MultiMeshInstance3D mesh = new MultiMeshInstance3D();
+					mesh.Multimesh = model.commonMesh[i];
+					mesh.Layers = layer;
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
+					MultiMeshesInstances.Add(model.commonMesh[i], mesh);
+					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+				}
+			}
+			else
+			{
+				MeshInstance3D mesh = new MeshInstance3D();
+				var surfaceArray = model.readySurfaceArray[i];
+				md3Model.data[model.meshes[i].meshNum].arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+				md3Model.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, model.readyMaterials[i]);
+				md3Model.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(md3Model.data[model.meshes[i].meshNum].arrMesh, 0);
+				mesh.Mesh = md3Model.data[model.meshes[i].meshNum].arrMesh;
+				mesh.Layers = layer;
+				modelObject.AddChild(mesh);
+				mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+			}			
 		}
 		return md3Model;
 	}
@@ -930,5 +1012,56 @@ public static class Mesher
 		return d;
 	}
 
+	public static void AddNodeToMultiMeshes(MultiMesh multiMesh, Node3D owner)
+	{
+		int instanceNum;
+		if (MultiMeshes.ContainsKey(multiMesh))
+		{
+			List<Node3D> multiMeshList = MultiMeshes[multiMesh];
+			instanceNum = multiMeshList.Count;
+/*			int threshold = (multiMesh.InstanceCount >> 1);
+			if (instanceNum > threshold)
+			{
+				DestroyAfterTime destroy = new DestroyAfterTime();
+				destroy.parent = owner.GetParent();
+				multiMeshList[0].AddChild(destroy);
+			}
+*/
+			if (multiMeshList.Contains(owner))
+				return;
+
+			multiMeshList.Add(owner);
+			multiMesh.SetInstanceTransform(instanceNum, owner.GlobalTransform);
+			multiMesh.VisibleInstanceCount = instanceNum + 1;
+		}
+	}
+	public static void UpdateInstanceMultiMesh(MultiMesh multiMesh, Node3D owner)
+	{
+		if (MultiMeshes.ContainsKey(multiMesh))
+		{
+			List<Node3D> multiMeshList = MultiMeshes[multiMesh];
+			if (!multiMeshList.Contains(owner))
+				return;
+
+			int index = multiMeshList.IndexOf(owner);
+			if (owner.IsVisibleInTree())
+				multiMesh.SetInstanceTransform(index, owner.GlobalTransform);
+			else //Move it out of the map
+			{
+				Transform3D min = new Transform3D(owner.Basis, MapLoader.mapMinCoord * 2f);
+				multiMesh.SetInstanceTransform(index, min);
+			}
+		}
+	}
+	public static void MultiMeshUpdateInstances(MultiMesh multiMesh)
+	{
+		if (MultiMeshes.ContainsKey(multiMesh))
+		{
+			List<Node3D> multiMeshList = MultiMeshes[multiMesh];
+			for (int i = 0 ; i < multiMeshList.Count; i++)
+				multiMesh.SetInstanceTransform(i, multiMeshList[i].Transform);
+			multiMesh.VisibleInstanceCount = multiMeshList.Count;
+		}
+	}
 }
 
