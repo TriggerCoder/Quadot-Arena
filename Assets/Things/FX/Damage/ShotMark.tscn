@@ -10,5 +10,5 @@ render_priority = -128
 script = ExtResource("1_y7hvl")
 spriteName = "gfx/damage/bullet_mrk"
 spriteRadius = 16
-destroyTimer = 20.0
+destroyTimer = 200.0
 alphaFade = true

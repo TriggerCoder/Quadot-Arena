@@ -9,7 +9,7 @@ sorting_offset = -3000.0
 script = ExtResource("1_5uawi")
 spriteName = "gfx/damage/burn_med_mrk"
 spriteRadius = 20
-destroyTimer = 30.0
+destroyTimer = 500.0
 alphaFade = true
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]

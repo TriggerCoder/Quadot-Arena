@@ -255,7 +255,6 @@ public partial class PlayerControls : Node3D
 		playerInfo.RotationDegrees = rotAngle;
 		Vector3 weaponColliderAngles = playerThing.weaponCollider.RotationDegrees;
 		playerThing.weaponCollider.RotationDegrees = new Vector3(weaponColliderAngles.X, rotAngle.Y, weaponColliderAngles.Z);
-		playerThing.weaponCollider.Position = playerThing.weaponCollider.Quaternion * new Vector3(.5f, -.7f, -.4f);
 		float deltaTime = (float)delta;
 
 		if (playerThing.Dead)

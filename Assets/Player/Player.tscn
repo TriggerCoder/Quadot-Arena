@@ -17,9 +17,7 @@ height = 1.5
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_aj4xj"]
 length = 0.991696
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3xr2m"]
-radius = 0.2
-height = 1.0
+[sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_04rnj"]
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Feets", "playerInfo", "playerControls", "weaponCollider", "audioStream", "player") groups=["Player"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -42,8 +40,8 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 
 shape = SubResource("SeparationRayShape3D_aj4xj")
 
 [node name="Weapon" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
-shape = SubResource("CapsuleShape3D_3xr2m")
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0, 0)
+shape = SubResource("SeparationRayShape3D_04rnj")
 
 [node name="PlayerControls" type="Node3D" parent="." node_paths=PackedStringArray("playerInfo", "playerThing", "playerCamera")]
 script = ExtResource("1_g37r6")

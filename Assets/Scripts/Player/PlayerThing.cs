@@ -76,7 +76,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 //		playerInfo.playerHUD.HUDUpdateHealthNum();
 //		playerInfo.playerHUD.HUDUpdateArmorNum();
 
-//		playerControls.playerCamera.ChangeThirdPersonCamera(false);
+		playerControls.playerCamera.ChangeThirdPersonCamera(false);
 		ready = true;
 	}
 	public void PlayModelSound(string soundName)
