@@ -1,4 +1,4 @@
-[gd_scene load_steps=47 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=52 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Texture2D" uid="uid://dv1ug6ajvhega" path="res://Assets/Textures/Skyboxes/Gehenna/gehenna.png" id="1_si63v"]
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
@@ -26,6 +26,7 @@
 [ext_resource type="PackedScene" uid="uid://wfrbjpq2b7t7" path="res://Assets/Things/Pickups/Ammo/ammo_bullets.tscn" id="19_qacws"]
 [ext_resource type="PackedScene" uid="uid://bvxapvmn28o6t" path="res://Assets/Things/Pickups/Ammo/ammo_shells.tscn" id="20_88qir"]
 [ext_resource type="PackedScene" uid="uid://da17o45p1fpov" path="res://Assets/Things/Pickups/Ammo/ammo_cells.tscn" id="21_gcmhg"]
+[ext_resource type="PackedScene" uid="uid://djgfyife6qicb" path="res://Assets/Things/Pickups/Ammo/ammo_rockets.tscn" id="22_xc5q4"]
 [ext_resource type="PackedScene" uid="uid://dxnvn5gs552we" path="res://Assets/Things/Pickups/Weapons/weapon_shotgun.tscn" id="24_5ts3k"]
 [ext_resource type="PackedScene" uid="uid://b2uuscwsgltoa" path="res://Assets/Things/Pickups/Weapons/weapon_plasmagun.tscn" id="25_5i6m0"]
 [ext_resource type="PackedScene" uid="uid://bll72amm2jjvr" path="res://Assets/Things/Pickups/Weapons/weapon_rocketlauncher.tscn" id="26_6gxqa"]
@@ -33,8 +34,11 @@
 [ext_resource type="PackedScene" uid="uid://00qa1h4uy2f7" path="res://Assets/Things/Pickups/Health/item_health_large.tscn" id="28_dpe7f"]
 [ext_resource type="PackedScene" uid="uid://dx8ra3pfwg8c" path="res://Assets/Things/Pickups/Armor/item_armor_body.tscn" id="29_slqlw"]
 [ext_resource type="PackedScene" uid="uid://ce5jta4khvm71" path="res://Assets/Things/Pickups/Armor/item_armor_shard.tscn" id="30_8nwr7"]
+[ext_resource type="PackedScene" uid="uid://bgc0fdktol7v8" path="res://Assets/Things/Pickups/Health/item_health_small.tscn" id="30_u4mvd"]
+[ext_resource type="PackedScene" uid="uid://b32kn8otikx3m" path="res://Assets/Things/Pickups/Health/item_health_mega.tscn" id="31_g11tp"]
 [ext_resource type="PackedScene" uid="uid://tpqffol7j0t" path="res://Assets/Things/GamePlay/target_speaker.tscn" id="31_tr8jk"]
 [ext_resource type="PackedScene" uid="uid://bmyv04u863exh" path="res://Assets/Things/GamePlay/target_position.tscn" id="32_b20ey"]
+[ext_resource type="PackedScene" uid="uid://bpu8u0uujgexx" path="res://Assets/Things/Pickups/Armor/item_armor_combat.tscn" id="32_pviff"]
 [ext_resource type="PackedScene" uid="uid://dcd4jomshlogt" path="res://Assets/Things/GamePlay/info_player_deathmatch.tscn" id="33_epjyi"]
 [ext_resource type="PackedScene" uid="uid://bqw0rqw0imck6" path="res://Assets/Things/GamePlay/func_timer.tscn" id="34_nkc1v"]
 [ext_resource type="PackedScene" uid="uid://7xtnpc5tfejv" path="res://Assets/Things/GamePlay/trigger_push.tscn" id="35_1ytnq"]
@@ -43,6 +47,7 @@
 [ext_resource type="PackedScene" uid="uid://bdkb25lv7sp7t" path="res://Assets/Things/GamePlay/func_door.tscn" id="38_2vxeb"]
 [ext_resource type="PackedScene" uid="uid://w6lesdgsukjc" path="res://Assets/Things/GamePlay/func_button.tscn" id="39_63dug"]
 [ext_resource type="PackedScene" uid="uid://bddv7ddaa8jd0" path="res://Assets/Things/GamePlay/trigger_multiple.tscn" id="40_yfkkd"]
+[ext_resource type="PackedScene" uid="uid://c3wij33wsqbg" path="res://Assets/Things/GamePlay/trigger_hurt.tscn" id="45_ge4jt"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_7oboo"]
 panorama = ExtResource("1_si63v")
@@ -66,7 +71,7 @@ environment = SubResource("Environment_rcj1l")
 [node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "playerViewPort", "Players")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
-autoloadMap = "map20"
+autoloadMap = "q3dm17"
 playerViewPort = NodePath("SplitScreen/PlayerViewPort")
 Players = [NodePath("../Player")]
 
@@ -85,12 +90,12 @@ script = ExtResource("9_71i1l")
 _fxPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("13_l5hcy"), ExtResource("16_xhuyt")])
 _projectilesPrefabs = Array[PackedScene]([ExtResource("12_6703q"), ExtResource("15_rsp03")])
 _decalsPrefabs = Array[PackedScene]([ExtResource("11_m4ddm"), ExtResource("17_xwyg6"), ExtResource("18_t27a7"), ExtResource("18_l0t6s")])
-_itemsPrefabs = Array[PackedScene]([ExtResource("19_qacws"), ExtResource("20_88qir"), ExtResource("21_gcmhg")])
+_itemsPrefabs = Array[PackedScene]([ExtResource("19_qacws"), ExtResource("20_88qir"), ExtResource("21_gcmhg"), ExtResource("22_xc5q4")])
 _debrisPrefabs = Array[PackedScene]([ExtResource("18_dkfmq"), ExtResource("19_flqi0")])
 _weaponsPrefabs = Array[PackedScene]([ExtResource("24_5ts3k"), ExtResource("25_5i6m0"), ExtResource("26_6gxqa")])
-_healthsPrefabs = Array[PackedScene]([ExtResource("27_5pqil"), ExtResource("28_dpe7f")])
-_armorPrefabs = Array[PackedScene]([ExtResource("29_slqlw"), ExtResource("30_8nwr7")])
-_gameplayPrefabs = Array[PackedScene]([ExtResource("31_tr8jk"), ExtResource("32_b20ey"), ExtResource("33_epjyi"), ExtResource("34_nkc1v"), ExtResource("35_1ytnq"), ExtResource("36_7m5u6"), ExtResource("37_kkxgn"), ExtResource("38_2vxeb"), ExtResource("39_63dug"), ExtResource("40_yfkkd")])
+_healthsPrefabs = Array[PackedScene]([ExtResource("27_5pqil"), ExtResource("28_dpe7f"), ExtResource("30_u4mvd"), ExtResource("31_g11tp")])
+_armorPrefabs = Array[PackedScene]([ExtResource("29_slqlw"), ExtResource("30_8nwr7"), ExtResource("32_pviff")])
+_gameplayPrefabs = Array[PackedScene]([ExtResource("31_tr8jk"), ExtResource("32_b20ey"), ExtResource("33_epjyi"), ExtResource("34_nkc1v"), ExtResource("35_1ytnq"), ExtResource("36_7m5u6"), ExtResource("37_kkxgn"), ExtResource("38_2vxeb"), ExtResource("39_63dug"), ExtResource("40_yfkkd"), ExtResource("45_ge4jt")])
 
 [node name="MultiAudioListener" type="AudioListener3D" parent="Quadot Arena"]
 current = true
@@ -107,6 +112,3 @@ grow_vertical = 2
 layout_mode = 2
 
 [node name="Player" parent="." instance=ExtResource("7_rdgk2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
-axis_lock_angular_x = true
-axis_lock_angular_z = true

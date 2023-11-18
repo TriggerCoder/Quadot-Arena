@@ -77,7 +77,7 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(rocket);
 			rocket.owner = playerInfo.playerThing;
 			if (muzzleObject != null)
-				rocket.GlobalPosition = muzzleObject.GlobalPosition;
+				rocket.GlobalPosition = muzzleObject.GlobalPosition + .2f * d;
 			else
 				rocket.GlobalPosition = playerInfo.playerCamera.CurrentCamera.GlobalPosition;
 			rocket.ignoreSelfLayer = playerInfo.playerLayer;

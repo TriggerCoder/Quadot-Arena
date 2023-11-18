@@ -465,6 +465,7 @@ public partial class PlayerModel : Node3D
 		}
 
 		modelCollider.CollisionLayer = (1 << GameManager.RagdollLayer);
+		modelCollider.CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.RagdollLayer));
 		impulseVector = playerControls.impulseVector;
 		playerControls.playerThing.CollisionLayer = (1 << GameManager.NoCollisionLayer);
 //		playerControls.EnableColliders(false);

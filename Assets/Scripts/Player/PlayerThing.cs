@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -12,7 +11,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	[Export]
 	public PlayerControls playerControls;
 	[Export]
-	public Node3D weaponCollider;
+	public Node3D[] weaponCollider;
 	[Export]
 	public MultiAudioStream audioStream;
 
@@ -36,6 +35,9 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public bool radsuit = false;
 	public bool invul = false;
 	public bool ready = false;
+
+	private GameManager.FuncState currentState = GameManager.FuncState.None;
+	public int skipFrames = 5;
 	private enum LookType
 	{
 		Left = 0,
@@ -49,14 +51,32 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.feetRay = new SeparationRayShape3D();
 		playerControls.feetRay.Length = .992f;
 		Feets.Shape = playerControls.feetRay;
+		currentState = GameManager.FuncState.Ready;
 	}
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta)
+	public override void _PhysicsProcess(double delta)
 	{
 		if (GameManager.Paused)
 			return;
 
+		switch (currentState)
+		{
+			default:
+			break;
+			case GameManager.FuncState.Ready:
+			{   //skip frames are used to easen up after loading
+				if (skipFrames > 0)
+				{
+					skipFrames--;
+					if (skipFrames == 0)
+					{
+						ready = true;
+						currentState = GameManager.FuncState.Start;
+					}
+				}
+			}
+			break;
+		}
 	}
 	public void InitPlayer()
 	{
@@ -77,7 +97,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 //		playerInfo.playerHUD.HUDUpdateArmorNum();
 
 		playerControls.playerCamera.ChangeThirdPersonCamera(false);
-		ready = true;
+		skipFrames = 5;
+		currentState = GameManager.FuncState.Ready;
 	}
 	public void PlayModelSound(string soundName)
 	{
@@ -87,6 +108,9 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	}
 	public void Impulse(Vector3 direction, float force)
 	{
+		if (!ready)
+			return;
+
 		float length = force / 80;
 
 		//Gravity will be the only force down
@@ -99,6 +123,9 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	}
 	public void Damage(int amount, DamageType damageType = DamageType.Generic, Node3D attacker = null)
 	{
+		if (!ready)
+			return;
+
 		if (Dead)
 			return;
 
@@ -149,7 +176,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		if (hitpoints <= 0)
 		{
 //			playerInfo.doomHUD.HUDUpdateMugshot(DoomHUD.MugType.Dead);
-
+			CollisionLayer = (1 << GameManager.RagdollLayer);
 			if (playerControls.playerWeapon != null)
 				playerControls.playerWeapon.putAway = true;
 
@@ -176,6 +203,9 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	}
 	public void JumpPadDest(Vector3 destination)
 	{
+		if (!ready)
+			return;
+
 		Vector3 position = GlobalPosition;
 		Vector3 horizontalVelocity = destination - position;
 		float height = destination.Y - position.Y;

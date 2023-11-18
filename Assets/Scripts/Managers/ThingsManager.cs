@@ -355,7 +355,6 @@ public partial class ThingsManager : Node
 						else
 							BigBox = BigBox.Merge(box);
 					}
-					GD.Print("Switch Angle "+angle);
 					sw.Init(angle, hitpoints, speed, wait, lip, BigBox);
 
 					//If it's not damagable, then create trigger collider
@@ -375,17 +374,7 @@ public partial class ThingsManager : Node
 						triggerCollider.GlobalPosition = BigBox.GetCenter();
 						triggerCollider.BodyEntered += sw.internalSwitch.OnBodyEntered;
 					}
-					//If it is, then we need to create a damage interface for the colliders
-/*					else
-					{
-						Collider[] collidersChildren = thingObject.GetComponentsInChildren<Collider>(includeInactive: true);
-						for (var i = 0; i < collidersChildren.Length; i++)
-						{
-							ParentIsDamageable parentIsDamageable = collidersChildren[i].gameObject.AddComponent<ParentIsDamageable>();
-							parentIsDamageable.parent = sw;
-						}
-					}
-*/
+
 					if (entity.entityData.TryGetValue("target", out strWord))
 					{
 						string target = strWord;
@@ -435,16 +424,25 @@ public partial class ThingsManager : Node
 					uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, door, model, 0, false);
 					int shapes = door.ShapeOwnerGetShapeCount(OwnerShapeId);
 					Aabb BigBox = new Aabb();
+
+					DoorCollider doorCollider = new DoorCollider();
+					door.AddChild(doorCollider);
+					doorCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
+					doorCollider.CollisionMask = GameManager.TakeDamageMask;
+					doorCollider.door = door;
+					uint bodyShapeId = doorCollider.CreateShapeOwner(door);
 					for (int i = 0; i < shapes; i++)
 					{
-						Shape3D boxShape = door.ShapeOwnerGetShape(OwnerShapeId, i);
-						Aabb box = boxShape.GetDebugMesh().GetAabb();
+						Shape3D shape = door.ShapeOwnerGetShape(OwnerShapeId, i);
+						doorCollider.ShapeOwnerAddShape(bodyShapeId, shape);
+						Aabb box = shape.GetDebugMesh().GetAabb();
 						if (i == 0)
 							BigBox = new Aabb(box.Position, box.Size);
 						else
 							BigBox = BigBox.Merge(box);
 					}
 					door.Init(angle, hitpoints, speed, wait, lip, BigBox, dmg);
+
 					if (entity.entityData.TryGetValue("targetname", out strWord))
 					{
 						string target = strWord;
@@ -488,37 +486,32 @@ public partial class ThingsManager : Node
 								door.CurrentState = DoorController.State.Opening;
 							});
 						}
-/*						else //If it is, then we need to create a damage interface for the colliders
-						{
-							for (int i = 0; i < rigidbodiesChildren.Length; i++)
-							{
-								ParentIsDamageable parentIsDamageable = rigidbodiesChildren[i].gameObject.AddComponent<ParentIsDamageable>();
-								parentIsDamageable.parent = door;
-							}
-						}
-*/					}
+					}
 				}
 				break;
 				//Trigger Hurt
-/*				case "trigger_hurt":
+				case "trigger_hurt":
 				{
 					int dmg = 9999;
 					strWord = entity.entityData["model"];
 					int model = int.Parse(strWord.Trim('*'));
 					if (entity.entityData.TryGetValue("dmg", out strWord))
 						dmg = int.Parse(strWord);
-					MapLoader.GenerateGeometricCollider(thingObject, model, ContentFlags.Trigger);
-					TriggerController tc = thingObject.GetComponent<TriggerController>();
-					if (tc == null)
-						tc = thingObject.AddComponent<TriggerController>();
+
+					TriggerController tc = new TriggerController();
+					thingObject.AddChild(tc);
+					Area3D objCollider = new Area3D();
+					thingObject.AddChild(objCollider);
+					MapLoader.GenerateGeometricCollider(thingObject, objCollider, model, ContentFlags.Trigger);
+					objCollider.BodyEntered += tc.OnBodyEntered;
 					tc.Repeatable = true;
-					tc.SetController("", (p) =>
+					tc.SetController("trigger_hurt", (p) =>
 					{
 						p.Damage(dmg, DamageType.Generic);
 					});
 				}
 				break;
-*/				//Remove PowerUps
+				//Remove PowerUps
 /*				case "target_remove_powerups":
 				{
 					if (entity.entityData.TryGetValue("targetname", out strWord))

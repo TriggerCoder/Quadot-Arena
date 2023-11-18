@@ -33,13 +33,17 @@ public partial class PlayerCamera : Node3D
 		currentThirdPerson = enable;
 		if (enable)
 		{
+			ThirdPerson.Visible = true;
 			CurrentCamera = ThirdPerson;
 			GameManager.Instance.SetViewPortToCamera(ThirdPerson);
+			ViewCamera.Visible = false;
 			playerControls.playerThing.avatar.ChangeLayer(GameManager.AllPlayerViewMask);
 			return;
 		}
+		ViewCamera.Visible = true;
 		CurrentCamera = ViewCamera;
 		GameManager.Instance.SetViewPortToCamera(ViewCamera);
+		ThirdPerson.Visible = false;
 		playerControls.playerThing.avatar.ChangeLayer(GameManager.AllPlayerViewMask & ~((uint)(playerControls.playerInfo.viewLayer)));
 	}
 }

@@ -77,7 +77,7 @@ public partial class PlasmagunWeapon : PlayerWeapon
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(plasma);
 			plasma.owner = playerInfo.playerThing;
 			if (muzzleObject != null)
-				plasma.GlobalPosition = muzzleObject.GlobalPosition;
+				plasma.GlobalPosition = muzzleObject.GlobalPosition + .2f * d;
 			else
 				plasma.GlobalPosition = playerInfo.playerCamera.CurrentCamera.GlobalPosition;
 			plasma.ignoreSelfLayer = playerInfo.playerLayer;
