@@ -14,6 +14,7 @@ public static class TextureLoader
 	}
 
 	public static Dictionary<string, ImageTexture> Textures = new Dictionary<string, ImageTexture>();
+	public static Dictionary<string, ImageTexture> TransparentTextures = new Dictionary<string, ImageTexture>();
 	public static Dictionary<string, ImageTexture> ColorizeTextures = new Dictionary<string, ImageTexture>();
 	public static void AddNewTexture(string textureName, bool forceSkinAlpha)
 	{
@@ -28,12 +29,17 @@ public static class TextureLoader
 	public static ImageTexture GetTextureOrAddTexture(string textureName, bool forceAlpha)
 	{
 		string upperName = textureName.ToUpper();
-		if (Textures.ContainsKey(upperName))
+		if (forceAlpha)
+		{
+			if (TransparentTextures.ContainsKey(upperName))
+				return TransparentTextures[upperName];
+		}
+		else if (Textures.ContainsKey(upperName))
 			return Textures[upperName];
 
 		GD.Print("GetTextureOrAddTexture: No texture \"" + upperName + "\"");
 		AddNewTexture(upperName, forceAlpha);
-		return GetTexture(upperName);
+		return GetTexture(upperName, forceAlpha);
 	}
 	public static bool HasTexture(string textureName)
 	{
@@ -45,10 +51,15 @@ public static class TextureLoader
 			return true;
 		return false;
 	}
-	public static ImageTexture GetTexture(string textureName)
+	public static ImageTexture GetTexture(string textureName, bool forceAlpha = false)
 	{
 		string upperName = textureName.ToUpper();
-		if (Textures.ContainsKey(upperName))
+		if (forceAlpha)
+		{
+			if (TransparentTextures.ContainsKey(upperName))
+				return TransparentTextures[upperName];
+		}
+		else if (Textures.ContainsKey(upperName))
 			return Textures[upperName];
 
 //		GD.Print("TextureLoader: No texture \"" + upperName + "\"");
@@ -104,13 +115,24 @@ public static class TextureLoader
 
 				if (Textures.ContainsKey(upperName))
 				{
-					GD.Print("Updating texture with name " + upperName + "." + imageFormat);
-					Textures[upperName] = readyTex;
+					if ((tex.addAlpha) || (baseTex.DetectAlpha() != AlphaMode.None))
+					{
+						GD.Print("Adding transparent texture with name " + upperName + "." + imageFormat);
+						TransparentTextures.Add(upperName, readyTex);
+					}
+					else
+					{
+						GD.Print("Updating texture with name " + upperName + "." + imageFormat);
+						Textures[upperName] = readyTex;
+					}
 				}
 				else
 				{
-					if (tex.addAlpha)
+					if ((tex.addAlpha) || (baseTex.DetectAlpha() != AlphaMode.None))
+					{
 						GD.Print("Adding transparent texture with name " + upperName + "."+ imageFormat);
+						TransparentTextures.Add(upperName, readyTex);
+					}
 					else
 						GD.Print("Adding texture with name " + upperName + "." + imageFormat);
 					Textures.Add(upperName, readyTex);

@@ -123,6 +123,11 @@ public partial class ModelAnimation : Node3D
 		
 		if (nextFrame >= md3Model.numFrames)
 			nextFrame = 0;
+		if ((nextFrame == 0) && (destroyType == DestroyType.DestroyAfterModelLastFrame))
+		{
+			QueueFree();
+			return;
+		}
 
 		for (int i = 0; i < modelAnim.Count; i++)
 		{
@@ -145,8 +150,6 @@ public partial class ModelAnimation : Node3D
 		{
 			ModelCurrentLerpTime -= 1.0f;
 			modelCurrentFrame = nextFrame;
-			if ((nextFrame == 0) && (destroyType == DestroyType.DestroyAfterModelLastFrame))
-				QueueFree();
 		}
 	}
 	void AnimateTexture(float deltaTime)

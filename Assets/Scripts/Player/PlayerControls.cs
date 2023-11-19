@@ -156,6 +156,7 @@ public partial class PlayerControls : Node3D
 		playerThing.avatar.CheckLegTurn(playerCamera.CurrentCamera.GlobalTransform.Basis.Z);
 
 		controllerIsGrounded = playerThing.IsOnFloor();
+		playerThing.avatar.isGrounded = controllerIsGrounded;
 		//Player can only crounch if it is grounded
 		if ((Input.IsActionJustPressed("Action_Crouch")) && (controllerIsGrounded))
 		{
@@ -215,12 +216,12 @@ public partial class PlayerControls : Node3D
 		if (controllerIsGrounded)
 		{
 			if (playerThing.avatar.enableOffset)
-				playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed);
+				playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed, deltaTime);
 			if (wishJump)
 				AnimateLegsOnJump();
 		}
 		else
-			playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed);
+			playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed, deltaTime);
 
 
 		if (Input.IsActionPressed("Action_Fire"))

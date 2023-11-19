@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public partial class PlayerModel : Node3D
 {
 	public int rotationFPS = 15;
+	public int lowerRotationFPS = 7;
 
 	private MD3 head;
 	private MD3 upper;
@@ -488,7 +489,7 @@ public partial class PlayerModel : Node3D
 		ownerDead = true;
 	}
 
-	public void TurnLegsOnJump(float sideMove)
+	public void TurnLegsOnJump(float sideMove, float deltaTime)
 	{
 		Quaternion rotate = Quaternion.Identity;
 
@@ -526,9 +527,9 @@ public partial class PlayerModel : Node3D
 		else if (sideMove < 0)
 			rotate = new Quaternion(Basis.Y, -30f);
 
-		lowerNode.Basis = new Basis(rotate);
+		lowerNode.Basis = lowerNode.Basis.Slerp(new Basis(rotate), lowerRotationFPS * deltaTime);
 	}
-	public void TurnLegs(int moveType, float sideMove, float forwardMove)
+	public void TurnLegs(int moveType, float sideMove, float forwardMove, float deltaTime)
 	{
 		if (ownerDead)
 			return;
@@ -603,7 +604,7 @@ public partial class PlayerModel : Node3D
 			else
 				lowerAnimation = LowerAnimation.Idle;
 		}
-		lowerNode.Basis = new Basis(rotate);
+		lowerNode.Basis = lowerNode.Basis.Slerp(new Basis(rotate), lowerRotationFPS * deltaTime);
 	}
 
 	public void MuzzleFlashSetActive(bool active)

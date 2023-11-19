@@ -17,7 +17,7 @@ public partial class TeleporterThing : Area3D
 	public void Init(Vector3 dest, int alpha)
 	{
 		destination = dest;
-		angle = -alpha - 90;
+		angle = alpha + 90;
 		if (angle < -180)
 			angle += 360;
 		if (angle > 180)
@@ -58,6 +58,8 @@ public partial class TeleporterThing : Area3D
 
 		if (other is PlayerThing playerThing)
 		{
+			if (!playerThing.ready)
+				return;
 
 			//Dead player don't use teleporters
 			if (playerThing.Dead)
@@ -91,7 +93,9 @@ public partial class TeleporterThing : Area3D
 			if (!string.IsNullOrEmpty(TeleportInSound))
 				SoundManager.Create3DSound(destination, SoundManager.LoadSound(TeleportInSound));
 			playerThing.playerControls.viewDirection.Y = angle;
-			playerThing.Impulse(Quaternion.FromEuler(new Vector3(0, angle, 0)) * Vector3.Forward, 1500);
+			playerThing.playerControls.impulseVector = Vector3.Zero;
+			playerThing.playerControls.playerVelocity = Vector3.Zero;
+			playerThing.Impulse(Quaternion.FromEuler(new Vector3(0, Mathf.DegToRad(angle), 0)) * Vector3.Forward, 1500);
 		}
 		toTeleport = new List<PlayerThing>();
 	}
