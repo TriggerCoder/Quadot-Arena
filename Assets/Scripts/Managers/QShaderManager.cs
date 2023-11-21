@@ -130,14 +130,15 @@ public static class QShaderManager
 						GSFragmentTexs += "\tvec4 Stage_" + i + " = texture(" + "Tex_" + index + ", uv_" + i + ");\n";
 					else
 					{
-						GSUniforms += "uniform sampler2D " + "Tex_" + textures.Count;
+						index = textures.Count;
+						GSUniforms += "uniform sampler2D " + "Tex_" + index;
 						if (qShaderStage.clamp)
 							GSUniforms += " : repeat_disable;\n";
 						else
 							GSUniforms += " : repeat_enable;\n";
-						GSFragmentTexs += "\tvec4 Stage_" + i + " = texture(" + "Tex_" + textures.Count + ", uv_" + i + ");\n";
+						GSFragmentTexs += "\tvec4 Stage_" + i + " = texture(" + "Tex_" + index + ", uv_" + i + ");\n";
+						TexIndex.Add(qShaderStage.map[0], index);
 						textures.Add(qShaderStage.map[0]);
-						TexIndex.Add(qShaderStage.map[0], i);
 					}
 				}
 			}
@@ -630,8 +631,10 @@ public static class QShaderManager
 		while (!stream.EndOfStream)
 		{
 			strWord = stream.ReadLine();
+			if (string.IsNullOrEmpty(strWord))
+				continue;
+
 			p = 0;
-			
 			for (int i = 0; i < strWord.Length; i++)
 			{
 				char c = strWord[i];
@@ -646,7 +649,7 @@ public static class QShaderManager
 						node++;
 						if (node == 2)
 							stage++;
-						i = strWord.Length;
+//						i = strWord.Length;
 					}
 					break;
 					case '}':
