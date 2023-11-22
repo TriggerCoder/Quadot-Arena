@@ -320,6 +320,12 @@ public static class BezierMesh
 				Quaternion changeRotation = Quaternion.Identity;
 				if (!Mesher.CanForm3DConvexHull(vertsLocalCache, ref normal))
 				{
+					if (normal.LengthSquared() == 0)
+					{
+						GD.Print("Cannot Form 2D/3D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time");
+						return;
+					}
+
 					if ((normal.X == 1) || (normal.X == -1))
 						axis = Axis.X;
 					else if ((normal.Y == 1) || (normal.Y == -1))

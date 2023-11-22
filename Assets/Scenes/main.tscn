@@ -72,7 +72,7 @@ environment = SubResource("Environment_rcj1l")
 [node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "playerViewPort", "Players")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
-autoloadMap = "q3tourney2"
+autoloadMap = "q3dm6"
 playerViewPort = NodePath("SplitScreen/PlayerViewPort")
 Players = [NodePath("../Player")]
 

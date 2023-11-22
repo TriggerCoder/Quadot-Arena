@@ -472,6 +472,9 @@ public partial class ThingsManager : Node
 							CollisionShape3D mc = new CollisionShape3D();
 							mc.Name = "Door Trigger";
 							triggerCollider.AddChild(mc);
+							triggerCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
+							triggerCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+
 							SphereShape3D sphere = new SphereShape3D();
 							sphere.Radius = max * .5f;
 							mc.Shape = sphere;
@@ -485,6 +488,9 @@ public partial class ThingsManager : Node
 							{
 								door.CurrentState = DoorController.State.Opening;
 							});
+
+							triggerCollider.GlobalPosition = BigBox.GetCenter();
+							triggerCollider.BodyEntered += tc.OnBodyEntered;
 						}
 					}
 				}
