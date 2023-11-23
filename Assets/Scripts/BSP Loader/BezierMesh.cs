@@ -401,7 +401,7 @@ public static class BezierMesh
 				if (is3D)
 					convexHull.Points = Mesher.RemoveDuplicatedVectors(vertsLocalCache).ToArray();
 				else
-					convexHull.Points = Mesher.GetExtrudedVerticesFromPoints(Mesher.RemoveDuplicatedVectors(vertsLocalCache).ToArray(), normal); 
+					convexHull.Points = Mesher.GetExtrudedVerticesFromPoints(vertsLocalCache.ToArray(), normal);
 				collider.ShapeOwnerAddShape(ownerShapeId, convexHull);
 			}
 		}

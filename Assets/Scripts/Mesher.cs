@@ -907,10 +907,7 @@ public static class Mesher
 		if (i == points.Count)
 		{
 			if (retry)
-			{
-				normal = Vector3.Zero;
 				return false;
-			}
 			retry = true;
 			points = RemoveDuplicatedVectors(points);
 			goto tryagain;

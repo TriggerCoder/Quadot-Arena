@@ -61,37 +61,12 @@ public static class QShaderManager
 		QShaderData qShader = QShaders[upperName];
 		GD.Print("Shader found: " + upperName);
 
-		switch (qShader.qShaderGlobal.sort)
-		{
-			case QShaderGlobal.SortType.Opaque:
-				GSHeader += "depth_draw_opaque, blend_mix, ";
-			break;
-			case QShaderGlobal.SortType.Additive:
-				GSHeader += "depth_draw_always, blend_add, ";
-				alphaIsTransparent = true;
-			break;
-		}
-		
-		if ((qShader.qShaderGlobal.unShaded) || (qShader.qShaderGlobal.isSky))
-			GSHeader += "unshaded, ";
-
-		switch (qShader.qShaderGlobal.cullType)
-		{
-			case QShaderGlobal.CullType.Back:
-				GSHeader += "cull_back;\n \n";
-			break;
-			case QShaderGlobal.CullType.Front:
-				GSHeader += "cull_front;\n \n";
-			break;
-			case QShaderGlobal.CullType.Disable:
-				GSHeader += "cull_disabled;\n \n";
-				alphaIsTransparent = true;
-			break;
-		}
 		int lightmapStage = -1;
 		bool helperRotate = false;
 		bool animStages = false;
+		bool depthWrite = false;
 		int totalStages = qShader.qShaderStages.Count;
+
 		for (int i = 0; i < totalStages; i++)
 		{
 			QShaderStage qShaderStage = qShader.qShaderStages[i];
@@ -148,9 +123,43 @@ public static class QShaderManager
 			
 			GSFragmentRGBs += GetGenFunc(qShader, i, GenFuncType.RGB);
 			GSFragmentRGBs += GetGenFunc(qShader, i, GenFuncType.Alpha);
-			GSFragmentRGBs += GetAlphaFunc(qShader, i);
+			GSFragmentBlends += GetAlphaFunc(qShader, i);
 			GSFragmentBlends += GetBlend(qShader, i, ref alphaIsTransparent);
+			depthWrite |= qShader.qShaderStages[i].depthWrite;
 		}
+
+		switch (qShader.qShaderGlobal.sort)
+		{
+			case QShaderGlobal.SortType.Opaque:
+			{
+				if (depthWrite)
+					GSHeader += "depth_draw_always, blend_mix, ";
+				else
+					GSHeader += "depth_draw_opaque, blend_mix, ";
+			}
+			break;
+			case QShaderGlobal.SortType.Additive:
+				GSHeader += "depth_draw_always, blend_add, ";
+				alphaIsTransparent = true;
+			break;
+		}
+
+		if ((qShader.qShaderGlobal.unShaded) || (qShader.qShaderGlobal.isSky))
+			GSHeader += "unshaded, ";
+
+		switch (qShader.qShaderGlobal.cullType)
+		{
+			case QShaderGlobal.CullType.Back:
+				GSHeader += "cull_back;\n \n";
+				break;
+			case QShaderGlobal.CullType.Front:
+				GSHeader += "cull_front;\n \n";
+				break;
+			case QShaderGlobal.CullType.Disable:
+				GSHeader += "cull_disabled;\n \n";
+				break;
+		}
+
 
 		int totalTex = textures.Count;
 		if (qShader.qShaderGlobal.trans)
@@ -273,11 +282,11 @@ public static class QShaderManager
 		}
 
 		if (alphaIsTransparent)
-			code += "\tALPHA = color.a * vertx_color.a;\n";
+			code += "\tALPHA = color.a;\n";
 		code += "}\n\n";
 
-//		if (upperName.Contains("SKIES"))
-//			GD.Print(code);
+		if (upperName.Contains("GLASS_FRAME"))
+			GD.Print(code);
 
 		Shader shader = new Shader();
 		shader.Code = code;
@@ -469,7 +478,12 @@ public static class QShaderManager
 				AlphaFunc += "< 0.5)\n";
 			break;
 		}
-		AlphaFunc += "\t{\n\t\tdiscard;\n\t}\n";
+		if (currentStage == 0)
+			AlphaFunc += "\t{\n\t\tdiscard;\n\t}\n";
+		else
+		{
+			AlphaFunc += "\t{\n\t\tStage_" + currentStage + ".rgb = color.rgb;\n\t\tStage_" + currentStage + ".a = color.a;\n\t}\n";
+		}
 		return AlphaFunc;
 	}
 	public static string GetBlend(QShaderData qShader, int currentStage, ref bool alphaIsTransparent)
@@ -580,7 +594,7 @@ public static class QShaderManager
 						if ((src == "GL_ONE") && (dst == "GL_ONE"))
 						{
 							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
-							Blend += "\tcolor.a = 0.5; \n";
+							Blend += "\tcolor.a = 0.3; \n";
 							alphaIsTransparent = true;
 						}
 						else
