@@ -181,6 +181,10 @@ Escape={
 3d_physics/layer_15="Player8Layer"
 3d_physics/layer_16="RagdollLayer"
 
+[network]
+
+limits/debugger/max_chars_per_second=65535
+
 [physics]
 
 3d/physics_engine="JoltPhysics3D"

@@ -5,18 +5,18 @@ using System.Threading;
 public partial class NodeAnimation : Node3D
 {
 	[Export]
-	public bool rotEnable;
+	public bool rotEnable = false;
 	[Export]
-	public float rotFPS;
+	public float rotFPS = 0;
 	[Export]
-	public bool rotClockwise;
+	public bool rotClockwise = true;
 
 	[Export]
-	public bool posEnable;
+	public bool posEnable = false;
 	[Export]
-	public float posAmplitude;
+	public float posAmplitude = 0;
 	[Export]
-	public float posFPS;
+	public float posFPS = 0;
 
 	private Node3D parent;
 	private Vector3 rotateAxis;
@@ -26,8 +26,16 @@ public partial class NodeAnimation : Node3D
 	private GameManager.FuncState currentState = GameManager.FuncState.None;
 	public override void _Ready()
 	{
+		Init();
+	}
+
+	public void Init()
+	{
 		if ((!rotEnable) && (!posEnable))
 			SetProcess(false);
+		else
+			SetProcess(true);
+
 		parent = (Node3D)GetParent();
 
 		if (rotEnable)
@@ -39,7 +47,6 @@ public partial class NodeAnimation : Node3D
 		}
 		currentState = GameManager.FuncState.Ready;
 	}
-
 	void RotateNode(float deltaTime)
 	{
 		if (!rotEnable)

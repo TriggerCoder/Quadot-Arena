@@ -36,7 +36,7 @@ public static class QShaderManager
 
 		return false;
 	}
-	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, ref bool alphaIsTransparent)
+	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, ref bool alphaIsTransparent, List<int> multiPassList = null)
 	{
 		string code = "";
 		string GSHeader = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, ";
@@ -65,22 +65,35 @@ public static class QShaderManager
 		bool helperRotate = false;
 		bool animStages = false;
 		bool depthWrite = false;
-		int totalStages = qShader.qShaderStages.Count;
+		int needMultiPass = 0;
+		bool forceAlpha = alphaIsTransparent;
+		int totalStages;
 
+		if (multiPassList == null)
+			totalStages = qShader.qShaderStages.Count;
+		else
+			totalStages = multiPassList.Count;
 		for (int i = 0; i < totalStages; i++)
 		{
-			QShaderStage qShaderStage = qShader.qShaderStages[i];
+			int currentStage;
+			if (multiPassList == null)
+				currentStage = i;
+			else
+				currentStage = multiPassList[i];
+			
+			QShaderStage qShaderStage = qShader.qShaderStages[currentStage];
+
 			if (qShaderStage.map != null)
 			{
 				if (qShaderStage.animFreq > 0)
 				{
 					animStages = true;
-					GSLateFragmentTexs += "\tvec4 Stage_" + i + " = animation_" + i + "(Time, ";
+					GSLateFragmentTexs += "\tvec4 Stage_" + currentStage + " = animation_" + currentStage + "(Time, ";
 					GSLateFragmentTexs += qShaderStage.animFreq.ToString("0.00") + " , " + qShaderStage.map.Length;
 					for (int j = 0; j < qShaderStage.map.Length; j++)
-						GSLateFragmentTexs += " , Anim_" + i + "_" + j;
+						GSLateFragmentTexs += " , Anim_" + currentStage + "_" + j;
 					GSLateFragmentTexs += ");\n";
-					GSAnimation += "vec4 animation_" + i + "(float Time, ";
+					GSAnimation += "vec4 animation_" + currentStage + "(float Time, ";
 					GSAnimation += "float freq , int frames";
 					for (int j = 0; j < qShaderStage.map.Length; j++)
 						GSAnimation += " , vec4 frame_" + j;
@@ -102,7 +115,7 @@ public static class QShaderManager
 				{
 					int index;
 					if (TexIndex.TryGetValue(qShaderStage.map[0], out index))
-						GSFragmentTexs += "\tvec4 Stage_" + i + " = texture(" + "Tex_" + index + ", uv_" + i + ");\n";
+						GSFragmentTexs += "\tvec4 Stage_" + currentStage + " = texture(" + "Tex_" + index + ", uv_" + currentStage + ");\n";
 					else
 					{
 						index = textures.Count;
@@ -111,21 +124,57 @@ public static class QShaderManager
 							GSUniforms += " : repeat_disable;\n";
 						else
 							GSUniforms += " : repeat_enable;\n";
-						GSFragmentTexs += "\tvec4 Stage_" + i + " = texture(" + "Tex_" + index + ", uv_" + i + ");\n";
+						GSFragmentTexs += "\tvec4 Stage_" + currentStage + " = texture(" + "Tex_" + index + ", uv_" + currentStage + ");\n";
 						TexIndex.Add(qShaderStage.map[0], index);
 						textures.Add(qShaderStage.map[0]);
 					}
 				}
 			}
 
-			GSFragmentUvs += GetTcGen(qShader, i, ref lightmapStage);
-			GSFragmentTcMod += GetTcMod(qShader, i, ref helperRotate);
+			GSFragmentUvs += GetTcGen(qShader, currentStage, ref lightmapStage);
+			GSFragmentTcMod += GetTcMod(qShader, currentStage, ref helperRotate);
 			
-			GSFragmentRGBs += GetGenFunc(qShader, i, GenFuncType.RGB);
-			GSFragmentRGBs += GetGenFunc(qShader, i, GenFuncType.Alpha);
-			GSFragmentBlends += GetAlphaFunc(qShader, i);
-			GSFragmentBlends += GetBlend(qShader, i, ref alphaIsTransparent);
-			depthWrite |= qShader.qShaderStages[i].depthWrite;
+			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.RGB);
+			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.Alpha);
+			GSFragmentBlends += GetAlphaFunc(qShader, currentStage);
+			GSFragmentBlends += GetBlend(qShader, currentStage, ref alphaIsTransparent);
+			if (qShaderStage.depthWrite)
+			{
+				if (i == 0)
+					depthWrite = true;
+				else
+					needMultiPass = i;
+			}
+		}
+
+		if (needMultiPass > 0)
+		{
+			GD.Print("NEED MULTIPASS " + needMultiPass);
+			if (lightmapStage >= 0)
+				GD.Print("MULTIPASS LIGHTMAP " + lightmapStage);
+
+			List<int> matPass = new List<int>();
+			for (int i = 0; i < needMultiPass; i++)
+				matPass.Add(i);
+			if (lightmapStage >= 0)
+				if (!matPass.Contains(lightmapStage))
+					matPass.Add(lightmapStage);
+			bool baseAlpha = forceAlpha;
+			ShaderMaterial passZeroMaterial = GetShadedMaterial(shaderName, lm_index, ref baseAlpha, matPass);
+
+			matPass = new List<int>();
+			for (int i = needMultiPass; i < qShader.qShaderStages.Count; i++)
+				matPass.Add(i);
+			if (lightmapStage >= 0)
+				if (!matPass.Contains(lightmapStage))
+					matPass.Add(lightmapStage);
+
+			ShaderMaterial passOneMaterial = GetShadedMaterial(shaderName, lm_index, ref forceAlpha, matPass);
+			passOneMaterial.RenderPriority = 1;
+			passZeroMaterial.NextPass = passOneMaterial;
+			alphaIsTransparent |= forceAlpha | baseAlpha;
+
+			return passZeroMaterial;
 		}
 
 		switch (qShader.qShaderGlobal.sort)
@@ -478,12 +527,8 @@ public static class QShaderManager
 				AlphaFunc += "< 0.5)\n";
 			break;
 		}
-		if (currentStage == 0)
-			AlphaFunc += "\t{\n\t\tdiscard;\n\t}\n";
-		else
-		{
-			AlphaFunc += "\t{\n\t\tStage_" + currentStage + ".rgb = color.rgb;\n\t\tStage_" + currentStage + ".a = color.a;\n\t}\n";
-		}
+		AlphaFunc += "\t{\n\t\tdiscard;\n\t}\n";
+
 		return AlphaFunc;
 	}
 	public static string GetBlend(QShaderData qShader, int currentStage, ref bool alphaIsTransparent)

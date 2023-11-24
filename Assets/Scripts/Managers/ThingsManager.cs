@@ -495,6 +495,31 @@ public partial class ThingsManager : Node
 					}
 				}
 				break;
+				//Rotating Object
+				case "func_rotating":
+				{
+					thingObject.GlobalPosition = entity.origin;
+
+					int speed = 100;
+					NodeAnimation nodeAnim = new NodeAnimation();
+					thingObject.AddChild(nodeAnim);
+					if (entity.entityData.TryGetValue("speed", out strWord))
+						speed = int.Parse(strWord);
+					nodeAnim.rotFPS = speed;
+					nodeAnim.rotEnable = true;
+					strWord = entity.entityData["model2"];
+					if (!string.IsNullOrEmpty(strWord))
+					{						
+						ModelAnimation modelAnim = new ModelAnimation();
+						thingObject.AddChild(modelAnim);
+						modelAnim.modelName = strWord.Split('.')[0].Split("models/")[1];
+						modelAnim.modelAnimation = new AnimData();
+						modelAnim.textureAnimation = new AnimData();
+						modelAnim.Init();
+					}
+					nodeAnim.Init();
+				}
+				break;
 				//Trigger Hurt
 				case "trigger_hurt":
 				{

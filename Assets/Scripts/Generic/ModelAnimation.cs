@@ -5,9 +5,9 @@ using System.Collections.Generic;
 public partial class ModelAnimation : Node3D
 {
 	[Export]
-	public string modelName;
+	public string modelName = "";
 	[Export]
-	public string shaderName;
+	public string shaderName = "";
 	[Export]
 	public bool isTransparent = false;
 	[Export]
@@ -53,19 +53,18 @@ public partial class ModelAnimation : Node3D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		Init();
+	}
+
+	public void Init()
+	{
+		currentState = GameManager.FuncState.Ready;
 		if (string.IsNullOrEmpty(modelName))
-		{
-			QueueFree();
 			return;
-		}
 
 		md3Model = ModelsManager.GetModel(modelName, isTransparent);
 		if (md3Model == null)
-		{
-			GD.Print("Model not found: " + modelName);
-			QueueFree();
 			return;
-		}
 
 		Node3D currentObject = this;
 		Dictionary<string, string> meshToSkin = null;
@@ -113,9 +112,7 @@ public partial class ModelAnimation : Node3D
 		}
 
 		modelCurrentFrame = 0;
-		currentState = GameManager.FuncState.Ready;
 	}
-
 	void AnimateModel(float deltaTime)
 	{
 		int currentFrame = modelCurrentFrame;
@@ -178,6 +175,19 @@ public partial class ModelAnimation : Node3D
 	}
 	public void Start()
 	{
+		if (string.IsNullOrEmpty(modelName))
+		{
+			QueueFree();
+			return;
+		}
+
+		if (md3Model == null)
+		{
+			GD.Print("Model not found: " + modelName);
+			QueueFree();
+			return;
+		}
+
 		if (modelAnimation.fps == 0)
 		{
 			for (int i = 0; i < model.data.Length; i++)
