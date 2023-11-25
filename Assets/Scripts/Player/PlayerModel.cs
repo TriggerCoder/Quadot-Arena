@@ -871,7 +871,7 @@ public partial class PlayerModel : Node3D
 		}
 		else
 		{
-			GD.Print("Unable to load animation file: " + fileName);
+			GameManager.Print("Unable to load animation file: " + fileName, GameManager.PrintType.Warning);
 			return false;
 		}
 
@@ -1013,7 +1013,7 @@ public partial class PlayerModel : Node3D
 		}
 		else
 		{
-			GD.Print("Unable to load skin for model: " + model.name);
+			GameManager.Print("Unable to load skin for model: " + model.name, GameManager.PrintType.Warning);
 			return false;
 		}
 
@@ -1021,7 +1021,7 @@ public partial class PlayerModel : Node3D
 
 		if (SkinFile.EndOfStream)
 		{
-			GD.Print("Unable to load skin for model: " + model.name);
+			GameManager.Print("Unable to load skin for model: " + model.name, GameManager.PrintType.Warning);
 			return false;
 		}
 
@@ -1050,7 +1050,7 @@ public partial class PlayerModel : Node3D
 					//Check if skin texture exist, if not add it
 					if (!TextureLoader.HasTexture(fullName[0]))
 					{
-						GD.Print("Skin: " + fullName[0]);
+						GameManager.Print("Skin: " + fullName[0]);
 						TextureLoader.AddNewTexture(fullName[0], false);
 					}
 

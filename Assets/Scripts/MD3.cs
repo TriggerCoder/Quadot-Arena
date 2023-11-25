@@ -267,7 +267,7 @@ public class MD3Mesh
 		fullName = (new string(Md3ModelFile.ReadChars(64))).Split('\0');
 		name = fullName[0].Replace("\0", string.Empty);
 
-//		GD.Print("Loading Mesh: " + name + " , " + meshId);
+//		GameManager.Print("Loading Mesh: " + name + " , " + meshId);
 
 		flags = Md3ModelFile.ReadInt32();
 		numFrames = Md3ModelFile.ReadInt32();					// This stores the mesh aniamtion frame count

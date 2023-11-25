@@ -66,13 +66,23 @@ public partial class MaterialManager : Node
 		if (!AditionalTextures.ContainsKey(textureName))
 			AditionalTextures.Add(textureName, shader);
 	}
-	public static ShaderMaterial GetMaterials(string textureName, int lm_index = -1)
+	public static ShaderMaterial GetMaterials(string textureName, int lm_index)
 	{
 		bool forceSkinAlpha = false;
 		return GetMaterials(textureName, lm_index, ref forceSkinAlpha);
 	}
+	public static ShaderMaterial GetMaterials(string textureName, int lm_index, ref ThingsManager.Portal portal)
+	{
+		bool forceSkinAlpha = false;
+		return GetMaterials(textureName, lm_index, ref forceSkinAlpha, ref portal);
+	}
 
-	public static ShaderMaterial GetMaterials(string textureName, int lm_index , ref bool forceSkinAlpha)
+	public static ShaderMaterial GetMaterials(string textureName, int lm_index, ref bool forceSkinAlpha)
+	{
+		ThingsManager.Portal portal = null;
+		return GetMaterials(textureName, lm_index, ref forceSkinAlpha, ref portal);
+	}
+	public static ShaderMaterial GetMaterials(string textureName, int lm_index , ref bool forceSkinAlpha, ref ThingsManager.Portal portal)
 	{
 //		if (IsSkyTexture(textureName))
 //			return Instance.skyHole;
@@ -89,7 +99,7 @@ public partial class MaterialManager : Node
 			if (Materials.ContainsKey(textureName + lm_index.ToString()))
 				return Materials[textureName + lm_index.ToString()];
 			bool useTransparent = false;
-			mat = QShaderManager.GetShadedMaterial(textureName, lm_index, ref useTransparent);
+			mat = QShaderManager.GetShadedMaterial(textureName, lm_index, ref useTransparent, ref portal);
 			if (mat == null)
 			{
 				// Lightmapping
@@ -111,7 +121,7 @@ public partial class MaterialManager : Node
 		if (Materials.ContainsKey(textureName))
 			return Materials[textureName];
 
-		mat = QShaderManager.GetShadedMaterial(textureName, 0, ref forceSkinAlpha);
+		mat = QShaderManager.GetShadedMaterial(textureName, 0, ref forceSkinAlpha, ref portal);
 		if (mat == null)
 		{
 			// Lightmapping is off, so don't.

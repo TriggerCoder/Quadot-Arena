@@ -17,7 +17,7 @@ public partial class DoorCollider : Area3D
 		if (door.CurrentState != DoorController.State.Closing)
 			return;
 
-		GD.Print("Someone " + other.Name + " entered this " + Name);
+		GameManager.Print("Someone " + other.Name + " entered this " + Name);
 		if (other is PlayerThing playerThing)
 		{
 			playerThing.Damage(Damage, DamageType.Crusher);

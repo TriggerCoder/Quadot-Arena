@@ -23,7 +23,7 @@ public partial class TriggerController : Node3D
 	{
 		if (!PreReq())
 		{
-			GD.Print("TriggerController: Prereq False for: " + triggerName);
+			GameManager.Print("TriggerController: Prereq False for: " + triggerName, GameManager.PrintType.Info);
 			return false;
 		}
 
@@ -59,7 +59,7 @@ public partial class TriggerController : Node3D
 		if (GameManager.Paused)
 			return;
 
-		GD.Print("Someone "+ other.Name + " activated this " + Name);
+		GameManager.Print("Someone "+ other.Name + " activated this " + Name);
 		if (other is PlayerThing player)
 		{
 			//Dead player don't activate stuff

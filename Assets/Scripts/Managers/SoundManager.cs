@@ -41,7 +41,7 @@ public static class SoundManager
 		string formatCode = FormatCode(audioFormat);
 		if ((audioFormat != 1) && (audioFormat != 2) && (audioFormat != 65534))
 		{
-			GD.Print("Detected format code '" + audioFormat + "' " + formatCode + ", but only PCM and WaveFormatExtensable uncompressed formats are currently supported.");
+			GameManager.Print("Detected format code '" + audioFormat + "' " + formatCode + ", but only PCM and WaveFormatExtensable uncompressed formats are currently supported.", GameManager.PrintType.Warning);
 			return null;
 		}
 
@@ -83,7 +83,7 @@ public static class SoundManager
 			audioStream.LoopEnd = totalSamples;
 			audioStream.LoopMode = AudioStreamWav.LoopModeEnum.Forward;
 		}
-		GD.Print("AudioStreamWav " + name + " created. Channels " + channels + " sampleRate " + sampleRate + " totalSamples "+ totalSamples + " format " + FormatCode(audioFormat) + (loop? " Loop" : " No Looping"));
+		GameManager.Print("AudioStreamWav " + name + " created. Channels " + channels + " sampleRate " + sampleRate + " totalSamples "+ totalSamples + " format " + FormatCode(audioFormat) + (loop? " Loop" : " No Looping"));
 		return audioStream;
 	}
 	public static MultiAudioStream Create2DSound(AudioStream audio, Node3D parent = null, bool destroyAfterSound = true)
@@ -120,7 +120,7 @@ public static class SoundManager
 			case 65534:
 				return "WaveFormatExtensable";
 			default:
-				GD.Print("Unknown wav code format:" + code);
+				GameManager.Print("Unknown wav code format:" + code, GameManager.PrintType.Warning);
 			return "";
 		}
 	}

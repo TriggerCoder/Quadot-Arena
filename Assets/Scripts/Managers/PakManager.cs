@@ -12,13 +12,13 @@ public static class PakManager
 	public static void LoadPK3Files()
 	{
 		string path = Directory.GetCurrentDirectory()+"/StreamingAssets/";
-		GD.Print("Open Directory " + path);
+		GameManager.Print("Open Directory " + path);
 		DirectoryInfo dir = new DirectoryInfo(path);
 		var info = dir.GetFiles("*.PK3").OrderBy(file => Regex.Replace(file.Name, @"\d+", match => match.Value.PadLeft(4, '0')));
 		foreach (FileInfo zipfile in info)
 		{
 			string FileName = path + zipfile.Name;
-			GD.Print("Open File " + FileName);
+			GameManager.Print("Open File " + FileName);
 			var reader = new ZipReader();
 			var err = reader.Open(FileName);
 			string[] zip = reader.GetFiles();
@@ -30,7 +30,7 @@ public static class PakManager
 					string logName = e.ToUpper();
 					if (ZipFiles.ContainsKey(logName))
 					{
-						GD.Print("Updating pak file with name " + logName);
+						GameManager.Print("Updating pak file with name " + logName);
 						ZipFiles[logName] = FileName;
 					}
 					else

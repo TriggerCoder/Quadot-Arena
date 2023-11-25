@@ -36,7 +36,7 @@ public static class QShaderManager
 
 		return false;
 	}
-	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, ref bool alphaIsTransparent, List<int> multiPassList = null)
+	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, ref bool alphaIsTransparent, ref ThingsManager.Portal portal, List<int> multiPassList = null)
 	{
 		string code = "";
 		string GSHeader = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, ";
@@ -52,6 +52,7 @@ public static class QShaderManager
 		string GSAnimation = "";
 
 		List<string> textures = new List<string>();
+		Dictionary<int,int> StageToTex = new Dictionary<int,int>();
 		Dictionary<string, int> TexIndex = new Dictionary<string, int>();
 
 		string upperName = shaderName.ToUpper();
@@ -59,8 +60,9 @@ public static class QShaderManager
 			return null;
 
 		QShaderData qShader = QShaders[upperName];
-		GD.Print("Shader found: " + upperName);
+		GameManager.Print("Shader found: " + upperName);
 
+		int portalStage = -1;
 		int lightmapStage = -1;
 		bool helperRotate = false;
 		bool animStages = false;
@@ -115,7 +117,10 @@ public static class QShaderManager
 				{
 					int index;
 					if (TexIndex.TryGetValue(qShaderStage.map[0], out index))
+					{
 						GSFragmentTexs += "\tvec4 Stage_" + currentStage + " = texture(" + "Tex_" + index + ", uv_" + currentStage + ");\n";
+						StageToTex.Add(currentStage, index);
+					}
 					else
 					{
 						index = textures.Count;
@@ -125,6 +130,7 @@ public static class QShaderManager
 						else
 							GSUniforms += " : repeat_enable;\n";
 						GSFragmentTexs += "\tvec4 Stage_" + currentStage + " = texture(" + "Tex_" + index + ", uv_" + currentStage + ");\n";
+						StageToTex.Add(currentStage, index);
 						TexIndex.Add(qShaderStage.map[0], index);
 						textures.Add(qShaderStage.map[0]);
 					}
@@ -134,8 +140,8 @@ public static class QShaderManager
 			GSFragmentUvs += GetTcGen(qShader, currentStage, ref lightmapStage);
 			GSFragmentTcMod += GetTcMod(qShader, currentStage, ref helperRotate);
 			
-			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.RGB);
-			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.Alpha);
+			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.RGB, ref portalStage);
+			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.Alpha, ref portalStage);
 			GSFragmentBlends += GetAlphaFunc(qShader, currentStage);
 			GSFragmentBlends += GetBlend(qShader, currentStage, ref alphaIsTransparent);
 			if (qShaderStage.depthWrite)
@@ -149,10 +155,7 @@ public static class QShaderManager
 
 		if (needMultiPass > 0)
 		{
-			GD.Print("NEED MULTIPASS " + needMultiPass);
-			if (lightmapStage >= 0)
-				GD.Print("MULTIPASS LIGHTMAP " + lightmapStage);
-
+			GameManager.Print("Shader needs multipass " + needMultiPass);
 			List<int> matPass = new List<int>();
 			for (int i = 0; i < needMultiPass; i++)
 				matPass.Add(i);
@@ -160,7 +163,7 @@ public static class QShaderManager
 				if (!matPass.Contains(lightmapStage))
 					matPass.Add(lightmapStage);
 			bool baseAlpha = forceAlpha;
-			ShaderMaterial passZeroMaterial = GetShadedMaterial(shaderName, lm_index, ref baseAlpha, matPass);
+			ShaderMaterial passZeroMaterial = GetShadedMaterial(shaderName, lm_index, ref baseAlpha, ref portal, matPass);
 
 			matPass = new List<int>();
 			for (int i = needMultiPass; i < qShader.qShaderStages.Count; i++)
@@ -169,8 +172,9 @@ public static class QShaderManager
 				if (!matPass.Contains(lightmapStage))
 					matPass.Add(lightmapStage);
 
-			ShaderMaterial passOneMaterial = GetShadedMaterial(shaderName, lm_index, ref forceAlpha, matPass);
-			passOneMaterial.RenderPriority = 1;
+			ShaderMaterial passOneMaterial = GetShadedMaterial(shaderName, lm_index, ref forceAlpha, ref portal, matPass);
+//			passZeroMaterial.RenderPriority = -1;
+//			passOneMaterial.RenderPriority = 0;
 			passZeroMaterial.NextPass = passOneMaterial;
 			alphaIsTransparent |= forceAlpha | baseAlpha;
 
@@ -181,6 +185,8 @@ public static class QShaderManager
 		{
 			case QShaderGlobal.SortType.Opaque:
 			{
+				if (alphaIsTransparent)
+					GSHeader += "depth_prepass_alpha, ";
 				if (depthWrite)
 					GSHeader += "depth_draw_always, blend_mix, ";
 				else
@@ -214,7 +220,7 @@ public static class QShaderManager
 		if (qShader.qShaderGlobal.trans)
 		{
 			alphaIsTransparent = true;
-			GD.Print("Current shader is transparent");
+			GameManager.Print("Current shader is transparent");
 		}
 
 		if (qShader.qShaderGlobal.editorImage.Length != 0)
@@ -225,7 +231,7 @@ public static class QShaderManager
 				if (qeditorShader.qShaderGlobal.trans)
 				{
 					alphaIsTransparent = true;
-					GD.Print("Current editor shader is transparent");
+					GameManager.Print("Current editor shader is transparent");
 				}
 
 				if (!TexIndex.ContainsKey(qShader.qShaderGlobal.editorImage))
@@ -233,6 +239,7 @@ public static class QShaderManager
 					GSUniforms += "uniform sampler2D " + "Tex_" + totalTex + " : repeat_enable;\n";
 					GSFragmentUvs += "\tvec2 uv_" + totalStages + " = UV;\n";
 					GSFragmentTexs += "\tvec4 Stage_" + totalStages + " = texture(" + "Tex_" + totalTex + ", uv_" + totalStages + ");\n";
+					StageToTex.Add(totalStages, totalTex);
 					textures.Add(qShader.qShaderGlobal.editorImage);
 					TexIndex.Add(qShader.qShaderGlobal.editorImage, totalStages);
 					totalTex++;
@@ -332,10 +339,12 @@ public static class QShaderManager
 
 		if (alphaIsTransparent)
 			code += "\tALPHA = color.a;\n";
+//		else if (multiPassList != null)
+//			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (upperName.Contains("GLASS_FRAME"))
-			GD.Print(code);
+		if (upperName.Contains("PORTAL_SFX"))
+			GameManager.Print(code);
 
 		Shader shader = new Shader();
 		shader.Code = code;
@@ -350,6 +359,9 @@ public static class QShaderManager
 				tex = TextureLoader.GetTextureOrAddTexture(textures[i], alphaIsTransparent);
 			shaderMaterial.SetShaderParameter("Tex_" + i, tex);
 		}
+
+		if (portalStage > 0)
+			portal = new ThingsManager.Portal(shaderMaterial, portalStage);
 
 		return shaderMaterial;
 	}
@@ -453,7 +465,7 @@ public static class QShaderManager
 		return TcMod;
 	}
 
-	public static string GetGenFunc(QShaderData qShader, int currentStage, GenFuncType type)
+	public static string GetGenFunc(QShaderData qShader, int currentStage, GenFuncType type, ref int portalStage)
 	{
 		string GenType = ".rgb";
 		string[] GenFunc = qShader.qShaderStages[currentStage].rgbGen;
@@ -499,11 +511,16 @@ public static class QShaderManager
 				break;
 			}
 		}
-		else if (GenFunc.Length == 1)
+		else if (GenFunc.Length > 0)
 		{
-			string RGBFunc = GenFunc[0];
-			if (RGBFunc.Contains("VERTEX"))
+			string Func = GenFunc[0];
+			if (Func.Contains("VERTEX"))
 				StageGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * vertx_color.rgb ; \n";
+			else if (Func.Contains("PORTAL"))
+			{
+				portalStage = currentStage;
+				GameManager.Print("This STAGE " + currentStage + " is a PORTAL");
+			}
 		}
 		return StageGen;
 	}
@@ -719,7 +736,7 @@ public static class QShaderManager
 						{
 							if (QShaders.ContainsKey(qShaderData.Name))
 							{
-								GD.Print("Shader already on the list: " + qShaderData.Name + " md5: "+ qShaderData.Name.Md5Text());
+								GameManager.Print("Shader already on the list: " + qShaderData.Name + " md5: "+ qShaderData.Name.Md5Text(), GameManager.PrintType.Info);
 								QShaders[qShaderData.Name] = qShaderData;
 							}
 							else
@@ -822,7 +839,7 @@ public static class QShaderManager
 	{
 		if (QShadersFiles.Contains(FileName))
 		{
-			GD.Print("Shader File "+ FileName + " already on the list ");
+			GameManager.Print("Shader File "+ FileName + " already on the list ", GameManager.PrintType.Info);
 			return;
 		}
 		else

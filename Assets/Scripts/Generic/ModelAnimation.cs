@@ -183,7 +183,7 @@ public partial class ModelAnimation : Node3D
 
 		if (md3Model == null)
 		{
-			GD.Print("Model not found: " + modelName);
+			GameManager.Print("Model not found: " + modelName, GameManager.PrintType.Warning);
 			QueueFree();
 			return;
 		}

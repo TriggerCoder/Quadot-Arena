@@ -37,7 +37,7 @@ public static class TextureLoader
 		else if (Textures.ContainsKey(upperName))
 			return Textures[upperName];
 
-		GD.Print("GetTextureOrAddTexture: No texture \"" + upperName + "\"");
+		GameManager.Print("GetTextureOrAddTexture: No texture \"" + upperName + "\"");
 		AddNewTexture(upperName, forceAlpha);
 		return GetTexture(upperName, forceAlpha);
 	}
@@ -62,7 +62,7 @@ public static class TextureLoader
 		else if (Textures.ContainsKey(upperName))
 			return Textures[upperName];
 
-//		GD.Print("TextureLoader: No texture \"" + upperName + "\"");
+//		GameManager.Print("TextureLoader: No texture \"" + upperName + "\"");
 		return illegal;
 	}
 	public static void LoadTextures(List<QShader> mapTextures, bool ignoreShaders, ImageFormat imageFormat = ImageFormat.JPG)
@@ -117,12 +117,12 @@ public static class TextureLoader
 				{
 					if ((tex.addAlpha) || (baseTex.DetectAlpha() != AlphaMode.None))
 					{
-						GD.Print("Adding transparent texture with name " + upperName + "." + imageFormat);
+						GameManager.Print("Adding transparent texture with name " + upperName + "." + imageFormat);
 						TransparentTextures.Add(upperName, readyTex);
 					}
 					else
 					{
-						GD.Print("Updating texture with name " + upperName + "." + imageFormat);
+						GameManager.Print("Updating texture with name " + upperName + "." + imageFormat);
 						Textures[upperName] = readyTex;
 					}
 				}
@@ -130,16 +130,16 @@ public static class TextureLoader
 				{
 					if ((tex.addAlpha) || (baseTex.DetectAlpha() != AlphaMode.None))
 					{
-						GD.Print("Adding transparent texture with name " + upperName + "."+ imageFormat);
+						GameManager.Print("Adding transparent texture with name " + upperName + "."+ imageFormat);
 						TransparentTextures.Add(upperName, readyTex);
 					}
 					else
-						GD.Print("Adding texture with name " + upperName + "." + imageFormat);
+						GameManager.Print("Adding texture with name " + upperName + "." + imageFormat);
 					Textures.Add(upperName, readyTex);
 				}
 			}
 			else
-				GD.Print("Image not found " + upperName + "." + imageFormat);
+				GameManager.Print("Image not found " + upperName + "." + imageFormat);
 		}
 	}
 	public static float computeAlphaFromColorFilter(Color color, Color filter)

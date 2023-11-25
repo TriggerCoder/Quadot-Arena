@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://p0n8fxq1vf8t"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_lrimx"]
+
+[node name="misc_portal_surface" type="Node3D"]
+script = ExtResource("1_lrimx")
+respawnSound = ""

@@ -61,6 +61,8 @@ public partial class GameManager : Node
 	public const short Player7UIViewLayer = 14;
 	public const short Player8UIViewLayer = 15;
 
+	public const short NotVisibleLayer = 20;
+
 	//Physic Masks
 	public const uint TakeDamageMask = ((1 << DamageablesLayer) | 
 										(1 << Player1Layer) | 
@@ -78,7 +80,7 @@ public partial class GameManager : Node
 									(1 << ThingsLayer));
 
 	//Rendering Masks
-	public const int InvisibleMask = 0;
+	public const int InvisibleMask = (1 << NotVisibleLayer);
 	public const uint AllPlayerViewMask = ((1 << Player1ViewLayer) | (1 << Player2ViewLayer) | (1 << Player3ViewLayer) | (1 << Player4ViewLayer) | (1 << Player5ViewLayer) | (1 << Player6ViewLayer) | (1 << Player7ViewLayer) | (1 << Player8ViewLayer));
 
 	public bool paused = true;
@@ -110,8 +112,18 @@ public partial class GameManager : Node
 		Ready,
 		Start
 	}
+	public enum PrintType
+	{
+		Log,
+		Info,
+		Warning,
+		Error
+	}
 
 	private FuncState currentState = FuncState.None;
+	
+	private static PrintType printType = PrintType.Log;
+	private static int printLine = 0;
 	public override void _Ready()
 	{
 		GD.Randomize();
@@ -217,5 +229,13 @@ public partial class GameManager : Node
 		foreach (var child in Childrens)
 			list.AddRange(GetAllChildrens(child));
 		return list;
+	}
+	public static void Print(string Message, PrintType type = PrintType.Log)
+	{
+		if (type >= printType)
+		{
+			GD.Print(printLine + ": " + Message);
+			printLine++;
+		}
 	}
 }

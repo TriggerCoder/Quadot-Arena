@@ -322,7 +322,7 @@ public static class BezierMesh
 				{
 					if (normal.LengthSquared() == 0)
 					{
-						GD.Print("Cannot Form 2D/3D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time");
+						GameManager.Print("Cannot Form 2D/3D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time", GameManager.PrintType.Info);
 						return;
 					}
 
@@ -334,7 +334,7 @@ public static class BezierMesh
 						axis = Axis.Z;
 					else
 					{
-						GD.Print("2D Plane is Rotated");
+						GameManager.Print("2D Plane is Rotated");
 						float x = Mathf.Abs(normal.X), y = Mathf.Abs(normal.Y), z = Mathf.Abs(normal.Z);
 						Vector3 normalRef = Vector3.Zero;
 
@@ -390,7 +390,7 @@ public static class BezierMesh
 
 					if (!Mesher.CanForm2DConvexHull(vertex2d))
 					{
-						GD.Print("Cannot Form 2D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time");
+						GameManager.Print("Cannot Form 2D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time", GameManager.PrintType.Info);
 						return;
 					}
 					else

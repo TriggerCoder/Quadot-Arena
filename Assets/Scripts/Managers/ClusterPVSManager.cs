@@ -21,12 +21,12 @@ public partial class ClusterPVSManager : Node
 	}
 	public void OnPreRender()
 	{
-//		GD.Print("PreRender");
+//		GameManager.Print("PreRender");
 	}
 	public void OnPostRender()
 	{
 		AllClusters.AsParallel().ForAll(mesh => { mesh.Layers = GameManager.InvisibleMask;});
-//		GD.Print("PostRender");
+//		GameManager.Print("PostRender");
 	}
 	public void RegisterClusterAndSurfaces(MeshInstance3D cluster, params QSurface[] surfaces)
 	{
@@ -40,7 +40,7 @@ public partial class ClusterPVSManager : Node
 		MeshInstance3D cluster = SurfaceToCluster[surface];
 		if (cluster == null)
 		{
-//			GD.Print("Cluster not found for surface: " + surface);
+//			GameManager.Print("Cluster not found for surface: " + surface);
 			return;
 		}
 		cluster.Layers |= layer;

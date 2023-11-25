@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://mp5ryxp1smn2"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_ftu61"]
+
+[node name="misc_portal_camera" type="Node3D"]
+script = ExtResource("1_ftu61")
+respawnSound = ""

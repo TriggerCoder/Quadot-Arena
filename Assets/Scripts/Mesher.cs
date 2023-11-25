@@ -229,11 +229,11 @@ public static class Mesher
 	{
 		if (surfaces == null || surfaces.Length == 0)
 		{
-			GD.Print("Failed to create polygon object because there are no surfaces");
+			GameManager.Print("Failed to create polygon object because there are no surfaces", GameManager.PrintType.Warning);
 			return;
 		}
-
-		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex);
+		ThingsManager.Portal portal = null;
+		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex, ref portal);
 
 		MeshInstance3D mesh = new MeshInstance3D();
 		ArrayMesh arrMesh = new ArrayMesh();
@@ -253,6 +253,14 @@ public static class Mesher
 			mesh.Layers = GameManager.AllPlayerViewMask;
 		mesh.Name = Name;
 		mesh.Mesh = arrMesh;
+
+		if (portal != null)
+		{
+			Aabb box = arrMesh.GetAabb();
+			portal.position = box.GetCenter();
+			ThingsManager.AddPortalToMap(portal);
+		}
+
 //		mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 		//PVS only add on Static Geometry, as it has BSP Nodes
 		if (addPVS)
@@ -326,13 +334,13 @@ public static class Mesher
 	{
 		if (model == null || model.meshes.Count == 0)
 		{
-			GD.Print("Failed to create model object because there are no meshes");
+			GameManager.Print("Failed to create model object because there are no meshes", GameManager.PrintType.Warning);
 			return null;
 		}
 
 		if (ownerObject == null)
 		{
-			GD.Print("No ownerObject");
+			GameManager.Print("No ownerObject");
 			ownerObject = new Node3D();
 			ownerObject.Name = "Model_" + model.name;
 		}
@@ -402,7 +410,7 @@ public static class Mesher
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
 					MultiMeshesInstances.Add(multiMesh, mesh);
-					GD.Print("Adding MultiMesh : " + mesh.Name);
+					GameManager.Print("Adding MultiMesh : " + mesh.Name);
 				}
 				else
 				{
@@ -412,7 +420,7 @@ public static class Mesher
 					mesh.Layers = layer;
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					modelObject.AddChild(mesh);
-					GD.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name);
+					GameManager.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name);
 				}
 				groupId++;
 			}
@@ -492,7 +500,7 @@ public static class Mesher
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 						GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
 						MultiMeshesInstances.Add(multiMesh, mesh);
-						GD.Print("Adding MultiMesh : " + mesh.Name + " skin group name " + meshes[0].skins[0].name);
+						GameManager.Print("Adding MultiMesh : " + mesh.Name + " skin group name " + meshes[0].skins[0].name);
 					}
 					else
 					{
@@ -502,7 +510,7 @@ public static class Mesher
 						mesh.Layers = layer;
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 						modelObject.AddChild(mesh);
-						GD.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name + " skin group name " + meshes[0].skins[0].name);
+						GameManager.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name + " skin group name " + meshes[0].skins[0].name);
 					}
 					groupId++;
 				}
@@ -578,7 +586,7 @@ public static class Mesher
 	{
 		if (md3Mesh == null)
 		{
-			GD.Print("Failed to generate polygon mesh because there are no meshe info");
+			GameManager.Print("Failed to generate polygon mesh because there are no meshe info", GameManager.PrintType.Warning);
 			return null;
 		}
 
@@ -659,13 +667,13 @@ public static class Mesher
 		uint stype = MapLoader.mapTextures[brushes[0].shaderId].surfaceFlags;
 		if (((type & ContentFlags.Details) != 0) || ((type & ContentFlags.Structural) != 0))
 		{
-			GD.Print("brushes: " + indexId + " Not used for collisions, Content Type is: " + type);
+			GameManager.Print("brushes: " + indexId + " Not used for collisions, Content Type is: " + type, GameManager.PrintType.Info);
 			return 0;
 		}
 
 /*		if ((stype & SurfaceFlags.NonSolid) != 0)
 		{
-			GD.Print("brushes: " + indexId + " Is not solid, Surface Type is: " + stype);
+			GameManager.Print("brushes: " + indexId + " Is not solid, Surface Type is: " + stype);
 			return;
 		}
 */		ContentType contentType = new ContentType();
@@ -760,7 +768,7 @@ public static class Mesher
 		Vector3 normal = Vector3.Zero;
 		if (!CanForm3DConvexHull(intersectPoint, ref normal))
 		{
-			GD.Print("Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time");
+			GameManager.Print("Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time", GameManager.PrintType.Info);
 			return null;
 		}
 
@@ -777,7 +785,7 @@ public static class Mesher
 
 		if (((type & ContentFlags.Details) != 0) || ((type & ContentFlags.Structural) != 0))
 		{
-//			GD.Print("brushSide: " + brush.brushSide + " Not used for collisions, Content Type is: " + type);
+//			GameManager.Print("brushSide: " + brush.brushSide + " Not used for collisions, Content Type is: " + type);
 			return false;
 		}
 
@@ -827,7 +835,7 @@ public static class Mesher
 		Vector3 normal = Vector3.Zero;
 		if (!CanForm3DConvexHull(intersectPoint, ref normal))
 		{
-			GD.Print("Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time");
+			GameManager.Print("Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time", GameManager.PrintType.Info);
 			return false;
 		}
 
@@ -875,7 +883,7 @@ public static class Mesher
 			objCollider.CollisionLayer = (1 << GameManager.InvisibleBlockerLayer);
 
 //		if ((type & SurfaceFlags.NonSolid) != 0)
-//			GD.Print("brushSide: " + brush.brushSide + " Surface Type is: " + type);
+//			GameManager.Print("brushSide: " + brush.brushSide + " Surface Type is: " + type);
 
 		return true;
 	}

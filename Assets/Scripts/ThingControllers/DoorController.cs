@@ -48,7 +48,7 @@ public partial class DoorController : AnimatableBody3D, Damageable
 			switch (initial)
 			{
 				default:
-					GD.Print("Initial DoorState must be only Open/Closed");
+					GameManager.Print("Initial DoorState must be only Open/Closed", GameManager.PrintType.Info);
 					break;
 				case State.Open:
 					currentState = initial;

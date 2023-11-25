@@ -96,7 +96,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.Shaders].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.Shaders].Length / 72;
 			mapTextures = new List<QShader>(num);
-			GD.Print("mapTextures " + num);
+			GameManager.Print("mapTextures " + num);
 			for (int i = 0; i < num; i++)
 			{
 				mapTextures.Add(new QShader(new string(BSPMap.ReadChars(64)), BSPMap.ReadUInt32(), BSPMap.ReadUInt32(), false));
@@ -108,7 +108,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.Planes].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.Planes].Length / 16;
 			planes = new List<QPlane>(num);
-			GD.Print("planes " + num);
+			GameManager.Print("planes " + num);
 			for (int i = 0; i < num; i++)
 			{
 				planes.Add(new QPlane(new Vector3(BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle()), BSPMap.ReadSingle()));
@@ -120,7 +120,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.Nodes].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.Nodes].Length / 36;
 			nodes = new List<QNode>(num);
-			GD.Print("nodes " + num);
+			GameManager.Print("nodes " + num);
 			for (int i = 0; i < num; i++)
 			{
 				nodes.Add(new QNode(BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32(), new Vector3I(BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32()), new Vector3I(BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32())));
@@ -132,7 +132,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.Leafs].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.Leafs].Length / 48;
 			leafs = new List<QLeaf>(num);
-			GD.Print("leafs " + num);
+			GameManager.Print("leafs " + num);
 			for (int i = 0; i < num; i++)
 			{
 				leafs.Add(new QLeaf(BSPMap.ReadInt32(), BSPMap.ReadInt32(), new Vector3I(BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32()), new Vector3I(BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32()), BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32()));
@@ -145,7 +145,7 @@ public static class MapLoader
 			int num = header.Directory[LumpType.LeafSurfaces].Length / 4;
 			leafsSurfaces = new List<int>(num);
 			leafRenderFrameLayer = new int[num];
-			GD.Print("leafsSurfaces " + num);
+			GameManager.Print("leafsSurfaces " + num);
 			for (int i = 0; i < num; i++)
 			{
 				leafsSurfaces.Add(BSPMap.ReadInt32());
@@ -157,7 +157,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.LeafBrushes].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.LeafBrushes].Length / 4;
 			leafsBrushes = new List<int>(num);
-			GD.Print("leafsBrushes " + num);
+			GameManager.Print("leafsBrushes " + num);
 			for (int i = 0; i < num; i++)
 			{
 				leafsBrushes.Add(BSPMap.ReadInt32());
@@ -169,7 +169,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.Models].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.Models].Length / 40;
 			models = new List<QModel>(num);
-			GD.Print("map geometry " + num);
+			GameManager.Print("map geometry " + num);
 			for (int i = 0; i < num; i++)
 			{
 				models.Add(new QModel(new Vector3(BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32()),
@@ -183,7 +183,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.Brushes].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.Brushes].Length / 12;
 			brushes = new List<QBrush>(num);
-			GD.Print("brushes " + num);
+			GameManager.Print("brushes " + num);
 			for (int i = 0; i < num; i++)
 			{
 				brushes.Add(new QBrush(BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32()));
@@ -195,7 +195,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.BrushSides].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.BrushSides].Length / 8;
 			brushSides = new List<QBrushSide>(num);
-			GD.Print("brushSides " + num);
+			GameManager.Print("brushSides " + num);
 			for (int i = 0; i < num; i++)
 			{
 				brushSides.Add(new QBrushSide(BSPMap.ReadInt32(), BSPMap.ReadInt32()));
@@ -207,7 +207,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.Vertexes].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.Vertexes].Length / 44;
 			verts = new List<QVertex>(num);
-			GD.Print("vertices " + num);
+			GameManager.Print("vertices " + num);
 			for (int i = 0; i < num; i++)
 			{
 				verts.Add(new QVertex(i, new Vector3(BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle()),
@@ -231,7 +231,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.VertIndices].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.VertIndices].Length / 4;
 			vertIndices = new List<int>(num);
-			GD.Print("vertIndices " + num);
+			GameManager.Print("vertIndices " + num);
 			for (int i = 0; i < num; i++)
 			{
 				vertIndices.Add(BSPMap.ReadInt32());
@@ -245,7 +245,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.Surfaces].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.Surfaces].Length / 104;
 			surfaces = new List<QSurface>(num);
-			GD.Print("surfaces " + num);
+			GameManager.Print("surfaces " + num);
 			for (int i = 0; i < num; i++)
 			{
 				surfaces.Add(new QSurface(i, BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32(),
@@ -287,7 +287,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.LightMaps].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.LightMaps].Length / lightMapLenght;
 			lightMaps = new List<ImageTexture>(num);
-			GD.Print("lightMaps " + num);
+			GameManager.Print("lightMaps " + num);
 			for (int i = 0; i < num; i++)
 			{
 				lightMaps.Add(TextureLoader.CreateLightmapTexture(BSPMap.ReadBytes(lightMapLenght)));
@@ -374,7 +374,7 @@ public static class MapLoader
 	//					Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
 						break;
 					default:
-						GD.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + bigGroup.Key.type + ").");
+						GameManager.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + bigGroup.Key.type + ").", GameManager.PrintType.Info);
 						break;
 				}
 			}
@@ -462,7 +462,7 @@ public static class MapLoader
 //					Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, modelObject, groupSurfaces);
 					break;
 				default:
-					GD.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + group.Key.type + ").");
+					GameManager.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + group.Key.type + ").", GameManager.PrintType.Info);
 					break;
 			}
 		}

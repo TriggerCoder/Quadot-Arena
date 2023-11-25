@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+
 public partial class ThingsManager : Node
 {
 	[Export]
@@ -26,13 +27,15 @@ public partial class ThingsManager : Node
 
 	public static Dictionary<string, PackedScene> thingsPrefabs = new Dictionary<string, PackedScene>();
 	public static List<Entity> entitiesOnMap = new List<Entity>();
+	public static List<PortalSurface> portalSurfaces = new List<PortalSurface>();
 	public static Dictionary<string, Target> targetsOnMap = new Dictionary<string, Target>();
+	public static Dictionary<string, Camera3D> portalCameras = new Dictionary<string, Camera3D>();
 	public static Dictionary<string, TriggerController> triggerToActivate = new Dictionary<string, TriggerController>();
 	public static Dictionary<string, Dictionary<string, string>> timersOnMap = new Dictionary<string, Dictionary<string, string>>();
 	public static Dictionary<string, Dictionary<string, string>> triggersOnMap = new Dictionary<string, Dictionary<string, string>>();
 	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group" };
 	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_position", "info_notnull", "misc_teleporter_dest" };
-
+	public static List<Portal> portalsOnMap = new List<Portal>();
 	public class Target
 	{
 		public Vector3 destination;
@@ -68,69 +71,90 @@ public partial class ThingsManager : Node
 			this.time = time;
 		}
 	}
+	public class Portal
+	{
+		public Vector3 position;
+		public ShaderMaterial material;
+		public int texNum;
+		public Portal(ShaderMaterial material, int texNum)
+		{
+			this.material = material;
+			this.texNum = texNum;
+		}
+	}
+	public class PortalSurface
+	{
+		public Vector3 position;
+		public string targetName;
+		public PortalSurface(Vector3 position, string targetName)
+		{
+			this.position = position;
+			this.targetName = targetName;
+		}
+	}
 	public override void _Ready()
 	{
 		foreach (var thing in _fxPrefabs)
 		{
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);
-			GD.Print("FX Name: "+ prefabName);
+			GameManager.Print("FX Name: "+ prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _projectilesPrefabs)
 		{
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);
-			GD.Print("Projectile Name: " + prefabName);
+			GameManager.Print("Projectile Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _decalsPrefabs)
 		{
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);
-			GD.Print("Decal Name: " + prefabName);
+			GameManager.Print("Decal Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _itemsPrefabs)
 		{
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);
-			GD.Print("Item Name: " + prefabName);
+			GameManager.Print("Item Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _debrisPrefabs)
 		{
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);
-			GD.Print("Debris Name: " + prefabName);
+			GameManager.Print("Debris Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _weaponsPrefabs)
 		{
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);
-			GD.Print("Weapon Name: " + prefabName);
+			GameManager.Print("Weapon Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _healthsPrefabs)
 		{
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);
-			GD.Print("Health Name: " + prefabName);
+			GameManager.Print("Health Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _armorPrefabs)
 		{
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);
-			GD.Print("Armor Name: " + prefabName);
+			GameManager.Print("Armor Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _gameplayPrefabs)
 		{
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);
-			GD.Print("Gamplay Item: " + prefabName);
+			GameManager.Print("Gamplay Item: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
 		
@@ -172,7 +196,7 @@ public partial class ThingsManager : Node
 
 				if (!thingsPrefabs.ContainsKey(entityData["classname"]))
 				{
-					GD.Print(entityData["classname"] + " not found");
+					GameManager.Print(entityData["classname"] + " not found", GameManager.PrintType.Warning);
 					continue;
 				}
 
@@ -243,6 +267,16 @@ public partial class ThingsManager : Node
 		AddTriggersOnMap();
 		AddEntitiesToMap();
 		AddTimersToMap();
+		AddPortalsToMap();
+	}
+
+	public static void AddPortalToMap(Portal portal)
+	{
+		if (portalsOnMap.Contains(portal))
+			return;
+
+		portalsOnMap.Add(portal);
+		GameManager.Print("Got Portal at X: " + portal.position.X + " Y: " + portal.position.Y + " Z: " + portal.position.Z);
 	}
 
 	public static void AddTriggersOnMap()
@@ -276,7 +310,6 @@ public partial class ThingsManager : Node
 		}
 	}
 
-
 	public static void AddTimersToMap()
 	{
 		foreach (KeyValuePair<string, Dictionary<string, string>> timer in timersOnMap)
@@ -300,6 +333,7 @@ public partial class ThingsManager : Node
 			timerController.Init(wait, random, tc);
 		}
 	}
+
 	public static void AddEntitiesToMap()
 	{
 		string strWord;
@@ -542,30 +576,68 @@ public partial class ThingsManager : Node
 					});
 				}
 				break;
-				//Remove PowerUps
-/*				case "target_remove_powerups":
+				//Portal Camera
+				case "misc_portal_camera":
 				{
+					int angle = 0;
+					Vector3 lookAt = Vector3.Forward;
+					if (entity.entityData.TryGetValue("angle", out strWord))
+						GameManager.Print("Angle " + strWord);
+					if (entity.entityData.TryGetValue("target", out strWord))
+					{
+						lookAt = targetsOnMap[strWord].destination;
+						angle = targetsOnMap[strWord].angle;
+						GameManager.Print("Target " + strWord);
+					}
 					if (entity.entityData.TryGetValue("targetname", out strWord))
 					{
-						string target = strWord;
-
-						TriggerController tc;
-						if (!triggerToActivate.TryGetValue(target, out tc))
-						{
-							tc = thingObject.AddComponent<TriggerController>();
-							triggerToActivate.Add(target, tc);
-						}
-						else
-							Destroy(thingObject);
-						tc.Repeatable = true;
-						tc.SetController(target, (p) =>
-						{
-							p.RemovePowerUps();
-						});
+						Camera3D camera = new Camera3D();
+						thingObject.AddChild(camera);
+						camera.CullMask = GameManager.AllPlayerViewMask | GameManager.InvisibleMask;
+						camera.GlobalPosition = entity.origin;
+						camera.LookAt(lookAt, Vector3.Up);
+						portalCameras.Add(strWord, camera);
+						GameManager.Print("TargetName " + strWord);
+					}
+					if (entity.entityData.TryGetValue("roll", out strWord))
+						GameManager.Print("Roll " + strWord);
+				}
+				break;
+				//Portal Surface
+				case "misc_portal_surface":
+				{
+					if (entity.entityData.TryGetValue("target", out strWord))
+					{
+						PortalSurface portalSurface = new PortalSurface(entity.origin, strWord);
+						portalSurfaces.Add(portalSurface);
+						GameManager.Print("TargetName " + strWord);
 					}
 				}
 				break;
-*/				//JumpPad
+				//Remove PowerUps
+				/*				case "target_remove_powerups":
+								{
+									if (entity.entityData.TryGetValue("targetname", out strWord))
+									{
+										string target = strWord;
+
+										TriggerController tc;
+										if (!triggerToActivate.TryGetValue(target, out tc))
+										{
+											tc = thingObject.AddComponent<TriggerController>();
+											triggerToActivate.Add(target, tc);
+										}
+										else
+											Destroy(thingObject);
+										tc.Repeatable = true;
+										tc.SetController(target, (p) =>
+										{
+											p.RemovePowerUps();
+										});
+									}
+								}
+								break;
+				*/                //JumpPad
 				case "trigger_push":
 				{
 					JumpPadThing jumpPad = new JumpPadThing();
@@ -695,6 +767,39 @@ public partial class ThingsManager : Node
 						AddRandomTimeToSound(thingObject, entity.entityData, audioStream2D, audioStream, isAudio3d);
 				}
 				break;
+			}
+		}
+	}
+	public static void AddPortalsToMap()
+	{
+		foreach (PortalSurface portalSurface in portalSurfaces)
+		{
+			Portal portal = null;
+			float closestPortal = 0;
+			Camera3D camera;
+			if (portalCameras.TryGetValue(portalSurface.targetName, out camera))
+			{
+				GameManager.Print("Found Portal Camera " + camera.Name);
+				for (int i = 0; i < portalsOnMap.Count; i++)
+				{
+					float distance = (portalsOnMap[i].position - portalSurface.position).LengthSquared();
+					if ((portal == null) || (distance < closestPortal))
+					{
+						portal = portalsOnMap[i];
+						closestPortal = distance;
+					}
+				}
+				SubViewport viewport = new SubViewport();
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(viewport);
+				viewport.Size = new Vector2I(1280, 720);
+				viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
+				viewport.HandleInputLocally = false;
+
+				var CamRID = camera.GetCameraRid();
+				var viewPortRID = viewport.GetViewportRid();
+				RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
+				if (portal != null)
+					portal.material.SetShaderParameter("Tex_" + portal.texNum, viewport.GetTexture());
 			}
 		}
 	}
