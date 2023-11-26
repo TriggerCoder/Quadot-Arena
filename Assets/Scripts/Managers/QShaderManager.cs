@@ -361,10 +361,38 @@ public static class QShaderManager
 		}
 
 		if (portalStage > 0)
-			portal = new ThingsManager.Portal(shaderMaterial, portalStage);
-
+		{
+			ShaderMaterial portalMaterial = PortalMaterial();
+			shaderMaterial.NextPass = portalMaterial;
+			portal = new ThingsManager.Portal(portalMaterial, 0);
+		}
 		return shaderMaterial;
 	}
+
+	public static ShaderMaterial PortalMaterial()
+	{
+		string code = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, depth_draw_always, blend_mix, cull_back;\n\n";
+		code += "uniform sampler2D Tex_0 : repeat_enable;\n";
+		code += "uniform float Transparency : hint_range(0, 1) = 0.0;\n";
+		code += "global uniform float MsTime;\n";
+		code += "instance uniform float OffSetTime = 0.0;\n";
+		code += "void fragment()\n{\n\tvec2 uv_0 = SCREEN_UV;\n\tvec4 Stage_0 = texture(Tex_0, uv_0);\n";
+		code += "\tvec4 ambient = vec4(" + GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.R.ToString("0.00") + "," + GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.G.ToString("0.00") + "," + GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.B.ToString("0.00") + ", 1.0 );\n";
+		code += "\tvec4 vertx_color = COLOR;\n";
+		code += "\tvec4 color = vec4(0.0, 0.0, 0.0, 0.0);\n";
+		code += "\tcolor = Stage_0;\n";
+		code += "\tALBEDO = (color.rgb * vertx_color.rgb);\n";
+		code += "\tEMISSION = mix((ambient.rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n";
+		code += "\tALPHA = Transparency;\n";
+		code += "}\n\n";
+		Shader shader = new Shader();
+		shader.Code = code;
+		ShaderMaterial shaderMaterial = new ShaderMaterial();
+		shaderMaterial.Shader = shader;
+		shaderMaterial.RenderPriority = 1;
+		return shaderMaterial;
+	}
+
 
 	public static string GetTcGen(QShaderData qShader, int currentStage, ref int lightmapStage)
 	{

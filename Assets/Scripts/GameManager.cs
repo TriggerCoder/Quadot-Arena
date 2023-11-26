@@ -80,7 +80,7 @@ public partial class GameManager : Node
 									(1 << ThingsLayer));
 
 	//Rendering Masks
-	public const int InvisibleMask = (1 << NotVisibleLayer);
+	public const int InvisibleMask = 0;
 	public const uint AllPlayerViewMask = ((1 << Player1ViewLayer) | (1 << Player2ViewLayer) | (1 << Player3ViewLayer) | (1 << Player4ViewLayer) | (1 << Player5ViewLayer) | (1 << Player6ViewLayer) | (1 << Player7ViewLayer) | (1 << Player8ViewLayer));
 
 	public bool paused = true;

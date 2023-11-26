@@ -258,6 +258,11 @@ public static class Mesher
 		{
 			Aabb box = arrMesh.GetAabb();
 			portal.position = box.GetCenter();
+			Vector3 normals = Vector3.Zero;
+			for (var i = 0; i < normalsCache.Count; i++)
+				normals += normalsCache[i];
+
+			portal.normal = normals.Normalized();
 			ThingsManager.AddPortalToMap(portal);
 		}
 

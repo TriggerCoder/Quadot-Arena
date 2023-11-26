@@ -74,22 +74,13 @@ public partial class ThingsManager : Node
 	public class Portal
 	{
 		public Vector3 position;
+		public Vector3 normal;
 		public ShaderMaterial material;
 		public int texNum;
 		public Portal(ShaderMaterial material, int texNum)
 		{
 			this.material = material;
 			this.texNum = texNum;
-		}
-	}
-	public class PortalSurface
-	{
-		public Vector3 position;
-		public string targetName;
-		public PortalSurface(Vector3 position, string targetName)
-		{
-			this.position = position;
-			this.targetName = targetName;
 		}
 	}
 	public override void _Ready()
@@ -579,6 +570,8 @@ public partial class ThingsManager : Node
 				//Portal Camera
 				case "misc_portal_camera":
 				{
+					thingObject.GlobalPosition = entity.origin;
+
 					int angle = 0;
 					Vector3 lookAt = Vector3.Forward;
 					if (entity.entityData.TryGetValue("angle", out strWord))
@@ -586,16 +579,16 @@ public partial class ThingsManager : Node
 					if (entity.entityData.TryGetValue("target", out strWord))
 					{
 						lookAt = targetsOnMap[strWord].destination;
+						thingObject.LookAt(lookAt, Vector3.Up);
 						angle = targetsOnMap[strWord].angle;
 						GameManager.Print("Target " + strWord);
+						GameManager.Print("Angle " + angle);
 					}
 					if (entity.entityData.TryGetValue("targetname", out strWord))
 					{
 						Camera3D camera = new Camera3D();
 						thingObject.AddChild(camera);
-						camera.CullMask = GameManager.AllPlayerViewMask | GameManager.InvisibleMask;
-						camera.GlobalPosition = entity.origin;
-						camera.LookAt(lookAt, Vector3.Up);
+						camera.CullMask = GameManager.AllPlayerViewMask;
 						portalCameras.Add(strWord, camera);
 						GameManager.Print("TargetName " + strWord);
 					}
@@ -608,7 +601,10 @@ public partial class ThingsManager : Node
 				{
 					if (entity.entityData.TryGetValue("target", out strWord))
 					{
-						PortalSurface portalSurface = new PortalSurface(entity.origin, strWord);
+						PortalSurface portalSurface = new PortalSurface();
+						GameManager.Instance.AddChild(portalSurface);
+						portalSurface.GlobalPosition = entity.origin;
+						portalSurface.targetName = strWord;
 						portalSurfaces.Add(portalSurface);
 						GameManager.Print("TargetName " + strWord);
 					}
@@ -782,25 +778,20 @@ public partial class ThingsManager : Node
 				GameManager.Print("Found Portal Camera " + camera.Name);
 				for (int i = 0; i < portalsOnMap.Count; i++)
 				{
-					float distance = (portalsOnMap[i].position - portalSurface.position).LengthSquared();
+					float distance = (portalsOnMap[i].position - portalSurface.GlobalPosition).LengthSquared();
 					if ((portal == null) || (distance < closestPortal))
 					{
 						portal = portalsOnMap[i];
 						closestPortal = distance;
 					}
 				}
-				SubViewport viewport = new SubViewport();
-				GameManager.Instance.TemporaryObjectsHolder.AddChild(viewport);
-				viewport.Size = new Vector2I(1280, 720);
-				viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
-				viewport.HandleInputLocally = false;
-
-				var CamRID = camera.GetCameraRid();
-				var viewPortRID = viewport.GetViewportRid();
-				RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 				if (portal != null)
-					portal.material.SetShaderParameter("Tex_" + portal.texNum, viewport.GetTexture());
+					portalSurface.SetUpPortal(camera, portal);
+				else
+					portalSurface.QueueFree();
 			}
+			else
+				portalSurface.QueueFree();
 		}
 	}
 	public static void AddRandomTimeToSound(Node3D node, Dictionary<string, string> entityData, AudioStreamPlayer audioStream2D, MultiAudioStream audioStream, bool isAudio3d)
