@@ -36,53 +36,6 @@ public partial class ThingsManager : Node
 	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group" };
 	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_position", "info_notnull", "misc_teleporter_dest" };
 	public static List<Portal> portalsOnMap = new List<Portal>();
-	public class Target
-	{
-		public Vector3 destination;
-		public int angle;
-		public Target(Vector3 destination, int angle)
-		{
-			this.destination = destination;
-			this.angle = angle;
-		}
-	}
-	public class Entity
-	{
-		public string name;
-		public Vector3 origin;
-		public Dictionary<string, string> entityData;
-		public Entity(string name, Vector3 origin, Dictionary<string, string> entityData)
-		{
-			this.name = name;
-			this.origin = origin;
-			this.entityData = entityData;
-		}
-	}
-	public class RespawnItem
-	{
-		public Node3D node;
-		public string respawnSound;
-		public float time;
-
-		public RespawnItem(Node3D node, string respawnSound, float time)
-		{
-			this.node = node;
-			this.respawnSound = respawnSound;
-			this.time = time;
-		}
-	}
-	public class Portal
-	{
-		public Vector3 position;
-		public Vector3 normal;
-		public ShaderMaterial material;
-		public int texNum;
-		public Portal(ShaderMaterial material, int texNum)
-		{
-			this.material = material;
-			this.texNum = texNum;
-		}
-	}
 	public override void _Ready()
 	{
 		foreach (var thing in _fxPrefabs)
@@ -824,6 +777,51 @@ public static class DictionaryExtensions
 			return true;
 		}
 		return false;
+	}
+}
+public class Target
+{
+	public Vector3 destination;
+	public int angle;
+	public Target(Vector3 destination, int angle)
+	{
+		this.destination = destination;
+		this.angle = angle;
+	}
+}
+public class Entity
+{
+	public string name;
+	public Vector3 origin;
+	public Dictionary<string, string> entityData;
+	public Entity(string name, Vector3 origin, Dictionary<string, string> entityData)
+	{
+		this.name = name;
+		this.origin = origin;
+		this.entityData = entityData;
+	}
+}
+public class RespawnItem
+{
+	public Node3D node;
+	public string respawnSound;
+	public float time;
+
+	public RespawnItem(Node3D node, string respawnSound, float time)
+	{
+		this.node = node;
+		this.respawnSound = respawnSound;
+		this.time = time;
+	}
+}
+public class Portal
+{
+	public Vector3 position;
+	public Vector3 normal;
+	public ShaderMaterial material;
+	public Portal(ShaderMaterial material)
+	{
+		this.material = (ShaderMaterial)material.NextPass;
 	}
 }
 

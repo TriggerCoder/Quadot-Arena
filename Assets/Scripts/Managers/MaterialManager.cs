@@ -30,7 +30,8 @@ public partial class MaterialManager : Node
 	public static string mixBrightness = "shader_parameter/mixBrightness";
 
 	public static List<string> HasBillBoard = new List<string>();
-	public static List<ShaderMaterial> AllMaterials = new List<ShaderMaterial>();	
+	public static List<string> PortalMaterials = new List<string>();
+	public static List<ShaderMaterial> AllMaterials = new List<ShaderMaterial>();
 	public static Dictionary<string, ShaderMaterial> Materials = new Dictionary<string, ShaderMaterial>();
 	public static Dictionary<string, QShader> AditionalTextures = new Dictionary<string, QShader>();
 
@@ -54,6 +55,19 @@ public partial class MaterialManager : Node
 		HasBillBoard.Add(shaderName);
 	}
 
+	public static void AddPortalMaterial(string shaderName)
+	{
+		if (PortalMaterials.Contains(shaderName))
+			return;
+		PortalMaterials.Add(shaderName);
+	}
+
+	public static bool IsPortalMaterial(string shaderName)
+	{
+		if (PortalMaterials.Contains(shaderName))
+			return true;
+		return false;
+	}
 	public static bool IsSkyTexture(string textureName)
 	{
 		if (textureName.ToUpper().Contains("/SKIES/"))
@@ -69,20 +83,15 @@ public partial class MaterialManager : Node
 	public static ShaderMaterial GetMaterials(string textureName, int lm_index)
 	{
 		bool forceSkinAlpha = false;
-		return GetMaterials(textureName, lm_index, ref forceSkinAlpha);
+		bool hasPortal = false;
+		return GetMaterials(textureName, lm_index, ref forceSkinAlpha, ref hasPortal);
 	}
-	public static ShaderMaterial GetMaterials(string textureName, int lm_index, ref ThingsManager.Portal portal)
-	{
-		bool forceSkinAlpha = false;
-		return GetMaterials(textureName, lm_index, ref forceSkinAlpha, ref portal);
-	}
-
 	public static ShaderMaterial GetMaterials(string textureName, int lm_index, ref bool forceSkinAlpha)
 	{
-		ThingsManager.Portal portal = null;
-		return GetMaterials(textureName, lm_index, ref forceSkinAlpha, ref portal);
+		bool hasPortal = false;
+		return GetMaterials(textureName, lm_index, ref forceSkinAlpha, ref hasPortal);
 	}
-	public static ShaderMaterial GetMaterials(string textureName, int lm_index , ref bool forceSkinAlpha, ref ThingsManager.Portal portal)
+	public static ShaderMaterial GetMaterials(string textureName, int lm_index , ref bool forceSkinAlpha, ref bool hasPortal)
 	{
 //		if (IsSkyTexture(textureName))
 //			return Instance.skyHole;
@@ -93,13 +102,18 @@ public partial class MaterialManager : Node
 		ImageTexture tex = TextureLoader.GetTexture(textureName);
 
 		ShaderMaterial mat;
+
 		// Lightmapping is on, so calc the lightmaps
 		if (lm_index >= 0 && Instance.applyLightmaps)
 		{
 			if (Materials.ContainsKey(textureName + lm_index.ToString()))
+			{
+				if (hasPortal = IsPortalMaterial(textureName + lm_index.ToString()))
+					return (ShaderMaterial)Materials[textureName + lm_index.ToString()].Duplicate(true);
 				return Materials[textureName + lm_index.ToString()];
+			}
 			bool useTransparent = false;
-			mat = QShaderManager.GetShadedMaterial(textureName, lm_index, ref useTransparent, ref portal);
+			mat = QShaderManager.GetShadedMaterial(textureName, lm_index, ref useTransparent, ref hasPortal);
 			if (mat == null)
 			{
 				// Lightmapping
@@ -113,15 +127,22 @@ public partial class MaterialManager : Node
 				mat.Set(lightMapProperty, lmap);
 				mat.Set(mixBrightness, GameManager.Instance.mixBrightness);
 			}
+			else if (hasPortal)
+				AddPortalMaterial(textureName + lm_index.ToString());
+
 			forceSkinAlpha = useTransparent;
 			Materials.Add(textureName + lm_index.ToString(), mat);
 			return mat;
 		}
 
 		if (Materials.ContainsKey(textureName))
+		{
+			if (hasPortal = IsPortalMaterial(textureName))
+				return (ShaderMaterial)Materials[textureName].Duplicate(true);
 			return Materials[textureName];
+		}
 
-		mat = QShaderManager.GetShadedMaterial(textureName, 0, ref forceSkinAlpha, ref portal);
+		mat = QShaderManager.GetShadedMaterial(textureName, 0, ref forceSkinAlpha, ref hasPortal);
 		if (mat == null)
 		{
 			// Lightmapping is off, so don't.
@@ -133,6 +154,8 @@ public partial class MaterialManager : Node
 			mat.Set(colorProperty, GameManager.ambientLight);
 			mat.Set(mixBrightness, GameManager.Instance.mixBrightness);
 		}
+		else if (hasPortal)
+			AddPortalMaterial(textureName);
 		Materials.Add(textureName, mat);
 		return mat;
 	}

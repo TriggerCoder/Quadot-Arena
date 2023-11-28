@@ -232,8 +232,10 @@ public static class Mesher
 			GameManager.Print("Failed to create polygon object because there are no surfaces", GameManager.PrintType.Warning);
 			return;
 		}
-		ThingsManager.Portal portal = null;
-		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex, ref portal);
+
+		bool hasPortal = false;
+		bool forceSkinAlpha = false;
+		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex, ref forceSkinAlpha, ref hasPortal);
 
 		MeshInstance3D mesh = new MeshInstance3D();
 		ArrayMesh arrMesh = new ArrayMesh();
@@ -254,8 +256,9 @@ public static class Mesher
 		mesh.Name = Name;
 		mesh.Mesh = arrMesh;
 
-		if (portal != null)
+		if (hasPortal)
 		{
+			Portal portal = new Portal(material);
 			Aabb box = arrMesh.GetAabb();
 			portal.position = box.GetCenter();
 			Vector3 normals = Vector3.Zero;
@@ -268,7 +271,7 @@ public static class Mesher
 
 //		mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 		//PVS only add on Static Geometry, as it has BSP Nodes
-		if (addPVS)
+		else if (addPVS)
 			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(mesh, surfaces);
 	}
 	public static void GeneratePolygonMesh(QSurface surface, int lm_index, ref int offset)

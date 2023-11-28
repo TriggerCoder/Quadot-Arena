@@ -84,8 +84,7 @@ public partial class TeleporterThing : Area3D
 
 			if (!string.IsNullOrEmpty(TeleportOutSound))
 				SoundManager.Create3DSound(playerThing.Position, SoundManager.LoadSound(TeleportOutSound));
-			int currentFrame = (Engine.GetFramesDrawn() << GameManager.Player1UIViewLayer);
-			playerThing.playerInfo.CheckPVS(currentFrame, destination);
+			ClusterPVSManager.CheckPVS(playerThing.playerInfo.viewLayer, destination);
 			TelefragEverything(destination, playerThing);
 			playerThing.Position = destination;
 			playerThing.playerControls.teleportDest = destination;

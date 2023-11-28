@@ -6,13 +6,15 @@ public partial class PortalSurface : Area3D
 {
 	public string targetName;
 	private Camera3D destCamera;
-	private ThingsManager.Portal destPortal;
+	private Portal destPortal;
 	private float radius = 256 * GameManager.sizeDividor;
+	private float radiusSquared;
 	private List<PlayerThing> currentPlayers = new List<PlayerThing>();
 	public override void _Ready()
 	{
 		BodyEntered += OnBodyEntered;
 		BodyExited += OnBodyExit;
+		radiusSquared = radius * radius;
 	}
 
 	public override void _Process(double delta)
@@ -20,17 +22,15 @@ public partial class PortalSurface : Area3D
 		for (int i = 0; i < currentPlayers.Count; i++) 
 		{
 			Camera3D playerCamera = currentPlayers[i].playerInfo.playerCamera.CurrentCamera;
-			Vector3 distance = (GlobalPosition - playerCamera.GlobalPosition);
-//			destCamera.Position = distance;
+			float distanceSquared = (GlobalPosition - playerCamera.GlobalPosition).LengthSquared();
 			destCamera.Basis = playerCamera.GlobalTransform.Basis;
-			int currentFrame = (Engine.GetFramesDrawn() << GameManager.Player1UIViewLayer);
-			currentPlayers[i].playerInfo.CheckPVS(currentFrame, destCamera.GlobalPosition);
-			float lenght = Mathf.Clamp(1.3f - (distance.Length() / radius), 0f, 1f);
+			ClusterPVSManager.CheckPVS(currentPlayers[i].playerInfo.viewLayer, destCamera.GlobalPosition);
+			float lenght = Mathf.Clamp(1.3f - (distanceSquared / radiusSquared), 0f, 1f);
 			destPortal.material.SetShaderParameter("Transparency", lenght);
 		}
 	}
 
-	public void SetUpPortal(Camera3D camera, ThingsManager.Portal portal)
+	public void SetUpPortal(Camera3D camera, Portal portal)
 	{
 		destCamera = camera;
 		destPortal = portal;
@@ -57,7 +57,7 @@ public partial class PortalSurface : Area3D
 		var viewPortRID = viewport.GetViewportRid();
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 
-		destPortal.material.SetShaderParameter("Tex_" + destPortal.texNum, viewport.GetTexture());
+		destPortal.material.SetShaderParameter("Tex_0", viewport.GetTexture());
 	}
 	void OnBodyEntered(Node3D other)
 	{
