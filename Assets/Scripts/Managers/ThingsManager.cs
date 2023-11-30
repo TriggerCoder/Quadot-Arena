@@ -555,7 +555,7 @@ public partial class ThingsManager : Node
 					if (entity.entityData.TryGetValue("target", out strWord))
 					{
 						PortalSurface portalSurface = new PortalSurface();
-						GameManager.Instance.AddChild(portalSurface);
+						GameManager.Instance.TemporaryObjectsHolder.AddChild(portalSurface);
 						portalSurface.GlobalPosition = entity.origin;
 						portalSurface.targetName = strWord;
 						portalSurfaces.Add(portalSurface);

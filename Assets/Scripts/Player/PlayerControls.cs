@@ -75,12 +75,55 @@ public partial class PlayerControls : Node3D
 		Run
 	}
 
-	//Cached Transform
-	public Transform3D cTransform;
-	public Vector3 teleportDest = Vector3.Zero;
+	public PlayerInput playerInput;
+	public struct PlayerInput
+	{
+		private readonly int _Device;
+		public int Device { get { return _Device; } }
 
+		private readonly string _Move_Forward;
+		public string Move_Forward { get { return _Move_Forward; } }
+
+		private readonly string _Move_Back;
+		public string Move_Back { get { return _Move_Back; } }
+		private readonly string _Move_Left;
+		public string Move_Left { get { return _Move_Left; } }
+		private readonly string _Move_Right;
+		public string Move_Right { get { return _Move_Right; } }
+		private readonly string _Action_Fire;
+		public string Action_Fire { get { return _Action_Fire; } }
+		private readonly string _Action_Jump;
+		public string Action_Jump { get { return _Action_Jump; } }
+		private readonly string _Action_Crouch;
+		public string Action_Crouch { get { return _Action_Crouch; } }
+		private readonly string _Action_Run;
+		public string Action_Run { get { return _Action_Run; } }
+		private readonly string _Action_CameraSwitch;
+		public string Action_CameraSwitch { get { return _Action_CameraSwitch; } }
+		private readonly string _Action_WeaponSwitch_Up;
+		public string Action_WeaponSwitch_Up { get { return _Action_WeaponSwitch_Up; } }
+		private readonly string _Action_WeaponSwitch_Down;
+		public string Action_WeaponSwitch_Down { get { return _Action_WeaponSwitch_Down; } }
+		public PlayerInput(int num)
+		{
+			_Device = num;
+			_Move_Forward = "Move_Forward_" + num;
+			_Move_Back = "Move_Back_" + num;
+			_Move_Left = "Move_Left_" + num;
+			_Move_Right = "Move_Right_" + num;
+			_Action_Fire = "Action_Fire_" + num;
+			_Action_Jump = "Action_Jump_" + num;
+			_Action_Crouch = "Action_Crouch_" + num;
+			_Action_Run = "Action_Run_" + num;
+			_Action_CameraSwitch = "Action_CameraSwitch_" + num;
+			_Action_WeaponSwitch_Up = "Action_WeaponSwitch_Up_" + num;
+			_Action_WeaponSwitch_Down = "Action_WeaponSwitch_Down_" + num;
+		}
+	}
+
+
+	public Vector3 teleportDest = Vector3.Zero;
 	private Vector3 rotAngle = Vector3.Zero;
-	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		moveSpeed = runSpeed;
@@ -88,28 +131,42 @@ public partial class PlayerControls : Node3D
 		playerThing.CollisionLayer = playerInfo.playerLayer;
 	}
 
+	public void Init(int contollerNum)
+	{
+		playerInput = new PlayerInput(contollerNum);
+	}
+
 	public override void _Input(InputEvent @event)
 	{
 		if (GameManager.Paused)
 			return;
 
-		if (@event is InputEventMouseMotion eventMouseMotion)
+		switch (playerInput.Device)
 		{
-			Look = eventMouseMotion.Relative;
-			viewDirection.Y -= Look.X * GameOptions.MouseSensitivity.X;
-			viewDirection.X -= Look.Y * GameOptions.MouseSensitivity.Y;
+			default:
 
-			if (viewDirection.Y < -180)
-				viewDirection.Y += 360;
-			if (viewDirection.Y > 180)
-				viewDirection.Y -= 360;
+			break;
+			case GameManager.ControllerType.MouseKeyboard:
+				if (@event is InputEventMouseMotion eventMouseMotion)
+				{
+					Look = eventMouseMotion.Relative;
+					viewDirection.Y -= Look.X * GameOptions.MouseSensitivity.X;
+					viewDirection.X -= Look.Y * GameOptions.MouseSensitivity.Y;
 
-			//restricted up/down looking angle
-			if (viewDirection.X < -85)
-				viewDirection.X = -85;
-			if (viewDirection.X > 85)
-				viewDirection.X = 85;
+					if (viewDirection.Y < -180)
+						viewDirection.Y += 360;
+					if (viewDirection.Y > 180)
+						viewDirection.Y -= 360;
+
+					//restricted up/down looking angle
+					if (viewDirection.X < -85)
+						viewDirection.X = -85;
+					if (viewDirection.X > 85)
+						viewDirection.X = 85;
+				}
+			break;
 		}
+
 	}
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
@@ -128,7 +185,7 @@ public partial class PlayerControls : Node3D
 				deathTime += deltaTime;
 			else
 			{
-				if (Input.IsActionJustPressed("Action_Jump") || Input.IsActionJustPressed("Action_Fire"))
+				if (Input.IsActionJustPressed(playerInput.Action_Jump) || Input.IsActionJustPressed(playerInput.Action_Fire))
 				{
 					deathTime = 0;
 					viewDirection = Vector2.Zero;
@@ -149,7 +206,7 @@ public partial class PlayerControls : Node3D
 		if (!playerThing.ready)
 			return;
 
-		if (Input.IsActionJustPressed("Action_CameraSwitch"))
+		if (Input.IsActionJustPressed(playerInput.Action_CameraSwitch))
 			playerCamera.ChangeThirdPersonCamera(!playerCamera.currentThirdPerson);
 
 		playerThing.avatar.ChangeView(viewDirection, deltaTime);
@@ -158,7 +215,7 @@ public partial class PlayerControls : Node3D
 		controllerIsGrounded = playerThing.IsOnFloor();
 		playerThing.avatar.isGrounded = controllerIsGrounded;
 		//Player can only crounch if it is grounded
-		if ((Input.IsActionJustPressed("Action_Crouch")) && (controllerIsGrounded))
+		if ((Input.IsActionJustPressed(playerInput.Action_Crouch)) && (controllerIsGrounded))
 		{
 			if (oldSpeed == 0)
 				oldSpeed = moveSpeed;
@@ -166,7 +223,7 @@ public partial class PlayerControls : Node3D
 			currentMoveType = MoveType.Crouch;
 //			ChangeHeight(false);
 		}
-		else if (Input.IsActionJustReleased("Action_Crouch"))
+		else if (Input.IsActionJustReleased(playerInput.Action_Crouch))
 		{
 			if (oldSpeed != 0)
 				moveSpeed = oldSpeed;
@@ -181,7 +238,7 @@ public partial class PlayerControls : Node3D
 		{
 			if (GameOptions.runToggle)
 			{
-				if (Input.IsActionJustReleased("Action_Run"))
+				if (Input.IsActionJustReleased(playerInput.Action_Run))
 				{
 					if (moveSpeed == walkSpeed)
 					{
@@ -197,7 +254,7 @@ public partial class PlayerControls : Node3D
 			}
 			else
 			{
-				if (Input.IsActionPressed("Action_Run"))
+				if (Input.IsActionPressed(playerInput.Action_Run))
 				{
 					moveSpeed = runSpeed;
 					currentMoveType = MoveType.Run;
@@ -224,7 +281,7 @@ public partial class PlayerControls : Node3D
 			playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed, deltaTime);
 
 
-		if (Input.IsActionPressed("Action_Fire"))
+		if (Input.IsActionPressed(playerInput.Action_Fire))
 			wishFire = true;
 
 		//swap weapon
@@ -244,7 +301,8 @@ public partial class PlayerControls : Node3D
 
 		CheckMouseWheelWeaponChange();
 
-		CheckWeaponChangeByIndex();
+		if (playerInput.Device == GameManager.ControllerType.MouseKeyboard)
+			CheckWeaponChangeByIndex();
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -322,7 +380,7 @@ public partial class PlayerControls : Node3D
 	}
 	private void SetMovementDir()
 	{
-		Vector2 Move = Input.GetVector("Move_Left", "Move_Right", "Move_Forward", "Move_Back");
+		Vector2 Move = Input.GetVector(playerInput.Move_Left, playerInput.Move_Right, playerInput.Move_Forward, playerInput.Move_Back);
 
 		cMove.forwardSpeed = Move.Y;
 		cMove.sidewaysSpeed = Move.X;
@@ -331,13 +389,13 @@ public partial class PlayerControls : Node3D
 	{
 		if (holdJumpToBhop)
 		{
-			wishJump = Input.IsActionPressed("Action_Jump");
+			wishJump = Input.IsActionPressed(playerInput.Action_Jump);
 			return;
 		}
 
-		if (Input.IsActionJustPressed("Action_Jump") && !wishJump)
+		if (Input.IsActionJustPressed(playerInput.Action_Jump) && !wishJump)
 			wishJump = true;
-		if (Input.IsActionJustReleased("Action_Jump"))
+		if (Input.IsActionJustReleased(playerInput.Action_Jump))
 			wishJump = false;
 	}
 	private void GroundMove(float deltaTime)
@@ -580,7 +638,7 @@ public partial class PlayerControls : Node3D
 
 	public void CheckMouseWheelWeaponChange()
 	{
-		if (Input.IsActionJustPressed("Action_WeaponSwitch_Up"))
+		if (Input.IsActionJustPressed(playerInput.Action_WeaponSwitch_Up))
 		{
 			bool gotWeapon = false;
 			for (int NextWeapon = CurrentWeapon + 1; NextWeapon < 9; NextWeapon++)
@@ -592,7 +650,7 @@ public partial class PlayerControls : Node3D
 			if (!gotWeapon)
 				TrySwapWeapon(0);
 		}
-		else if (Input.IsActionJustPressed("Action_WeaponSwitch_Down"))
+		else if (Input.IsActionJustPressed(playerInput.Action_WeaponSwitch_Down))
 		{
 			bool gotWeapon = false;
 			for (int NextWeapon = CurrentWeapon - 1; NextWeapon >= 0; NextWeapon--)

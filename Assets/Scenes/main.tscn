@@ -72,12 +72,12 @@ glow_enabled = true
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_rcj1l")
 
-[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "playerViewPort", "Players")]
+[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "playerViewPort")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
-autoloadMap = "q3dm7"
+autoloadMap = "map20"
 playerViewPort = NodePath("SplitScreen/PlayerViewPort")
-Players = [NodePath("../Player")]
+playerPrefab = ExtResource("7_rdgk2")
 
 [node name="MaterialManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("3_amftv")
@@ -114,5 +114,3 @@ grow_vertical = 2
 
 [node name="PlayerViewPort" parent="Quadot Arena/SplitScreen" instance=ExtResource("13_tu0mj")]
 layout_mode = 2
-
-[node name="Player" parent="." instance=ExtResource("7_rdgk2")]

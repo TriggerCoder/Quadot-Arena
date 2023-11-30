@@ -83,6 +83,7 @@ public partial class GameManager : Node
 	public const int InvisibleMask = 0;
 	public const uint AllPlayerViewMask = ((1 << Player1ViewLayer) | (1 << Player2ViewLayer) | (1 << Player3ViewLayer) | (1 << Player4ViewLayer) | (1 << Player5ViewLayer) | (1 << Player6ViewLayer) | (1 << Player7ViewLayer) | (1 << Player8ViewLayer));
 
+	//SplitScreen Players
 	public const int MaxLocalPlayers = 8;
 
 	public bool paused = true;
@@ -104,10 +105,10 @@ public partial class GameManager : Node
 
 	public int skipFrames = 5;
 	public Node3D TemporaryObjectsHolder;
-
 	[Export]
-	public PlayerThing[] Players;
+	public PackedScene playerPrefab;
 
+	public List<PlayerThing> Players = new List<PlayerThing>();
 	public enum FuncState
 	{
 		None,
@@ -120,6 +121,19 @@ public partial class GameManager : Node
 		Info,
 		Warning,
 		Error
+	}
+
+	public static class ControllerType
+	{
+		public const int MouseKeyboard = 0;
+		public const int Joy_0 = 1;
+		public const int Joy_1 = 2;
+		public const int Joy_2 = 3;
+		public const int Joy_3 = 4;
+		public const int Joy_4 = 5;
+		public const int Joy_5 = 6;
+		public const int Joy_6 = 7;
+		public const int Joy_7 = 8;
 	}
 
 	private FuncState currentState = FuncState.None;
@@ -177,7 +191,7 @@ public partial class GameManager : Node
 		{
 			if (@event is InputEventMouseButton)
 			{
-				if (Input.IsActionJustPressed("Action_Fire"))
+				if (Input.IsActionJustPressed("Action_Fire_0"))
 				{
 					paused = false;
 					Input.MouseMode = Input.MouseModeEnum.Captured;
@@ -204,7 +218,18 @@ public partial class GameManager : Node
 					skipFrames--;
 					if (skipFrames == 0)
 					{
-						Players[0].InitPlayer();
+						if (Players.Count == 0)
+						{
+							PlayerThing player = (PlayerThing)playerPrefab.Instantiate();
+							player.Name = "Player 0";
+							AddChild(player);
+							player.playerInfo.SetPlayer(Players.Count);
+							player.playerControls.Init(Players.Count);
+							player.InitPlayer();
+							Players.Add(player);
+						}
+
+
 						paused = false;
 						currentState = FuncState.Start;
 					}

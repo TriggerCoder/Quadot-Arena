@@ -27,13 +27,23 @@ public partial class PlayerInfo : Node3D
 	[Export]
 	public PackedScene[] WeaponPrefabs = new PackedScene[9];
 
-	public int viewLayer = (1 << GameManager.Player1ViewLayer);
-	public uint playerLayer = (1 << GameManager.Player1Layer);
-	public uint uiLayer = (1 << GameManager.Player1UIViewLayer);
+	public int viewLayer;
+	public uint playerLayer;
+	public uint uiLayer;
+	public int localPlayerNum;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+	}
+	public void SetPlayer(int playerNum)
+	{
+		localPlayerNum = playerNum;
+		viewLayer = (1 << (GameManager.Player1ViewLayer + localPlayerNum));
+		playerLayer = (uint)(1 << (GameManager.Player1Layer + localPlayerNum));
+		uiLayer = (uint)(1 << (GameManager.Player1UIViewLayer + localPlayerNum));
+		playerCamera.ViewCamera.CullMask = (uint)viewLayer | uiLayer;
+		playerCamera.ThirdPerson.CullMask = (uint)viewLayer;
 	}
 
 	public void Reset()

@@ -267,6 +267,7 @@ public static class Mesher
 
 			portal.normal = normals.Normalized();
 			ThingsManager.AddPortalToMap(portal);
+			mesh.Layers = GameManager.AllPlayerViewMask;
 		}
 
 //		mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
