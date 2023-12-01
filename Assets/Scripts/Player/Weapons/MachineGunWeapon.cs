@@ -107,6 +107,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletMark);
 					BulletMark.Position = collision + (d * .05f);
 					BulletMark.LookAt(collision - normal, Vector3.Up);
+					BulletMark.Rotate((BulletMark.Basis.Y).Normalized(), -Mathf.Pi * .5f);
 					BulletMark.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}
 			}

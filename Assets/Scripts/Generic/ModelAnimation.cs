@@ -14,6 +14,8 @@ public partial class ModelAnimation : Node3D
 	public bool castShadow = true;
 	[Export]
 	public bool useLowCountMultiMesh = true;
+	[Export]
+	public bool alphaFade = false;
 
 	private MD3 md3Model;
 
@@ -24,6 +26,8 @@ public partial class ModelAnimation : Node3D
 	public AnimData textureAnimation;
 	[Export]
 	public DestroyType destroyType;
+	[Export]
+	public float destroyTimer = 0;
 
 	public List<MultiMeshData> multiMeshDataList = new List<MultiMeshData>();
 	private List<int> modelAnim = new List<int>();
@@ -43,6 +47,9 @@ public partial class ModelAnimation : Node3D
 	private float TextureCurrentLerpTime = 0;
 
 	private GameManager.FuncState currentState = GameManager.FuncState.None;
+
+	private Color Modulate = Colors.Black;
+	private float baseTime = 1;
 	public enum DestroyType
 	{
 		NoDestroy,
@@ -77,7 +84,7 @@ public partial class ModelAnimation : Node3D
 		}
 
 		if (md3Model.readySurfaceArray.Count == 0)
-			model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, currentObject, isTransparent, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, useLowCountMultiMesh);
+			model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, currentObject, isTransparent, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, useLowCountMultiMesh, alphaFade);
 		else
 			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, currentObject, ((modelAnimation.fps == 0) && !isTransparent));
 
@@ -112,6 +119,8 @@ public partial class ModelAnimation : Node3D
 		}
 
 		modelCurrentFrame = 0;
+		if (destroyTimer != 0)
+			baseTime = destroyTimer;
 	}
 	void AnimateModel(float deltaTime)
 	{
@@ -122,7 +131,7 @@ public partial class ModelAnimation : Node3D
 			nextFrame = 0;
 		if ((nextFrame == 0) && (destroyType == DestroyType.DestroyAfterModelLastFrame))
 		{
-			QueueFree();
+			Destroy();
 			return;
 		}
 
@@ -162,6 +171,11 @@ public partial class ModelAnimation : Node3D
 			int nextFrame = currentFrame + 1;
 			if (nextFrame >= currentMesh.numSkins)
 				nextFrame = 0;
+			if ((nextFrame == 0) && (destroyType == DestroyType.DestroyAfterTextureLastFrame))
+			{
+				Destroy();
+				return;
+			}
 			if (TextureCurrentLerpTime >= 1.0f)
 			{
 				model.data[currentMesh.meshNum].meshDataTool.SetMaterial(materials[i][nextFrame]);
@@ -201,7 +215,7 @@ public partial class ModelAnimation : Node3D
 				{
 					MultiMeshData multiMeshData = new MultiMeshData();
 					multiMeshData.multiMesh = model.data[i].multiMesh;
-					 Mesher.AddNodeToMultiMeshes(model.data[i].multiMesh, this);
+					Mesher.AddNodeToMultiMeshes(model.data[i].multiMesh, this);
 					multiMeshData.owner = this;
 					multiMeshDataList.Add(multiMeshData);
 				}
@@ -214,7 +228,33 @@ public partial class ModelAnimation : Node3D
 	void UpdateMultiMesh()
 	{
 		for (int i = 0; i < multiMeshDataList.Count; i++)
-			Mesher.UpdateInstanceMultiMesh(multiMeshDataList[i].multiMesh, this);
+		{
+			if (alphaFade)
+				Mesher.UpdateInstanceMultiMesh(multiMeshDataList[i].multiMesh, this, Modulate);
+			else
+				Mesher.UpdateInstanceMultiMesh(multiMeshDataList[i].multiMesh, this);
+		}
+	}
+
+	public void Destroy()
+	{
+		List<MultiMesh> updateMultiMesh = new List<MultiMesh>();
+		for (int i = 0; i < multiMeshDataList.Count; i++)
+		{
+			MultiMesh multiMesh = multiMeshDataList[i].multiMesh;
+			if (Mesher.MultiMeshes.ContainsKey(multiMesh))
+			{
+				List<Node3D> multiMeshList = Mesher.MultiMeshes[multiMesh];
+				if (multiMeshList.Contains(multiMeshDataList[i].owner))
+					multiMeshList.Remove(multiMeshDataList[i].owner);
+			}
+			if (!updateMultiMesh.Contains(multiMesh))
+				updateMultiMesh.Add(multiMesh);
+		}
+		foreach (MultiMesh multiMesh in updateMultiMesh)
+			Mesher.MultiMeshUpdateInstances(multiMesh);
+
+		QueueFree();
 	}
 	public override void _Process(double delta)
 	{
@@ -235,5 +275,16 @@ public partial class ModelAnimation : Node3D
 		AnimateModel(deltaTime);
 		AnimateTexture(deltaTime);
 		UpdateMultiMesh();
+		if (alphaFade)
+		{
+			float alphaValue = Mathf.Lerp(1.0f, 0.0f, destroyTimer / baseTime);
+			Modulate = new Color(alphaValue, alphaValue, alphaValue);
+		}	
+		if (destroyType == DestroyType.DestroyAfterTime)
+		{
+			destroyTimer -= deltaTime;
+			if (destroyTimer < 0)
+				Destroy();
+		}
 	}
 }

@@ -339,7 +339,7 @@ public static class Mesher
 	{
 		return GenerateModelFromMeshes(model, layer, null, false, false, meshToSkin);
 	}
-	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true)
+	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true, bool useColorData = false)
 	{
 		if (model == null || model.meshes.Count == 0)
 		{
@@ -397,6 +397,8 @@ public static class Mesher
 				data.multiMesh = multiMesh;
 				multiMesh.Mesh = data.arrMesh;
 				multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
+				if (useColorData)
+					multiMesh.UseColors = true;
 				if (useLowMultimeshes)
 					multiMesh.InstanceCount = LOW_USE_MULTIMESHES;
 				else
@@ -1047,6 +1049,8 @@ public static class Mesher
 				return;
 
 			multiMeshList.Add(owner);
+			if (multiMesh.UseColors)
+				multiMesh.SetInstanceColor(instanceNum, Colors.Black);
 			multiMesh.SetInstanceTransform(instanceNum, owner.GlobalTransform);
 			multiMesh.VisibleInstanceCount = instanceNum + 1;
 		}
@@ -1060,6 +1064,25 @@ public static class Mesher
 				return;
 
 			int index = multiMeshList.IndexOf(owner);
+			if (owner.IsVisibleInTree())
+				multiMesh.SetInstanceTransform(index, owner.GlobalTransform);
+			else //Move it out of the map
+			{
+				Transform3D min = new Transform3D(owner.Basis, MapLoader.mapMinCoord * 2f);
+				multiMesh.SetInstanceTransform(index, min);
+			}
+		}
+	}
+	public static void UpdateInstanceMultiMesh(MultiMesh multiMesh, Node3D owner, Color color)
+	{
+		if (MultiMeshes.ContainsKey(multiMesh))
+		{
+			List<Node3D> multiMeshList = MultiMeshes[multiMesh];
+			if (!multiMeshList.Contains(owner))
+				return;
+
+			int index = multiMeshList.IndexOf(owner);
+			multiMesh.SetInstanceColor(index, color);
 			if (owner.IsVisibleInTree())
 				multiMesh.SetInstanceTransform(index, owner.GlobalTransform);
 			else //Move it out of the map
