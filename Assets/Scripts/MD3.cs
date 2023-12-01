@@ -22,6 +22,16 @@ public class MultiMeshData
 	public Node3D owner;
 	public MultiMesh multiMesh;
 }
+
+public class SkinMaterialData
+{
+	public string skinName;															// This is the materialName;
+	public MultiMesh commonMesh;													// This is the common processed Godot Mesh
+	public bool useTransparent;														// This is bool for the transparent surface
+	public ShaderMaterial readyMaterials;											// This is the processed Material
+
+}
+
 public class MD3
 {
 	public string name;																// The name of the model
@@ -35,11 +45,9 @@ public class MD3
 	public Dictionary<string, int> tagsIdbyName = new Dictionary<string, int>();	// Get the index of tags list in the model by name
 	public List<List<MD3Tag>> tagsbyId = new List<List<MD3Tag>>();					// The list of tags in the model by Id
 	public List<MD3Mesh> meshes;													// The list of meshes in the model
-	public List<MD3Skin> skins;														// The list of skins in the model
+	public List<MD3Skin> skins;                                                     // The list of skins in the model
 	public List<Godot.Collections.Array> readySurfaceArray = new List<Godot.Collections.Array>();           // This is the processed Godot Mesh
-	public List<MultiMesh> commonMesh = new List<MultiMesh>();           // This is the common processed Godot Mesh
-	public List<bool> useTransparent = new List<bool>();				// This is bool for the transparent surface
-	public List<ShaderMaterial> readyMaterials = new List<ShaderMaterial>();		// This is the processed Material
+	public Dictionary<string, SkinMaterialData> skinMaterials = new Dictionary<string, SkinMaterialData>();	// This store the material data by skinName
 	public static MD3 ImportModel(string modelName, bool forceSkinAlpha)
 	{
 		BinaryReader Md3ModelFile;

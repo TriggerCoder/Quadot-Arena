@@ -1053,8 +1053,6 @@ public partial class PlayerModel : Node3D
 						GameManager.Print("Skin: " + fullName[0]);
 						TextureLoader.AddNewTexture(fullName[0], false);
 					}
-
-
 					meshToSkin.Add(model.meshes[i].name, fullName[0]);
 				}
 			}

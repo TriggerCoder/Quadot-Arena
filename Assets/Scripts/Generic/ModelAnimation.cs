@@ -86,7 +86,7 @@ public partial class ModelAnimation : Node3D
 		if (md3Model.readySurfaceArray.Count == 0)
 			model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, currentObject, isTransparent, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, useLowCountMultiMesh, alphaFade);
 		else
-			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, currentObject, ((modelAnimation.fps == 0) && !isTransparent));
+			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, currentObject, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, isTransparent, useLowCountMultiMesh, alphaFade);
 
 		for (int i = 0; i < md3Model.meshes.Count; i++)
 		{

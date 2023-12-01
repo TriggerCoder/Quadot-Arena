@@ -86,7 +86,7 @@ defaultTransparentMaterial = ExtResource("6_fojn5")
 defaultLightMapMaterial = ExtResource("6_i1nl1")
 defaultTransparentLightMapMaterial = ExtResource("7_wtcy7")
 decalsMapMaterial = ExtResource("9_xagb5")
-_decalsNames = PackedStringArray("gfx/damage/burn_med_mrk")
+_decalsNames = PackedStringArray("gfx/damage/burn_med_mrk", "gfx/damage/bullet_mrk")
 
 [node name="ClusterPVSManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("8_vpkit")
