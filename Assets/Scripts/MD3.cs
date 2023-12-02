@@ -47,7 +47,8 @@ public class MD3
 	public List<MD3Mesh> meshes;													// The list of meshes in the model
 	public List<MD3Skin> skins;                                                     // The list of skins in the model
 	public List<Godot.Collections.Array> readySurfaceArray = new List<Godot.Collections.Array>();           // This is the processed Godot Mesh
-	public Dictionary<string, SkinMaterialData> skinMaterials = new Dictionary<string, SkinMaterialData>();	// This store the material data by skinName
+	public List<SkinMaterialData> readyMaterials = new List<SkinMaterialData>();	// This store the material data
+	public Dictionary<string, int> materialsIdbySkinName = new Dictionary<string, int>();    // Get the index of material list by the skin name
 	public static MD3 ImportModel(string modelName, bool forceSkinAlpha)
 	{
 		BinaryReader Md3ModelFile;

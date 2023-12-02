@@ -406,7 +406,9 @@ public static class Mesher
 				skinMaterial.commonMesh = multiMesh;
 				skinMaterial.useTransparent = currentTransparent;
 				skinMaterial.readyMaterials = material;
-				model.skinMaterials.Add(skinName, skinMaterial);
+				model.materialsIdbySkinName.Add(skinName, model.readyMaterials.Count());
+				model.readyMaterials.Add(skinMaterial);
+
 				if (!MultiMeshes.ContainsKey(multiMesh))
 				{
 					List<Node3D> list = new List<Node3D> ();
@@ -500,7 +502,8 @@ public static class Mesher
 					skinMaterial.commonMesh = multiMesh;
 					skinMaterial.useTransparent = currentTransparent;
 					skinMaterial.readyMaterials = material;
-					model.skinMaterials.Add(meshes[0].skins[0].name, skinMaterial);
+					model.materialsIdbySkinName.Add(meshes[0].skins[0].name, model.readyMaterials.Count());
+					model.readyMaterials.Add(skinMaterial);
 					if (!MultiMeshes.ContainsKey(multiMesh))
 					{
 						List<Node3D> list = new List<Node3D>();
@@ -567,15 +570,23 @@ public static class Mesher
 			}
 
 			md3Model.data[model.meshes[i].meshNum] = new dataMeshes();
+			SkinMaterialData skinMaterial = null;
+			int skinIndex = -1;
 			string skinName;
 			if (meshToSkin == null)
-				skinName = model.meshes[i].skins[0].name;
+			{
+				skinMaterial = model.readyMaterials[i];
+				skinName = skinMaterial.skinName;
+			}
 			else
 				skinName = meshToSkin[model.meshes[i].name];
 
-			SkinMaterialData skinMaterial;
-			if (model.skinMaterials.TryGetValue(skinName, out skinMaterial))
+			
+			if (model.materialsIdbySkinName.TryGetValue(skinName, out skinIndex))
 			{
+				if (skinMaterial == null)
+					skinMaterial = model.readyMaterials[skinIndex];
+
 				bool useTransparent = skinMaterial.useTransparent;
 				md3Model.data[model.meshes[i].meshNum].isTransparent = useTransparent;
 				if (useCommon && !useTransparent)
@@ -606,6 +617,7 @@ public static class Mesher
 			}
 			else
 			{
+				GameManager.Print("NO SKIN FOUND" + skinName);
 				skinMaterial = new SkinMaterialData();
 				skinMaterial.skinName = skinName;
 
@@ -628,7 +640,8 @@ public static class Mesher
 				skinMaterial.commonMesh = multiMesh;
 				skinMaterial.useTransparent = useTransparent;
 				skinMaterial.readyMaterials = material;
-				model.skinMaterials.Add(skinName, skinMaterial);
+				model.materialsIdbySkinName.Add(skinName, model.readyMaterials.Count());
+				model.readyMaterials.Add(skinMaterial);
 				if (!MultiMeshes.ContainsKey(multiMesh))
 				{
 					List<Node3D> list = new List<Node3D>();

@@ -1,16 +1,29 @@
-[gd_scene load_steps=3 format=3 uid="uid://w1e8feydse2o"]
+[gd_scene load_steps=6 format=3 uid="uid://dkn4pgx2b86gy"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="1_5uawi"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/LightFade.cs" id="2_eeopm"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="1_68da5"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="2_c0v3b"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/LightFade.cs" id="3_e4dy8"]
 
-[node name="BurnMark" type="Sprite3D"]
-layers = 255
-sorting_offset = -3000.0
-script = ExtResource("1_5uawi")
-spriteName = "gfx/damage/burn_med_mrk"
-spriteRadius = 20
-destroyTimer = 500.0
+[sub_resource type="Resource" id="Resource_7hy85"]
+script = ExtResource("2_c0v3b")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_ae2ql"]
+script = ExtResource("2_c0v3b")
+fps = 0.0
+
+[node name="BurnMark" type="Node3D"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
+script = ExtResource("1_68da5")
+modelName = "weaphits/boom01"
+shaderName = "GFX/DAMAGE/BURN_MED_MRK"
+castShadow = false
+useLowCountMultiMesh = false
 alphaFade = true
+modelAnimation = SubResource("Resource_7hy85")
+textureAnimation = SubResource("Resource_ae2ql")
+destroyType = 1
+destroyTimer = 200.0
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 layers = 255
@@ -18,5 +31,5 @@ light_color = Color(1, 0.686275, 0, 1)
 light_energy = 5.0
 light_bake_mode = 0
 omni_shadow_mode = 0
-script = ExtResource("2_eeopm")
+script = ExtResource("3_e4dy8")
 destroyTimer = 3.0

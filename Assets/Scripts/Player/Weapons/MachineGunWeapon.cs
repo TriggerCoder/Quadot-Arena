@@ -95,8 +95,11 @@ public partial class MachineGunWeapon : PlayerWeapon
 				Vector3 normal = (Vector3)hit["normal"];
 				Node3D BulletHit = (Node3D)ThingsManager.thingsPrefabs[onDeathSpawn].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletHit);
-				BulletHit.Position = collision + (d * .2f);
-				BulletHit.LookAt(collision + normal, Vector3.Up);
+				BulletHit.Position = collision + (normal * .2f);
+				if (Mathf.IsZeroApprox(normal.Dot(Vector3.Forward)))
+					BulletHit.Rotation = Transform3D.Identity.LookingAt(normal, Vector3.Forward).Basis.GetEuler();
+				else
+					BulletHit.Rotation = Transform3D.Identity.LookingAt(normal, Vector3.Up).Basis.GetEuler();
 				BulletHit.Rotate(BulletHit.Basis.Y, -Mathf.Pi * .5f);
 				BulletHit.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				if (Sounds.Length > 3)
@@ -106,7 +109,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 				{
 					Node3D BulletMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletMark);
-					BulletMark.Position = collision + (d * .05f);
+					BulletMark.Position = collision + (normal * .05f);
 					if (Mathf.IsZeroApprox(normal.Dot(Vector3.Forward)))
 						BulletMark.Rotation = Transform3D.Identity.LookingAt(-normal, Vector3.Forward).Basis.GetEuler();
 					else
