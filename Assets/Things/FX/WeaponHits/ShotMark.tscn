@@ -1,19 +1,19 @@
-[gd_scene load_steps=5 format=3 uid="uid://wtmx7f0u7egf"]
+[gd_scene load_steps=5 format=3 uid="uid://p0c8bbt6juft"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="1_kyg58"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="2_26t01"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="1_v6csq"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="2_bbync"]
 
 [sub_resource type="Resource" id="Resource_7hy85"]
-script = ExtResource("2_26t01")
+script = ExtResource("2_bbync")
 fps = 0.0
 
 [sub_resource type="Resource" id="Resource_ae2ql"]
-script = ExtResource("2_26t01")
+script = ExtResource("2_bbync")
 fps = 0.0
 
-[node name="BulletMark" type="Node3D"]
+[node name="ShotMark" type="Node3D"]
 transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0, 0, 0)
-script = ExtResource("1_kyg58")
+script = ExtResource("1_v6csq")
 modelName = "weaphits/boom01"
 shaderName = "GFX/DAMAGE/BULLET_MRK"
 castShadow = false

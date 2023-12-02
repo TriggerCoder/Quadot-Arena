@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Diagnostics;
+using static Godot.Image;
 
 public partial class MachineGunWeapon : PlayerWeapon
 {
@@ -106,7 +107,10 @@ public partial class MachineGunWeapon : PlayerWeapon
 					Node3D BulletMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletMark);
 					BulletMark.Position = collision + (d * .05f);
-					BulletMark.LookAt(collision - normal, Vector3.Up);
+					if (Mathf.IsZeroApprox(normal.Dot(Vector3.Forward)))
+						BulletMark.Rotation = Transform3D.Identity.LookingAt(-normal, Vector3.Forward).Basis.GetEuler();
+					else
+						BulletMark.Rotation = Transform3D.Identity.LookingAt(-normal, Vector3.Up).Basis.GetEuler();
 					BulletMark.Rotate((BulletMark.Basis.Y).Normalized(), -Mathf.Pi * .5f);
 					BulletMark.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}
