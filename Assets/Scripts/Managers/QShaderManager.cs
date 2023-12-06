@@ -42,6 +42,8 @@ public static class QShaderManager
 		string GSHeader = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, ";
 		string GSUniforms = "";
 		string GSVertexH = "void vertex()\n{ \n";
+		string GSVaryings = "";
+		string GSVertexUvs = "";
 		string GSFragmentH = "void fragment()\n{ \n";
 		string GSFragmentUvs = "";
 		string GSFragmentTcMod = "";
@@ -136,6 +138,7 @@ public static class QShaderManager
 				}
 			}
 
+			GSVertexUvs += GetUVGen(qShader, currentStage, ref GSVaryings);
 			GSFragmentUvs += GetTcGen(qShader, currentStage, ref lightmapStage);
 			GSFragmentTcMod += GetTcMod(qShader, currentStage, ref helperRotate);
 			
@@ -276,6 +279,7 @@ public static class QShaderManager
 
 		code += GSHeader;
 		code += GSUniforms;
+		code += GSVaryings;
 		code += "global uniform float MsTime;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
 		if (helperRotate)
@@ -291,6 +295,11 @@ public static class QShaderManager
 		{
 			code += GSVertexH;
 			code += "VERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n}\n";
+		}
+		else
+		{
+			code += GSVertexH;
+			code += GSVertexUvs + "}\n";
 		}
 		code += GSFragmentH;
 		code += GSFragmentUvs;
@@ -392,7 +401,20 @@ public static class QShaderManager
 		return shaderMaterial;
 	}
 
-
+	public static string GetUVGen(QShaderData qShader, int currentStage, ref string GSVaryings)
+	{
+		string UVGen = "";
+		if (qShader.qShaderStages[currentStage].environment)
+		{
+			GSVaryings += "varying vec2 UV_" + currentStage + ";\n";
+			UVGen = "\tvec3 viewer_" + currentStage + " = normalize(CAMERA_POSITION_WORLD - (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz);\n";
+			UVGen += "\tvec3 normal_" + currentStage + " = normalize(MODEL_NORMAL_MATRIX * NORMAL);\n";
+			UVGen += "\tvec3 reflect_" + currentStage + " = reflect(-viewer_" + currentStage + ", normal_" + currentStage + ");\n";
+			UVGen += "\tUV_" + currentStage + " = reflect_" + currentStage + ".yz;\n";
+		}
+		return UVGen;
+	}
+		
 	public static string GetTcGen(QShaderData qShader, int currentStage, ref int lightmapStage)
 	{
 		string TcGen = "";
@@ -408,7 +430,11 @@ public static class QShaderManager
 		else
 		{
 			if (qShader.qShaderStages[currentStage].environment)
-				TcGen = "\tvec2 uv_" + currentStage + " = ((NORMAL * (2.0 * dot(VIEW,NORMAL))) - VIEW).yz * UV;\n";
+			{
+				TcGen += "\tvec2 uv_" + currentStage + ";\n";
+				TcGen += "\tuv_" + currentStage + ".x = 0.5 + UV_" + currentStage + ".y * 0.5;\n";
+				TcGen += "\tuv_" + currentStage + ".y = 0.5 - UV_" + currentStage + ".x * 0.5;\n";
+			}
 			else if (qShader.qShaderStages[currentStage].map != null)
 			{
 				if (qShader.qShaderStages[currentStage].map[0].Contains("$LIGHTMAP"))
