@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 public partial class ModelAnimation : Node3D
 {
@@ -81,6 +82,8 @@ public partial class ModelAnimation : Node3D
 			{
 				{ md3Model.meshes[0].name, shaderName }
 			};
+			if (!TextureLoader.HasTexture(shaderName))
+				TextureLoader.AddNewTexture(shaderName, isTransparent);
 		}
 
 		if (md3Model.readySurfaceArray.Count == 0)

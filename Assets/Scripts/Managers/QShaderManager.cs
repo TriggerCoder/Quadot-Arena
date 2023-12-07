@@ -351,7 +351,7 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (upperName.Contains("PORTAL_SFX"))
+		if (upperName.Contains("HEALTH/YELLOW_SPHERE"))
 			GameManager.Print(code);
 
 		Shader shader = new Shader();
@@ -407,9 +407,9 @@ public static class QShaderManager
 		if (qShader.qShaderStages[currentStage].environment)
 		{
 			GSVaryings += "varying vec2 UV_" + currentStage + ";\n";
-			UVGen = "\tvec3 viewer_" + currentStage + " = normalize(CAMERA_POSITION_WORLD - (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz);\n";
+			UVGen = "\tvec3 viewer_" + currentStage + " = normalize((MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz - CAMERA_POSITION_WORLD);\n";
 			UVGen += "\tvec3 normal_" + currentStage + " = normalize(MODEL_NORMAL_MATRIX * NORMAL);\n";
-			UVGen += "\tvec3 reflect_" + currentStage + " = reflect(-viewer_" + currentStage + ", normal_" + currentStage + ");\n";
+			UVGen += "\tvec3 reflect_" + currentStage + " = reflect(viewer_" + currentStage + ", normal_" + currentStage + ");\n";
 			UVGen += "\tUV_" + currentStage + " = reflect_" + currentStage + ".yz;\n";
 		}
 		return UVGen;

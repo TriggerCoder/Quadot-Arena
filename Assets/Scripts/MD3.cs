@@ -353,8 +353,8 @@ public class MD3Mesh
 			byte n1 = Md3ModelFile.ReadByte();
 			byte n2 = Md3ModelFile.ReadByte();
 
-			float lat = n1 * (6.28f) / 255.0f;
-			float lng = n2 * (6.28f) / 255.0f;
+			float lng = n1 * (Mathf.Pi) / 128.0f;
+			float lat = n2 * (Mathf.Pi) / 128.0f;
 
 			Vector3	normal = new Vector3(- Mathf.Cos(lat) * Mathf.Sin(lng), Mathf.Cos(lng), Mathf.Sin(lat) * Mathf.Sin(lng));
 			Vector3 position = new Vector3(-x, z, y);
