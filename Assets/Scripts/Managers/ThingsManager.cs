@@ -487,13 +487,13 @@ public partial class ThingsManager : Node
 					nodeAnim.rotEnable = true;
 					strWord = entity.entityData["model2"];
 					if (!string.IsNullOrEmpty(strWord))
-					{						
-						ModelAnimation modelAnim = new ModelAnimation();
-						thingObject.AddChild(modelAnim);
-						modelAnim.modelName = strWord.Split('.')[0].Split("models/")[1];
-						modelAnim.modelAnimation = new AnimData();
-						modelAnim.textureAnimation = new AnimData();
-						modelAnim.Init();
+					{
+						ModelController modelController = new ModelController();
+						thingObject.AddChild(modelController);
+						modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
+						modelController.modelAnimation = new AnimData();
+						modelController.textureAnimation = new AnimData();
+						modelController.Init();
 					}
 					nodeAnim.Init();
 				}
@@ -650,7 +650,7 @@ public partial class ThingsManager : Node
 						{
 							audioStream.Stream = SoundManager.LoadSound(audioFile,true);
 							if ((spawnflags & 1) != 0)
-							audioStream.Play();
+								audioStream.Play();
 						}
 						else
 						{

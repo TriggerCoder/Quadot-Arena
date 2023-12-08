@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://ca1g7ktte6e7h"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="1_ylrnw"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="1_ylrnw"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="2_20bvr"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/LightFade.cs" id="3_ways6"]
 

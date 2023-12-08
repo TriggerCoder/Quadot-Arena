@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_eht21"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_80sla"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="2_y0rb5"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_y0rb5"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_64lx6"]
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="3_wfhkk"]
 

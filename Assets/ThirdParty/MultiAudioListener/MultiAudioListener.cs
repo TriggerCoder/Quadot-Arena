@@ -90,10 +90,4 @@ public partial class MultiAudioListener : Node3D
 	{
 		Main = this;
 	}
-
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta)
-	{
-
-	}
 }

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Projectile.cs" id="1_vfo3e"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_741w6"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="2_t21kj"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_t21kj"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_v34hp"]
 [ext_resource type="PackedScene" uid="uid://dbqx4olek5uvj" path="res://Assets/Things/FX/Particles/Smoke.tscn" id="4_8oprf"]
 

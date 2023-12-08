@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class MultiAudioStream : Node3D
 {
@@ -343,7 +344,7 @@ public partial class MultiAudioStream : Node3D
 
 	private void CreateSubAudioStream(VirtualAudioListener virtualAudioListener, ref bool hardWareChannelsLeft)
 	{
-		var audioStream = CreateAudioStream("Sub Audio Stream " + virtualAudioListener.Num, ref hardWareChannelsLeft);
+		AudioStreamPlayer3D audioStream = CreateAudioStream("Sub Audio Stream " + virtualAudioListener.Num, ref hardWareChannelsLeft);
 		_subAudioStreams.Add(virtualAudioListener, audioStream);
 		audioStream.VolumeDb = VolumeDb * virtualAudioListener.Volume;
 
@@ -380,11 +381,17 @@ public partial class MultiAudioStream : Node3D
 
 		if (_Playing && hardwareChannelsLeft)
 		{
-			audioStream.Play();
+			float position = 0f;
+
+			//Play from position of first audioStream
+			if (_subAudioStreams.Count > 0)
+				position = _subAudioStreams.First().Value.GetPlaybackPosition();
+
+			audioStream.Play(position);
 			//If this sound gets culled all following will be too
 			if (!audioStream.Playing)
 			{
-				hardwareChannelsLeft = false;
+					hardwareChannelsLeft = false;
 			}
 		}
 		//All audio doppler effect should be  zero
@@ -456,8 +463,12 @@ public partial class MultiAudioStream : Node3D
 				isCurrentlyPlaying |= subAudioStream.Value.Playing;
 			}
 
-			if (!isCurrentlyPlaying)
-				Stop();
+			//is there anyone listening?
+			if (MultiAudioListener.ROVirtualAudioListeners.Count > 0)
+			{
+				if (!isCurrentlyPlaying)
+					Stop();
+			}
 		}
 	}
 	public override void _PhysicsProcess(double delta)

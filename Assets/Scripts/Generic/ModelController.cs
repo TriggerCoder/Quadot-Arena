@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Linq;
 
-public partial class ModelAnimation : Node3D
+public partial class ModelController : Node3D
 {
 	[Export]
 	public string modelName = "";

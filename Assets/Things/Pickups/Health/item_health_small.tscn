@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://bgc0fdktol7v8"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_us0o8"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="2_wlt3h"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_rrjx0"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_sk46p"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="4_b6d7h"]
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_451k2"]
@@ -22,22 +22,20 @@ respawnTime = 30.0
 thingType = 2
 
 [node name="Sphere" type="Node3D" parent="."]
-script = ExtResource("2_wlt3h")
+script = ExtResource("2_rrjx0")
 modelName = "powerups/health/small_sphere"
 modelAnimation = SubResource("Resource_h1upd")
 textureAnimation = SubResource("Resource_sejmd")
 
 [node name="NodeAnimation" type="Node3D" parent="Sphere"]
 script = ExtResource("4_b6d7h")
-rotEnable = true
-rotFPS = 20.0
-rotClockwise = true
+rotClockwise = false
 posEnable = true
 posAmplitude = 0.1
 posFPS = 5.0
 
 [node name="Cross" type="Node3D" parent="."]
-script = ExtResource("2_wlt3h")
+script = ExtResource("2_rrjx0")
 modelName = "powerups/health/small_cross"
 modelAnimation = SubResource("Resource_h1upd")
 textureAnimation = SubResource("Resource_sejmd")
@@ -46,7 +44,6 @@ textureAnimation = SubResource("Resource_sejmd")
 script = ExtResource("4_b6d7h")
 rotEnable = true
 rotFPS = 100.0
-rotClockwise = true
 posEnable = true
 posAmplitude = 0.1
 posFPS = 5.0

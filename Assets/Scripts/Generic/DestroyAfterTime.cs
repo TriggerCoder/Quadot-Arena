@@ -7,7 +7,7 @@ public partial class DestroyAfterTime : Node
 	public float destroyTimer = 10;
 
 	private Node parent;
-	private List<ModelAnimation> modelList = new List<ModelAnimation>();
+	private List<ModelController> modelList = new List<ModelController>();
 	private GameManager.FuncState currentState = GameManager.FuncState.None;
 	public override void _Ready()
 	{
@@ -19,7 +19,7 @@ public partial class DestroyAfterTime : Node
 		var Childrens = GameManager.GetAllChildrens(parent);
 		foreach (var child in Childrens)
 		{
-			if (child is ModelAnimation mesh)
+			if (child is ModelController mesh)
 				modelList.Add(mesh);
 		}
 	}
@@ -53,16 +53,16 @@ public partial class DestroyAfterTime : Node
 	public void Destroy()
 	{
 		List<MultiMesh> updateMultiMesh = new List<MultiMesh>();
-		foreach(ModelAnimation modelAnimation in modelList)
+		foreach(ModelController modelController in modelList)
 		{
-			for (int i = 0; i < modelAnimation.multiMeshDataList.Count; i++)
+			for (int i = 0; i < modelController.multiMeshDataList.Count; i++)
 			{
-				MultiMesh multiMesh = modelAnimation.multiMeshDataList[i].multiMesh;
+				MultiMesh multiMesh = modelController.multiMeshDataList[i].multiMesh;
 				if (Mesher.MultiMeshes.ContainsKey(multiMesh))
 				{
 					List<Node3D> multiMeshList = Mesher.MultiMeshes[multiMesh];
-					if (multiMeshList.Contains(modelAnimation.multiMeshDataList[i].owner))
-						multiMeshList.Remove(modelAnimation.multiMeshDataList[i].owner);
+					if (multiMeshList.Contains(modelController.multiMeshDataList[i].owner))
+						multiMeshList.Remove(modelController.multiMeshDataList[i].owner);
 				}
 				if (!updateMultiMesh.Contains(multiMesh))
 					updateMultiMesh.Add(multiMesh);

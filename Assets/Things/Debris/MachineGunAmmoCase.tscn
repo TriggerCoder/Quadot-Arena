@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://vbdxg44bm8su"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/DestroyAfterTime.cs" id="1_3ij0q"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelAnimation.cs" id="1_ntifi"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="1_ntifi"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="2_q37bc"]
 
 [sub_resource type="Resource" id="Resource_3dopq"]
