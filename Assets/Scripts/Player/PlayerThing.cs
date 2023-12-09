@@ -15,8 +15,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	[Export]
 	public MultiAudioStream audioStream;
 
-	public string modelName = "crash";
-	public string skinName = "cc-crash_blue";
+	public string modelName = "sarge";
+	public string skinName = "default";
 
 	[Export]
 	public Node3D player;
@@ -49,7 +49,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public override void _Ready()
 	{
 		playerControls.feetRay = new SeparationRayShape3D();
-		playerControls.feetRay.Length = .992f;
+		playerControls.feetRay.Length = .8f;
 		Feets.Shape = playerControls.feetRay;
 		currentState = GameManager.FuncState.Ready;
 	}

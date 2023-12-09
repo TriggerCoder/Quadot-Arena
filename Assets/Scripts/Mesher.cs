@@ -83,7 +83,9 @@ public static class Mesher
 		}
 
 		BezierMesh.FinalizeBezierMesh(arrMesh);
+		material.Set(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity);
 		arrMesh.SurfaceSetMaterial(0, material);
+
 		holder.AddChild(mesh);
 		if (addPVS)
 			mesh.Layers = GameManager.InvisibleMask;
@@ -91,7 +93,7 @@ public static class Mesher
 			mesh.Layers = GameManager.AllPlayerViewMask;
 		mesh.Name = Name;
 		mesh.Mesh = arrMesh;
-//		mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+		mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 
 		//PVS only add on Static Geometry, as it has BSP Nodes
 		if (addPVS)
@@ -255,6 +257,10 @@ public static class Mesher
 			mesh.Layers = GameManager.AllPlayerViewMask;
 		mesh.Name = Name;
 		mesh.Mesh = arrMesh;
+		mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+
+		if (!forceSkinAlpha && !hasPortal)
+			material.Set(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity);
 
 		if (hasPortal)
 		{
@@ -270,7 +276,6 @@ public static class Mesher
 			mesh.Layers = GameManager.AllPlayerViewMask;
 		}
 
-//		mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 		//PVS only add on Static Geometry, as it has BSP Nodes
 		else if (addPVS)
 			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(mesh, surfaces);
@@ -337,9 +342,9 @@ public static class Mesher
 	}
 	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask)
 	{
-		return GenerateModelFromMeshes(model, layer, null, false, false, meshToSkin);
+		return GenerateModelFromMeshes(model, layer, true, true, null, false, false, meshToSkin);
 	}
-	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true, bool useColorData = false)
+	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true, bool useColorData = false)
 	{
 		if (model == null || model.meshes.Count == 0)
 		{
@@ -387,8 +392,8 @@ public static class Mesher
 					skinName = meshToSkin[modelMesh.name];
 				bool currentTransparent = forceSkinAlpha;
 				ShaderMaterial material = MaterialManager.GetMaterials(skinName, -1, ref currentTransparent);
-				SkinMaterialData skinMaterial = new SkinMaterialData();
-				skinMaterial.skinName = skinName;
+				if (!currentTransparent && receiveShadows)
+					material.Set(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * .5f);
 				data.arrMesh.SurfaceSetMaterial(0, material);
 				data.meshDataTool.CreateFromSurface(data.arrMesh, 0);
 				md3Model.data[modelMesh.meshNum] = data;
@@ -403,11 +408,17 @@ public static class Mesher
 					multiMesh.InstanceCount = LOW_USE_MULTIMESHES;
 				else
 					multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
-				skinMaterial.commonMesh = multiMesh;
-				skinMaterial.useTransparent = currentTransparent;
-				skinMaterial.readyMaterials = material;
-				model.materialsIdbySkinName.Add(skinName, model.readyMaterials.Count());
-				model.readyMaterials.Add(skinMaterial);
+
+				if (!model.materialsIdbySkinName.ContainsKey(skinName))
+				{
+					SkinMaterialData skinMaterial = new SkinMaterialData();
+					skinMaterial.skinName = skinName;
+					skinMaterial.commonMesh = multiMesh;
+					skinMaterial.useTransparent = currentTransparent;
+					skinMaterial.readyMaterials = material;
+					model.materialsIdbySkinName.Add(skinName, model.readyMaterials.Count());
+					model.readyMaterials.Add(skinMaterial);
+				}
 
 				if (!MultiMeshes.ContainsKey(multiMesh))
 				{
@@ -421,6 +432,8 @@ public static class Mesher
 					mesh.Name = modelMesh.name;
 					mesh.Multimesh = multiMesh;
 					mesh.Layers = layer;
+					if (!castShadows)
+						mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
 					MultiMeshesInstances.Add(multiMesh, mesh);
@@ -432,6 +445,8 @@ public static class Mesher
 					mesh.Name = modelMesh.name;
 					mesh.Mesh = data.arrMesh;
 					mesh.Layers = layer;
+					if (!castShadows)
+						mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					modelObject.AddChild(mesh);
 					GameManager.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name);
@@ -481,8 +496,9 @@ public static class Mesher
 					}
 					bool currentTransparent = forceSkinAlpha;
 					ShaderMaterial material = MaterialManager.GetMaterials(meshes[0].skins[0].name, -1, ref currentTransparent);
-					SkinMaterialData skinMaterial = new SkinMaterialData();
-					skinMaterial.skinName = meshes[0].skins[0].name;
+					if (!currentTransparent && receiveShadows)
+						material.Set(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * .5f);
+
 					for (int i = 0; i < meshes.Length; i++)
 						md3Model.data[meshes[i].meshNum] = data;
 
@@ -499,11 +515,18 @@ public static class Mesher
 						multiMesh.InstanceCount = LOW_USE_MULTIMESHES;
 					else
 						multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
-					skinMaterial.commonMesh = multiMesh;
-					skinMaterial.useTransparent = currentTransparent;
-					skinMaterial.readyMaterials = material;
-					model.materialsIdbySkinName.Add(meshes[0].skins[0].name, model.readyMaterials.Count());
-					model.readyMaterials.Add(skinMaterial);
+
+					if (!model.materialsIdbySkinName.ContainsKey(meshes[0].skins[0].name))
+					{
+						SkinMaterialData skinMaterial = new SkinMaterialData();
+						skinMaterial.skinName = meshes[0].skins[0].name;
+						skinMaterial.commonMesh = multiMesh;
+						skinMaterial.useTransparent = currentTransparent;
+						skinMaterial.readyMaterials = material;
+						model.materialsIdbySkinName.Add(meshes[0].skins[0].name, model.readyMaterials.Count());
+						model.readyMaterials.Add(skinMaterial);
+					}
+
 					if (!MultiMeshes.ContainsKey(multiMesh))
 					{
 						List<Node3D> list = new List<Node3D>();
@@ -516,6 +539,8 @@ public static class Mesher
 						mesh.Name = Name;
 						mesh.Multimesh = multiMesh;
 						mesh.Layers = layer;
+						if (!castShadows)
+							mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 						GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
 						MultiMeshesInstances.Add(multiMesh, mesh);
@@ -527,6 +552,8 @@ public static class Mesher
 						mesh.Name = Name;
 						mesh.Mesh = data.arrMesh;
 						mesh.Layers = layer;
+						if (!castShadows)
+							mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 						modelObject.AddChild(mesh);
 						GameManager.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name + " skin group name " + meshes[0].skins[0].name);
@@ -540,10 +567,10 @@ public static class Mesher
 	
 	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask)
 	{
-		return FillModelFromProcessedData(model, layer, null, false, meshToSkin);
+		return FillModelFromProcessedData(model, layer, true, null, false, meshToSkin);
 	}
 
-	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, Node3D ownerObject = null, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool forceSkinAlpha = false, bool useLowMultimeshes = true, bool useColorData = false)
+	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, bool castShadows, Node3D ownerObject = null, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool forceSkinAlpha = false, bool useLowMultimeshes = true, bool useColorData = false)
 	{
 		if (ownerObject == null)
 		{
@@ -597,6 +624,8 @@ public static class Mesher
 						MultiMeshInstance3D mesh = new MultiMeshInstance3D();
 						mesh.Multimesh = skinMaterial.commonMesh;
 						mesh.Layers = layer;
+						if (!castShadows)
+							mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 						GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
 						MultiMeshesInstances.Add(skinMaterial.commonMesh, mesh);
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
@@ -611,6 +640,8 @@ public static class Mesher
 					md3Model.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(md3Model.data[model.meshes[i].meshNum].arrMesh, 0);
 					mesh.Mesh = md3Model.data[model.meshes[i].meshNum].arrMesh;
 					mesh.Layers = layer;
+					if (!castShadows)
+						mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 					modelObject.AddChild(mesh);
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 				}
@@ -657,6 +688,8 @@ public static class Mesher
 						MultiMeshInstance3D mesh = new MultiMeshInstance3D();
 						mesh.Multimesh = skinMaterial.commonMesh;
 						mesh.Layers = layer;
+						if (!castShadows)
+							mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 						GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
 						MultiMeshesInstances.Add(skinMaterial.commonMesh, mesh);
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
@@ -670,6 +703,8 @@ public static class Mesher
 					md3Model.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(md3Model.data[model.meshes[i].meshNum].arrMesh, 0);
 					mesh.Mesh = md3Model.data[model.meshes[i].meshNum].arrMesh;
 					mesh.Layers = layer;
+					if (!castShadows)
+						mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 					modelObject.AddChild(mesh);
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 				}

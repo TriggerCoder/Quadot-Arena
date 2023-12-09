@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_fb5qb"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_mtcb7"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_esf6u"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_p5hmv"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="4_6rqed"]
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_1qprf"]
 
@@ -25,15 +25,16 @@ thingType = 2
 script = ExtResource("2_mtcb7")
 rotEnable = true
 rotFPS = 40.0
-rotClockwise = true
 posEnable = true
 posAmplitude = 0.1
 posFPS = 5.0
 
 [node name="Double Barrel Shotgun" type="Node3D" parent="."]
-transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
-script = ExtResource("3_esf6u")
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0.3, 0, 0)
+script = ExtResource("3_p5hmv")
 modelName = "weapons2/shotgun/shotgun"
+receiveShadows = true
+castShadows = true
 modelAnimation = SubResource("Resource_h1upd")
 textureAnimation = SubResource("Resource_sejmd")
 

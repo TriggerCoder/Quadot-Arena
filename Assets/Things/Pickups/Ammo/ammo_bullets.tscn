@@ -25,7 +25,6 @@ thingType = 2
 script = ExtResource("2_80sla")
 rotEnable = true
 rotFPS = 40.0
-rotClockwise = true
 posEnable = true
 posAmplitude = 0.1
 posFPS = 5.0
@@ -33,6 +32,7 @@ posFPS = 5.0
 [node name="Bullets" type="Node3D" parent="."]
 script = ExtResource("2_y0rb5")
 modelName = "powerups/ammo/machinegunam"
+castShadows = true
 modelAnimation = SubResource("Resource_h1upd")
 textureAnimation = SubResource("Resource_sejmd")
 

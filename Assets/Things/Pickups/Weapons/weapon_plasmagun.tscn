@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_ogf65"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_7y7o2"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_s3yqu"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_ww77a"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="4_phq23"]
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_fbpmj"]
 
@@ -25,15 +25,15 @@ thingType = 2
 script = ExtResource("2_7y7o2")
 rotEnable = true
 rotFPS = 40.0
-rotClockwise = true
 posEnable = true
 posAmplitude = 0.1
 posFPS = 5.0
 
 [node name="Plasmagun" type="Node3D" parent="."]
-transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
-script = ExtResource("3_s3yqu")
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0.25, 0, 0)
+script = ExtResource("3_ww77a")
 modelName = "weapons2/plasma/plasma"
+castShadows = true
 modelAnimation = SubResource("Resource_h1upd")
 textureAnimation = SubResource("Resource_sejmd")
 

@@ -5,6 +5,7 @@
 [node name="PlasmaExplosion" type="Sprite3D"]
 layers = 255
 sorting_offset = -3000.0
+cast_shadow = 0
 billboard = 1
 texture_filter = 1
 render_priority = -128

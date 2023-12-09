@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_tdkgm"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_npw1n"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_murql"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_qwfjr"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="4_vt7qi"]
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_csovl"]
 
@@ -25,15 +25,16 @@ thingType = 2
 script = ExtResource("2_npw1n")
 rotEnable = true
 rotFPS = 40.0
-rotClockwise = true
 posEnable = true
 posAmplitude = 0.1
 posFPS = 5.0
 
 [node name="Rocket Launcher" type="Node3D" parent="."]
-transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
-script = ExtResource("3_murql")
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0.5, 0, 0)
+script = ExtResource("3_qwfjr")
 modelName = "weapons2/rocketl/rocketl"
+receiveShadows = true
+castShadows = true
 modelAnimation = SubResource("Resource_h1upd")
 textureAnimation = SubResource("Resource_sejmd")
 

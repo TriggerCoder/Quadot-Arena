@@ -40,7 +40,8 @@ public static class QShaderManager
 	{
 		string code = "";
 		string GSHeader = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, ";
-		string GSUniforms = "";
+		string GSUniforms = "uniform float ShadowIntensity : hint_range(0, 1) = 0.0;\n";
+		string GSLigtH = "void light()\n{ \n";
 		string GSVertexH = "void vertex()\n{ \n";
 		string GSVaryings = "";
 		string GSVertexUvs = "";
@@ -301,6 +302,12 @@ public static class QShaderManager
 			code += GSVertexH;
 			code += GSVertexUvs + "}\n";
 		}
+
+		{
+			code += GSLigtH;
+			code += "\tif (LIGHT_IS_DIRECTIONAL)\n\t\tDIFFUSE_LIGHT += ShadowIntensity * vec3(ATTENUATION - 1.0);\n\telse\n\t\tDIFFUSE_LIGHT += clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION * LIGHT_COLOR;\n}\n";
+		}
+
 		code += GSFragmentH;
 		code += GSFragmentUvs;
 		code += "\tfloat Time = (MsTime - OffSetTime);\n";

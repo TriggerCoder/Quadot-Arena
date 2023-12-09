@@ -16,7 +16,6 @@ script = ExtResource("1_0oine")
 modelName = "weaphits/bullet"
 shaderName = "bulletExplosion"
 isTransparent = true
-castShadow = false
 modelAnimation = SubResource("Resource_trrf8")
 textureAnimation = SubResource("Resource_7d5sb")
 destroyType = 2

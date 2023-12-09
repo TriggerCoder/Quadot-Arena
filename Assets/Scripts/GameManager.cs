@@ -15,6 +15,8 @@ public partial class GameManager : Node
 	[Export]
 	public float mixBrightness = 0.25f;             // Range from 0 to 1, .25f Is the nicest
 	[Export]
+	public float shadowIntensity = 0.5f;
+	[Export]
 	public PlayerViewPort playerViewPort;
 
 	public static GameManager Instance;

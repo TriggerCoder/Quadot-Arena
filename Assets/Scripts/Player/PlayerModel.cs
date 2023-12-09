@@ -342,7 +342,7 @@ public partial class PlayerModel : Node3D
 //				if ((_enableOffset) || (ownerDead))
 				Position = lowerTorsoOrigin;
 //				else
-//					playerTransform.localPosition = Vector3.zero;
+//					Position = Vector3.Zero;
 
 				currentOffset = upperTorsoRotation * upperTorsoOrigin;
 				currentOffset -= lowerTorsoOrigin;
@@ -645,9 +645,9 @@ public partial class PlayerModel : Node3D
 			weapon = newWeapon;
 
 		if (weapon.readySurfaceArray.Count == 0)
-			weaponModel = Mesher.GenerateModelFromMeshes(weapon, currentLayer, null, false, false);
+			weaponModel = Mesher.GenerateModelFromMeshes(weapon, currentLayer, true, true, null, false, false);
 		else
-			weaponModel = Mesher.FillModelFromProcessedData(weapon, currentLayer, null, false);
+			weaponModel = Mesher.FillModelFromProcessedData(weapon, currentLayer, true, null, false);
 		weaponModel.node.Name = "weapon";
 		weaponNode.AddChild(weaponModel.node);
 
@@ -657,9 +657,9 @@ public partial class PlayerModel : Node3D
 			barrel = new Node3D();
 			barrel.Name = "barrel_weapon";
 			if (newWeapon.readySurfaceArray.Count == 0)
-				Mesher.GenerateModelFromMeshes(newWeapon, currentLayer, barrel, false, false);
+				Mesher.GenerateModelFromMeshes(newWeapon, currentLayer, true, true, barrel, false, false);
 			else
-				Mesher.FillModelFromProcessedData(newWeapon, currentLayer, barrel, false);
+				Mesher.FillModelFromProcessedData(newWeapon, currentLayer, true, barrel, false);
 			weaponModel.node.AddChild(barrel);
 
 			if (weapon.tagsIdbyName.TryGetValue("tag_barrel", out int tagId))
@@ -681,9 +681,9 @@ public partial class PlayerModel : Node3D
 				return;
 
 			if (muzzle.readySurfaceArray.Count == 0)
-				Mesher.GenerateModelFromMeshes(muzzle, currentLayer, muzzleFlash, true, false);
+				Mesher.GenerateModelFromMeshes(muzzle, currentLayer, false, false, muzzleFlash, true, false);
 			else
-				Mesher.FillModelFromProcessedData(muzzle, currentLayer, muzzleFlash, false);
+				Mesher.FillModelFromProcessedData(muzzle, currentLayer, false, muzzleFlash, false);
 
 			//Muzzle Flash never cast shadow
 //			for (int i = 0; i < muzzle.readyMeshes.Count; i++)
@@ -1053,7 +1053,8 @@ public partial class PlayerModel : Node3D
 						GameManager.Print("Skin: " + fullName[0]);
 						TextureLoader.AddNewTexture(fullName[0], false);
 					}
-					meshToSkin.Add(model.meshes[i].name, fullName[0]);
+					if (!meshToSkin.ContainsKey(model.meshes[i].name))
+						meshToSkin.Add(model.meshes[i].name, fullName[0]);
 				}
 			}
 		}

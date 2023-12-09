@@ -12,7 +12,9 @@ public partial class ModelController : Node3D
 	[Export]
 	public bool isTransparent = false;
 	[Export]
-	public bool castShadow = true;
+	public bool receiveShadows = false;
+	[Export]
+	public bool castShadows = false;
 	[Export]
 	public bool useLowCountMultiMesh = true;
 	[Export]
@@ -87,9 +89,9 @@ public partial class ModelController : Node3D
 		}
 
 		if (md3Model.readySurfaceArray.Count == 0)
-			model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, currentObject, isTransparent, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, useLowCountMultiMesh, alphaFade);
+			model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, receiveShadows, castShadows, currentObject, isTransparent, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, useLowCountMultiMesh, alphaFade);
 		else
-			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, currentObject, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, isTransparent, useLowCountMultiMesh, alphaFade);
+			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, castShadows, currentObject, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, isTransparent, useLowCountMultiMesh, alphaFade);
 
 		for (int i = 0; i < md3Model.meshes.Count; i++)
 		{

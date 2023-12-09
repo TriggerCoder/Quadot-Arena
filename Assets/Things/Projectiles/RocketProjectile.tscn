@@ -36,7 +36,7 @@ audioStream = NodePath("MultiAudioStream")
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 script = ExtResource("2_t21kj")
 modelName = "ammo/rocket/rocket"
-castShadow = false
+castShadows = true
 modelAnimation = SubResource("Resource_drxc8")
 textureAnimation = SubResource("Resource_ry408")
 

@@ -25,7 +25,6 @@ thingType = 2
 script = ExtResource("2_hmbcy")
 rotEnable = true
 rotFPS = 20.0
-rotClockwise = true
 posEnable = true
 posAmplitude = 0.1
 posFPS = 5.0
@@ -33,6 +32,7 @@ posFPS = 5.0
 [node name="Combar Armor" type="Node3D" parent="."]
 script = ExtResource("3_trkqv")
 modelName = "powerups/armor/armor_yel"
+castShadows = true
 modelAnimation = SubResource("Resource_h1upd")
 textureAnimation = SubResource("Resource_sejmd")
 

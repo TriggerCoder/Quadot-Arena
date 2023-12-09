@@ -76,7 +76,7 @@ environment = SubResource("Environment_rcj1l")
 [node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "playerViewPort")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
-autoloadMap = "q3tourney2"
+autoloadMap = "q3dm7"
 tessellations = 10
 playerViewPort = NodePath("SplitScreen/PlayerViewPort")
 playerPrefab = ExtResource("7_rdgk2")
@@ -118,3 +118,10 @@ grow_vertical = 2
 
 [node name="PlayerViewPort" parent="Quadot Arena/SplitScreen" instance=ExtResource("13_tu0mj")]
 layout_mode = 2
+
+[node name="SunLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.642788, -0.492404, 0.586824, 0, 0.766044, 0.642788, -0.766044, 0.413176, -0.492404, 0, 0, 0)
+layers = 255
+light_color = Color(0, 0, 0, 1)
+shadow_enabled = true
+directional_shadow_mode = 1

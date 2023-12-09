@@ -1,4 +1,4 @@
-[gd_resource type="VisualShader" load_steps=10 format=3 uid="uid://d2rmih505ogyx"]
+[gd_resource type="VisualShader" load_steps=13 format=3 uid="uid://d2rmih505ogyx"]
 
 [sub_resource type="VisualShaderNodeFloatParameter" id="VisualShaderNodeFloatParameter_sl7qe"]
 parameter_name = "mixBrightness"
@@ -34,6 +34,22 @@ default_value_enabled = true
 size = Vector2(363.946, 219.622)
 expression = "color = input0 * input1;"
 
+[sub_resource type="VisualShaderNodeExpression" id="VisualShaderNodeExpression_oq4tf"]
+size = Vector2(320, 240)
+expression = "if(LIGHT_IS_DIRECTIONAL)
+	output = input + intensity * vec3(ATTENUATION - 1.0);
+else
+	output = input + clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION * LIGHT_COLOR;
+"
+
+[sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_ht0xn"]
+input_name = "diffuse"
+
+[sub_resource type="VisualShaderNodeFloatParameter" id="VisualShaderNodeFloatParameter_d6obo"]
+parameter_name = "ShadowIntensity"
+hint = 1
+default_value_enabled = true
+
 [resource]
 code = "shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
@@ -41,6 +57,7 @@ render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_s
 uniform sampler2D Tex_0 : repeat_enable;
 uniform vec4 AmbientColor : source_color = vec4(1.000000, 1.000000, 1.000000, 1.000000);
 uniform float mixBrightness = 0.5;
+uniform float ShadowIntensity : hint_range(0, 1) = 0;
 
 
 
@@ -96,7 +113,35 @@ void fragment() {
 
 
 }
+
+void light() {
+// Input:3
+	vec3 n_out3p0 = DIFFUSE_LIGHT;
+
+
+// FloatParameter:4
+	float n_out4p0 = ShadowIntensity;
+
+
+	vec3 n_out2p0;
+// Expression:2
+	n_out2p0 = vec3(0.0, 0.0, 0.0);
+	{
+		if(LIGHT_IS_DIRECTIONAL)
+			n_out2p0 = n_out3p0 + n_out4p0 * vec3(ATTENUATION - 1.0);
+		else
+			n_out2p0 = n_out3p0 + clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION * LIGHT_COLOR;
+		
+	}
+
+
+// Output:0
+	DIFFUSE_LIGHT = n_out2p0;
+
+
+}
 "
+graph_offset = Vector2(-487.986, 123.115)
 nodes/vertex/0/position = Vector2(640, 140)
 nodes/fragment/0/position = Vector2(2460, 140)
 nodes/fragment/2/node = SubResource("VisualShaderNodeTexture_hufbw")
@@ -130,3 +175,18 @@ nodes/fragment/11/input_ports = "0,5,input0;1,5,input1;2,0,input2;"
 nodes/fragment/11/output_ports = "0,5,color;"
 nodes/fragment/11/expression = "color = mix(input0 * input1, input0 , input2);"
 nodes/fragment/connections = PackedInt32Array(3, 0, 2, 0, 4, 0, 2, 2, 7, 0, 0, 0, 2, 0, 7, 0, 5, 0, 7, 1, 7, 0, 9, 0, 8, 0, 9, 1, 7, 0, 11, 0, 9, 0, 11, 1, 10, 0, 11, 2, 11, 0, 0, 5)
+nodes/light/2/node = SubResource("VisualShaderNodeExpression_oq4tf")
+nodes/light/2/position = Vector2(-160, 100)
+nodes/light/2/size = Vector2(320, 240)
+nodes/light/2/input_ports = "0,4,input;1,0,intensity;"
+nodes/light/2/output_ports = "0,4,output;"
+nodes/light/2/expression = "if(LIGHT_IS_DIRECTIONAL)
+	output = input + intensity * vec3(ATTENUATION - 1.0);
+else
+	output = input + clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION * LIGHT_COLOR;
+"
+nodes/light/3/node = SubResource("VisualShaderNodeInput_ht0xn")
+nodes/light/3/position = Vector2(-520, 140)
+nodes/light/4/node = SubResource("VisualShaderNodeFloatParameter_d6obo")
+nodes/light/4/position = Vector2(-500, 260)
+nodes/light/connections = PackedInt32Array(2, 0, 0, 0, 3, 0, 2, 0, 4, 0, 2, 1)
