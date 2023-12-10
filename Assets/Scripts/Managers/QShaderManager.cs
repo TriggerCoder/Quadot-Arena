@@ -55,7 +55,6 @@ public static class QShaderManager
 		string GSAnimation = "";
 
 		List<string> textures = new List<string>();
-		Dictionary<int,int> StageToTex = new Dictionary<int,int>();
 		Dictionary<string, int> TexIndex = new Dictionary<string, int>();
 
 		string upperName = shaderName.ToUpper();
@@ -119,10 +118,7 @@ public static class QShaderManager
 				{
 					int index;
 					if (TexIndex.TryGetValue(qShaderStage.map[0], out index))
-					{
 						GSFragmentTexs += "\tvec4 Stage_" + currentStage + " = texture(" + "Tex_" + index + ", uv_" + currentStage + ");\n";
-						StageToTex.Add(currentStage, index);
-					}
 					else
 					{
 						index = textures.Count;
@@ -132,7 +128,6 @@ public static class QShaderManager
 						else
 							GSUniforms += " : repeat_enable;\n";
 						GSFragmentTexs += "\tvec4 Stage_" + currentStage + " = texture(" + "Tex_" + index + ", uv_" + currentStage + ");\n";
-						StageToTex.Add(currentStage, index);
 						TexIndex.Add(qShaderStage.map[0], index);
 						textures.Add(qShaderStage.map[0]);
 					}
@@ -236,17 +231,22 @@ public static class QShaderManager
 					alphaIsTransparent = true;
 					GameManager.Print("Current editor shader is transparent");
 				}
+			}
 
-				if (!TexIndex.ContainsKey(qShader.qShaderGlobal.editorImage))
-				{
-					GSUniforms += "uniform sampler2D " + "Tex_" + totalTex + " : repeat_enable;\n";
-					GSFragmentUvs += "\tvec2 uv_" + totalStages + " = UV;\n";
-					GSFragmentTexs += "\tvec4 Stage_" + totalStages + " = texture(" + "Tex_" + totalTex + ", uv_" + totalStages + ");\n";
-					StageToTex.Add(totalStages, totalTex);
-					textures.Add(qShader.qShaderGlobal.editorImage);
-					TexIndex.Add(qShader.qShaderGlobal.editorImage, totalStages);
-					totalTex++;
-				}
+			int editorIndex;
+			if (TexIndex.TryGetValue(qShader.qShaderGlobal.editorImage, out editorIndex))
+			{
+				GSFragmentUvs += "\tvec2 uv_" + totalStages + " = UV;\n";
+				GSFragmentTexs += "\tvec4 Stage_" + totalStages + " = texture(" + "Tex_" + editorIndex + ", uv_" + totalStages + ");\n";
+			}
+			else
+			{
+				GSUniforms += "uniform sampler2D " + "Tex_" + totalTex + " : repeat_enable;\n";
+				GSFragmentUvs += "\tvec2 uv_" + totalStages + " = UV;\n";
+				GSFragmentTexs += "\tvec4 Stage_" + totalStages + " = texture(" + "Tex_" + totalTex + ", uv_" + totalStages + ");\n";
+				textures.Add(qShader.qShaderGlobal.editorImage);
+				TexIndex.Add(qShader.qShaderGlobal.editorImage, totalTex);
+				totalTex++;
 			}
 		}
 
@@ -267,7 +267,7 @@ public static class QShaderManager
 							else
 							{
 								GSUniforms += "uniform sampler2D " + "Tex_" + totalTex + " : repeat_enable;\n";
-								GSFragmentTexs += "\tvec4 Anim_" + i + "_" + j +" = texture(" + "Tex_" + totalTex + ", uv_" + i + ");\n";
+								GSFragmentTexs += "\tvec4 Anim_" + i + "_" + j + " = texture(" + "Tex_" + totalTex + ", uv_" + i + ");\n";
 								TexIndex.Add(qShaderStage.map[j], totalTex);
 								textures.Add(qShaderStage.map[j]);
 								totalTex++;
@@ -305,7 +305,8 @@ public static class QShaderManager
 
 		{
 			code += GSLigtH;
-			code += "\tif (LIGHT_IS_DIRECTIONAL)\n\t\tDIFFUSE_LIGHT += ShadowIntensity * vec3(ATTENUATION - 1.0);\n\telse\n\t\tDIFFUSE_LIGHT += clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION * LIGHT_COLOR;\n}\n";
+			code += GetDiffuseLightning();
+			code += " }\n";
 		}
 
 		code += GSFragmentH;
@@ -325,9 +326,8 @@ public static class QShaderManager
 			code += "\tvec4 color = Stage_" + lightmapStage + ";\n";
 		else if (qShader.qShaderGlobal.editorImage.Length != 0)
 		{
-			int editorIndex;
-			if (TexIndex.TryGetValue(qShader.qShaderGlobal.editorImage, out editorIndex))
-				code += "\tvec4 color = Stage_" + editorIndex + ";\n";
+			if (TexIndex.ContainsKey(qShader.qShaderGlobal.editorImage))
+				code += "\tvec4 color = Stage_" + totalStages + ";\n";
 			else
 				code += "\tvec4 color = vec4(0.0, 0.0, 0.0, 0.0);\n";
 		}
@@ -358,7 +358,7 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (upperName.Contains("HEALTH/YELLOW_SPHERE"))
+		if (upperName.Contains("FLAME2"))
 			GameManager.Print(code);
 
 		Shader shader = new Shader();
@@ -406,6 +406,15 @@ public static class QShaderManager
 		shaderMaterial.Shader = shader;
 		shaderMaterial.RenderPriority = 1;
 		return shaderMaterial;
+	}
+	public static string GetDiffuseLightning()
+	{
+		string DiffuseLight;
+
+		DiffuseLight = "\tif (LIGHT_IS_DIRECTIONAL)\n\t\tDIFFUSE_LIGHT += ShadowIntensity * vec3(ATTENUATION - 1.0);\n";
+		DiffuseLight += "\telse\n\t\tDIFFUSE_LIGHT += clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION * LIGHT_COLOR;\n";
+
+		return DiffuseLight;
 	}
 
 	public static string GetUVGen(QShaderData qShader, int currentStage, ref string GSVaryings)

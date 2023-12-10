@@ -72,5 +72,8 @@ public partial class PlayerInfo : Node3D
 	public override void _Process(double delta)
 	{
 		ClusterPVSManager.CheckPVS(viewLayer, GlobalPosition);
+		//if camera is thirdperson, need to make sure at all that it can see 
+		if (playerCamera.currentThirdPerson)
+			ClusterPVSManager.CheckPVS(viewLayer, playerCamera.CurrentCamera.GlobalPosition);
 	}
 }

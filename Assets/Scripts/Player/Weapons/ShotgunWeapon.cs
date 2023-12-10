@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using ExtensionMethods;
 
 public partial class ShotgunWeapon : PlayerWeapon
 {
@@ -94,10 +95,7 @@ public partial class ShotgunWeapon : PlayerWeapon
 				Node3D BulletHit = (Node3D)ThingsManager.thingsPrefabs[onDeathSpawn].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletHit);
 				BulletHit.Position = collision + (normal * .2f);
-				if (Mathf.IsZeroApprox(normal.Dot(Vector3.Forward)))
-					BulletHit.Rotation = Transform3D.Identity.LookingAt(normal, Vector3.Forward).Basis.GetEuler();
-				else
-					BulletHit.Rotation = Transform3D.Identity.LookingAt(normal, Vector3.Up).Basis.GetEuler();
+				BulletHit.SetForward(normal);
 				BulletHit.Rotate(BulletHit.Basis.Y, -Mathf.Pi * .5f);
 				BulletHit.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				if (Sounds.Length > 3)
@@ -108,10 +106,7 @@ public partial class ShotgunWeapon : PlayerWeapon
 					Node3D BulletMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletMark);
 					BulletMark.Position = collision + (normal * .05f);
-					if (Mathf.IsZeroApprox(normal.Dot(Vector3.Forward)))
-						BulletMark.Rotation = Transform3D.Identity.LookingAt(-normal, Vector3.Forward).Basis.GetEuler();
-					else
-						BulletMark.Rotation = Transform3D.Identity.LookingAt(-normal, Vector3.Up).Basis.GetEuler();
+					BulletMark.SetForward(-normal); 
 					BulletMark.Rotate((BulletMark.Basis.Y).Normalized(), -Mathf.Pi * .5f);
 					BulletMark.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}

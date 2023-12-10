@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using ExtensionMethods;
 
 public partial class Projectile : Node3D
 {
@@ -201,10 +202,7 @@ public partial class Projectile : Node3D
 				Node3D DeathSpawn = (Node3D)ThingsManager.thingsPrefabs[OnDeathSpawn].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(DeathSpawn);
 				DeathSpawn.Position = Collision + d;
-				if (Mathf.IsZeroApprox(d.Dot(Vector3.Forward)))
-					DeathSpawn.Rotation = Transform3D.Identity.LookingAt(-d, Vector3.Forward).Basis.GetEuler();
-				else
-					DeathSpawn.Rotation = Transform3D.Identity.LookingAt(-d, Vector3.Up).Basis.GetEuler();
+				DeathSpawn.SetForward(-d);
 				DeathSpawn.Rotate(d, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				if (fx != null)
 				{
@@ -219,10 +217,7 @@ public partial class Projectile : Node3D
 				Node3D DecalMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
 				DecalMark.Position = Collision + (Normal * .03f);
-				if (Mathf.IsZeroApprox(Normal.Dot(Vector3.Forward)))
-					DecalMark.Rotation = Transform3D.Identity.LookingAt(-Normal, Vector3.Forward).Basis.GetEuler();
-				else
-					DecalMark.Rotation = Transform3D.Identity.LookingAt(-Normal, Vector3.Up).Basis.GetEuler();
+				DecalMark.SetForward(-Normal);
 				DecalMark.Rotate((DecalMark.Basis.Y).Normalized(), -Mathf.Pi * .5f);
 				DecalMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				if (!string.IsNullOrEmpty(secondaryMark))
@@ -230,10 +225,7 @@ public partial class Projectile : Node3D
 					Node3D SecondMark = (Node3D)ThingsManager.thingsPrefabs[secondaryMark].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(SecondMark);
 					SecondMark.Position = Collision + (Normal * .05f);
-					if (Mathf.IsZeroApprox(Normal.Dot(Vector3.Forward)))
-						SecondMark.Rotation = Transform3D.Identity.LookingAt(-Normal, Vector3.Forward).Basis.GetEuler();
-					else
-						SecondMark.Rotation = Transform3D.Identity.LookingAt(-Normal, Vector3.Up).Basis.GetEuler();
+					SecondMark.SetForward(-Normal);
 					SecondMark.Rotate((SecondMark.Basis.Y).Normalized(), -Mathf.Pi * .5f);
 					SecondMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}

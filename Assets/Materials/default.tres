@@ -7,3 +7,4 @@ render_priority = 0
 shader = ExtResource("1_i5l18")
 shader_parameter/AmbientColor = Color(1, 1, 1, 1)
 shader_parameter/mixBrightness = 0.5
+shader_parameter/ShadowIntensity = 0.0
