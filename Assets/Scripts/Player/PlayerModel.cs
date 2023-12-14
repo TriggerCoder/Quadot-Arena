@@ -472,8 +472,7 @@ public partial class PlayerModel : Node3D
 //		playerControls.EnableColliders(false);
 		ragDoll = true;
 		Reparent(GameManager.Instance.TemporaryObjectsHolder);
-//		DestroyAfterTime destroyAfterTime = playerTransform.gameObject.AddComponent<DestroyAfterTime>();
-//		destroyAfterTime._lifeTime = 10;
+
 	}
 
 	public void Die()
@@ -647,7 +646,7 @@ public partial class PlayerModel : Node3D
 		if (weapon.readySurfaceArray.Count == 0)
 			weaponModel = Mesher.GenerateModelFromMeshes(weapon, currentLayer, true, true, null, false, false);
 		else
-			weaponModel = Mesher.FillModelFromProcessedData(weapon, currentLayer, true, null, false);
+			weaponModel = Mesher.FillModelFromProcessedData(weapon, currentLayer, true, true, null, false);
 		weaponModel.node.Name = "weapon";
 		weaponNode.AddChild(weaponModel.node);
 
@@ -659,7 +658,7 @@ public partial class PlayerModel : Node3D
 			if (newWeapon.readySurfaceArray.Count == 0)
 				Mesher.GenerateModelFromMeshes(newWeapon, currentLayer, true, true, barrel, false, false);
 			else
-				Mesher.FillModelFromProcessedData(newWeapon, currentLayer, true, barrel, false);
+				Mesher.FillModelFromProcessedData(newWeapon, currentLayer, true, true, barrel, false);
 			weaponModel.node.AddChild(barrel);
 
 			if (weapon.tagsIdbyName.TryGetValue("tag_barrel", out int tagId))
@@ -683,7 +682,7 @@ public partial class PlayerModel : Node3D
 			if (muzzle.readySurfaceArray.Count == 0)
 				Mesher.GenerateModelFromMeshes(muzzle, currentLayer, false, false, muzzleFlash, true, false);
 			else
-				Mesher.FillModelFromProcessedData(muzzle, currentLayer, false, muzzleFlash, false);
+				Mesher.FillModelFromProcessedData(muzzle, currentLayer, false, false, muzzleFlash, false);
 
 			//Muzzle Flash never cast shadow
 //			for (int i = 0; i < muzzle.readyMeshes.Count; i++)
@@ -820,6 +819,7 @@ public partial class PlayerModel : Node3D
 		}
 		playerControls = control;
 		currentLayer = layer;
+		
 		AddAllMeshInstance3D(playerModel);
 		return true;
 	}
@@ -837,7 +837,15 @@ public partial class PlayerModel : Node3D
 		foreach(var child in Childrens)
 		{
 			if (child is MeshInstance3D mesh)
+			{
 				modelsMeshes.Add(mesh);
+
+				MeshInstance3D shadowMesh = new MeshInstance3D();
+				shadowMesh.Mesh = mesh.Mesh;
+				shadowMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
+				shadowMesh.Layers = playerControls.playerInfo.uiLayer;
+				mesh.AddChild(shadowMesh);
+			}
 		}
 	}
 	private void RemoveAllMeshInstance3D(Node parent)

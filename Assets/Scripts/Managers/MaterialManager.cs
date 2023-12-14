@@ -28,7 +28,7 @@ public partial class MaterialManager : Node
 
 	public bool applyLightmaps = true;
 
-	public static string shadowProperty = "shader_parameter/ShadowIntensity";
+	public static string shadowProperty = "ShadowIntensity";
 	public static string lightMapProperty = "shader_parameter/LightMap";
 	public static string opaqueTexProperty = "shader_parameter/Tex_0";
 	public static string colorProperty = "shader_parameter/AmbientColor";

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 public partial class PlayerThing : CharacterBody3D, Damageable
 {
 	[Export]
+	public CollisionShape3D Torso;
+	[Export]
 	public CollisionShape3D Feets;
 	[Export]
 	public PlayerInfo playerInfo;
@@ -51,6 +53,11 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.feetRay = new SeparationRayShape3D();
 		playerControls.feetRay.Length = .8f;
 		Feets.Shape = playerControls.feetRay;
+
+		playerControls.collider = new CapsuleShape3D();
+		playerControls.collider.Radius = .5f;
+		playerControls.collider.Height = 1.5f;
+		Torso.Shape = playerControls.collider;
 		currentState = GameManager.FuncState.Ready;
 	}
 
@@ -89,6 +96,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		TeleporterThing.TelefragEverything(destination, this);
 		GlobalPosition = destination;
 		playerControls.teleportDest = destination;
+		playerControls.feetRay.Length = 0.8f;
 
 		if (playerControls.playerWeapon == null)
 			playerControls.SwapToBestWeapon();

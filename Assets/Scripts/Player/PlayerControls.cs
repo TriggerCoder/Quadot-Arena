@@ -15,9 +15,11 @@ public partial class PlayerControls : Node3D
 
 	public SeparationRayShape3D feetRay;
 
-	private Vector2 centerHeight = new Vector2(0.2f, -.05f);	// character controller center height, x standing, y crouched
-	private Vector2 height = new Vector2(2.0f, 1.5f);			// character controller height, x standing, y crouched
-	private float camerasHeight = .65f;
+	public CapsuleShape3D	collider;
+
+	private Vector2 centerHeight = new Vector2(0.4f, 0.2f);	// character controller center height, x standing, y crouched
+	private Vector2 height = new Vector2(1.5f, 1.1f);			// character controller height, x standing, y crouched
+	private float camerasHeight = .05f;
 	private float ccHeight = .05f;
 
 	public Vector2 viewDirection = new Vector2(0, 0);
@@ -221,7 +223,7 @@ public partial class PlayerControls : Node3D
 				oldSpeed = moveSpeed;
 			moveSpeed = crouchSpeed;
 			currentMoveType = MoveType.Crouch;
-//			ChangeHeight(false);
+			ChangeHeight(false);
 		}
 		else if (Input.IsActionJustReleased(playerInput.Action_Crouch))
 		{
@@ -231,7 +233,7 @@ public partial class PlayerControls : Node3D
 				currentMoveType = MoveType.Walk;
 			else
 				currentMoveType = MoveType.Run;
-//			ChangeHeight(true);
+			ChangeHeight(true);
 			oldSpeed = 0;
 		}
 		else //CheckRun
@@ -385,6 +387,28 @@ public partial class PlayerControls : Node3D
 		cMove.forwardSpeed = Move.Y;
 		cMove.sidewaysSpeed = Move.X;
 	}
+
+	public void ChangeHeight(bool Standing)
+	{
+		float newCenter = centerHeight.Y;
+		float newHeight = height.Y;
+
+		if (Standing)
+		{
+			newCenter = centerHeight.X;
+			newHeight = height.X;
+		}
+		playerThing.Torso.Position = new Vector3(0, newCenter, 0);
+		collider.Height = newHeight;
+
+		//Don't move camera on thirdperson
+		if (playerCamera.currentThirdPerson)
+			playerCamera.Position = new Vector3(0, .85f, 0);
+		else
+			playerCamera.Position = new Vector3(0, 2 * newCenter + camerasHeight, 0);
+	}
+
+
 	private void QueueJump()
 	{
 		if (holdJumpToBhop)

@@ -40,7 +40,7 @@ public static class QShaderManager
 	{
 		string code = "";
 		string GSHeader = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, ";
-		string GSUniforms = "uniform float ShadowIntensity : hint_range(0, 1) = 0.0;\n";
+		string GSUniforms = "";
 		string GSLigtH = "void light()\n{ \n";
 		string GSVertexH = "void vertex()\n{ \n";
 		string GSVaryings = "";
@@ -283,6 +283,7 @@ public static class QShaderManager
 		code += GSVaryings;
 		code += "global uniform float MsTime;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
+		code += "instance uniform float ShadowIntensity : hint_range(0, 1) = 0.0;\n";
 		if (helperRotate)
 		{
 			code += "\nvec2 rotate(vec2 uv, vec2 pivot, float angle)\n{\n\tmat2 rotation = mat2(vec2(sin(angle), -cos(angle)),vec2(cos(angle), sin(angle)));\n";

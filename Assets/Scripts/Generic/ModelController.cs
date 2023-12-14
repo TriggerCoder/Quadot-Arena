@@ -91,7 +91,7 @@ public partial class ModelController : Node3D
 		if (md3Model.readySurfaceArray.Count == 0)
 			model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, receiveShadows, castShadows, currentObject, isTransparent, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, useLowCountMultiMesh, alphaFade);
 		else
-			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, castShadows, currentObject, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, isTransparent, useLowCountMultiMesh, alphaFade);
+			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, receiveShadows, castShadows, currentObject, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, isTransparent, useLowCountMultiMesh, alphaFade);
 
 		for (int i = 0; i < md3Model.meshes.Count; i++)
 		{

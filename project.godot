@@ -28,6 +28,12 @@ window/size/viewport_height=720
 
 project/assembly_name="Quadot Arena"
 
+[file_customization]
+
+folder_colors={
+"res://Assets/Scripts/": "gray"
+}
+
 [input]
 
 Move_Forward_0={

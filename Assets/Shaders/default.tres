@@ -47,6 +47,7 @@ input_name = "diffuse"
 
 [sub_resource type="VisualShaderNodeFloatParameter" id="VisualShaderNodeFloatParameter_d6obo"]
 parameter_name = "ShadowIntensity"
+qualifier = 2
 hint = 1
 default_value_enabled = true
 
@@ -57,7 +58,7 @@ render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_s
 uniform sampler2D Tex_0 : repeat_enable;
 uniform vec4 AmbientColor : source_color = vec4(1.000000, 1.000000, 1.000000, 1.000000);
 uniform float mixBrightness = 0.5;
-uniform float ShadowIntensity : hint_range(0, 1) = 0;
+instance uniform float ShadowIntensity : hint_range(0, 1) = 0;
 
 
 
@@ -141,7 +142,7 @@ void light() {
 
 }
 "
-graph_offset = Vector2(-487.986, 123.115)
+graph_offset = Vector2(-702.127, 96.1819)
 nodes/vertex/0/position = Vector2(640, 140)
 nodes/fragment/0/position = Vector2(2460, 140)
 nodes/fragment/2/node = SubResource("VisualShaderNodeTexture_hufbw")

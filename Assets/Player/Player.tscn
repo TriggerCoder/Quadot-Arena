@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://xi3ybp7mrio2"]
+[gd_scene load_steps=13 format=3 uid="uid://xi3ybp7mrio2"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerThing.cs" id="1_da8o2"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerControls.cs" id="1_g37r6"]
@@ -11,22 +11,20 @@
 [ext_resource type="PackedScene" uid="uid://dpl55sl78gnh4" path="res://Assets/Player/Weapons/PlasmagunWeapon.tscn" id="6_yhj32"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="7_qljl7"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3kcwc"]
-height = 1.5
-
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_aj4xj"]
 length = 0.991696
 
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_04rnj"]
 length = 1.2
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Feets", "playerInfo", "playerControls", "weaponCollider", "audioStream", "player") groups=["Player"]]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Torso", "Feets", "playerInfo", "playerControls", "weaponCollider", "audioStream", "player") groups=["Player"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 collision_layer = 64
 collision_mask = 125
 axis_lock_angular_x = true
 axis_lock_angular_z = true
 script = ExtResource("1_da8o2")
+Torso = NodePath("Torso")
 Feets = NodePath("Feets")
 playerInfo = NodePath("PlayerInfo")
 playerControls = NodePath("PlayerControls")
@@ -35,23 +33,22 @@ audioStream = NodePath("PlayerVoiceAudioStream")
 player = NodePath("PlayerControls/PlayerModel")
 
 [node name="Torso" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.442, 0)
-shape = SubResource("CapsuleShape3D_3kcwc")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
 
 [node name="Feets" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 shape = SubResource("SeparationRayShape3D_aj4xj")
 
 [node name="Weapon Right" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0.85, 0)
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0.5, 0)
 shape = SubResource("SeparationRayShape3D_04rnj")
 
 [node name="Weapon Front" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0.85, 0)
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0.5, 0)
 shape = SubResource("SeparationRayShape3D_04rnj")
 
 [node name="Weapon Left" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0.85, 0)
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0.5, 0)
 shape = SubResource("SeparationRayShape3D_04rnj")
 
 [node name="PlayerControls" type="Node3D" parent="." node_paths=PackedStringArray("playerInfo", "playerThing", "playerCamera")]
