@@ -24,7 +24,7 @@ public partial class PlayerControls : Node3D
 
 	public Vector2 viewDirection = new Vector2(0, 0);
 
-	public Vector3 lastPosition = new Vector3(0, 0, 0);
+	public Vector3 lastGlobalPosition = new Vector3(0, 0, 0);
 
 	public Vector3 impulseVector = Vector3.Zero;
 
@@ -56,6 +56,12 @@ public partial class PlayerControls : Node3D
 
 	private float deathTime = 0;
 	private float respawnDelay = 1.7f;
+
+	//Head/Weapon Bob
+	public float vBob = .005f;
+	public float hBob = .05f;
+	public bool bobActive;
+	public Vector2 currentBob = Vector2.Zero;
 
 	public Vector2 Look = Vector2.Zero;
 	struct currentMove
@@ -180,8 +186,8 @@ public partial class PlayerControls : Node3D
 
 		if (playerThing.Dead)
 		{
-//			if (playerCamera != null)
-//				playerCamera.bopActive = false;
+			if (playerCamera != null)
+				bobActive = false;
 
 			if (deathTime < respawnDelay)
 				deathTime += deltaTime;
@@ -282,6 +288,12 @@ public partial class PlayerControls : Node3D
 		else
 			playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed, deltaTime);
 
+		if ((GlobalPosition - lastGlobalPosition).LengthSquared() > .0001f)
+			bobActive = true;
+		else
+			bobActive = false;
+
+		currentBob = GetBob();
 
 		if (Input.IsActionPressed(playerInput.Action_Fire))
 			wishFire = true;
@@ -370,6 +382,7 @@ public partial class PlayerControls : Node3D
 	void ApplyMove(float deltaTime)
 	{
 		playerThing.Velocity = (playerVelocity + impulseVector + jumpPadVel);
+		lastGlobalPosition = GlobalPosition;
 		playerThing.MoveAndSlide();
 
 		//dampen impulse
@@ -403,9 +416,9 @@ public partial class PlayerControls : Node3D
 
 		//Don't move camera on thirdperson
 		if (playerCamera.currentThirdPerson)
-			playerCamera.Position = new Vector3(0, .85f, 0);
+			playerCamera.yOffset = .85f;
 		else
-			playerCamera.Position = new Vector3(0, 2 * newCenter + camerasHeight, 0);
+			playerCamera.yOffset = 2 * newCenter + camerasHeight;
 	}
 
 
@@ -422,6 +435,25 @@ public partial class PlayerControls : Node3D
 		if (Input.IsActionJustReleased(playerInput.Action_Jump))
 			wishJump = false;
 	}
+
+	private Vector2 GetBob()
+	{
+		Vector2 bob;
+		float speed = playerVelocity.Length();
+		float moveSpeed = walkSpeed;
+		if (moveSpeed != walkSpeed)
+			moveSpeed = runSpeed;
+		bob.X = Mathf.Cos(GameManager.CurrentTimeMsec * moveSpeed) * hBob * speed;
+		if (currentMoveType == MoveType.Crouch)
+			bob.X *= 5;
+
+		bob.Y = Mathf.Sin(GameManager.CurrentTimeMsec * moveSpeed) * vBob * speed;
+		if (currentMoveType == MoveType.Crouch)
+			bob.Y *= 5;
+
+		return bob;
+	}
+
 	private void GroundMove(float deltaTime)
 	{
 		Vector3 wishdir;

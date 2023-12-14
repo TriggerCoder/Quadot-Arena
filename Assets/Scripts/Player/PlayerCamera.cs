@@ -13,6 +13,11 @@ public partial class PlayerCamera : Node3D
 	public Camera3D CurrentCamera;
 	private Vector3 rotAngle = Vector3.Zero;
 	public bool currentThirdPerson = false;
+
+	public float yOffset = .85f;
+	private float learpYOffset = .85f;
+	private float interp = 0;
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -22,8 +27,24 @@ public partial class PlayerCamera : Node3D
 
 	public override void _PhysicsProcess(double delta)
 	{
-		rotAngle.X = playerControls.viewDirection.X;
+		if (GameManager.Paused)
+			return;
 
+		float deltaTime = (float)delta;
+
+		if (GameOptions.HeadBob && playerControls.bobActive && !currentThirdPerson)
+			interp = Mathf.Lerp(interp, 1, deltaTime * 5);
+		else
+			interp = Mathf.Lerp(interp, 0, deltaTime * 6);
+
+		Vector2 Bob = playerControls.currentBob * interp;
+
+		if (learpYOffset != yOffset)
+			learpYOffset = Mathf.Lerp(learpYOffset, yOffset, 10 * deltaTime);
+
+		Position = new Vector3 (0, learpYOffset + Bob.Y, 0);
+		rotAngle.X = playerControls.viewDirection.X;
+		rotAngle.Z = Bob.X;
 		RotationDegrees = rotAngle;
 	}
 
