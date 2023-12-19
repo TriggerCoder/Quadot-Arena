@@ -36,7 +36,7 @@ public partial class NodeAnimation : Node3D
 		else
 			SetProcess(true);
 
-		parent = (Node3D)GetParent();
+		parent = GetParentNode3D();
 
 		if (rotEnable)
 		{

@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://xi3ybp7mrio2"]
+[gd_scene load_steps=14 format=3 uid="uid://xi3ybp7mrio2"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerThing.cs" id="1_da8o2"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerControls.cs" id="1_g37r6"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/VirtualAudioListener.cs" id="6_ve4m7"]
 [ext_resource type="PackedScene" uid="uid://dpl55sl78gnh4" path="res://Assets/Player/Weapons/PlasmagunWeapon.tscn" id="6_yhj32"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="7_qljl7"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="10_h25w0"]
 
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_aj4xj"]
 length = 0.991696
@@ -66,37 +67,41 @@ playerControls = NodePath("../PlayerControls")
 playerCamera = NodePath("MainCameras")
 audioStream = NodePath("../PlayerVoiceAudioStream")
 playerThing = NodePath("..")
-WeaponHand = NodePath("MainCameras/ViewCamera/WeaponHand")
+WeaponHand = NodePath("InterpolatedTransform/ViewCamera/WeaponHand")
 WeaponPrefabs = [null, ExtResource("4_4obu3"), ExtResource("5_mrmdb"), null, ExtResource("5_jwttf"), null, null, ExtResource("6_yhj32"), null]
 
 [node name="MainCameras" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("playerControls", "ThirdPerson", "ViewCamera")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 script = ExtResource("3_bs0x2")
 playerControls = NodePath("../../PlayerControls")
-ThirdPerson = NodePath("SpringArm3D/ThirdPersonCamera")
-ViewCamera = NodePath("ViewCamera")
+ThirdPerson = NodePath("../InterpolatedTransform/SpringArm3D/ThirdPersonCamera")
+ViewCamera = NodePath("../InterpolatedTransform/ViewCamera")
 
-[node name="ViewCamera" type="Camera3D" parent="PlayerInfo/MainCameras"]
+[node name="VirtualAudioListener" type="Node3D" parent="PlayerInfo"]
+script = ExtResource("6_ve4m7")
+
+[node name="InterpolatedTransform" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("Source")]
+script = ExtResource("10_h25w0")
+Source = NodePath("../MainCameras")
+
+[node name="ViewCamera" type="Camera3D" parent="PlayerInfo/InterpolatedTransform"]
 cull_mask = 0
 near = 0.1
 far = 300.0
 
-[node name="WeaponHand" type="Node3D" parent="PlayerInfo/MainCameras/ViewCamera"]
+[node name="WeaponHand" type="Node3D" parent="PlayerInfo/InterpolatedTransform/ViewCamera"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 
-[node name="SpringArm3D" type="SpringArm3D" parent="PlayerInfo/MainCameras"]
+[node name="SpringArm3D" type="SpringArm3D" parent="PlayerInfo/InterpolatedTransform"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4, 0, 0)
 collision_mask = 32708
 spring_length = 2.5
 margin = 0.05
 
-[node name="ThirdPersonCamera" type="Camera3D" parent="PlayerInfo/MainCameras/SpringArm3D"]
+[node name="ThirdPersonCamera" type="Camera3D" parent="PlayerInfo/InterpolatedTransform/SpringArm3D"]
 cull_mask = 0
 near = 0.1
 far = 300.0
-
-[node name="VirtualAudioListener" type="Node3D" parent="PlayerInfo"]
-script = ExtResource("6_ve4m7")
 
 [node name="PlayerVoiceAudioStream" type="Node3D" parent="."]
 script = ExtResource("7_qljl7")

@@ -42,7 +42,7 @@ public partial class PortalSurface : Area3D
 	{
 		destCamera = camera;
 		destPortal = portal;
-		Node3D parent = (Node3D)camera.GetParent();
+		Node3D parent = camera.GetParentNode3D();
 		parent.Rotation += Transform3D.Identity.LookingAt(-portal.normal, Vector3.Up).Basis.GetEuler();
 
 		CollisionShape3D mc = new CollisionShape3D();

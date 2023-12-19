@@ -88,8 +88,12 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public void InitPlayer()
 	{
 		CollisionLayer = playerInfo.playerLayer;
+		InterpolatedTransform interpolatedTransform = new InterpolatedTransform();
+		player.AddChild(interpolatedTransform);
+		interpolatedTransform.SetSource(player);
+
 		avatar = new PlayerModel();
-		player.AddChild(avatar);
+		interpolatedTransform.AddChild(avatar);
 		avatar.LoadPlayer(modelName, skinName, (GameManager.AllPlayerViewMask & ~((uint)(playerInfo.viewLayer))), playerControls);
 
 		Vector3 destination = SpawnerManager.FindSpawnLocation();

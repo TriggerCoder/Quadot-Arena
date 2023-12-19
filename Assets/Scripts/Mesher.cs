@@ -1181,7 +1181,7 @@ public static class Mesher
 			if (instanceNum > threshold)
 			{
 				DestroyAfterTime destroy = new DestroyAfterTime();
-				destroy.parent = owner.GetParent();
+				destroy.parent = owner.GetParentNode3D();
 				multiMeshList[0].AddChild(destroy);
 			}
 */

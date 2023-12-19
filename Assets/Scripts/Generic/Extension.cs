@@ -25,4 +25,24 @@ namespace ExtensionMethods
 			return quaternion;
 		}
 	}
+
+	public static class TransformExtensions
+	{
+		public static Transform3D Lerp(this Transform3D transform, Transform3D to, float weight)
+		{
+			Vector3 scale = transform.Basis.Scale;
+			Quaternion rotationQuaternion = transform.Basis.GetRotationQuaternion().FastNormal();
+			Vector3 origin = transform.Origin;
+			Vector3 scale2 = to.Basis.Scale;
+			Quaternion rotationQuaternion2 = to.Basis.GetRotationQuaternion().FastNormal();
+			Vector3 origin2 = to.Origin;
+			Transform3D result = Transform3D.Identity;
+			Quaternion quaternion = rotationQuaternion.Slerp(rotationQuaternion2, weight).FastNormal();
+			result.Basis = new Basis(quaternion);
+			Vector3 scale3 = scale.Lerp(scale2, weight);
+			result.Basis.Scaled(scale3);
+			result.Origin = origin.Lerp(origin2, weight);
+			return result;
+		}
+	}
 }
