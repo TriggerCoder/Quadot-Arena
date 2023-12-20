@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://dw2it7pnea5rd"]
+[gd_scene load_steps=9 format=3 uid="uid://dw2it7pnea5rd"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Projectile.cs" id="1_vfo3e"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_741w6"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_t21kj"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="3_ttljs"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_v34hp"]
 [ext_resource type="PackedScene" uid="uid://dbqx4olek5uvj" path="res://Assets/Things/FX/Particles/Smoke.tscn" id="4_8oprf"]
 
@@ -16,7 +17,7 @@ fps = 20.0
 
 [node name="RocketProjectile" type="Node3D" node_paths=PackedStringArray("fx", "audioStream")]
 script = ExtResource("1_vfo3e")
-fx = NodePath("SmokeParticles")
+fx = NodePath("InterpolatedTransform/SmokeParticles")
 _lifeTime = 3.0
 speed = 28.0
 rotateSpeed = 180
@@ -32,7 +33,16 @@ _onFlySound = "weapons/rocket/rockfly"
 _onDeathSound = "weapons/rocket/rocklx1a"
 audioStream = NodePath("MultiAudioStream")
 
-[node name="Rocket" type="Node3D" parent="."]
+[node name="SourceRocket" type="Node3D" parent="."]
+
+[node name="MultiAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_741w6")
+
+[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source")]
+script = ExtResource("3_ttljs")
+Source = NodePath("../SourceRocket")
+
+[node name="Rocket" type="Node3D" parent="InterpolatedTransform"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 script = ExtResource("2_t21kj")
 modelName = "ammo/rocket/rocket"
@@ -40,10 +50,7 @@ castShadows = true
 modelAnimation = SubResource("Resource_drxc8")
 textureAnimation = SubResource("Resource_ry408")
 
-[node name="MultiAudioStream" type="Node3D" parent="."]
-script = ExtResource("2_741w6")
-
-[node name="SpotLight3D" type="SpotLight3D" parent="."]
+[node name="SpotLight3D" type="SpotLight3D" parent="InterpolatedTransform"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0.2)
 layers = 127
 light_color = Color(1, 0.686275, 0, 1)
@@ -51,5 +58,5 @@ light_energy = 5.0
 spot_range = 10.0
 spot_angle = 90.0
 
-[node name="SmokeParticles" parent="." instance=ExtResource("4_8oprf")]
+[node name="SmokeParticles" parent="InterpolatedTransform" instance=ExtResource("4_8oprf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)

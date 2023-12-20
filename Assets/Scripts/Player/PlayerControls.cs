@@ -217,7 +217,7 @@ public partial class PlayerControls : InterpolatedNode3D
 			playerCamera.ChangeThirdPersonCamera(!playerCamera.currentThirdPerson);
 
 		playerThing.avatar.ChangeView(viewDirection, deltaTime);
-		playerThing.avatar.CheckLegTurn(playerCamera.CurrentCamera.GlobalTransform.Basis.Z);
+		playerThing.avatar.CheckLegTurn(playerCamera.GlobalTransform.Basis.Z);
 
 		controllerIsGrounded = playerThing.IsOnFloor();
 		playerThing.avatar.isGrounded = controllerIsGrounded;

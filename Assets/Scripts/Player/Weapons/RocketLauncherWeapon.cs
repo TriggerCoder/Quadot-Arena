@@ -67,7 +67,7 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 
 		//Projectile attack
 		{
-			Transform3D global = playerInfo.playerCamera.CurrentCamera.GlobalTransform;
+			Transform3D global = playerInfo.playerCamera.GlobalTransform;
 			Vector3 d = global.Basis.Z;
 			Vector2 r = GetDispersion();
 			d += global.Basis.X * r.X + global.Basis.Y * r.Y;
@@ -79,7 +79,7 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 			if (muzzleObject != null)
 				rocket.GlobalPosition = muzzleObject.GlobalPosition + .2f * d;
 			else
-				rocket.GlobalPosition = playerInfo.playerCamera.CurrentCamera.GlobalPosition;
+				rocket.GlobalPosition = playerInfo.playerCamera.GlobalPosition;
 			rocket.ignoreSelfLayer = playerInfo.playerLayer;
 			rocket.LookAt(rocket.GlobalPosition - d, Vector3.Up);
 		}

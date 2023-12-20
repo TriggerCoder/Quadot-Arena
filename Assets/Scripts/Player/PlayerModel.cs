@@ -266,9 +266,11 @@ public partial class PlayerModel : Node3D
 							break;
 						case LowerAnimation.Jump:
 							lowerAnimation = LowerAnimation.Land;
+							_enableOffset = true;
 							break;
 						case LowerAnimation.JumpBack:
 							lowerAnimation = LowerAnimation.LandBack;
+							_enableOffset = true;
 							break;
 						case LowerAnimation.Land:
 						case LowerAnimation.LandBack:
@@ -285,7 +287,6 @@ public partial class PlayerModel : Node3D
 									turnTo = QuaternionZero;
 								}
 								lowerAnimation = LowerAnimation.Idle;
-								_enableOffset = true;
 							}
 							break;
 					}

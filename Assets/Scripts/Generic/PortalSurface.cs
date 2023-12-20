@@ -17,15 +17,6 @@ public partial class PortalSurface : Area3D
 		radiusSquared = radius * radius;
 	}
 
-	public override void _PhysicsProcess(double delta)
-	{
-		for (int i = 0; i < currentPlayers.Count; i++)
-		{
-			Camera3D playerCamera = currentPlayers[i].playerInfo.playerCamera.CurrentCamera;
-			destCamera.Basis = playerCamera.GlobalTransform.Basis;
-		}
-	}
-
 	public override void _Process(double delta)
 	{
 		for (int i = 0; i < currentPlayers.Count; i++) 
@@ -35,6 +26,7 @@ public partial class PortalSurface : Area3D
 			ClusterPVSManager.CheckPVS(currentPlayers[i].playerInfo.viewLayer, destCamera.GlobalPosition);
 			float lenght = Mathf.Clamp(1.3f - (distanceSquared / radiusSquared), 0f, 1f);
 			destPortal.material.SetShaderParameter("Transparency", lenght);
+			destCamera.Basis = playerCamera.GlobalTransform.Basis;
 		}
 	}
 

@@ -45,4 +45,20 @@ namespace ExtensionMethods
 			return result;
 		}
 	}
+
+	public static class BasisExtensions
+	{
+		public static Basis Lerp(this Basis basis, Basis to, float weight)
+		{
+			Vector3 scale = basis.Scale;
+			Quaternion rotationQuaternion = basis.GetRotationQuaternion().FastNormal();
+			Vector3 scale2 = to.Scale;
+			Quaternion rotationQuaternion2 = to.GetRotationQuaternion().FastNormal();
+			Quaternion quaternion = rotationQuaternion.Slerp(rotationQuaternion2, weight).FastNormal();
+			Basis result = new Basis(quaternion);
+			Vector3 scale3 = scale.Lerp(scale2, weight);
+			result.Scaled(scale3);
+			return result;
+		}
+	}
 }

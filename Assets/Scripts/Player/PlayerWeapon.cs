@@ -71,7 +71,7 @@ public partial class PlayerWeapon : Node3D
 	protected float coolTimer = 0f;
 
 	private float interp = 0;
-	private Vector3 oldPosition = Vector3.Zero;
+	private Vector3 oldPosition = Vector3.Down;
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -185,20 +185,23 @@ public partial class PlayerWeapon : Node3D
 		}
 		else
 			LowerAmount = Mathf.Lerp(LowerAmount, 0, deltaTime * swapSpeed);
+		LowerAmount = Mathf.Clamp(LowerAmount, 0, 1);
 
 		if (fireTime > 0)
 			KickAmount = Mathf.Lerp(KickAmount, 1, deltaTime * kickSpeed);
 		else
 			KickAmount = Mathf.Lerp(KickAmount, 0, deltaTime * kickSpeed);
+		KickAmount = Mathf.Clamp(KickAmount, 0, 1);
 
 		if (GameOptions.HeadBob && playerInfo.playerControls.bobActive)
 			interp = Mathf.Lerp(interp, 1, deltaTime * 5);
 		else
 			interp = Mathf.Lerp(interp, 0, deltaTime * 6);
+		interp = Mathf.Clamp(interp, 0, 1);
 
 		Vector2 Bob = playerInfo.playerControls.currentBob * interp;
 
-		Position = oldPosition.Lerp(new Vector3(KickOffSet * KickAmount, LowerOffset * LowerAmount + Bob.Y * .1f, Bob.X * .05f), 10 * deltaTime);
+		Position = oldPosition.Lerp(new Vector3(KickOffSet * KickAmount, LowerOffset * LowerAmount + Bob.Y * .1f, Bob.X * .05f), Mathf.Clamp(10 * deltaTime, 0, 1));
 		oldPosition = Position;
 		OnUpdate();
 	}

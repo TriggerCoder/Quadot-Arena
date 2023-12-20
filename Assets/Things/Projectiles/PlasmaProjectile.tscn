@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://c5tu2rku1v7om"]
+[gd_scene load_steps=5 format=3 uid="uid://c5tu2rku1v7om"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Projectile.cs" id="1_ikbab"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="2_usudf"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="3_85jl5"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="4_nkpjw"]
 
 [node name="PlasmaProjectile" type="Node3D" node_paths=PackedStringArray("audioStream")]
@@ -22,7 +23,16 @@ _onFlySound = "weapons/plasma/lasfly"
 _onDeathSound = "weapons/plasma/plasmx1a"
 audioStream = NodePath("MultiAudioStream")
 
-[node name="Plasma" type="Sprite3D" parent="."]
+[node name="SourcePlasma" type="Node3D" parent="."]
+
+[node name="MultiAudioStream" type="Node3D" parent="."]
+script = ExtResource("4_nkpjw")
+
+[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source")]
+script = ExtResource("3_85jl5")
+Source = NodePath("../SourcePlasma")
+
+[node name="Plasma" type="Sprite3D" parent="InterpolatedTransform"]
 layers = 255
 cast_shadow = 0
 billboard = 1
@@ -30,10 +40,7 @@ script = ExtResource("2_usudf")
 spriteName = "sprites/plasma1"
 spriteRadius = 16
 
-[node name="MultiAudioStream" type="Node3D" parent="."]
-script = ExtResource("4_nkpjw")
-
-[node name="OmniLight3D" type="OmniLight3D" parent="."]
+[node name="OmniLight3D" type="OmniLight3D" parent="InterpolatedTransform"]
 layers = 255
 light_color = Color(0, 0.0980392, 1, 1)
 light_energy = 5.0

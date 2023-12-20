@@ -1,8 +1,13 @@
-[gd_scene load_steps=7 format=3 uid="uid://bt2wbekblvsnd"]
+[gd_scene load_steps=8 format=3 uid="uid://bt2wbekblvsnd"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/DestroyAfterTime.cs" id="1_3u8pq"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_ctrif"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="2_sgj0h"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_bcuy2"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_h38lu"]
+radius = 0.015
+height = 0.12
 
 [sub_resource type="Resource" id="Resource_3dopq"]
 script = ExtResource("3_bcuy2")
@@ -11,10 +16,6 @@ fps = 0.0
 [sub_resource type="Resource" id="Resource_u44j0"]
 script = ExtResource("3_bcuy2")
 fps = 0.0
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_h38lu"]
-radius = 0.015
-height = 0.12
 
 [node name="ShotgunShell" type="RigidBody3D"]
 collision_layer = 32768
@@ -26,13 +27,18 @@ mass = 0.1
 script = ExtResource("1_3u8pq")
 destroyTimer = 500.0
 
-[node name="Case" type="Node3D" parent="."]
-script = ExtResource("2_ctrif")
-modelName = "weapons2/shells/s_shell"
-castShadow = false
-useLowCountMultiMesh = false
-modelAnimation = SubResource("Resource_3dopq")
-textureAnimation = SubResource("Resource_u44j0")
+[node name="SourceCase" type="Node3D" parent="."]
 
 [node name="Capsule" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_h38lu")
+
+[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source")]
+script = ExtResource("2_sgj0h")
+Source = NodePath("../SourceCase")
+
+[node name="Case" type="Node3D" parent="InterpolatedTransform"]
+script = ExtResource("2_ctrif")
+modelName = "weapons2/shells/s_shell"
+useLowCountMultiMesh = false
+modelAnimation = SubResource("Resource_3dopq")
+textureAnimation = SubResource("Resource_u44j0")

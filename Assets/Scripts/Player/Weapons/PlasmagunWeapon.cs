@@ -67,7 +67,7 @@ public partial class PlasmagunWeapon : PlayerWeapon
 
 		//Projectile attack
 		{
-			Transform3D global = playerInfo.playerCamera.CurrentCamera.GlobalTransform;
+			Transform3D global = playerInfo.playerCamera.GlobalTransform;
 			Vector3 d = global.Basis.Z;
 			Vector2 r = GetDispersion();
 			d += global.Basis.X * r.X + global.Basis.Y * r.Y;
@@ -79,7 +79,7 @@ public partial class PlasmagunWeapon : PlayerWeapon
 			if (muzzleObject != null)
 				plasma.GlobalPosition = muzzleObject.GlobalPosition + .2f * d;
 			else
-				plasma.GlobalPosition = playerInfo.playerCamera.CurrentCamera.GlobalPosition;
+				plasma.GlobalPosition = playerInfo.playerCamera.GlobalPosition;
 			plasma.ignoreSelfLayer = playerInfo.playerLayer;
 			plasma.LookAt(plasma.GlobalPosition - d, Vector3.Up);
 		}

@@ -74,7 +74,7 @@ public partial class ShotgunWeapon : PlayerWeapon
 		}
 
 		//Hitscan attack
-		Transform3D global = playerInfo.playerCamera.CurrentCamera.GlobalTransform;
+		Transform3D global = playerInfo.playerCamera.GlobalTransform;
 		Vector3 d = global.Basis.Z;
 
 		for (int i = 0; i < 11; i++)
@@ -82,7 +82,7 @@ public partial class ShotgunWeapon : PlayerWeapon
 			Vector2 r = GetDispersion();
 			d += global.Basis.X * r.X + global.Basis.Y * r.Y;
 			d = d.Normalized();
-			Vector3 Origin = playerInfo.playerCamera.CurrentCamera.GlobalPosition;
+			Vector3 Origin = playerInfo.playerCamera.GlobalPosition;
 			Vector3 End = Origin - d * maxRange;
 			var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | ~((playerInfo.playerLayer) | (1 << GameManager.InvisibleBlockerLayer) | (1 << GameManager.RagdollLayer))));
 			var SpaceState = GetWorld3D().DirectSpaceState;
