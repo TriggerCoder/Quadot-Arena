@@ -1,10 +1,13 @@
 using Godot;
 using ExtensionMethods;
+using System;
 
 public partial class InterpolatedTransform : Node3D
 {
 	[Export]
 	public Node3D Source;
+	[Export]
+	public InterpolatedNode3D interpolationReset;
 
 	private bool update = false;
 	private Transform3D prev;
@@ -13,6 +16,10 @@ public partial class InterpolatedTransform : Node3D
 	public override void _Ready()
 	{
 		TopLevel = true;
+
+		if (interpolationReset != null) 
+			interpolationReset.SetTransformReset += ResetTransform;
+
 		if (Source == null)
 			Source = GetParentNode3D();
 
@@ -28,6 +35,19 @@ public partial class InterpolatedTransform : Node3D
 		GlobalTransform = Source.GlobalTransform;
 	}
 
+	public void SetInterpolationReset(InterpolatedNode3D interpolated) 
+	{
+		interpolationReset = interpolated;
+		if (interpolationReset != null)
+			interpolationReset.SetTransformReset += ResetTransform;
+	}
+	public void ResetTransform()
+	{
+		GameManager.Print("Reset Transform " + Name);
+		current = Source.GlobalTransform;
+		prev = current;
+		GlobalTransform = current;
+	}
 	public void UpdateTransform()
 	{
 		prev = current;

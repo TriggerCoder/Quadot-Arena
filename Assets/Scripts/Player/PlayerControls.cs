@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Globalization;
 
-public partial class PlayerControls : Node3D
+public partial class PlayerControls : InterpolatedNode3D
 {
 	[Export]
 	public PlayerInfo playerInfo;
@@ -129,9 +129,8 @@ public partial class PlayerControls : Node3D
 		}
 	}
 
-
-	public Vector3 teleportDest = Vector3.Zero;
 	private Vector3 rotAngle = Vector3.Zero;
+
 	public override void _Ready()
 	{
 		moveSpeed = runSpeed;
@@ -731,4 +730,5 @@ public partial class PlayerControls : Node3D
 			}
 		}
 	}
+
 }

@@ -80,9 +80,10 @@ ViewCamera = NodePath("../InterpolatedTransform/ViewCamera")
 [node name="VirtualAudioListener" type="Node3D" parent="PlayerInfo"]
 script = ExtResource("6_ve4m7")
 
-[node name="InterpolatedTransform" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("Source")]
+[node name="InterpolatedTransform" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("Source", "interpolationReset")]
 script = ExtResource("10_h25w0")
 Source = NodePath("../MainCameras")
+interpolationReset = NodePath("../../PlayerControls")
 
 [node name="ViewCamera" type="Camera3D" parent="PlayerInfo/InterpolatedTransform"]
 cull_mask = 0

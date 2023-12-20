@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -88,9 +89,12 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public void InitPlayer()
 	{
 		CollisionLayer = playerInfo.playerLayer;
+		
 		InterpolatedTransform interpolatedTransform = new InterpolatedTransform();
+		interpolatedTransform.Name = "PlayerInterpolatedTransform";
 		player.AddChild(interpolatedTransform);
 		interpolatedTransform.SetSource(player);
+		interpolatedTransform.SetInterpolationReset(playerControls);
 
 		avatar = new PlayerModel();
 		interpolatedTransform.AddChild(avatar);
@@ -98,8 +102,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 		Vector3 destination = SpawnerManager.FindSpawnLocation();
 		TeleporterThing.TelefragEverything(destination, this);
-		GlobalPosition = destination;
-		playerControls.teleportDest = destination;
+		Position = destination;
+		playerControls.InvoqueSetTransformReset();
 		playerControls.feetRay.Length = 0.8f;
 
 		if (playerControls.playerWeapon == null)
@@ -239,4 +243,5 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.playerVelocity = Vector3.Zero;
 		playerControls.AnimateLegsOnJump();
 	}
+
 }
