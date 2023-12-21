@@ -1,6 +1,6 @@
 using Godot;
 using System;
-using System.Globalization;
+using ExtensionMethods;
 
 public partial class PlayerControls : InterpolatedNode3D
 {
@@ -217,7 +217,7 @@ public partial class PlayerControls : InterpolatedNode3D
 			playerCamera.ChangeThirdPersonCamera(!playerCamera.currentThirdPerson);
 
 		playerThing.avatar.ChangeView(viewDirection, deltaTime);
-		playerThing.avatar.CheckLegTurn(playerCamera.GlobalTransform.Basis.Z);
+		playerThing.avatar.CheckLegTurn(playerCamera.GlobalTransform.ForwardVector());
 
 		controllerIsGrounded = playerThing.IsOnFloor();
 		playerThing.avatar.isGrounded = controllerIsGrounded;

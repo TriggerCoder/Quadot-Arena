@@ -43,7 +43,6 @@ public partial class InterpolatedTransform : Node3D
 	}
 	public void ResetTransform()
 	{
-		GameManager.Print("Reset Transform " + Name);
 		current = Source.GlobalTransform;
 		prev = current;
 		GlobalTransform = current;

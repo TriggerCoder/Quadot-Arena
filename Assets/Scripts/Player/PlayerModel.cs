@@ -120,6 +120,8 @@ public partial class PlayerModel : Node3D
 	}
 
 	private const int TotalAnimation = 29;
+	private const string defaultModel = "sarge";
+	private const string defaultSkin = "default";
 
 	private Node3D upperBody;
 	private Node3D headBody;
@@ -236,6 +238,7 @@ public partial class PlayerModel : Node3D
 							break;
 						case UpperAnimation.Drop:
 							nextFrameUpper = currentUpper.endFrame;
+							DestroyWeapon();
 							break;
 					}
 				}
@@ -410,7 +413,7 @@ public partial class PlayerModel : Node3D
 		if (ownerDead)
 			return;
 
-		Vector3 forward = Basis.Z;
+		Vector3 forward = this.ForwardVector();
 		int angle = (int)Mathf.Round((Mathf.Atan2(direction.X, direction.Z)) / (Mathf.Pi * 2) * 8) % 8;
 		Quaternion dir = Quaternion.FromEuler(new Vector3(0f, Mathf.DegToRad(angle * 45f), 0f));
 
@@ -529,11 +532,11 @@ public partial class PlayerModel : Node3D
 		}
 
 		if (sideMove > 0)
-			rotate = new Quaternion(Basis.Y, 30f);
+			rotate = new Quaternion(this.UpVector(), 30f);
 		else if (sideMove < 0)
-			rotate = new Quaternion(Basis.Y, -30f);
+			rotate = new Quaternion(this.UpVector(), -30f);
 
-		lowerNode.Basis = lowerNode.Basis.Slerp(new Basis(rotate), lowerRotationFPS * deltaTime);
+		lowerNode.Quaternion = lowerNode.Quaternion.Slerp(rotate, lowerRotationFPS * deltaTime);
 	}
 	public void TurnLegs(int moveType, float sideMove, float forwardMove, float deltaTime)
 	{
@@ -559,9 +562,9 @@ public partial class PlayerModel : Node3D
 					break;
 			}
 			if (sideMove > 0)
-				rotate = new Quaternion(Basis.Y, Mathf.DegToRad(-30f));
+				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(-30f));
 			else if (sideMove < 0)
-				rotate = new Quaternion(Basis.Y, Mathf.DegToRad(30f));
+				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(30f));
 		}
 		else if (forwardMove > 0)
 		{
@@ -579,9 +582,9 @@ public partial class PlayerModel : Node3D
 					break;
 			}
 			if (sideMove > 0)
-				rotate = new Quaternion(Basis.Y, Mathf.DegToRad(30f));
+				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(30f));
 			else if (sideMove < 0)
-				rotate = new Quaternion(Basis.Y, Mathf.DegToRad(-30f));
+				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(-30f));
 		}
 		else if (sideMove != 0)
 		{
@@ -599,9 +602,9 @@ public partial class PlayerModel : Node3D
 					break;
 			}
 			if (sideMove > 0)
-				rotate = new Quaternion(Basis.Y, Mathf.DegToRad(-50f));
+				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(-50f));
 			else if (sideMove < 0)
-				rotate = new Quaternion(Basis.Y, Mathf.DegToRad(50f));
+				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(50f));
 		}
 		else if (lowerAnimation != LowerAnimation.Turn)
 		{
@@ -610,7 +613,7 @@ public partial class PlayerModel : Node3D
 			else
 				lowerAnimation = LowerAnimation.Idle;
 		}
-		lowerNode.Basis = lowerNode.Basis.Slerp(new Basis(rotate), lowerRotationFPS * deltaTime);
+		lowerNode.Quaternion = lowerNode.Quaternion.Slerp(rotate, lowerRotationFPS * deltaTime);
 	}
 
 	public void MuzzleFlashSetActive(bool active)
@@ -625,7 +628,7 @@ public partial class PlayerModel : Node3D
 	{
 		if (barrel == null)
 			return;
-		barrel.Basis = new Basis(barrel.Basis.GetRotationQuaternion().Slerp(rotation,speed));
+		barrel.Quaternion = barrel.Quaternion.Slerp(rotation, speed);
 	}
 
 	public void LoadWeapon(MD3 newWeapon, string completeModelName, string muzzleModelName, uint layer)
@@ -720,6 +723,30 @@ public partial class PlayerModel : Node3D
 		if (weapon == null)
 			return;
 
+		if (ownerDead)
+		{
+			if (weaponModel != null)
+				if (weaponModel.node != null)
+				{
+					RemoveAllMeshInstance3D(weaponNode);
+					weaponModel.node.QueueFree();
+					weaponModel.node = null;
+				}
+
+			weapon = null;
+			barrel = null;
+			muzzleFlash = null;
+			return;
+		}
+
+		upperAnimation = UpperAnimation.Drop;
+	}
+
+	public void DestroyWeapon()
+	{
+		if (weapon == null)
+			return;
+
 		if (weaponModel != null)
 			if (weaponModel.node != null)
 			{
@@ -731,28 +758,28 @@ public partial class PlayerModel : Node3D
 		weapon = null;
 		barrel = null;
 		muzzleFlash = null;
-
-		if (ownerDead)
-			return;
-
-		upperAnimation = UpperAnimation.Drop;
 	}
-	public bool LoadPlayer(string modelName, string SkinName, uint layer, PlayerControls control)
+
+	public bool LoadPlayer(ref string modelName, ref string SkinName, uint layer, PlayerControls control)
 	{
 		string playerModelPath = "players/" + modelName;
-
 		string lowerModelName = playerModelPath + "/lower";
+
+		lower = ModelsManager.GetModel(lowerModelName);
+		if (lower == null)
+		{
+			modelName = defaultModel;
+			playerModelPath = "players/" + modelName;
+			lowerModelName = playerModelPath + "/lower";
+			lower = ModelsManager.GetModel(lowerModelName);
+			if (lower == null)
+				return false;
+		}
+
 		string upperModelName = playerModelPath + "/upper";
 		string headModelName = playerModelPath + "/head";
 		string animationFile = playerModelPath + "/animation";
 
-		string lowerSkin = playerModelPath + "/lower_" + SkinName;
-		string upperSkin = playerModelPath + "/upper_" + SkinName;
-		string headSkin = playerModelPath + "/head_" + SkinName;
-
-		lower = ModelsManager.GetModel(lowerModelName);
-		if (lower == null)
-			return false;
 		upper = ModelsManager.GetModel(upperModelName);
 		if (upper == null)
 			return false;
@@ -761,8 +788,19 @@ public partial class PlayerModel : Node3D
 		if (head == null)
 			return false;
 
+		string lowerSkin = playerModelPath + "/lower_" + SkinName;
+
 		if (!LoadSkin(lower, lowerSkin))
-			return false;
+		{
+			SkinName = defaultSkin;
+			lowerSkin = playerModelPath + "/lower_" + SkinName;
+			if (!LoadSkin(lower, lowerSkin))
+				return false;
+		}
+
+		string upperSkin = playerModelPath + "/upper_" + SkinName;
+		string headSkin = playerModelPath + "/head_" + SkinName;
+
 		if (!LoadSkin(upper, upperSkin))
 			return false;
 		if (!LoadSkin(head, headSkin))

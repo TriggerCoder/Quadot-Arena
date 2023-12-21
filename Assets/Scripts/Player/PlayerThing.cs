@@ -17,8 +17,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public MultiAudioStream audioStream;
 
 	public InterpolatedTransform interpolatedTransform;
-	public string modelName = "sarge";
-	public string skinName = "default";
+	public string modelName = "crash";
+	public string skinName = "cc-crash_blue";
 
 	[Export]
 	public Node3D player;
@@ -97,7 +97,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 		avatar = new PlayerModel();
 		interpolatedTransform.AddChild(avatar);
-		avatar.LoadPlayer(modelName, skinName, (GameManager.AllPlayerViewMask & ~((uint)(playerInfo.viewLayer))), playerControls);
+		avatar.LoadPlayer(ref modelName, ref skinName, (GameManager.AllPlayerViewMask & ~((uint)(playerInfo.viewLayer))), playerControls);
 
 		Vector3 destination = SpawnerManager.FindSpawnLocation();
 		TeleporterThing.TelefragEverything(destination, this);

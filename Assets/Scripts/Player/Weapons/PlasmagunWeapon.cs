@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using ExtensionMethods;
 
 public partial class PlasmagunWeapon : PlayerWeapon
 {
@@ -68,9 +69,9 @@ public partial class PlasmagunWeapon : PlayerWeapon
 		//Projectile attack
 		{
 			Transform3D global = playerInfo.playerCamera.GlobalTransform;
-			Vector3 d = global.Basis.Z;
+			Vector3 d = global.ForwardVector();
 			Vector2 r = GetDispersion();
-			d += global.Basis.X * r.X + global.Basis.Y * r.Y;
+			d += global.RightVector() * r.X + global.UpVector() * r.Y;
 			d = d.Normalized();
 
 			Projectile plasma = (Projectile)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
@@ -79,9 +80,10 @@ public partial class PlasmagunWeapon : PlayerWeapon
 			if (muzzleObject != null)
 				plasma.GlobalPosition = muzzleObject.GlobalPosition + .2f * d;
 			else
-				plasma.GlobalPosition = playerInfo.playerCamera.GlobalPosition;
+				plasma.GlobalPosition = global.Origin;
 			plasma.ignoreSelfLayer = playerInfo.playerLayer;
-			plasma.LookAt(plasma.GlobalPosition - d, Vector3.Up);
+			plasma.SetForward(-d);
+			plasma.InvoqueSetTransformReset();
 		}
 
 		return true;

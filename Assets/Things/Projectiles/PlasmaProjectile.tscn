@@ -28,9 +28,10 @@ audioStream = NodePath("MultiAudioStream")
 [node name="MultiAudioStream" type="Node3D" parent="."]
 script = ExtResource("4_nkpjw")
 
-[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source")]
+[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source", "interpolationReset")]
 script = ExtResource("3_85jl5")
 Source = NodePath("../SourcePlasma")
+interpolationReset = NodePath("..")
 
 [node name="Plasma" type="Sprite3D" parent="InterpolatedTransform"]
 layers = 255

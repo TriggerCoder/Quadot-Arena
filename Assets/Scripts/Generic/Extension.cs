@@ -11,6 +11,19 @@ namespace ExtensionMethods
 			else
 				node3D.Rotation = Transform3D.Identity.LookingAt(forward, Vector3.Up).Basis.GetEuler();
 		}
+
+		public static Vector3 ForwardVector(this Node3D node3D)
+		{
+			return node3D.Basis.Z;
+		}
+		public static Vector3 UpVector(this Node3D node3D)
+		{
+			return node3D.Basis.Y;
+		}
+		public static Vector3 RightVector(this Node3D node3D)
+		{
+			return node3D.Basis.X;
+		}
 	}
 
 	public static class QuaternionExtensions
@@ -43,6 +56,18 @@ namespace ExtensionMethods
 			result.Basis.Scaled(scale3);
 			result.Origin = origin.Lerp(origin2, weight);
 			return result;
+		}
+		public static Vector3 ForwardVector(this Transform3D transform)
+		{
+			return transform.Basis.Z;
+		}
+		public static Vector3 UpVector(this Transform3D transform)
+		{
+			return transform.Basis.Y;
+		}
+		public static Vector3 RightVector(this Transform3D transform)
+		{
+			return transform.Basis.X;
 		}
 	}
 

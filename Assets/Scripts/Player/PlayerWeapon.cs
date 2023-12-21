@@ -1,3 +1,4 @@
+using ExtensionMethods;
 using Godot;
 using System;
 public partial class PlayerWeapon : Node3D
@@ -30,7 +31,7 @@ public partial class PlayerWeapon : Node3D
 	[Export]
 	public int DamageMax = 15;
 	[Export]
-	public float swapSpeed = 6f;
+	public float swapSpeed = 12f;
 	[Export]
 	public float kickSpeed = 6f;
 	[Export]
@@ -251,7 +252,7 @@ public partial class PlayerWeapon : Node3D
 		Quaternion rotX = new Quaternion(Vector3.Forward, mouse.Y);
 		Quaternion rotY = new Quaternion(Vector3.Up, mouse.X);
 
-		Quaternion rotZ = GetRotate(delta).Normalized();
+		Quaternion rotZ = GetRotate(delta).FastNormal();
 
 		playerInfo.playerThing.avatar.RotateBarrel(rotZ, rotateSpeed * delta);
 
@@ -262,7 +263,7 @@ public partial class PlayerWeapon : Node3D
 
 	void ApplyRotation(Quaternion targetRot, float deltaTime)
 	{
-		Basis = new Basis(Transform.Basis.GetRotationQuaternion().Slerp(targetRot, rotateSpeed * deltaTime));
+		Quaternion = Quaternion.Slerp(targetRot, rotateSpeed * deltaTime);
 	}
 
 	protected virtual Quaternion GetRotate(float deltaTime)

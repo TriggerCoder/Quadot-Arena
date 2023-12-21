@@ -2,7 +2,7 @@ using Godot;
 using System;
 using ExtensionMethods;
 
-public partial class Projectile : Node3D
+public partial class Projectile : InterpolatedNode3D
 {
 	public Node3D owner;
 	[Export]
@@ -93,7 +93,7 @@ public partial class Projectile : Node3D
 		CollisionObject3D Hit = null;
 		Vector3 Collision = Vector3.Zero;
 		Vector3 Normal = Vector3.Zero;
-		Vector3 d = GlobalTransform.Basis.Z;
+		Vector3 d = GlobalTransform.ForwardVector();
 
 		var SpaceState = GetWorld3D().DirectSpaceState;
 		//check for collision
@@ -218,7 +218,7 @@ public partial class Projectile : Node3D
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
 				DecalMark.Position = Collision + (Normal * .03f);
 				DecalMark.SetForward(-Normal);
-				DecalMark.Rotate((DecalMark.Basis.Y).Normalized(), -Mathf.Pi * .5f);
+				DecalMark.Rotate((DecalMark.UpVector()).Normalized(), -Mathf.Pi * .5f);
 				DecalMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				if (!string.IsNullOrEmpty(secondaryMark))
 				{
@@ -226,7 +226,7 @@ public partial class Projectile : Node3D
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(SecondMark);
 					SecondMark.Position = Collision + (Normal * .05f);
 					SecondMark.SetForward(-Normal);
-					SecondMark.Rotate((SecondMark.Basis.Y).Normalized(), -Mathf.Pi * .5f);
+					SecondMark.Rotate((SecondMark.UpVector()).Normalized(), -Mathf.Pi * .5f);
 					SecondMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}
 			}

@@ -78,9 +78,9 @@ public partial class MachineGunWeapon : PlayerWeapon
 		//Hitscan attack
 		{
 			Transform3D global = playerInfo.playerCamera.GlobalTransform;
-			Vector3 d = global.Basis.Z;
+			Vector3 d = global.ForwardVector();
 			Vector2 r = GetDispersion();
-			d += global.Basis.X * r.X + global.Basis.Y * r.Y;
+			d += global.RightVector() * r.X + global.UpVector() * r.Y;
 			d = d.Normalized();
 			Vector3 Origin = playerInfo.playerCamera.GlobalPosition;
 			Vector3 End = Origin - d * maxRange;
@@ -96,7 +96,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletHit);
 				BulletHit.Position = collision + (normal * .2f);
 				BulletHit.SetForward(normal);
-				BulletHit.Rotate(BulletHit.Basis.Y, -Mathf.Pi * .5f);
+				BulletHit.Rotate(BulletHit.UpVector(), -Mathf.Pi * .5f);
 				BulletHit.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				if (Sounds.Length > 3)
 					SoundManager.Create3DSound(collision, Sounds[GD.RandRange(3, Sounds.Length - 1)]);
@@ -107,7 +107,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletMark);
 					BulletMark.Position = collision + (normal * .05f);
 					BulletMark.SetForward(-normal);
-					BulletMark.Rotate((BulletMark.Basis.Y).Normalized(), -Mathf.Pi * .5f);
+					BulletMark.Rotate((BulletMark.UpVector()).Normalized(), -Mathf.Pi * .5f);
 					BulletMark.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}
 			}

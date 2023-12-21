@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using ExtensionMethods;
 
 public partial class RocketLauncherWeapon : PlayerWeapon
 {
@@ -68,9 +69,9 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 		//Projectile attack
 		{
 			Transform3D global = playerInfo.playerCamera.GlobalTransform;
-			Vector3 d = global.Basis.Z;
+			Vector3 d = global.ForwardVector();
 			Vector2 r = GetDispersion();
-			d += global.Basis.X * r.X + global.Basis.Y * r.Y;
+			d += global.RightVector() * r.X + global.UpVector() * r.Y;
 			d = d.Normalized();
 
 			Projectile rocket = (Projectile)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
@@ -79,9 +80,10 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 			if (muzzleObject != null)
 				rocket.GlobalPosition = muzzleObject.GlobalPosition + .2f * d;
 			else
-				rocket.GlobalPosition = playerInfo.playerCamera.GlobalPosition;
+				rocket.GlobalPosition = global.Origin;
 			rocket.ignoreSelfLayer = playerInfo.playerLayer;
-			rocket.LookAt(rocket.GlobalPosition - d, Vector3.Up);
+			rocket.SetForward(-d);
+			rocket.InvoqueSetTransformReset();
 		}
 
 		return true;

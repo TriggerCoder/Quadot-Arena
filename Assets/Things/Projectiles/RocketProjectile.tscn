@@ -38,9 +38,10 @@ audioStream = NodePath("MultiAudioStream")
 [node name="MultiAudioStream" type="Node3D" parent="."]
 script = ExtResource("2_741w6")
 
-[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source")]
+[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source", "interpolationReset")]
 script = ExtResource("3_ttljs")
 Source = NodePath("../SourceRocket")
+interpolationReset = NodePath("..")
 
 [node name="Rocket" type="Node3D" parent="InterpolatedTransform"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
