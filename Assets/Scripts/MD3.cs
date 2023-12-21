@@ -97,7 +97,7 @@ public class MD3
 
 		md3Model.frames = new List<MD3Frame>();
 		Md3ModelFile.BaseStream.Seek(ofsFrames, SeekOrigin.Begin);
-		for (int i = 0, j = 0, numFrame = 1; i < md3Model.numFrames * md3Model.numTags; i++)
+		for (int i = 0; i < md3Model.numFrames; i++)
 		{
 			MD3Frame frame = new MD3Frame();
 
@@ -111,22 +111,17 @@ public class MD3
 			z = Md3ModelFile.ReadSingle();
 			frame.bb_Max = new Vector3(x, y, z);
 
-			frame.bs_Radius = Md3ModelFile.ReadSingle();
-
 			x = Md3ModelFile.ReadSingle();
 			y = Md3ModelFile.ReadSingle();
 			z = Md3ModelFile.ReadSingle();
 			frame.locOrigin = new Vector3(x, y, z);
 
+			frame.bs_Radius = Md3ModelFile.ReadSingle();
+
 			Md3ModelFile.ReadBytes(16);
 //			name = (new string(Md3ModelFile.ReadChars(16))).Split('\0');
 //			frame.name = name[0].Replace("\0", string.Empty);
-			frame.name = "Tag Frame " + numFrame++;
-			if (((i + 1) % md3Model.numFrames) == 0)
-			{
-				j++;
-				numFrame = 1;
-			}
+			frame.name = "Frame " + i;
 			frame.QuakeToGodotCoordSystem();
 			md3Model.frames.Add(frame);
 		}
@@ -193,6 +188,9 @@ public class MD3
 				md3Model.tagsIdbyName.Add(tag.name, tagId++);
 				md3Model.tagsbyId.Add(tagList);
 			}
+
+			int numFram = i % md3Model.numFrames;
+			tag.localOrigin = md3Model.frames[numFram].locOrigin;
 			md3Model.tagsbyId[md3Model.tagsIdbyName[tag.name]].Add(tag);
 		}
 
@@ -233,6 +231,7 @@ public class MD3Tag
 {
 	public string name;                 // The name of the tag
 	public Vector3 origin;              // The origin of the tag in 3D space
+	public Vector3 localOrigin;         // Model local origin in 3D space
 	public Transform3D orientation;       // The orientation of the tag in 3D space
 	public Quaternion rotation;         // The rotation of the tag in 3D space
 	public void QuakeToGodotCoordSystem()

@@ -1,6 +1,5 @@
 using Godot;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
 using ExtensionMethods;
 public partial class PlayerModel : Node3D
@@ -148,7 +147,6 @@ public partial class PlayerModel : Node3D
 	private PlayerControls playerControls;
 	private float impulseDampening = 4f;
 	private Vector3 impulseVector = Vector3.Zero;
-
 	public int Hitpoints { get { return hitpoints; } }
 	public bool Dead { get { return hitpoints <= 0; } }
 	public bool Bleed { get { return true; } }
@@ -169,7 +167,7 @@ public partial class PlayerModel : Node3D
 		PhysicsServer3D.ShapeSetData(Sphere, .5f);
 		SphereCast.CollisionMask = (1 << GameManager.ColliderLayer);
 		SphereCast.Motion = Vector3.Zero;
-		SphereCast.Transform = new Transform3D(Basis.Identity, Position);
+		SphereCast.Transform = new Transform3D(Basis.Identity, upperBody.GlobalPosition);
 		var SpaceState = GetWorld3D().DirectSpaceState;
 		var hit = SpaceState.GetRestInfo(SphereCast);
 		if (hit.ContainsKey("collider_id"))
@@ -302,6 +300,7 @@ public partial class PlayerModel : Node3D
 			Quaternion lowerTorsoRotation = lower.tagsbyId[lower_tag_torso][currentFrameLower].rotation.Slerp(lower.tagsbyId[lower_tag_torso][nextFrameLower].rotation, lowerCurrentLerpTime).FastNormal();
 			Quaternion weaponRotation = upper.tagsbyId[upper_tag_weapon][currentFrameUpper].rotation.Slerp(upper.tagsbyId[upper_tag_weapon][nextFrameUpper].rotation, upperCurrentLerpTime).FastNormal();
 
+			Vector3 localOrigin = lower.tagsbyId[lower_tag_torso][currentFrameLower].localOrigin.Lerp(lower.tagsbyId[lower_tag_torso][nextFrameLower].localOrigin, lowerCurrentLerpTime);
 			Vector3 upperTorsoOrigin = upper.tagsbyId[upper_tag_torso][currentFrameUpper].origin.Lerp(upper.tagsbyId[upper_tag_torso][nextFrameUpper].origin, upperCurrentLerpTime);
 			Vector3 upperHeadOrigin = upper.tagsbyId[upper_tag_head][currentFrameUpper].origin.Lerp(upper.tagsbyId[upper_tag_head][nextFrameUpper].origin, upperCurrentLerpTime);
 			Vector3 lowerTorsoOrigin = lower.tagsbyId[lower_tag_torso][currentFrameLower].origin.Lerp(lower.tagsbyId[lower_tag_torso][nextFrameLower].origin, lowerCurrentLerpTime);
@@ -326,6 +325,7 @@ public partial class PlayerModel : Node3D
 					upperModel.data[i].arrMesh.ClearSurfaces();
 					upperModel.data[i].meshDataTool.CommitToSurface(upperModel.data[i].arrMesh);
 				}
+				upperBody.Position = lowerTorsoOrigin;
 
 				Quaternion baseRotation = lowerTorsoRotation;
 				currentOffset = baseRotation * upperHeadOrigin;
@@ -340,13 +340,9 @@ public partial class PlayerModel : Node3D
 				weaponNode.Position = currentOffset;
 				weaponNode.Basis = new Basis(currentRotation);
 
-//				if ((_enableOffset) || (ownerDead))
-				Position = lowerTorsoOrigin;
-//				else
-//					Position = Vector3.Zero;
+				Position = localOrigin;
 
 				currentOffset = upperTorsoRotation * upperTorsoOrigin;
-				currentOffset -= lowerTorsoOrigin;
 				currentRotation = upperTorsoRotation;
 
 				for (int i = 0; i < lower.meshes.Count; i++)
@@ -436,7 +432,7 @@ public partial class PlayerModel : Node3D
 	
 	private void ChangeToRagDoll()
 	{
-		AnimatableBody3D modelCollider = new AnimatableBody3D();
+		StaticBody3D modelCollider = new StaticBody3D();
 
 		modelCollider.Name = "Player_collider";
 		AddChild(modelCollider);
@@ -444,23 +440,34 @@ public partial class PlayerModel : Node3D
 		uint OwnerShapeId = modelCollider.CreateShapeOwner(this);
 		for (int i = 0; i < upper.meshes.Count; i++)
 		{
-			MD3Mesh currentMesh = upper.meshes[i];
 			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
-			modelColliderShape.Data = upperModel.data[i].arrMesh.GetFaces();
+			Vector3[] faces = upperModel.data[i].arrMesh.GetFaces();
+			Quaternion rotation = upperBody.Quaternion;
+			for (int j = 0; j < faces.Length; j++)
+			{
+				faces[j] = rotation * faces[j];
+				faces[j] += upperBody.Position;
+			}
+			modelColliderShape.Data = faces;
 			modelCollider.ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
 		}
 
 		for (int i = 0; i < head.meshes.Count; i++)
 		{
-			MD3Mesh currentMesh = head.meshes[i];
 			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
-			modelColliderShape.Data = headModel.data[i].arrMesh.GetFaces();
+			Vector3[] faces = headModel.data[i].arrMesh.GetFaces();
+			Quaternion rotation = tagHeadNode.Quaternion;
+			for (int j = 0; j < faces.Length; j++)
+			{
+				faces[j] = rotation * faces[j];
+				faces[j] += tagHeadNode.Position + upperBody.Position;
+			}
+			modelColliderShape.Data = faces;
 			modelCollider.ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
 		}
 
 		for (int i = 0; i < lower.meshes.Count; i++)
 		{
-			MD3Mesh currentMesh = lower.meshes[i];
 			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
 			modelColliderShape.Data = lowerModel.data[i].arrMesh.GetFaces();
 			modelCollider.ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
@@ -470,10 +477,9 @@ public partial class PlayerModel : Node3D
 		modelCollider.CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.RagdollLayer));
 		impulseVector = playerControls.impulseVector;
 		playerControls.playerThing.CollisionLayer = (1 << GameManager.NoCollisionLayer);
-//		playerControls.EnableColliders(false);
 		ragDoll = true;
 		Reparent(GameManager.Instance.TemporaryObjectsHolder);
-
+		playerControls.playerThing.interpolatedTransform.QueueFree();
 	}
 
 	public void Die()

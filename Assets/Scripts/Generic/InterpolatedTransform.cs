@@ -70,4 +70,9 @@ public partial class InterpolatedTransform : Node3D
 		update = true;
 	}
 
+	public override void _ExitTree()
+	{
+		if (interpolationReset != null)
+			interpolationReset.SetTransformReset -= ResetTransform;
+	}
 }

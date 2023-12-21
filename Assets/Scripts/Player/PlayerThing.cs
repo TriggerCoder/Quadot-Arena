@@ -1,6 +1,4 @@
 using Godot;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 
 public partial class PlayerThing : CharacterBody3D, Damageable
@@ -18,6 +16,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	[Export]
 	public MultiAudioStream audioStream;
 
+	public InterpolatedTransform interpolatedTransform;
 	public string modelName = "sarge";
 	public string skinName = "default";
 
@@ -90,7 +89,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	{
 		CollisionLayer = playerInfo.playerLayer;
 		
-		InterpolatedTransform interpolatedTransform = new InterpolatedTransform();
+		interpolatedTransform = new InterpolatedTransform();
 		interpolatedTransform.Name = "PlayerInterpolatedTransform";
 		player.AddChild(interpolatedTransform);
 		interpolatedTransform.SetSource(player);
@@ -104,7 +103,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		TeleporterThing.TelefragEverything(destination, this);
 		Position = destination;
 		playerControls.InvoqueSetTransformReset();
-		playerControls.feetRay.Length = 0.8f;
+		playerControls.feetRay.Length = .8f;
 
 		if (playerControls.playerWeapon == null)
 			playerControls.SwapToBestWeapon();
@@ -199,7 +198,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			playerControls.playerCamera.ChangeThirdPersonCamera(true);
 			PlayModelSound("death" + GD.RandRange(1, 3));
 			avatar.Die();
-			playerControls.feetRay.Length = 1.2f;
+			playerControls.feetRay.Length = 1.6f;
 			ready = false;
 //			GameManager.Instance.AddDeathCount();
 		}
