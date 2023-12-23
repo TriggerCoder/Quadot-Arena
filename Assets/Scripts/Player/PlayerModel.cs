@@ -52,6 +52,7 @@ public partial class PlayerModel : Node3D
 	private bool loaded = false;
 	private bool ragDoll = false;
 	private bool ownerDead = false;
+	private bool destroyWeapon = false;
 	public class ModelAnimation
 	{
 		public int index;
@@ -238,7 +239,8 @@ public partial class PlayerModel : Node3D
 							break;
 						case UpperAnimation.Drop:
 							nextFrameUpper = currentUpper.endFrame;
-							DestroyWeapon();
+							if (destroyWeapon)
+								DestroyWeapon();
 							break;
 					}
 				}
@@ -635,14 +637,8 @@ public partial class PlayerModel : Node3D
 	{
 		if (ownerDead)
 			return;
-
-		if (weaponModel != null)
-			if (weaponModel.node != null)
-			{
-				RemoveAllMeshInstance3D(weaponNode);
-				weaponModel.node.QueueFree();
-				weaponModel.node = null;
-			}
+		if (destroyWeapon)
+			DestroyWeapon();
 
 		if (!string.IsNullOrEmpty(completeModelName))
 		{
@@ -738,7 +734,7 @@ public partial class PlayerModel : Node3D
 			muzzleFlash = null;
 			return;
 		}
-
+		destroyWeapon = true;
 		upperAnimation = UpperAnimation.Drop;
 	}
 
@@ -758,6 +754,7 @@ public partial class PlayerModel : Node3D
 		weapon = null;
 		barrel = null;
 		muzzleFlash = null;
+		destroyWeapon = false;
 	}
 
 	public bool LoadPlayer(ref string modelName, ref string SkinName, uint layer, PlayerControls control)
@@ -884,7 +881,6 @@ public partial class PlayerModel : Node3D
 			if (child is MeshInstance3D mesh)
 			{
 				modelsMeshes.Add(mesh);
-
 				MeshInstance3D shadowMesh = new MeshInstance3D();
 				shadowMesh.Mesh = mesh.Mesh;
 				shadowMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;

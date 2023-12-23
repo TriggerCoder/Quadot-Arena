@@ -370,6 +370,9 @@ public partial class PlayerControls : InterpolatedNode3D
 			if (playerWeapon == null)
 				return;
 
+			if (!playerWeapon.weaponReady)
+				return;
+
 			if (playerWeapon.Fire())
 			{
 //				playerInfo.playerHUD.HUDUpdateAmmoNum();
@@ -673,7 +676,12 @@ public partial class PlayerControls : InterpolatedNode3D
 		}
 
 		if (playerWeapon != null)
+		{
+			if (!playerWeapon.weaponReady)
+				return false;
+
 			playerWeapon.putAway = true;
+		}
 
 		SwapWeapon = weapon;
 		return true;

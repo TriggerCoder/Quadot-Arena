@@ -44,7 +44,6 @@ public partial class PlayerWeapon : Node3D
 	Vector2 MousePosition;
 	Vector2 oldMousePosition = Vector2.Zero;
 
-	public PlayerWeapon Instance;
 	public PlayerInfo playerInfo = null;
 
 	public float LowerOffset = -.4f;
@@ -53,7 +52,7 @@ public partial class PlayerWeapon : Node3D
 	public int Noise = 0;
 
 	public bool putAway = false;
-	public void PutAway() { if (Instance != null) Instance.putAway = true; }
+	public bool weaponReady = false;
 
 	public bool cooldown = false;
 	public bool useCooldown = false;
@@ -76,11 +75,6 @@ public partial class PlayerWeapon : Node3D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		if (Instance != null)
-			Instance.QueueFree();
-
-		Instance = this;
-
 		Sounds = new AudioStreamWav[_sounds.Length];
 		for (int i = 0; i < _sounds.Length; i++)
 			Sounds[i] = SoundManager.LoadSound(_sounds[i]);
@@ -187,6 +181,11 @@ public partial class PlayerWeapon : Node3D
 		else
 			LowerAmount = Mathf.Lerp(LowerAmount, 0, deltaTime * swapSpeed);
 		LowerAmount = Mathf.Clamp(LowerAmount, 0, 1);
+		if (!weaponReady)
+		{
+			if (LowerAmount < 0.01f)
+				weaponReady = true;
+		}
 
 		if (fireTime > 0)
 			KickAmount = Mathf.Lerp(KickAmount, 1, deltaTime * kickSpeed);
@@ -279,9 +278,6 @@ public partial class PlayerWeapon : Node3D
 
 	public override void _ExitTree()
 	{
-		base._ExitTree();
-		if (Instance == this)
-			Instance = null;
 		playerInfo.playerControls.playerWeapon = null;
 	}
 	public Vector2 GetDispersion()
