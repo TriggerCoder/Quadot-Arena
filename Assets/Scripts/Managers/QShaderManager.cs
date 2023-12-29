@@ -193,7 +193,7 @@ public static class QShaderManager
 			break;
 			case QShaderGlobal.SortType.Additive:
 				GSHeader += "depth_draw_always, blend_add, ";
-				alphaIsTransparent = true;
+//				alphaIsTransparent = true;
 			break;
 		}
 
@@ -293,17 +293,14 @@ public static class QShaderManager
 		if (animStages)
 			code += GSAnimation;
 
-		if (MaterialManager.HasBillBoard.Contains(upperName))
+		//Vertex
 		{
 			code += GSVertexH;
-			code += "VERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n}\n";
-		}
-		else
-		{
-			code += GSVertexH;
+			code += GetVertex(qShader);
 			code += GSVertexUvs + "}\n";
 		}
 
+		//Lightning
 		{
 			code += GSLigtH;
 			code += GetDiffuseLightning();
@@ -359,7 +356,7 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (upperName.Contains("FLAME2"))
+		if (upperName.Contains("PROTOBANNER"))
 			GameManager.Print(code);
 
 		Shader shader = new Shader();
@@ -418,6 +415,71 @@ public static class QShaderManager
 		return DiffuseLight;
 	}
 
+	public static string GetVertex(QShaderData qShader)
+	{
+		string Vertex = "";
+
+		if (MaterialManager.HasBillBoard.Contains(qShader.Name))
+		{
+			Vertex = "VERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
+			return Vertex;
+		}
+		if (qShader.qShaderGlobal.deformVertexes == null)
+			return Vertex;
+
+		Vertex = "\tfloat Time = (MsTime - OffSetTime);\n";
+		string Vars = "";
+		string Verts = "";
+		for (int i = 0; i < qShader.qShaderGlobal.deformVertexes.Count; i++)
+		{
+			string[] VertexFunc = qShader.qShaderGlobal.deformVertexes[i];
+
+			// Wave
+			if (VertexFunc.Length > 6)
+			{
+				float div = TryToParseFloat(VertexFunc[1]) * GameManager.sizeDividor;
+				string DeformFunc = VertexFunc[2];
+				float offset = TryToParseFloat(VertexFunc[3]);
+				float amp = TryToParseFloat(VertexFunc[4]);
+				float phase = TryToParseFloat(VertexFunc[5]);
+				float freq = TryToParseFloat(VertexFunc[6]);
+
+				if (div > 0)
+					div = 1.0f / div;
+				else
+					div = 100 * GameManager.sizeDividor;
+
+				Vars += "\tfloat OffSet_" + i + " = (VERTEX.x + VERTEX.y + VERTEX.z) * "+ div.ToString("0.00") + ";\n";
+				switch (DeformFunc)
+				{
+					case "SIN":
+						Verts += "\tVERTEX += NORMAL * "+ GameManager.sizeDividor.ToString("0.00") + " * (";
+						Verts += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") + " +  OffSet_" + i + "))  * " + amp.ToString("0.00") + "); \n";
+						break;
+					case "SQUARE":
+						Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+						Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))); \n";
+						break;
+					case "TRIANGLE":
+						Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+						Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))))); \n";
+						break;
+					case "SAWTOOTH":
+						Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+						Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))); \n";
+						break;
+					case "INVERSESAWTOOTH":
+						Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+						Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + ")))); \n";
+						break;
+				}
+			}
+		}
+		Vertex += Vars;
+		Vertex += Verts;
+
+		return Vertex;
+	}
 	public static string GetUVGen(QShaderData qShader, int currentStage, ref string GSVaryings)
 	{
 		string UVGen = "";
@@ -682,7 +744,10 @@ public static class QShaderManager
 						adst = " 1.0 ";
 						//Horrible hack
 						if (currentStage == 0)
-							alphaIsTransparent = true;
+						{
+							qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
+							GameManager.Print("HORRIBLE HACK");
+						}
 						break;
 					case "GL_ZERO":
 						cdst = " 0.0 ";
@@ -716,13 +781,14 @@ public static class QShaderManager
 				//Horrible hack
 				if (currentStage == 0)
 				{
-					if (qShader.qShaderStages[currentStage].environment)
+	/*				if (qShader.qShaderStages[currentStage].environment)
 					{
 						if ((src == "GL_ONE") && (dst == "GL_ONE"))
 						{
 							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
-							Blend += "\tcolor.a = 0.3; \n";
-							alphaIsTransparent = true;
+//							Blend += "\tcolor.a = 1.0; \n";
+							qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
+//							alphaIsTransparent = true;
 						}
 						else
 						{
@@ -730,7 +796,7 @@ public static class QShaderManager
 							Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
 						}
 					}
-					else if ((src == "GL_ZERO") && (dst == "GL_ONE_MINUS_SRC_COLOR"))
+					else*/ if ((src == "GL_ZERO") && (dst == "GL_ONE_MINUS_SRC_COLOR"))
 					{
 						Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
 						Blend += "\tcolor.a = Stage_" + currentStage + ".a; \n";
@@ -956,7 +1022,7 @@ public class QShaderGlobal
 {
 	public List<string> surfaceParms = null;
 	public List<string> skyParms = null;
-	public List<string> deformVertexes = null;
+	public List<string[]> deformVertexes = null;
 	public List<string> fogParms = null;
 	public SortType sort = SortType.Opaque;
 	public List<string> tessSize = null;
@@ -971,6 +1037,7 @@ public class QShaderGlobal
 	public bool isSky = false;
 	public bool unShaded = false;
 	public bool trans = false;
+	public bool lava = false;
 	public bool noPicMip = false;
 	public bool portal = false;
 	public bool noMipMap = false;
@@ -1003,13 +1070,19 @@ public class QShaderGlobal
 				switch (Value)
 				{
 					case "TRANS":
-						trans = true;
+						if (!lava)
+							trans = true;
 					break;
 					case "NODLIGHT":
 						unShaded = true;
 					break;
 					case "SKY":
 						isSky = true;
+					break;
+					case "LAVA":
+						lava = true;
+						if (trans)
+							trans = false;
 					break;
 				}
 				break;
@@ -1033,10 +1106,10 @@ public class QShaderGlobal
 				}
 			break;
 			case "DEFORMVERTEXES":
-				if (deformVertexes ==  null)
-					deformVertexes = new List<string>();
-				deformVertexes.Add(Value);
-			break;
+				if (deformVertexes == null)
+					deformVertexes = new List<string[]>();
+				deformVertexes.Add(Value.Split(' '));
+				break;
 			case "FOGPARMS":
 				if (fogParms == null)
 					fogParms = new List<string>();
