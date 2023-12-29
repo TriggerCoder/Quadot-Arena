@@ -192,8 +192,10 @@ public static class QShaderManager
 			}
 			break;
 			case QShaderGlobal.SortType.Additive:
-				GSHeader += "depth_draw_always, blend_add, ";
-//				alphaIsTransparent = true;
+				if (depthWrite)
+					GSHeader += "depth_draw_always, blend_add, ";
+				else
+					GSHeader += "depth_draw_opaque, blend_add, ";
 			break;
 		}
 
@@ -376,19 +378,21 @@ public static class QShaderManager
 		if (qShader.qShaderGlobal.portal)
 		{
 			hasPortal = true;
-			ShaderMaterial portalMaterial = PortalMaterial();
+			ShaderMaterial portalMaterial = PortalMaterial(qShader);
 			shaderMaterial.NextPass = portalMaterial;
 		}
 		return shaderMaterial;
 	}
 
-	public static ShaderMaterial PortalMaterial()
+	public static ShaderMaterial PortalMaterial(QShaderData qShader)
 	{
 		string code = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, depth_draw_always, blend_mix, cull_back;\n\n";
 		code += "uniform sampler2D Tex_0 : repeat_enable;\n";
 		code += "uniform float Transparency : hint_range(0, 1) = 0.0;\n";
 		code += "global uniform float MsTime;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
+		code += "void vertex()\n{ \n";
+		code += GetVertex(qShader) + "}\n";
 		code += "void fragment()\n{\n\tvec2 uv_0 = SCREEN_UV;\n\tvec4 Stage_0 = texture(Tex_0, uv_0);\n";
 		code += "\tvec4 ambient = vec4(" + GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.R.ToString("0.00") + "," + GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.G.ToString("0.00") + "," + GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.B.ToString("0.00") + ", 1.0 );\n";
 		code += "\tvec4 vertx_color = COLOR;\n";
@@ -433,46 +437,51 @@ public static class QShaderManager
 		for (int i = 0; i < qShader.qShaderGlobal.deformVertexes.Count; i++)
 		{
 			string[] VertexFunc = qShader.qShaderGlobal.deformVertexes[i];
-
-			// Wave
-			if (VertexFunc.Length > 6)
+			switch (VertexFunc[0])
 			{
-				float div = TryToParseFloat(VertexFunc[1]) * GameManager.sizeDividor;
-				string DeformFunc = VertexFunc[2];
-				float offset = TryToParseFloat(VertexFunc[3]);
-				float amp = TryToParseFloat(VertexFunc[4]);
-				float phase = TryToParseFloat(VertexFunc[5]);
-				float freq = TryToParseFloat(VertexFunc[6]);
-
-				if (div > 0)
-					div = 1.0f / div;
-				else
-					div = 100 * GameManager.sizeDividor;
-
-				Vars += "\tfloat OffSet_" + i + " = (VERTEX.x + VERTEX.y + VERTEX.z) * "+ div.ToString("0.00") + ";\n";
-				switch (DeformFunc)
+				case "WAVE":
 				{
-					case "SIN":
-						Verts += "\tVERTEX += NORMAL * "+ GameManager.sizeDividor.ToString("0.00") + " * (";
-						Verts += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") + " +  OffSet_" + i + "))  * " + amp.ToString("0.00") + "); \n";
+					float div = TryToParseFloat(VertexFunc[1]) * GameManager.sizeDividor;
+					string DeformFunc = VertexFunc[2];
+					float offset = TryToParseFloat(VertexFunc[3]);
+					float amp = TryToParseFloat(VertexFunc[4]);
+					float phase = TryToParseFloat(VertexFunc[5]);
+					float freq = TryToParseFloat(VertexFunc[6]);
+
+					if (div > 0)
+						div = 1.0f / div;
+					else
+						div = 100 * GameManager.sizeDividor;
+
+					Vars += "\tfloat OffSet_" + i + " = (VERTEX.x + VERTEX.y + VERTEX.z) * " + div.ToString("0.00") + ";\n";
+					switch (DeformFunc)
+					{
+						case "SIN":
+							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+							Verts += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") + " +  OffSet_" + i + "))  * " + amp.ToString("0.00") + "); \n";
 						break;
-					case "SQUARE":
-						Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
-						Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))); \n";
+						case "SQUARE":
+							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))); \n";
 						break;
-					case "TRIANGLE":
-						Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
-						Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))))); \n";
+						case "TRIANGLE":
+							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))))); \n";
 						break;
-					case "SAWTOOTH":
-						Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
-						Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))); \n";
+						case "SAWTOOTH":
+							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))); \n";
 						break;
-					case "INVERSESAWTOOTH":
-						Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
-						Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + ")))); \n";
+						case "INVERSESAWTOOTH":
+							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + ")))); \n";
 						break;
+					}
 				}
+				break;
+				default:
+
+				break;
 			}
 		}
 		Vertex += Vars;
@@ -707,96 +716,76 @@ public static class QShaderManager
 					case "GL_ONE":
 						csrc = " 1.0 ";
 						asrc = " 1.0 ";
-						break;
+					break;
 					case "GL_ZERO":
 						csrc = " 0.0 ";
 						asrc = " 0.0 ";
-						break;
+					break;
 					case "GL_DST_COLOR":
 						csrc = " color.rgb ";
 						asrc = " color.a ";
-						break;
+					break;
 					case "GL_ONE_MINUS_DST_COLOR":
 						csrc = " 1.0 - color.rgb ";
 						asrc = " 1.0 - color.a ";
-						break;
+					break;
 					case "GL_SRC_ALPHA":
 						csrc = "  Stage_" + currentStage + ".a ";
 						asrc = "  Stage_" + currentStage + ".a ";
-						break;
+					break;
 					case "GL_ONE_MINUS_SRC_ALPHA":
 						csrc = " (1.0 -  Stage_" + currentStage + ".a) ";
 						asrc = " (1.0 -  Stage_" + currentStage + ".a) ";
-						break;
+					break;
 					case "GL_DST_ALPHA":
 						csrc = " color.a ";
 						asrc = " color.a ";
-						break;
+					break;
 					case "GL_ONE_MINUS_DST_ALPHA":
 						csrc = " (1.0 - color.a) ";
 						asrc = " (1.0 - color.a) ";
-						break;
+					break;
 				}
 				switch (dst)
 				{
 					case "GL_ONE":
 						cdst = " 1.0 ";
 						adst = " 1.0 ";
-						//Horrible hack
 						if (currentStage == 0)
-						{
 							qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
-							GameManager.Print("HORRIBLE HACK");
-						}
-						break;
+					break;
 					case "GL_ZERO":
 						cdst = " 0.0 ";
 						adst = " 0.0 ";
-						break;
+					break;
 					case "GL_SRC_COLOR":
 						cdst = " Stage_" + currentStage + ".rgb ";
 						adst = " Stage_" + currentStage + ".a ";
-						break;
+					break;
 					case "GL_ONE_MINUS_SRC_COLOR":
 						cdst = " (1.0 - Stage_" + currentStage + ".rgb) ";
 						adst = " (1.0 - Stage_" + currentStage + ".a) ";
-						break;
+					break;
 					case "GL_DST_ALPHA":
 						cdst = " color.a ";
 						adst = " color.a ";
-						break;
+					break;
 					case "GL_ONE_MINUS_DST_ALPHA":
 						cdst = " (1.0 - color.a) ";
 						adst = " (1.0 - color.a) ";
-						break;
+					break;
 					case "GL_SRC_ALPHA":
 						cdst = "  Stage_" + currentStage + ".a ";
 						adst = "  Stage_" + currentStage + ".a ";
-						break;
+					break;
 					case "GL_ONE_MINUS_SRC_ALPHA":
 						cdst = " (1.0 -  Stage_" + currentStage + ".a) ";
 						adst = " (1.0 -  Stage_" + currentStage + ".a) ";
-						break;
+					break;
 				}
-				//Horrible hack
 				if (currentStage == 0)
 				{
-	/*				if (qShader.qShaderStages[currentStage].environment)
-					{
-						if ((src == "GL_ONE") && (dst == "GL_ONE"))
-						{
-							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + "; \n";
-//							Blend += "\tcolor.a = 1.0; \n";
-							qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
-//							alphaIsTransparent = true;
-						}
-						else
-						{
-							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
-							Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
-						}
-					}
-					else*/ if ((src == "GL_ZERO") && (dst == "GL_ONE_MINUS_SRC_COLOR"))
+					if ((src == "GL_ZERO") && (dst == "GL_ONE_MINUS_SRC_COLOR"))
 					{
 						Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
 						Blend += "\tcolor.a = Stage_" + currentStage + ".a; \n";
