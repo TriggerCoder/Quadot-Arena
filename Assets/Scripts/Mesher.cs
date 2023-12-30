@@ -348,6 +348,104 @@ public static class Mesher
 		// Create the Mesh.
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 	}
+
+	public static void GenerateBillBoardObject(string textureName, int lmIndex, Node3D holder, QSurface surfaces, bool addPVS = true)
+	{
+		if (surfaces == null)
+		{
+			GameManager.Print("Failed to create polygon object because there are no surfaces", GameManager.PrintType.Warning);
+			return;
+		}
+
+		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex);
+
+		MeshInstance3D mesh = new MeshInstance3D();
+		ArrayMesh arrMesh = new ArrayMesh();
+		string Name = "Mesh_Surfaces_" + surfaces.surfaceId;
+
+		Vector3 center = GenerateBillBoardMesh(surfaces, lmIndex);
+
+		Node3D billBoard = new Node3D();
+		holder.AddChild(billBoard);
+		billBoard.GlobalPosition = center;
+
+		FinalizePolygonMesh(arrMesh);
+		arrMesh.SurfaceSetMaterial(0, material);
+		billBoard.AddChild(mesh);
+		if (addPVS)
+			mesh.Layers = GameManager.InvisibleMask;
+		else //As dynamic surface don't have bsp data, assign it to the always visible layer 
+			mesh.Layers = GameManager.AllPlayerViewMask;
+		mesh.Name = Name;
+		mesh.Mesh = arrMesh;
+
+//		if (MaterialManager.IsSkyTexture(textureName))
+			mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+//		else
+//			mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.DoubleSided;
+		//PVS only add on Static Geometry, as it has BSP Nodes
+		if (addPVS)
+			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(mesh, surfaces);
+	}
+	public static Vector3 GenerateBillBoardMesh(QSurface surface, int lm_index)
+	{
+		Vector3 center = Vector3.Zero;
+		Vector3 normal = Vector3.Zero;
+		Quaternion changeRotation;
+
+		vertsCache.Clear();
+		uvCache.Clear();
+		uv2Cache.Clear();
+		normalsCache.Clear();
+		indiciesCache.Clear();
+		vertsColor.Clear();
+
+		int vstep = surface.startVertIndex;
+		for (int n = 0; n < surface.numOfVerts; n++)
+		{
+			Vector3 pos = MapLoader.verts[vstep].position;
+			vertsCache.Add(pos);
+			center += pos;
+			vstep++;
+		}
+
+		center /= surface.numOfVerts;
+		CanForm3DConvexHull(vertsCache, ref normal);
+
+		if (Mathf.IsZeroApprox(normal.Dot(Vector3.Up)))
+			changeRotation = Transform3D.Identity.LookingAt(normal, Vector3.Up).Basis.GetRotationQuaternion();
+		else
+			changeRotation = Transform3D.Identity.LookingAt(normal, Vector3.Forward).Basis.GetRotationQuaternion();
+
+		vertsCache.Clear();
+		vstep = surface.startVertIndex;
+		for (int n = 0; n < surface.numOfVerts; n++)
+		{
+			Vector3 pos = changeRotation * (MapLoader.verts[vstep].position - center);
+			vertsCache.Add(pos);
+			uvCache.Add(MapLoader.verts[vstep].textureCoord);
+			uv2Cache.Add(MapLoader.verts[vstep].lightmapCoord);
+			normalsCache.Add(MapLoader.verts[vstep].normal);
+
+			//Need to compensate for Color lightning as lightmapped textures will change
+			if (lm_index >= 0)
+				vertsColor.Add(MapLoader.verts[vstep].color);
+			else
+				vertsColor.Add(TextureLoader.ChangeColorLighting(MapLoader.verts[vstep].color));
+			vstep++;
+		}
+
+		// Rip meshverts / triangles
+		int mstep = surface.startIndex;
+		for (int n = 0; n < surface.numOfIndices; n++)
+		{
+			indiciesCache.Add(MapLoader.vertIndices[mstep]);
+			mstep++;
+		}
+
+		return center;
+	}
+
 	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask)
 	{
 		return GenerateModelFromMeshes(model, layer, true, true, null, false, false, meshToSkin);
@@ -1044,11 +1142,11 @@ public static class Mesher
 		int i;
 		bool retry = false;
 
+		// Calculate a normal vector
+		tryagain:
 		if (points.Count < 4)
 			return false;
 
-		// Calculate a normal vector
-		tryagain:
 		for (i = 0; i < points.Count; i++)
 		{
 			Vector3 v1 = points[1] - points[i];

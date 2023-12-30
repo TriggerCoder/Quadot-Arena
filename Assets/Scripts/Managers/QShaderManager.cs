@@ -141,7 +141,7 @@ public static class QShaderManager
 			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.RGB);
 			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.Alpha);
 			GSFragmentBlends += GetAlphaFunc(qShader, currentStage);
-			GSFragmentBlends += GetBlend(qShader, currentStage, ref alphaIsTransparent);
+			GSFragmentBlends += GetBlend(qShader, currentStage, i, ref needMultiPass);
 			if (qShaderStage.depthWrite)
 			{
 				if (i == 0)
@@ -358,7 +358,7 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (upperName.Contains("PROTOBANNER"))
+		if (upperName.Contains("CONSOLE/SPHERE2"))
 			GameManager.Print(code);
 
 		Shader shader = new Shader();
@@ -425,7 +425,7 @@ public static class QShaderManager
 
 		if (MaterialManager.HasBillBoard.Contains(qShader.Name))
 		{
-			Vertex = "VERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
+			Vertex = "\tVERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
 			return Vertex;
 		}
 		if (qShader.qShaderGlobal.deformVertexes == null)
@@ -439,6 +439,9 @@ public static class QShaderManager
 			string[] VertexFunc = qShader.qShaderGlobal.deformVertexes[i];
 			switch (VertexFunc[0])
 			{
+				case "AUTOSPRITE":
+//					Verts += "\tVERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
+				break;
 				case "WAVE":
 				{
 					float div = TryToParseFloat(VertexFunc[1]) * GameManager.sizeDividor;
@@ -479,8 +482,42 @@ public static class QShaderManager
 					}
 				}
 				break;
-				default:
+				case "MOVE":
+				{
+					Vector3 move = new Vector3(-1.0f * TryToParseFloat(VertexFunc[1]), TryToParseFloat(VertexFunc[3]), TryToParseFloat(VertexFunc[2])) * GameManager.sizeDividor;
+					string DeformFunc = VertexFunc[4];
+					float offset = TryToParseFloat(VertexFunc[5]);
+					float amp = TryToParseFloat(VertexFunc[6]);
+					float phase = TryToParseFloat(VertexFunc[7]);
+					float freq = TryToParseFloat(VertexFunc[8]);
 
+					Vars += "\tvec3 OffSet_" + i + " = vec3(" + move.X.ToString("0.00") + ", "+ move.Y.ToString("0.00") + ", " + move.Z.ToString("0.00") + ");\n";
+					switch (DeformFunc)
+					{
+						case "SIN":
+							Verts += "\tVERTEX += OffSet_" + i + " * (";
+							Verts += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") +"))  * " + amp.ToString("0.00") + "); \n";
+						break;
+						case "SQUARE":
+							Verts += "\tVERTEX += OffSet_" + i + " * (";
+							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
+						break;
+						case "TRIANGLE":
+							Verts += "\tVERTEX += OffSet_" + i + " * (";
+							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
+						break;
+						case "SAWTOOTH":
+							Verts += "\tVERTEX += OffSet_" + i + " * (";
+							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
+						break;
+						case "INVERSESAWTOOTH":
+							Verts += "\tVERTEX += OffSet_" + i + " * (";
+							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + ")))); \n";
+						break;
+						}
+					}
+				break;
+				default:
 				break;
 			}
 		}
@@ -684,7 +721,7 @@ public static class QShaderManager
 
 		return AlphaFunc;
 	}
-	public static string GetBlend(QShaderData qShader, int currentStage, ref bool alphaIsTransparent)
+	public static string GetBlend(QShaderData qShader, int currentStage, int numStage, ref int needMultiPass)
 	{
 		string Blend = "";
 		if (qShader.qShaderStages[currentStage].blendFunc != null)
@@ -694,7 +731,7 @@ public static class QShaderManager
 			{
 				Blend = "\tcolor = Stage_" + currentStage + " + color; \n";
 				if (currentStage == 0)
-					alphaIsTransparent = true;
+					qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
 			}
 			else if (BlendWhat.Contains("FILTER"))
 				Blend = "\tcolor = Stage_" + currentStage + " * color; \n";
@@ -804,7 +841,11 @@ public static class QShaderManager
 			}
 		}
 		else
+		{
+			if (numStage != 0)
+				needMultiPass = currentStage;
 			Blend = "\tcolor = Stage_" + currentStage + ";\n";
+		}
 
 		Blend += "\tcolor = clamp(color,black,white);\n";
 		return Blend;
@@ -861,7 +902,9 @@ public static class QShaderManager
 							}
 							else
 								QShaders.Add(qShaderData.Name, qShaderData);
-							qShaderData = null;
+							if (qShaderData.qShaderGlobal.isBillboard)
+								MaterialManager.AddBillBoard(qShaderData.Name);
+						   qShaderData = null;
 							stage = 0;
 						}
 						i = strWord.Length;
@@ -1023,6 +1066,7 @@ public class QShaderGlobal
 	public List<string> q3map_LightSubdivide = null;
 	public string editorImage = "";
 	public CullType cullType = CullType.Back;
+	public bool isBillboard = false;
 	public bool isSky = false;
 	public bool unShaded = false;
 	public bool trans = false;
@@ -1095,10 +1139,15 @@ public class QShaderGlobal
 				}
 			break;
 			case "DEFORMVERTEXES":
-				if (deformVertexes == null)
-					deformVertexes = new List<string[]>();
-				deformVertexes.Add(Value.Split(' '));
-				break;
+				if (Value.Contains("AUTOSPRITE"))
+					isBillboard = true;
+				else
+				{
+					if (deformVertexes == null)
+						deformVertexes = new List<string[]>();
+					deformVertexes.Add(Value.Split(' '));
+				}
+			break;
 			case "FOGPARMS":
 				if (fogParms == null)
 					fogParms = new List<string>();

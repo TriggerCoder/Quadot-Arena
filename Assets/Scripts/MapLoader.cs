@@ -352,7 +352,17 @@ public static class MapLoader
 		int groupId = 0;
 		foreach (var bigGroup in groups)
 		{
-			var limitedGroup = bigGroup.Chunk(MAX_MESH_SURFACES);
+			bool billBoard = false;
+			int ChunkSize = MAX_MESH_SURFACES;
+			string shaderName = mapTextures[bigGroup.ElementAt(0).shaderId].name.ToUpper();
+			if (MaterialManager.HasBillBoard.Contains(shaderName))
+			{
+				billBoard = true;
+				ChunkSize = 1;
+				GameManager.Print("AUTOSPRITE " + shaderName);
+			}
+
+			var limitedGroup = bigGroup.Chunk(ChunkSize);
 			foreach (var group in limitedGroup)
 			{
 				QSurface[] groupSurfaces = group.ToArray();
@@ -368,10 +378,13 @@ public static class MapLoader
 						break;
 					case QSurfaceType.Polygon:
 					case QSurfaceType.Mesh:
-						Mesher.GeneratePolygonObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, holder, groupSurfaces);
+						if (billBoard)
+							Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, holder, groupSurfaces[0]);
+						else
+							Mesher.GeneratePolygonObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, holder, groupSurfaces);
 						break;
 					case QSurfaceType.Billboard:
-	//					Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
+//							Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
 						break;
 					default:
 						GameManager.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + bigGroup.Key.type + ").", GameManager.PrintType.Info);
