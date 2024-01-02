@@ -5,13 +5,13 @@ using System.Linq;
 public partial class ClusterPVSManager : Node
 {
 	public static ClusterPVSManager Instance;
-	private List<MeshInstance3D> AllClusters;
-	private MeshInstance3D[] SurfaceToCluster;
+	private List<GeometryInstance3D> AllClusters;
+	private GeometryInstance3D[] SurfaceToCluster;
 	public const int RenderFrameMask = (0xFFFF << GameManager.MaxLocalPlayers);
 	public void ResetClusterList()
 	{
-		AllClusters = new List<MeshInstance3D>();
-		SurfaceToCluster = new MeshInstance3D[MapLoader.surfaces.Count];
+		AllClusters = new List<GeometryInstance3D>();
+		SurfaceToCluster = new GeometryInstance3D[MapLoader.surfaces.Count];
 	}
 	public override void _Ready()
 	{
@@ -28,7 +28,7 @@ public partial class ClusterPVSManager : Node
 		AllClusters.AsParallel().ForAll(mesh => { mesh.Layers = GameManager.InvisibleMask;});
 //		GameManager.Print("PostRender");
 	}
-	public void RegisterClusterAndSurfaces(MeshInstance3D cluster, params QSurface[] surfaces)
+	public void RegisterClusterAndSurfaces(GeometryInstance3D cluster, params QSurface[] surfaces)
 	{
 		for (int i = 0; i < surfaces.Length; i++)
 			SurfaceToCluster[surfaces[i].surfaceId] = cluster;
@@ -37,7 +37,7 @@ public partial class ClusterPVSManager : Node
 
 	public void ActivateClusterBySurface(int surface, uint layer)
 	{
-		MeshInstance3D cluster = SurfaceToCluster[surface];
+		GeometryInstance3D cluster = SurfaceToCluster[surface];
 		if (cluster == null)
 		{
 //			GameManager.Print("Cluster not found for surface: " + surface);

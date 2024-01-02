@@ -424,14 +424,11 @@ public static class QShaderManager
 		string Vertex = "";
 
 		if (MaterialManager.HasBillBoard.Contains(qShader.Name))
-		{
 			Vertex = "\tVERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
-			return Vertex;
-		}
 		if (qShader.qShaderGlobal.deformVertexes == null)
 			return Vertex;
 
-		Vertex = "\tfloat Time = (MsTime - OffSetTime);\n";
+		Vertex += "\tfloat Time = (MsTime - OffSetTime);\n";
 		string Vars = "";
 		string Verts = "";
 		for (int i = 0; i < qShader.qShaderGlobal.deformVertexes.Count; i++)
@@ -439,9 +436,6 @@ public static class QShaderManager
 			string[] VertexFunc = qShader.qShaderGlobal.deformVertexes[i];
 			switch (VertexFunc[0])
 			{
-				case "AUTOSPRITE":
-//					Verts += "\tVERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
-				break;
 				case "WAVE":
 				{
 					float div = TryToParseFloat(VertexFunc[1]) * GameManager.sizeDividor;

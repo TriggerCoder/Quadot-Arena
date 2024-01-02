@@ -35,7 +35,7 @@ public partial class MaterialManager : Node
 	public static string mixBrightness = "shader_parameter/mixBrightness";
 
 	public static List<string> Decals = new List<string>();
-	public static List<string> HasBillBoard = new List<string>();
+	public static List<string> HasBillBoard = new List<string>() { "FLARESHADER" };
 	public static List<string> PortalMaterials = new List<string>();
 	public static List<ShaderMaterial> AllMaterials = new List<ShaderMaterial>();
 	public static Dictionary<string, ShaderMaterial> Materials = new Dictionary<string, ShaderMaterial>();

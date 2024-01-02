@@ -446,6 +446,50 @@ public static class Mesher
 		return center;
 	}
 
+	public static void GenerateBillBoardSprites(string textureName, int lmIndex, Node3D holder, QSurface surfaces, bool addPVS = true)
+	{
+		if (surfaces == null)
+		{
+			GameManager.Print("Failed to create polygon object because there are no surfaces", GameManager.PrintType.Warning);
+			return;
+		}
+
+		SpriteBillboard sprite = new SpriteBillboard();
+		string Name = "BillBoard_Surfaces_"+ surfaces.surfaceId;
+		holder.AddChild(sprite);
+		sprite.spriteName = textureName;
+		sprite.Billboard = BaseMaterial3D.BillboardModeEnum.Enabled;
+		if (addPVS)
+			sprite.Layers = GameManager.InvisibleMask;
+		else //As dynamic surface don't have bsp data, assign it to the always visible layer 
+			sprite.Layers = GameManager.AllPlayerViewMask;
+		sprite.Name = Name;
+		sprite.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+		sprite.spriteRadius = 20;
+/*
+		Vector3 center = Vector3.Zero;
+		int vstep = surfaces.startVertIndex;
+		for (int n = 0; n < surfaces.numOfVerts; n++)
+		{
+			center += MapLoader.verts[vstep].position;
+			vstep++;
+		}
+		if (surfaces.numOfVerts > 0)
+			center /= surfaces.numOfVerts;
+		center += 2 * surfaces.normal + surfaces.lm_Origin;
+*/		sprite.Position = surfaces.lm_Origin;
+		sprite.Modulate = new Color(surfaces.lm_vecs[0].X, surfaces.lm_vecs[0].Y, surfaces.lm_vecs[0].Z, 1f);
+		sprite.Init();
+/*		Aabb box = sprite.GetAabb();
+		float size = box.GetLongestAxisSize();
+		Vector3 newSize = new Vector3(size, size, size);
+		box.Size = newSize;
+		sprite.CustomAabb = box;
+*/		//PVS only add on Static Geometry, as it has BSP Nodes
+		if (addPVS)
+			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(sprite, surfaces);
+	}
+
 	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask)
 	{
 		return GenerateModelFromMeshes(model, layer, true, true, null, false, false, meshToSkin);

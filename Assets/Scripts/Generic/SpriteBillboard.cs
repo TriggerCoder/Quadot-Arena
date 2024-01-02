@@ -14,14 +14,17 @@ public partial class SpriteBillboard : Sprite3D
 
 	private float baseTime = 1;
 	private ShaderMaterial spriteMaterial;
-	
+
 	public override void _Ready()
 	{
+		Init();
+	}
+
+	public void Init()
+	{
 		if (string.IsNullOrEmpty(spriteName))
-		{
-			QueueFree();
 			return;
-		}
+
 		bool isTransparent = Transparent;
 		if (Billboard != BaseMaterial3D.BillboardModeEnum.Disabled)
 			MaterialManager.AddBillBoard(spriteName);

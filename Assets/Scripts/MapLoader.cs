@@ -31,6 +31,7 @@ public static class MapLoader
 	public static LightMapSize currentLightMapSize = LightMapSize.Q3_QL;
 
 	public static Node3D MapMesh;
+	public static Node3D MapFlares;
 	public static Node3D ColliderGroup;
 
 	public static int MAX_MESH_SURFACES = 256;
@@ -342,6 +343,9 @@ public static class MapLoader
 		MapMesh.Name = "MapMeshes";
 		Node3D holder = MapMesh;
 		GameManager.Instance.AddChild(MapMesh);
+		MapFlares = new Node3D();
+		MapFlares.Name = "MapFlares";
+		holder.AddChild(MapFlares);
 
 		List<QSurface> staticGeometry = new List<QSurface>();
 		for (int i = 0; i < models[0].numSurfaces; i++)
@@ -384,7 +388,7 @@ public static class MapLoader
 							Mesher.GeneratePolygonObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, holder, groupSurfaces);
 						break;
 					case QSurfaceType.Billboard:
-//							Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
+							Mesher.GenerateBillBoardSprites(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, MapFlares, groupSurfaces[0]);
 						break;
 					default:
 						GameManager.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + bigGroup.Key.type + ").", GameManager.PrintType.Info);
