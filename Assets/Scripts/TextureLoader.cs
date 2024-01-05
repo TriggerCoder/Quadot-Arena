@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using static Godot.Image;
@@ -93,25 +94,43 @@ public static class TextureLoader
 					baseTex.LoadTgaFromBuffer(imageBytes);
 				else
 					baseTex.LoadJpgFromBuffer(imageBytes);
+
+				int width = baseTex.GetWidth();
+				int height = baseTex.GetHeight();
+				float luminance = 0;
+
 				if ((tex.addAlpha) && (baseTex.DetectAlpha() == AlphaMode.None))
 				{
 					baseTex.Convert(Format.Rgba8);
-					int width = baseTex.GetWidth();
-					int height = baseTex.GetHeight();
+
 					Color black = Colors.Black;
 					for (int i = 0; i < width; i++)
 					{
 						for (int j = 0; j < height; j++)
 						{
 							Color pulledColors = baseTex.GetPixel(i, j);
+							luminance += pulledColors.Luminance;
 							float alpha = computeAlphaFromColorFilter(pulledColors, black);
 							pulledColors.A = alpha;
 							baseTex.SetPixel(i, j, pulledColors);
 						}
 					}
 				}
+				else
+				{
+					for (int i = 0; i < width; i++)
+					{
+						for (int j = 0; j < height; j++)
+						{
+							luminance += baseTex.GetPixel(i, j).Luminance;
+						}
+					}
+				}
+				luminance /= (width * height);
+				luminance = Mathf.Clamp(luminance, 0f, .35f);
 				baseTex.ResizeToPo2(false, Interpolation.Lanczos);
 				ImageTexture readyTex = ImageTexture.CreateFromImage(baseTex);
+				readyTex.ResourceName = Convert.ToBase64String(BitConverter.GetBytes(luminance));
 
 				if (Textures.ContainsKey(upperName))
 				{

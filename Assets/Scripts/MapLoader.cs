@@ -362,7 +362,8 @@ public static class MapLoader
 			if (MaterialManager.HasBillBoard.Contains(shaderName))
 			{
 				billBoard = true;
-				ChunkSize = 1;
+				if (bigGroup.Key.type != QSurfaceType.Billboard)
+					ChunkSize = 1;
 				GameManager.Print("AUTOSPRITE " + shaderName);
 			}
 
@@ -388,7 +389,7 @@ public static class MapLoader
 							Mesher.GeneratePolygonObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, holder, groupSurfaces);
 						break;
 					case QSurfaceType.Billboard:
-							Mesher.GenerateBillBoardSprites(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, MapFlares, groupSurfaces[0]);
+							Mesher.GenerateBillBoardSprites(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, MapFlares, groupSurfaces);
 						break;
 					default:
 						GameManager.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + bigGroup.Key.type + ").", GameManager.PrintType.Info);

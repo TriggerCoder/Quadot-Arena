@@ -15,7 +15,7 @@ public partial class GameManager : Node
 	[Export]
 	public float mixBrightness = 0.25f;             // Range from 0 to 1, .25f Is the nicest
 	[Export]
-	public float shadowIntensity = 0.5f;
+	public float shadowIntensity = 1f;
 	[Export]
 	public PlayerViewPort playerViewPort;
 
@@ -244,7 +244,6 @@ public partial class GameManager : Node
 	{
 		var CamRID = camera.GetCameraRid();
 
-//		playerViewPort.viewPort.DebugDraw = Viewport.DebugDrawEnum.DirectionalShadowAtlas;
 		var viewPortRID = playerViewPort.viewPort.GetViewportRid();
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 	}

@@ -58,6 +58,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.collider.Radius = .5f;
 		playerControls.collider.Height = 1.5f;
 		Torso.Shape = playerControls.collider;
+		for (int i = 0; i < weaponCollider.Length; i++)
+			weaponCollider[i].Position = new Vector3(0, 0.85f, 0);
 		currentState = GameManager.FuncState.Ready;
 	}
 
@@ -103,6 +105,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		TeleporterThing.TelefragEverything(destination, this);
 		Position = destination;
 		playerControls.InvoqueSetTransformReset();
+		playerControls.ChangeHeight(true);
 		playerControls.feetRay.Length = .8f;
 
 		if (playerControls.playerWeapon == null)

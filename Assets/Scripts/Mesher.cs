@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +84,11 @@ public static class Mesher
 		}
 
 		BezierMesh.FinalizeBezierMesh(arrMesh);
-		mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity);
+		Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
+		float luminance = .25f;
+		if (!string.IsNullOrEmpty(mainText.ResourceName))
+			luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+		mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 		arrMesh.SurfaceSetMaterial(0, material);
 
 		holder.AddChild(mesh);
@@ -268,7 +273,13 @@ public static class Mesher
 //			mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.DoubleSided;
 
 		if (!forceSkinAlpha && !hasPortal)
-			mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity);
+		{
+			Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
+			float luminance = .25f;
+			if (!string.IsNullOrEmpty(mainText.ResourceName))
+				luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+			mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
+		}
 
 		if (hasPortal)
 		{
@@ -349,9 +360,9 @@ public static class Mesher
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 	}
 
-	public static void GenerateBillBoardObject(string textureName, int lmIndex, Node3D holder, QSurface surfaces, bool addPVS = true)
+	public static void GenerateBillBoardObject(string textureName, int lmIndex, Node3D holder, QSurface surface, bool addPVS = true)
 	{
-		if (surfaces == null)
+		if (surface == null)
 		{
 			GameManager.Print("Failed to create polygon object because there are no surfaces", GameManager.PrintType.Warning);
 			return;
@@ -361,9 +372,9 @@ public static class Mesher
 
 		MeshInstance3D mesh = new MeshInstance3D();
 		ArrayMesh arrMesh = new ArrayMesh();
-		string Name = "Mesh_Surfaces_" + surfaces.surfaceId;
+		string Name = "Mesh_Surfaces_" + surface.surfaceId;
 
-		Vector3 center = GenerateBillBoardMesh(surfaces, lmIndex);
+		Vector3 center = GenerateBillBoardMesh(surface, lmIndex);
 
 		Node3D billBoard = new Node3D();
 		holder.AddChild(billBoard);
@@ -385,7 +396,7 @@ public static class Mesher
 //			mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.DoubleSided;
 		//PVS only add on Static Geometry, as it has BSP Nodes
 		if (addPVS)
-			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(mesh, surfaces);
+			ClusterPVSManager.Instance.RegisterClusterAndSurface(mesh, surface);
 	}
 	public static Vector3 GenerateBillBoardMesh(QSurface surface, int lm_index)
 	{
@@ -446,48 +457,35 @@ public static class Mesher
 		return center;
 	}
 
-	public static void GenerateBillBoardSprites(string textureName, int lmIndex, Node3D holder, QSurface surfaces, bool addPVS = true)
+	public static void GenerateBillBoardSprites(string textureName, int lmIndex, Node3D holder, QSurface[] surfaces, bool addPVS = true)
 	{
-		if (surfaces == null)
+		if (surfaces == null || surfaces.Length == 0)
 		{
 			GameManager.Print("Failed to create polygon object because there are no surfaces", GameManager.PrintType.Warning);
 			return;
 		}
 
-		SpriteBillboard sprite = new SpriteBillboard();
-		string Name = "BillBoard_Surfaces_"+ surfaces.surfaceId;
-		holder.AddChild(sprite);
-		sprite.spriteName = textureName;
-		sprite.Billboard = BaseMaterial3D.BillboardModeEnum.Enabled;
-		if (addPVS)
-			sprite.Layers = GameManager.InvisibleMask;
-		else //As dynamic surface don't have bsp data, assign it to the always visible layer 
-			sprite.Layers = GameManager.AllPlayerViewMask;
-		sprite.Name = Name;
-		sprite.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
-		sprite.spriteRadius = 20;
-/*
-		Vector3 center = Vector3.Zero;
-		int vstep = surfaces.startVertIndex;
-		for (int n = 0; n < surfaces.numOfVerts; n++)
+		for (var i = 0; i < surfaces.Length; i++)
 		{
-			center += MapLoader.verts[vstep].position;
-			vstep++;
+			SpriteBillboard sprite = new SpriteBillboard();
+			string Name = "BillBoard_Surfaces_" + surfaces[i].surfaceId;
+			holder.AddChild(sprite);
+			sprite.spriteName = textureName;
+			sprite.Billboard = BaseMaterial3D.BillboardModeEnum.Enabled;
+			if (addPVS)
+				sprite.Layers = GameManager.InvisibleMask;
+			else //As dynamic surface don't have bsp data, assign it to the always visible layer 
+				sprite.Layers = GameManager.AllPlayerViewMask;
+			sprite.Name = Name;
+			sprite.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+			sprite.spriteRadius = 20;
+			sprite.Position = surfaces[i].lm_Origin;
+			sprite.Modulate = new Color(surfaces[i].lm_vecs[0].X, surfaces[i].lm_vecs[0].Y, surfaces[i].lm_vecs[0].Z, 1f);
+			sprite.Init();
+			//PVS only add on Static Geometry, as it has BSP Nodes
+			if (addPVS)
+				ClusterPVSManager.Instance.RegisterClusterAndSurface(sprite, surfaces[i]);
 		}
-		if (surfaces.numOfVerts > 0)
-			center /= surfaces.numOfVerts;
-		center += 2 * surfaces.normal + surfaces.lm_Origin;
-*/		sprite.Position = surfaces.lm_Origin;
-		sprite.Modulate = new Color(surfaces.lm_vecs[0].X, surfaces.lm_vecs[0].Y, surfaces.lm_vecs[0].Z, 1f);
-		sprite.Init();
-/*		Aabb box = sprite.GetAabb();
-		float size = box.GetLongestAxisSize();
-		Vector3 newSize = new Vector3(size, size, size);
-		box.Size = newSize;
-		sprite.CustomAabb = box;
-*/		//PVS only add on Static Geometry, as it has BSP Nodes
-		if (addPVS)
-			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(sprite, surfaces);
 	}
 
 	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask)
@@ -584,7 +582,13 @@ public static class Mesher
 						mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					if (!currentTransparent && receiveShadows)
-						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * .5f);
+					{
+						Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
+						float luminance = .25f;
+						if (!string.IsNullOrEmpty(mainText.ResourceName))
+							luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
+					}
 
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
 					MultiMeshesInstances.Add(multiMesh, mesh);
@@ -600,7 +604,13 @@ public static class Mesher
 						mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					if (!currentTransparent && receiveShadows)
-						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * .5f);
+					{
+						Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
+						float luminance = .25f;
+						if (!string.IsNullOrEmpty(mainText.ResourceName))
+							luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
+					}
 
 					modelObject.AddChild(mesh);
 					GameManager.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name);
@@ -695,7 +705,13 @@ public static class Mesher
 							mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 						if (receiveShadows)
-							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * .5f);
+						{
+							Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
+							float luminance = .25f;
+							if (!string.IsNullOrEmpty(mainText.ResourceName))
+								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
+						}
 
 						GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
 						MultiMeshesInstances.Add(multiMesh, mesh);
@@ -711,7 +727,13 @@ public static class Mesher
 							mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 						if (receiveShadows)
-							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * .5f);
+						{
+							Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
+							float luminance = .25f;
+							if (!string.IsNullOrEmpty(mainText.ResourceName))
+								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
+						}
 
 						modelObject.AddChild(mesh);
 						GameManager.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name + " skin group name " + meshes[0].skins[0].name);
@@ -788,7 +810,13 @@ public static class Mesher
 						MultiMeshesInstances.Add(skinMaterial.commonMesh, mesh);
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 						if (receiveShadows)
-							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * .5f);
+						{
+							Texture mainText = (Texture2D)skinMaterial.readyMaterials.Get("shader_parameter/Tex_0");
+							float luminance = .25f;
+							if (!string.IsNullOrEmpty(mainText.ResourceName))
+								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
+						}
 					}
 				}
 				else
@@ -805,7 +833,13 @@ public static class Mesher
 					modelObject.AddChild(mesh);
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					if (receiveShadows)
-						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * .5f);
+					{
+						Texture mainText = (Texture2D)skinMaterial.readyMaterials.Get("shader_parameter/Tex_0");
+						float luminance = .25f;
+						if (!string.IsNullOrEmpty(mainText.ResourceName))
+							luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
+					}
 				}
 			}
 			else
