@@ -109,7 +109,7 @@ public static class TextureLoader
 						for (int j = 0; j < height; j++)
 						{
 							Color pulledColors = baseTex.GetPixel(i, j);
-							luminance += pulledColors.Luminance;
+							luminance += .21f * pulledColors.R + .72f * pulledColors.G + .07f * pulledColors.G;
 							float alpha = computeAlphaFromColorFilter(pulledColors, black);
 							pulledColors.A = alpha;
 							baseTex.SetPixel(i, j, pulledColors);
@@ -122,7 +122,8 @@ public static class TextureLoader
 					{
 						for (int j = 0; j < height; j++)
 						{
-							luminance += baseTex.GetPixel(i, j).Luminance;
+							Color pulledColors = baseTex.GetPixel(i, j);
+							luminance += .21f * pulledColors.R + .72f * pulledColors.G + .07f * pulledColors.G;
 						}
 					}
 				}

@@ -1,10 +1,9 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://b7a0ll36sihim"]
 
-[ext_resource type="Shader" uid="uid://d2rmih505ogyx" path="res://Assets/Shaders/default.tres" id="1_i5l18"]
+[ext_resource type="Shader" path="res://Assets/Shaders/default.gdshader" id="1_ru3fq"]
 
 [resource]
 render_priority = 0
-shader = ExtResource("1_i5l18")
+shader = ExtResource("1_ru3fq")
 shader_parameter/AmbientColor = Color(1, 1, 1, 1)
 shader_parameter/mixBrightness = 0.5
-shader_parameter/ShadowIntensity = 0.0

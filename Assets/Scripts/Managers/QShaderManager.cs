@@ -286,6 +286,7 @@ public static class QShaderManager
 		code += "global uniform float MsTime;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
 		code += "instance uniform float ShadowIntensity : hint_range(0, 1) = 0.0;\n";
+		code += "instance uniform bool ViewModel = false;\n";
 		if (helperRotate)
 		{
 			code += "\nvec2 rotate(vec2 uv, vec2 pivot, float angle)\n{\n\tmat2 rotation = mat2(vec2(sin(angle), -cos(angle)),vec2(cos(angle), sin(angle)));\n";
@@ -306,7 +307,7 @@ public static class QShaderManager
 		{
 			code += GSLigtH;
 			code += GetDiffuseLightning();
-			code += " }\n";
+			code += "}\n";
 		}
 
 		code += GSFragmentH;
@@ -358,7 +359,7 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (upperName.Contains("CONSOLE/SPHERE2"))
+		if (upperName.Contains("MACHINEGUN"))
 			GameManager.Print(code);
 
 		Shader shader = new Shader();
@@ -391,6 +392,7 @@ public static class QShaderManager
 		code += "uniform float Transparency : hint_range(0, 1) = 0.0;\n";
 		code += "global uniform float MsTime;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
+		code += "const bool ViewModel = false;\n";
 		code += "void vertex()\n{ \n";
 		code += GetVertex(qShader) + "}\n";
 		code += "void fragment()\n{\n\tvec2 uv_0 = SCREEN_UV;\n\tvec4 Stage_0 = texture(Tex_0, uv_0);\n";
@@ -412,8 +414,8 @@ public static class QShaderManager
 	public static string GetDiffuseLightning()
 	{
 		string DiffuseLight;
-
-		DiffuseLight = "\tif (LIGHT_IS_DIRECTIONAL)\n\t\tDIFFUSE_LIGHT += ShadowIntensity * vec3(ATTENUATION - 1.0);\n";
+		DiffuseLight = "\tif (LIGHT_IS_DIRECTIONAL)\n\t{\n";
+		DiffuseLight += "\t\tDIFFUSE_LIGHT += ShadowIntensity * vec3(ATTENUATION - 1.0);\n\t}\n";
 		DiffuseLight += "\telse\n\t\tDIFFUSE_LIGHT += clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION * LIGHT_COLOR;\n";
 
 		return DiffuseLight;
@@ -426,7 +428,12 @@ public static class QShaderManager
 		if (MaterialManager.HasBillBoard.Contains(qShader.Name))
 			Vertex = "\tVERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
 		if (qShader.qShaderGlobal.deformVertexes == null)
+		{
+			Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);\n";
+			Vertex += "\tif (ViewModel)\n";
+			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
 			return Vertex;
+		}
 
 		Vertex += "\tfloat Time = (MsTime - OffSetTime);\n";
 		string Vars = "";
@@ -517,7 +524,9 @@ public static class QShaderManager
 		}
 		Vertex += Vars;
 		Vertex += Verts;
-
+		Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);\n";
+		Vertex += "\tif (ViewModel)\n";
+		Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
 		return Vertex;
 	}
 	public static string GetUVGen(QShaderData qShader, int currentStage, ref string GSVaryings)

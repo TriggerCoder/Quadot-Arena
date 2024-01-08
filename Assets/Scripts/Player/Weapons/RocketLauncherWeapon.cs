@@ -70,18 +70,18 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 		{
 			Transform3D global = playerInfo.playerCamera.GlobalTransform;
 			Vector3 d = global.ForwardVector();
-			Vector2 r = GetDispersion();
-			d += global.RightVector() * r.X + global.UpVector() * r.Y;
-			d = d.Normalized();
 
 			Projectile rocket = (Projectile)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(rocket);
 			rocket.owner = playerInfo.playerThing;
 			if (muzzleObject != null)
-				rocket.GlobalPosition = muzzleObject.GlobalPosition + .2f * d;
+				rocket.GlobalPosition = muzzleObject.GlobalPosition + d;
 			else
 				rocket.GlobalPosition = global.Origin;
 			rocket.ignoreSelfLayer = playerInfo.playerLayer;
+			Vector2 r = GetDispersion();
+			d += global.RightVector() * r.X + global.UpVector() * r.Y;
+			d = d.Normalized();
 			rocket.SetForward(-d);
 			rocket.InvoqueSetTransformReset();
 		}

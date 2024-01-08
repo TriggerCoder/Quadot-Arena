@@ -96,9 +96,9 @@ public partial class PlayerWeapon : Node3D
 		if (model != null)
 		{
 			if (model.readySurfaceArray.Count == 0)
-				Mesher.GenerateModelFromMeshes(model, p.uiLayer, false, false, this, false, false);
+				Mesher.GenerateModelFromMeshes(model, p.uiLayer, false, false, this, false, false, null, true, false, true);
 			else
-				Mesher.FillModelFromProcessedData(model, p.uiLayer, false, false, this, false);
+				Mesher.FillModelFromProcessedData(model, p.uiLayer, false, false, this, false, null, false, true, false, true);
 
 			if (playerInfo.playerThing.avatar != null)
 				playerInfo.playerThing.avatar.LoadWeapon(model, CompleteModelName, MuzzleModelName, playerInfo.playerLayer);
@@ -117,9 +117,9 @@ public partial class PlayerWeapon : Node3D
 			if (model != null)
 			{
 				if (model.readySurfaceArray.Count == 0)
-					Mesher.GenerateModelFromMeshes(model, p.uiLayer, false, false, muzzleObject, true, false);
+					Mesher.GenerateModelFromMeshes(model, p.uiLayer, false, false, muzzleObject, true, false, null, true, false, true);
 				else
-					Mesher.FillModelFromProcessedData(model, p.uiLayer, false, false, muzzleObject, false);
+					Mesher.FillModelFromProcessedData(model, p.uiLayer, false, false, muzzleObject, false, null, false, true, false, true);
 			}
 			muzzleObject.Visible = false;
 			if (muzzleLight != null)

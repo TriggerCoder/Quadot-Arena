@@ -70,18 +70,18 @@ public partial class PlasmagunWeapon : PlayerWeapon
 		{
 			Transform3D global = playerInfo.playerCamera.GlobalTransform;
 			Vector3 d = global.ForwardVector();
-			Vector2 r = GetDispersion();
-			d += global.RightVector() * r.X + global.UpVector() * r.Y;
-			d = d.Normalized();
 
 			Projectile plasma = (Projectile)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(plasma);
 			plasma.owner = playerInfo.playerThing;
 			if (muzzleObject != null)
-				plasma.GlobalPosition = muzzleObject.GlobalPosition + .2f * d;
+				plasma.GlobalPosition = muzzleObject.GlobalPosition + d;
 			else
 				plasma.GlobalPosition = global.Origin;
 			plasma.ignoreSelfLayer = playerInfo.playerLayer;
+			Vector2 r = GetDispersion();
+			d += global.RightVector() * r.X + global.UpVector() * r.Y;
+			d = d.Normalized();
 			plasma.SetForward(-d);
 			plasma.InvoqueSetTransformReset();
 		}

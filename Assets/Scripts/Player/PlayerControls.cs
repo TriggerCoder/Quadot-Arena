@@ -19,7 +19,6 @@ public partial class PlayerControls : InterpolatedNode3D
 
 	private Vector2 centerHeight = new Vector2(0.4f, 0.2f);	// character controller center height, x standing, y crouched
 	private Vector2 height = new Vector2(1.5f, 1.1f);		// character controller height, x standing, y crouched
-	private Vector2 wHeight = new Vector2(.85f, .5f);		// wepon height, x standing, y crouched
 	private float camerasHeight = .05f;
 	private float ccHeight = .05f;
 
@@ -326,12 +325,6 @@ public partial class PlayerControls : InterpolatedNode3D
 
 		rotAngle.Y = viewDirection.Y;
 		playerInfo.RotationDegrees = rotAngle;
-		rotAngle.Y -= 30f;
-		for (int i = 0; i < playerThing.weaponCollider.Length; i++)
-		{
-			Vector3 weaponColliderAngles = playerThing.weaponCollider[i].RotationDegrees;
-			playerThing.weaponCollider[i].RotationDegrees = new Vector3(weaponColliderAngles.X, rotAngle.Y + (30f * i), weaponColliderAngles.Z);
-		}
 		float deltaTime = (float)delta;
 
 		if (playerThing.Dead)
@@ -405,17 +398,13 @@ public partial class PlayerControls : InterpolatedNode3D
 	{
 		float newCenter = centerHeight.Y;
 		float newHeight = height.Y;
-		float newWHeight = wHeight.Y;
 
 		if (Standing)
 		{
 			newCenter = centerHeight.X;
 			newHeight = height.X;
-			newWHeight = wHeight.X;
 		}
 		playerThing.Torso.Position = new Vector3(0, newCenter, 0);
-		for (int i = 0; i < playerThing.weaponCollider.Length; i++)
-			playerThing.weaponCollider[i].Position = new Vector3(0, newWHeight, 0);
 		collider.Height = newHeight;
 
 		//Don't move camera on thirdperson

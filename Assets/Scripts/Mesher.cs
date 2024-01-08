@@ -86,8 +86,9 @@ public static class Mesher
 		BezierMesh.FinalizeBezierMesh(arrMesh);
 		Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
 		float luminance = .25f;
-		if (!string.IsNullOrEmpty(mainText.ResourceName))
-			luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+		if (mainText != null)
+			if (!string.IsNullOrEmpty(mainText.ResourceName))
+				luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 		mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 		arrMesh.SurfaceSetMaterial(0, material);
 
@@ -276,8 +277,9 @@ public static class Mesher
 		{
 			Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
 			float luminance = .25f;
-			if (!string.IsNullOrEmpty(mainText.ResourceName))
-				luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+			if (mainText != null)
+				if (!string.IsNullOrEmpty(mainText.ResourceName))
+					luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 			mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 		}
 
@@ -492,7 +494,7 @@ public static class Mesher
 	{
 		return GenerateModelFromMeshes(model, layer, true, true, null, false, false, meshToSkin);
 	}
-	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true, bool useColorData = false)
+	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false)
 	{
 		if (model == null || model.meshes.Count == 0)
 		{
@@ -585,8 +587,9 @@ public static class Mesher
 					{
 						Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
 						float luminance = .25f;
-						if (!string.IsNullOrEmpty(mainText.ResourceName))
-							luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+						if (mainText != null)
+							if (!string.IsNullOrEmpty(mainText.ResourceName))
+								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 					}
 
@@ -603,12 +606,15 @@ public static class Mesher
 					if (!castShadows)
 						mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+					if (isViewModel)
+						mesh.SetInstanceShaderParameter("ViewModel", true);
 					if (!currentTransparent && receiveShadows)
 					{
 						Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
 						float luminance = .25f;
-						if (!string.IsNullOrEmpty(mainText.ResourceName))
-							luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+						if (mainText != null)
+							if (!string.IsNullOrEmpty(mainText.ResourceName))
+								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 					}
 
@@ -708,8 +714,9 @@ public static class Mesher
 						{
 							Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
 							float luminance = .25f;
-							if (!string.IsNullOrEmpty(mainText.ResourceName))
-								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+							if (mainText != null)
+								if (!string.IsNullOrEmpty(mainText.ResourceName))
+									luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 						}
 
@@ -726,12 +733,15 @@ public static class Mesher
 						if (!castShadows)
 							mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+						if (isViewModel)
+							mesh.SetInstanceShaderParameter("ViewModel", true);
 						if (receiveShadows)
 						{
 							Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
 							float luminance = .25f;
-							if (!string.IsNullOrEmpty(mainText.ResourceName))
-								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+							if (mainText != null)
+								if (!string.IsNullOrEmpty(mainText.ResourceName))
+									luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 						}
 
@@ -750,7 +760,7 @@ public static class Mesher
 		return FillModelFromProcessedData(model, layer, true, true, null, false, meshToSkin);
 	}
 
-	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool forceSkinAlpha = false, bool useLowMultimeshes = true, bool useColorData = false)
+	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool forceSkinAlpha = false, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false)
 	{
 		if (ownerObject == null)
 		{
@@ -813,8 +823,9 @@ public static class Mesher
 						{
 							Texture mainText = (Texture2D)skinMaterial.readyMaterials.Get("shader_parameter/Tex_0");
 							float luminance = .25f;
-							if (!string.IsNullOrEmpty(mainText.ResourceName))
-								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+							if (mainText != null)
+								if (!string.IsNullOrEmpty(mainText.ResourceName))
+									luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 						}
 					}
@@ -832,12 +843,15 @@ public static class Mesher
 						mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 					modelObject.AddChild(mesh);
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+					if (isViewModel)
+						mesh.SetInstanceShaderParameter("ViewModel", true);
 					if (receiveShadows)
 					{
 						Texture mainText = (Texture2D)skinMaterial.readyMaterials.Get("shader_parameter/Tex_0");
 						float luminance = .25f;
-						if (!string.IsNullOrEmpty(mainText.ResourceName))
-							luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+						if (mainText != null)
+							if (!string.IsNullOrEmpty(mainText.ResourceName))
+								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 					}
 				}
@@ -903,6 +917,8 @@ public static class Mesher
 						mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 					modelObject.AddChild(mesh);
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+					if (isViewModel)
+						mesh.SetInstanceShaderParameter("ViewModel", true);
 				}
 			}
 		}

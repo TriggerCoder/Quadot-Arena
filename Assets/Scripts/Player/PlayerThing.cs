@@ -6,13 +6,11 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	[Export]
 	public CollisionShape3D Torso;
 	[Export]
-	public CollisionShape3D Feets;
+	public CollisionShape3D[] Feets;
 	[Export]
 	public PlayerInfo playerInfo;
 	[Export]
 	public PlayerControls playerControls;
-	[Export]
-	public Node3D[] weaponCollider;
 	[Export]
 	public MultiAudioStream audioStream;
 
@@ -52,14 +50,13 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	{
 		playerControls.feetRay = new SeparationRayShape3D();
 		playerControls.feetRay.Length = .8f;
-		Feets.Shape = playerControls.feetRay;
+		for (int i = 0; i < Feets.Length; i++)
+			Feets[i].Shape = playerControls.feetRay;
 
 		playerControls.collider = new CapsuleShape3D();
 		playerControls.collider.Radius = .5f;
 		playerControls.collider.Height = 1.5f;
 		Torso.Shape = playerControls.collider;
-		for (int i = 0; i < weaponCollider.Length; i++)
-			weaponCollider[i].Position = new Vector3(0, 0.85f, 0);
 		currentState = GameManager.FuncState.Ready;
 	}
 
