@@ -207,7 +207,7 @@ limits/debugger/max_chars_per_second=65535
 
 [physics]
 
-common/physics_ticks_per_second=50
+common/physics_ticks_per_second=40
 3d/physics_engine="JoltPhysics3D"
 
 [shader_globals]

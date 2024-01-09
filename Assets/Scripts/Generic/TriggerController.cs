@@ -1,11 +1,15 @@
 using Godot;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+
 public partial class TriggerController : Node3D
 {
+	public Area3D Area = null;
 	public string triggerName = "";
 	public bool activated = false;
 	private Action<PlayerThing> OnActivate = new Action<PlayerThing>((p) => { return; });
-
+	private Dictionary<Node3D,int> CurrentColliders = new Dictionary<Node3D, int> ();
 	public bool Repeatable = false;
 	public bool AutoReturn = false;
 	public float AutoReturnTime = 1f;
@@ -59,14 +63,54 @@ public partial class TriggerController : Node3D
 		if (GameManager.Paused)
 			return;
 
-		GameManager.Print("Someone "+ other.Name + " activated this " + Name);
+		GameManager.Print("Someone "+ other.Name + " tried to activate this " + Name);
 		if (other is PlayerThing player)
 		{
 			//Dead player don't activate stuff
 			if (player.Dead)
 				return;
 
-			Activate(player);
+			if (!CurrentColliders.ContainsKey(other))
+				CurrentColliders.Add(other, 0);
 		}
+	}
+
+	public override void _PhysicsProcess(double delta)
+	{
+		if (GameManager.Paused)
+			return;
+
+		if (Area == null)
+		{
+			SetPhysicsProcess(false);
+			return;
+		}
+
+		if (CurrentColliders.Count > 0)
+		{
+			var CurrentBodies = Area.GetOverlappingBodies();
+			int CurrentBodiesNum = CurrentBodies.Count;
+			if (CurrentBodiesNum == 0)
+			{
+				CurrentColliders.Clear();
+				return;
+			}
+
+			for (int i = 0; i < CurrentBodiesNum; i++)
+			{
+				Node3D CurrentBody = CurrentBodies[i];
+				if (CurrentColliders.ContainsKey(CurrentBody))
+				{
+					int value = CurrentColliders[CurrentBody]++;
+					if (value > 5)
+					{
+						GameManager.Print("Someone " + CurrentBody.Name + " activated this " + Name);
+						Activate(CurrentBody as PlayerThing);
+						CurrentColliders.Remove(CurrentBody);
+					}					
+				}
+			}
+		}
+
 	}
 }

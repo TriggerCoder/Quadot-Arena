@@ -250,6 +250,7 @@ public partial class ThingsManager : Node
 			thingObject.AddChild(objCollider);
 			MapLoader.GenerateGeometricCollider(thingObject, objCollider, model, ContentFlags.Trigger);
 			objCollider.BodyEntered += tc.OnBodyEntered;
+			tc.Area = objCollider;
 			triggerToActivate.Add(target, tc);
 		}
 	}
@@ -351,6 +352,7 @@ public partial class ThingsManager : Node
 						mc.Shape = sphere;
 						triggerCollider.GlobalPosition = BigBox.GetCenter();
 						triggerCollider.BodyEntered += sw.internalSwitch.OnBodyEntered;
+						sw.internalSwitch.Area = triggerCollider;
 					}
 
 					if (entity.entityData.TryGetValue("target", out strWord))
@@ -469,6 +471,7 @@ public partial class ThingsManager : Node
 
 							triggerCollider.GlobalPosition = BigBox.GetCenter();
 							triggerCollider.BodyEntered += tc.OnBodyEntered;
+							tc.Area = triggerCollider;
 						}
 					}
 				}
@@ -513,6 +516,8 @@ public partial class ThingsManager : Node
 					thingObject.AddChild(objCollider);
 					MapLoader.GenerateGeometricCollider(thingObject, objCollider, model, ContentFlags.Trigger);
 					objCollider.BodyEntered += tc.OnBodyEntered;
+					tc.Area = objCollider;
+
 					tc.Repeatable = true;
 					tc.SetController("trigger_hurt", (p) =>
 					{

@@ -8,7 +8,6 @@ sorting_offset = -3000.0
 cast_shadow = 0
 billboard = 1
 texture_filter = 1
-render_priority = -128
 script = ExtResource("1_apdci")
 spriteName = "rocketExplosion"
 spriteRadius = 8
