@@ -64,6 +64,8 @@ public static class QShaderManager
 		QShaderData qShader = QShaders[upperName];
 		GameManager.Print("Shader found: " + upperName);
 
+		GetSunData(qShader);
+
 		int lightmapStage = -1;
 		bool helperRotate = false;
 		bool animStages = false;
@@ -359,7 +361,7 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (upperName.Contains("MACHINEGUN"))
+		if (upperName.Contains("SLAMP3"))
 			GameManager.Print(code);
 
 		Shader shader = new Shader();
@@ -385,6 +387,17 @@ public static class QShaderManager
 		return shaderMaterial;
 	}
 
+	public static void GetSunData(QShaderData qShader)
+	{
+		if (qShader.qShaderGlobal.sunParams == null)
+			return;
+
+		string[] SunData = qShader.qShaderGlobal.sunParams;
+		float degrees = TryToParseFloat(SunData[4]);
+		float elevation = TryToParseFloat(SunData[5]);
+		GameManager.Instance.Sun.RotationDegrees = new Vector3(-elevation, degrees - 90, 0); 
+
+	}
 	public static ShaderMaterial PortalMaterial(QShaderData qShader)
 	{
 		string code = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, depth_draw_always, blend_mix, cull_back;\n\n";
@@ -426,7 +439,26 @@ public static class QShaderManager
 		string Vertex = "";
 
 		if (MaterialManager.HasBillBoard.Contains(qShader.Name))
-			Vertex = "\tVERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
+		{
+			switch (qShader.qShaderGlobal.billboard)
+			{
+				default:
+					Vertex = "\tVERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
+				break;
+				case BaseMaterial3D.BillboardModeEnum.FixedY:
+					Vertex = "\tivec2 tex_size = textureSize(Tex_0, 0);\n";
+					Vertex += "\tif(tex_size.x > tex_size.y)\n";
+					Vertex += "\t\ttex_size = ivec2(0,1);\n\telse\n";
+					Vertex += "\t\ttex_size = ivec2(1,0);\n";
+					Vertex += "\tvec3 local_up = MODEL_MATRIX[tex_size.x].xyz;\n";
+					Vertex += "\tvec4 ax = vec4(normalize(cross(local_up, INV_VIEW_MATRIX[2].xyz)), 0.0);\n";
+					Vertex += "\tvec4 ay = vec4(local_up.xyz, 0.0);\n";
+					Vertex += "\tvec4 az = vec4(normalize(cross(INV_VIEW_MATRIX[tex_size.y].xyz, local_up)), 0.0);\n";
+					Vertex += "\tMODELVIEW_MATRIX = VIEW_MATRIX * mat4(ax, ay, az, MODEL_MATRIX[3]);\n";
+					Vertex += "\tMODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);\n";
+				break;
+			}
+		}
 		if (qShader.qShaderGlobal.deformVertexes == null)
 		{
 			Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);\n";
@@ -905,7 +937,7 @@ public static class QShaderManager
 							}
 							else
 								QShaders.Add(qShaderData.Name, qShaderData);
-							if (qShaderData.qShaderGlobal.isBillboard)
+							if (qShaderData.qShaderGlobal.billboard != BaseMaterial3D.BillboardModeEnum.Disabled)
 								MaterialManager.AddBillBoard(qShaderData.Name);
 						   qShaderData = null;
 							stage = 0;
@@ -1060,16 +1092,16 @@ public class QShaderGlobal
 	public List<string[]> deformVertexes = null;
 	public List<string> fogParms = null;
 	public SortType sort = SortType.Opaque;
+	public string[] sunParams = null;
 	public List<string> tessSize = null;
 	public List<string> q3map_BackShader = null;
 	public List<string> q3map_GlobalTexture = null;
-	public List<string> q3map_Sun = null;
 	public List<string> q3map_SurfaceLight = null;
 	public List<string> q3map_LightImage = null;
 	public List<string> q3map_LightSubdivide = null;
 	public string editorImage = "";
 	public CullType cullType = CullType.Back;
-	public bool isBillboard = false;
+	public BaseMaterial3D.BillboardModeEnum billboard = BaseMaterial3D.BillboardModeEnum.Disabled;
 	public bool isSky = false;
 	public bool unShaded = false;
 	public bool trans = false;
@@ -1143,7 +1175,12 @@ public class QShaderGlobal
 			break;
 			case "DEFORMVERTEXES":
 				if (Value.Contains("AUTOSPRITE"))
-					isBillboard = true;
+				{
+					if (Value.Contains('2'))
+						billboard = BaseMaterial3D.BillboardModeEnum.FixedY;
+					else
+						billboard = BaseMaterial3D.BillboardModeEnum.Enabled;
+				}
 				else
 				{
 					if (deformVertexes == null)
@@ -1183,9 +1220,8 @@ public class QShaderGlobal
 				q3map_GlobalTexture.Add(Value);
 			break;
 			case "Q3MAP_SUN":
-				if (q3map_Sun == null)
-					q3map_Sun = new List<string>();
-				q3map_Sun.Add(Value);
+				if (sunParams == null)
+					sunParams = Value.Split(' ');
 			break;
 			case "Q3MAP_SURFACELIGHT":
 				if (q3map_SurfaceLight == null)

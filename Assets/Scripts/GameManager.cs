@@ -7,6 +7,8 @@ public partial class GameManager : Node
 	[Export]
 	WorldEnvironment worldEnvironment;
 	[Export]
+	public Node3D Sun;
+	[Export]
 	public string autoloadMap = "q3dm1";
 	[Export]
 	public int tessellations = 5;
