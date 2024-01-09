@@ -36,8 +36,6 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public bool invul = false;
 	public bool ready = false;
 
-	private GameManager.FuncState currentState = GameManager.FuncState.None;
-	public int skipFrames = 5;
 	private enum LookType
 	{
 		Left = 0,
@@ -57,32 +55,6 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.collider.Radius = .5f;
 		playerControls.collider.Height = 1.5f;
 		Torso.Shape = playerControls.collider;
-		currentState = GameManager.FuncState.Ready;
-	}
-
-	public override void _PhysicsProcess(double delta)
-	{
-		if (GameManager.Paused)
-			return;
-
-		switch (currentState)
-		{
-			default:
-			break;
-			case GameManager.FuncState.Ready:
-			{   //skip frames are used to easen up after loading
-				if (skipFrames > 0)
-				{
-					skipFrames--;
-					if (skipFrames == 0)
-					{
-						ready = true;
-						currentState = GameManager.FuncState.Start;
-					}
-				}
-			}
-			break;
-		}
 	}
 	public void InitPlayer()
 	{
@@ -112,8 +84,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 //		playerInfo.playerHUD.HUDUpdateArmorNum();
 
 		playerControls.playerCamera.ChangeThirdPersonCamera(false);
-		skipFrames = 5;
-		currentState = GameManager.FuncState.Ready;
+		ready = true;
 	}
 	public void PlayModelSound(string soundName)
 	{

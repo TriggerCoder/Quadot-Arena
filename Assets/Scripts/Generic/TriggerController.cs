@@ -86,31 +86,30 @@ public partial class TriggerController : Node3D
 			return;
 		}
 
-		if (CurrentColliders.Count > 0)
-		{
-			var CurrentBodies = Area.GetOverlappingBodies();
-			int CurrentBodiesNum = CurrentBodies.Count;
-			if (CurrentBodiesNum == 0)
-			{
-				CurrentColliders.Clear();
-				return;
-			}
+		if (CurrentColliders.Count == 0)
+			return;
 
-			for (int i = 0; i < CurrentBodiesNum; i++)
+		var CurrentBodies = Area.GetOverlappingBodies();
+		int CurrentBodiesNum = CurrentBodies.Count;
+		if (CurrentBodiesNum == 0)
+		{
+			CurrentColliders.Clear();
+			return;
+		}
+
+		for (int i = 0; i < CurrentBodiesNum; i++)
+		{
+			Node3D CurrentBody = CurrentBodies[i];
+			if (CurrentColliders.ContainsKey(CurrentBody))
 			{
-				Node3D CurrentBody = CurrentBodies[i];
-				if (CurrentColliders.ContainsKey(CurrentBody))
+				int value = CurrentColliders[CurrentBody]++;
+				if (value > 1)
 				{
-					int value = CurrentColliders[CurrentBody]++;
-					if (value > 5)
-					{
-						GameManager.Print("Someone " + CurrentBody.Name + " activated this " + Name);
-						Activate(CurrentBody as PlayerThing);
-						CurrentColliders.Remove(CurrentBody);
-					}					
+					GameManager.Print("Someone " + CurrentBody.Name + " activated this " + Name);
+					Activate(CurrentBody as PlayerThing);
+					CurrentColliders.Remove(CurrentBody);
 				}
 			}
 		}
-
 	}
 }
