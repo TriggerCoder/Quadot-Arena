@@ -1,6 +1,6 @@
 using Godot;
 using System;
-using System.Collections;
+using System.IO;
 using System.Collections.Generic;
 using static Godot.Image;
 
@@ -91,7 +91,8 @@ public static class TextureLoader
 
 				Image baseTex = new Image();
 				if (imageFormat == ImageFormat.TGA)
-					baseTex.LoadTgaFromBuffer(imageBytes);
+//					baseTex.LoadTgaFromBuffer(imageBytes);
+					LoadTGA(baseTex, imageBytes);
 				else
 					baseTex.LoadJpgFromBuffer(imageBytes);
 
@@ -161,6 +162,117 @@ public static class TextureLoader
 			else
 				GameManager.Print("Image not found " + upperName + "." + imageFormat);
 		}
+	}
+
+	public static void LoadTGA(Image TgaImage, byte[] TGABytes)
+	{
+		MemoryStream ms = new MemoryStream(TGABytes);
+		BinaryReader TGAData = new BinaryReader(ms);
+		Format format;
+		int byteSize;
+		// Read the TGA or TARGA header data
+		byte idLength = TGAData.ReadByte();
+		byte colorMapType = TGAData.ReadByte();
+		byte imageType = TGAData.ReadByte();
+		ushort colorMapFirstEntryIndex = TGAData.ReadUInt16();
+		ushort colorMapLength = TGAData.ReadUInt16();
+		byte colorMapEntrySize = TGAData.ReadByte();
+		ushort xOrigin = TGAData.ReadUInt16();
+		ushort yOrigin = TGAData.ReadUInt16();
+		ushort width = TGAData.ReadUInt16();
+		ushort height = TGAData.ReadUInt16();
+		byte pixelDepth = TGAData.ReadByte();
+		byte imageDescriptor = TGAData.ReadByte();
+
+		bool topToBottom = ((imageDescriptor & 32) > 0);
+
+		// Skip the TGA or TARGA ID field
+		TGAData.BaseStream.Seek(idLength, SeekOrigin.Current);
+
+		if (pixelDepth == 32)
+		{
+			format = Format.Rgba8;
+			byteSize = 4;
+		}
+		else
+		{
+			format = Format.Rgb8;
+			byteSize = 3;
+		}
+
+		byte[] colors = new byte[width * height * byteSize];
+		int currentPixel = 0;
+
+		if (imageType == 10) // RLE compressed
+		{
+			while (currentPixel < colors.Length)
+			{
+				// Get the RLE packet header byte
+				byte header = TGAData.ReadByte();
+
+				int packetLength = header & 0x7F;
+
+				// Check if the RLE packet header is a RLE packet
+				if ((header & 0x80) != 0)
+				{
+					// Read the repeated color data
+					byte r = TGAData.ReadByte();
+					byte g = TGAData.ReadByte();
+					byte b = TGAData.ReadByte();
+					byte a = (pixelDepth == 32) ? TGAData.ReadByte() : (byte)0xFF;
+
+					// Copy the repeated color into the Color array
+					for (int i = 0; i <= packetLength; i++)
+					{
+						colors[currentPixel] = b;
+						colors[currentPixel + 1] = g;
+						colors[currentPixel + 2] = r;
+						if (byteSize == 4)
+							colors[currentPixel + 3] = a;
+						currentPixel += byteSize;
+					}
+				}
+				else
+				{
+					for (int i = 0; i <= packetLength; i++, currentPixel += byteSize)
+					{
+						// Read the raw color data
+						byte r = TGAData.ReadByte();
+						byte g = TGAData.ReadByte();
+						byte b = TGAData.ReadByte();
+						byte a = (pixelDepth == 32) ? TGAData.ReadByte() : (byte)0xFF;
+						colors[currentPixel] = b;
+						colors[currentPixel + 1] = g;
+						colors[currentPixel + 2] = r;
+						if (byteSize == 4)
+							colors[currentPixel + 3] = a;
+					}
+				}
+			}
+		}
+		else if (imageType == 2) //Uncompressed
+		{
+			for (currentPixel = 0; currentPixel < colors.Length; currentPixel += byteSize)
+			{
+				// Read the color data
+				byte r = TGAData.ReadByte();
+				byte g = TGAData.ReadByte();
+				byte b = TGAData.ReadByte();
+				byte a = (pixelDepth == 32) ? TGAData.ReadByte() : (byte)0xFF;
+
+				colors[currentPixel] = b;
+				colors[currentPixel + 1] = g;
+				colors[currentPixel + 2] = r;
+				if (byteSize == 4)
+					colors[currentPixel + 3] = a;
+			}
+		}
+		else
+			GameManager.Print("TGA texture: unknown type.");
+
+		TgaImage.SetData(width, height, false, format, colors);
+		if (!topToBottom)
+			TgaImage.FlipY();
 	}
 	public static float computeAlphaFromColorFilter(Color color, Color filter)
 	{ 
