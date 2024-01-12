@@ -1,8 +1,9 @@
-[gd_scene load_steps=57 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=58 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Texture2D" uid="uid://dv1ug6ajvhega" path="res://Assets/Textures/Skyboxes/Gehenna/gehenna.png" id="1_si63v"]
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
+[ext_resource type="Material" uid="uid://cuswccc2jvs1t" path="res://Assets/Materials/illegal.tres" id="5_7m0rp"]
 [ext_resource type="Material" uid="uid://b7a0ll36sihim" path="res://Assets/Materials/default.tres" id="5_is83x"]
 [ext_resource type="Material" uid="uid://dx20p677lxv8l" path="res://Assets/Materials/transparentDefault.tres" id="6_fojn5"]
 [ext_resource type="Material" uid="uid://bxnkqiouvmut0" path="res://Assets/Materials/defaultLightMap.tres" id="6_i1nl1"]
@@ -83,6 +84,7 @@ playerPrefab = ExtResource("7_rdgk2")
 
 [node name="MaterialManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("3_amftv")
+illegal = ExtResource("5_7m0rp")
 defaultMaterial = ExtResource("5_is83x")
 defaultTransparentMaterial = ExtResource("6_fojn5")
 defaultLightMapMaterial = ExtResource("6_i1nl1")

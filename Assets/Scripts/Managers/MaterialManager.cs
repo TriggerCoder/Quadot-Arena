@@ -51,6 +51,8 @@ public partial class MaterialManager : Node
 	public override void _Ready()
 	{
 		Instance = this;
+		Image image = ((CompressedTexture2D)illegal.Get("shader_parameter/Tex_0")).GetImage();
+		TextureLoader.illegal = ImageTexture.CreateFromImage(image);
 		foreach (string name in _decalsNames)
 		{
 			string upperName = name.ToUpper();
@@ -105,14 +107,6 @@ public partial class MaterialManager : Node
 	}
 	public static ShaderMaterial GetMaterials(string textureName, int lm_index , ref bool forceSkinAlpha, ref bool hasPortal)
 	{
-//		if (IsSkyTexture(textureName))
-//			return Instance.skyHole;
-
-		// Load the primary texture for the surface from the texture lump
-		// The texture lump itself will have already looked over all
-		// available .pk3 files and compiled a dictionary of textures for us.
-		ImageTexture tex = TextureLoader.GetTexture(textureName);
-
 		ShaderMaterial mat;
 
 		// Lightmapping is on, so calc the lightmaps
@@ -134,7 +128,7 @@ public partial class MaterialManager : Node
 					mat = (ShaderMaterial)Instance.defaultTransparentLightMapMaterial.Duplicate(true);
 				else
 					mat = (ShaderMaterial)Instance.defaultLightMapMaterial.Duplicate(true);
-			
+				ImageTexture tex = TextureLoader.GetTexture(textureName);
 				mat.Set(opaqueTexProperty, tex);
 				mat.Set(lightMapProperty, lmap);
 				mat.Set(mixBrightness, GameManager.Instance.mixBrightness);
@@ -158,10 +152,8 @@ public partial class MaterialManager : Node
 		{
 			GD.Print("Decal found: " + textureName);
 			if (!TextureLoader.Textures.ContainsKey(textureName))
-			{
 				TextureLoader.AddNewTexture(textureName, false);
-				tex = TextureLoader.GetTexture(textureName);
-			}
+			ImageTexture tex = TextureLoader.GetTexture(textureName);
 			mat = (ShaderMaterial)Instance.decalsMapMaterial.Duplicate(true);
 			mat.Set(opaqueTexProperty, tex);
 			mat.Set(colorProperty, GameManager.ambientLight);
@@ -176,6 +168,7 @@ public partial class MaterialManager : Node
 				mat = (ShaderMaterial)Instance.defaultTransparentMaterial.Duplicate(true);
 			else
 				mat = (ShaderMaterial)Instance.defaultMaterial.Duplicate(true);
+			ImageTexture tex = TextureLoader.GetTexture(textureName);
 			mat.Set(opaqueTexProperty, tex);
 			mat.Set(colorProperty, GameManager.ambientLight);
 			mat.Set(mixBrightness, GameManager.Instance.mixBrightness);

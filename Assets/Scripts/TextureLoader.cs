@@ -26,7 +26,23 @@ public static class TextureLoader
 		LoadTextures(list, false);
 		LoadTextures(list, false , ImageFormat.TGA);
 	}
+	public static bool HasTextureOrAddTexture(string textureName, bool forceAlpha)
+	{
+		string upperName = textureName.ToUpper();
+		if (forceAlpha)
+		{
+			if (TransparentTextures.ContainsKey(upperName))
+				return true;
+		}
+		else if (Textures.ContainsKey(upperName))
+			return true;
 
+		GameManager.Print("GetTextureOrAddTexture: No texture \"" + upperName + "\"");
+		AddNewTexture(upperName, forceAlpha);
+		if (Textures.ContainsKey(upperName))
+			return true;
+		return false;
+	}
 	public static ImageTexture GetTextureOrAddTexture(string textureName, bool forceAlpha)
 	{
 		string upperName = textureName.ToUpper();
@@ -63,7 +79,7 @@ public static class TextureLoader
 		else if (Textures.ContainsKey(upperName))
 			return Textures[upperName];
 
-//		GameManager.Print("TextureLoader: No texture \"" + upperName + "\"");
+		GameManager.Print("GetTexture: Texture not found  \"" + upperName + "\"");
 		return illegal;
 	}
 	public static void LoadTextures(List<QShader> mapTextures, bool ignoreShaders, ImageFormat imageFormat = ImageFormat.JPG)

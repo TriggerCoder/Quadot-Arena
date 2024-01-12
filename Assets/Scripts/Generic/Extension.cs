@@ -86,4 +86,15 @@ namespace ExtensionMethods
 			return result;
 		}
 	}
+
+	public static class StringExtensions
+	{
+		public static string StripExtension(this string String)
+		{
+			int fileExtPos = String.LastIndexOf(".");
+			if (fileExtPos >= 0)
+				return String.Substring(0, fileExtPos);
+			return String;
+		}
+	}
 }
