@@ -79,7 +79,7 @@ public static class TextureLoader
 		else if (Textures.ContainsKey(upperName))
 			return Textures[upperName];
 
-		GameManager.Print("GetTexture: Texture not found  \"" + upperName + "\"");
+		GameManager.Print("GetTexture: Texture not found \"" + upperName + "\"");
 		return illegal;
 	}
 	public static void LoadTextures(List<QShader> mapTextures, bool ignoreShaders, ImageFormat imageFormat = ImageFormat.JPG)

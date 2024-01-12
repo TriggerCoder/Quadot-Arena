@@ -52,11 +52,13 @@ public static class Mesher
 		BezierMesh.ClearCaches();
 	}
 
-	public static void GenerateBezObject(string textureName, int lmIndex, int indexId, Node3D holder, QSurface[] surfaces, bool addPVS = true)
+	public static void GenerateBezObject(int shaderId, int lmIndex, int indexId, Node3D holder, QSurface[] surfaces, bool addPVS = true)
 	{
 		if (surfaces == null || surfaces.Length == 0)
 			return;
 
+		bool isTrigger = false;
+		string textureName = MapLoader.mapTextures[shaderId].name;
 		string Name = "Bezier_Surfaces";
 		int[] numPatches = new int[surfaces.Length];
 		int totalPatches = 0;
@@ -68,29 +70,69 @@ public static class Mesher
 			Name += "_" + surfaces[i].surfaceId;
 		}
 
-		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex);
-		MeshInstance3D mesh = new MeshInstance3D();
-		ArrayMesh arrMesh = new ArrayMesh();
-		StaticBody3D collider = new StaticBody3D();
+		uint type = MapLoader.mapTextures[shaderId].contentsFlags;
+		uint stype = MapLoader.mapTextures[shaderId].surfaceFlags;
+
+		SurfaceType surfaceType = new SurfaceType();
+		surfaceType.Init(stype);
+		ContentType contentType = new ContentType();
+		contentType.Init(type);
+
+		if ((contentType.value & MaskPlayerSolid) == 0)
+			isTrigger = true;
+
+		CollisionObject3D collider;
+		if (isTrigger)
+			collider = new Area3D();
+		else
+			collider = new StaticBody3D();
 		MapLoader.ColliderGroup.AddChild(collider);
 		collider.Name = "Bezier_" + indexId + "_collider";
-		uint OwnerShapeId = collider.CreateShapeOwner(holder);
+		collider.AddChild(contentType);
 
+		uint OwnerShapeId = collider.CreateShapeOwner(holder);
 		int offset = 0;
+
 		for (int i = 0; i < surfaces.Length; i++)
 		{
 			for (int n = 0; n < numPatches[i]; n++)
-				GenerateBezMesh(OwnerShapeId, collider, surfaces[i], n, ref offset);
+				GenerateBezMesh(OwnerShapeId, collider, surfaces[i], n, (surfaceType.NoDraw == false), ref offset);
 		}
 
+		if ((surfaceType.value & MaskTransparent) != 0)
+			collider.CollisionLayer = (1 << GameManager.InvisibleBlockerLayer);
+		else
+			collider.CollisionLayer = (1 << GameManager.ColliderLayer);
+
+		//If noMarks add it to the table
+		if ((surfaceType.value & NoMarks) != 0)
+			MapLoader.noMarks.Add(collider);
+
+		collider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+		collider.AddChild(surfaceType);
+
+		if (surfaceType.NoDraw)
+			return;
+
+		bool hasPortal = false;
+		bool forceSkinAlpha = false;
+
+		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex, ref forceSkinAlpha, ref hasPortal);
+		MeshInstance3D mesh = new MeshInstance3D();
+		ArrayMesh arrMesh = new ArrayMesh();
+
 		BezierMesh.FinalizeBezierMesh(arrMesh);
-		Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
-		float luminance = .25f;
-		if (mainText != null)
-			if (!string.IsNullOrEmpty(mainText.ResourceName))
-				luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
-		mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 		arrMesh.SurfaceSetMaterial(0, material);
+
+		if (!forceSkinAlpha)
+		{
+			Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
+			float luminance = .25f;
+			if (mainText != null)
+				if (!string.IsNullOrEmpty(mainText.ResourceName))
+					luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+			mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
+		}
 
 		holder.AddChild(mesh);
 		if (addPVS)
@@ -109,7 +151,7 @@ public static class Mesher
 		if (addPVS)
 			ClusterPVSManager.Instance.RegisterClusterAndSurfaces(mesh, surfaces);
 	}
-	public static void GenerateBezMesh(uint OwnerShapeId, CollisionObject3D collider, QSurface surface, int patchNumber, ref int offset)
+	public static void GenerateBezMesh(uint OwnerShapeId, CollisionObject3D collider, QSurface surface, int patchNumber, bool draw, ref int offset)
 	{
 		//Calculate how many patches there are using size[]
 		//There are n_patchesX by n_patchesY patches in the grid, each of those
@@ -232,7 +274,8 @@ public static class Mesher
 		color.Add(vertGrid[vi + 1, vj + 2].color);
 		color.Add(vertGrid[vi + 2, vj + 2].color);
 
-		BezierMesh.GenerateBezierMesh(GameManager.Instance.tessellations, bverts, uv, uv2, color, ref offset);
+		if (draw)
+			BezierMesh.GenerateBezierMesh(GameManager.Instance.tessellations, bverts, uv, uv2, color, ref offset);
 		BezierMesh.BezierColliderMesh(OwnerShapeId, collider, surface.surfaceId, patchNumber, bverts);
 
 		return;

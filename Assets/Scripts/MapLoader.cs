@@ -379,7 +379,7 @@ public static class MapLoader
 				switch (bigGroup.Key.type)
 				{
 					case QSurfaceType.Patch:
-						Mesher.GenerateBezObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
+						Mesher.GenerateBezObject(groupSurfaces[0].shaderId, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces);
 						break;
 					case QSurfaceType.Polygon:
 					case QSurfaceType.Mesh:
@@ -470,7 +470,7 @@ public static class MapLoader
 			switch (group.Key.type)
 			{
 				case QSurfaceType.Patch:
-					Mesher.GenerateBezObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces, false);
+					Mesher.GenerateBezObject(groupSurfaces[0].shaderId, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces, false);
 					break;
 				case QSurfaceType.Polygon:
 				case QSurfaceType.Mesh:
