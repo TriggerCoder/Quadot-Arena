@@ -7,21 +7,25 @@ public partial class TeleporterThing : Area3D
 	public string TeleportInSound = "world/telein";
 	public string TeleportOutSound = "world/teleout";
 
-	private Vector3 destination;
-	private int angle;
+	public List<Target> destinations = new List<Target>();
 	private List<PlayerThing> toTeleport = new List<PlayerThing>();
 	public override void _Ready()
 	{
 		BodyEntered += OnBodyEntered;
 	}
-	public void Init(Vector3 dest, int alpha)
+	public void Init(List<Target> dest)
 	{
-		destination = dest;
-		angle = alpha + 90;
-		if (angle < -180)
-			angle += 360;
-		if (angle > 180)
-			angle -= 360;
+		foreach(var target in dest) 
+		{
+			Vector3 destination = target.destination;
+			int angle = target.angle + 90;
+			if (angle < -180)
+				angle += 360;
+			if (angle > 180)
+				angle -= 360;
+
+			destinations.Add(new Target(destination, angle));
+		}
 	}
 	public static void TelefragEverything(Vector3 position, Node3D node)
 	{
@@ -84,17 +88,19 @@ public partial class TeleporterThing : Area3D
 
 			if (!string.IsNullOrEmpty(TeleportOutSound))
 				SoundManager.Create3DSound(playerThing.Position, SoundManager.LoadSound(TeleportOutSound));
-			ClusterPVSManager.CheckPVS(playerThing.playerInfo.viewLayer, destination);
-			TelefragEverything(destination, playerThing);
-			playerThing.Position = destination;
+
+			Target target = destinations[GD.RandRange(0, destinations.Count - 1)];
+			ClusterPVSManager.CheckPVS(playerThing.playerInfo.viewLayer, target.destination);
+			TelefragEverything(target.destination, playerThing);
+			playerThing.Position = target.destination;
 			playerThing.playerControls.InvoqueSetTransformReset();
 
 			if (!string.IsNullOrEmpty(TeleportInSound))
-				SoundManager.Create3DSound(destination, SoundManager.LoadSound(TeleportInSound));
-			playerThing.playerControls.viewDirection.Y = angle;
+				SoundManager.Create3DSound(target.destination, SoundManager.LoadSound(TeleportInSound));
+			playerThing.playerControls.viewDirection.Y = target.angle;
 			playerThing.playerControls.impulseVector = Vector3.Zero;
 			playerThing.playerControls.playerVelocity = Vector3.Zero;
-			playerThing.Impulse(Quaternion.FromEuler(new Vector3(0, Mathf.DegToRad(angle), 0)) * Vector3.Forward, 1500);
+			playerThing.Impulse(Quaternion.FromEuler(new Vector3(0, Mathf.DegToRad(target.angle), 0)) * Vector3.Forward, 1500);
 		}
 		toTeleport = new List<PlayerThing>();
 	}

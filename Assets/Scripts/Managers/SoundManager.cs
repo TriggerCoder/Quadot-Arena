@@ -5,16 +5,19 @@ using System.Collections.Generic;
 public static class SoundManager
 {
 	public static Dictionary<string, AudioStreamWav> Sounds = new Dictionary<string, AudioStreamWav>();
-	public static AudioStreamWav LoadSound(string soundName, bool loop = false)
+	public static AudioStreamWav LoadSound(string soundName, bool loop = false, bool music = false)
 	{
 		if (Sounds.ContainsKey(soundName))
 			return Sounds[soundName];
+		string dir = "sound/";
+		if (music)
+			dir = "";
 
 		byte[] WavSoudFile;
-		string path = Directory.GetCurrentDirectory() + "/StreamingAssets/sound/" + soundName + ".wav";
+		string path = Directory.GetCurrentDirectory() + "/StreamingAssets/"+ dir + soundName + ".wav";
 		if (File.Exists(path))
 			WavSoudFile = File.ReadAllBytes(path);
-		else if (PakManager.ZipFiles.ContainsKey(path = ("sound/" + soundName + ".wav").ToUpper()))
+		else if (PakManager.ZipFiles.ContainsKey(path = (dir + soundName + ".wav").ToUpper()))
 		{
 			string FileName = PakManager.ZipFiles[path];
 			var reader = new ZipReader();
@@ -22,7 +25,10 @@ public static class SoundManager
 			WavSoudFile = reader.ReadFile(path, false);
 		}
 		else
+		{
+			GameManager.Print("LoadSound: " + path + " not found", GameManager.PrintType.Warning);
 			return null;
+		}
 
 		string[] soundFileName = path.Split('/');
 		AudioStreamWav clip = ToAudioStream(WavSoudFile, 0, soundFileName[soundFileName.Length - 1], loop);
@@ -70,13 +76,16 @@ public static class SoundManager
 			else
 			{
 				audioStream.Format = AudioStreamWav.FormatEnum.Format16Bits;
-				totalSamples /= 2; //block size = 2;
+				totalSamples = (totalSamples >> 1); //block size = 2;
 			}
 		}
 		audioStream.Data = byteArray;
 		audioStream.MixRate = sampleRate;
 		if (channels == 2)
+		{
 			audioStream.Stereo = true;
+			totalSamples = (totalSamples >> 1);
+		}
 		if (loop)
 		{
 			audioStream.LoopBegin = 0;
@@ -88,9 +97,9 @@ public static class SoundManager
 	}
 	public static MultiAudioStream Create2DSound(AudioStream audio, Node3D parent = null, bool destroyAfterSound = true)
 	{
-		return Create3DSound(Vector3.Zero, audio, parent, destroyAfterSound);
+		return Create3DSound(Vector3.Zero, audio, parent, destroyAfterSound, true);
 	}
-	public static MultiAudioStream Create3DSound(Vector3 position, AudioStream audio, Node3D parent = null, bool destroyAfterSound = true)
+	public static MultiAudioStream Create3DSound(Vector3 position, AudioStream audio, Node3D parent = null, bool destroyAfterSound = true, bool is2DAudio = false)
 	{
 		MultiAudioStream sound = new MultiAudioStream();
 		sound.Name = "3D Sound";
@@ -98,6 +107,7 @@ public static class SoundManager
 			parent = GameManager.Instance.TemporaryObjectsHolder;
 		
 		parent.AddChild(sound);
+		sound.Is2DAudio = is2DAudio;
 		sound.GlobalPosition = position;
 		sound.Bus = "FXBus";
 		sound.Stream = audio;

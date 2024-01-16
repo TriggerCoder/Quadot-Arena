@@ -256,6 +256,16 @@ public partial class MultiAudioStream : Node3D
 			_destroyAfterSoundPlayed = value;
 		}
 	}
+
+	private bool _is2DAudio = false;
+	public bool Is2DAudio
+	{
+		get { return _is2DAudio; }
+		set
+		{
+			_is2DAudio = value;
+		}
+	}
 	//Internal components
 
 	private Dictionary<VirtualAudioListener, AudioStreamPlayer3D> _subAudioStreams = new Dictionary<VirtualAudioListener, AudioStreamPlayer3D>();
@@ -328,18 +338,22 @@ public partial class MultiAudioStream : Node3D
 	private void VirtualAudioListenerAdded(VirtualAudioListener virtualAudioListener)
 	{
 		bool hardwareChannelsLeft = true;
+		if ((Is2DAudio) && (_subAudioStreams.Count > 0))
+			return;
+
 		CreateSubAudioStream(virtualAudioListener, ref hardwareChannelsLeft);
 	}
 
 	private void VirtualAudioListenerRemoved(VirtualAudioListener virtualAudioListener)
 	{
-		var audioStream = _subAudioStreams[virtualAudioListener];
-		_subAudioStreams.Remove(virtualAudioListener);
+		AudioStreamPlayer3D audioStream;
 
+		if (!_subAudioStreams.TryGetValue(virtualAudioListener, out audioStream))
+			return;
+
+		_subAudioStreams.Remove(virtualAudioListener);
 		if (audioStream != null)
-		{
 			MultiAudioListener.EnquequeAudioStreamInPool(audioStream);
-		}
 	}
 
 	private void CreateSubAudioStream(VirtualAudioListener virtualAudioListener, ref bool hardWareChannelsLeft)
@@ -357,6 +371,13 @@ public partial class MultiAudioStream : Node3D
 		//There is no main listener so translation is not needed
 		if (MultiAudioListener.Main == null) 
 			return;
+
+		if (Is2DAudio)
+		{
+			GlobalPosition = MultiAudioListener.Main.GlobalPosition;
+			return;
+		}
+
 		// Get the position of the object relative to the virtual listener
 		Vector3 localPos = GlobalPosition - virtualListener.GlobalPosition;
 		subAudioStream.Position = virtualListener.Quaternion * localPos;
@@ -391,7 +412,7 @@ public partial class MultiAudioStream : Node3D
 			//If this sound gets culled all following will be too
 			if (!audioStream.Playing)
 			{
-					hardwareChannelsLeft = false;
+				hardwareChannelsLeft = false;
 			}
 		}
 		//All audio doppler effect should be  zero

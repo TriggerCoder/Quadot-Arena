@@ -97,7 +97,7 @@ public partial class GameManager : Node
 
 	private float timeMs = 0.0f;
 	public static float CurrentTimeMsec { get { return Instance.timeMs; } }
-	public float gravity = 25f;
+	public float gravity = 25f;					//default 800 * sizeDividor
 	public float friction = 6;
 	public float terminalVelocity = 100f;
 	public float barrierVelocity = 1024f;
@@ -111,6 +111,8 @@ public partial class GameManager : Node
 	public Node3D TemporaryObjectsHolder;
 	[Export]
 	public PackedScene playerPrefab;
+	[Export]
+	public MusicType musicType = MusicType.None;
 
 	public List<PlayerThing> Players = new List<PlayerThing>();
 	public enum FuncState
@@ -126,7 +128,12 @@ public partial class GameManager : Node
 		Warning,
 		Error
 	}
-
+	public enum MusicType
+	{
+		None,
+		Static,
+		Dynamic
+	}
 	public static class ControllerType
 	{
 		public const int MouseKeyboard = 0;
@@ -245,7 +252,6 @@ public partial class GameManager : Node
 	public void SetViewPortToCamera(Camera3D camera)
 	{
 		var CamRID = camera.GetCameraRid();
-
 		var viewPortRID = playerViewPort.viewPort.GetViewportRid();
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 	}

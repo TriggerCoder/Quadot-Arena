@@ -36,7 +36,7 @@ public partial class ThingsManager : Node
 	public static Dictionary<string, PackedScene> thingsPrefabs = new Dictionary<string, PackedScene>();
 	public static List<Entity> entitiesOnMap = new List<Entity>();
 	public static List<PortalSurface> portalSurfaces = new List<PortalSurface>();
-	public static Dictionary<string, Target> targetsOnMap = new Dictionary<string, Target>();
+	public static Dictionary<string, List<Target>> targetsOnMap = new Dictionary<string, List<Target>>();
 	public static Dictionary<string, Camera3D> portalCameras = new Dictionary<string, Camera3D>();
 	public static Dictionary<string, TriggerController> triggerToActivate = new Dictionary<string, TriggerController>();
 	public static Dictionary<string, Dictionary<string, string>> timersOnMap = new Dictionary<string, Dictionary<string, string>>();
@@ -216,15 +216,24 @@ public partial class ThingsManager : Node
 
 				if (targetThings.Any(s => s == entityData["classname"]))
 				{
-					if (!entityData.TryGetValue("target", out strWord))
-						strWord = entityData["targetname"];
+					if (!entityData.TryGetValue("targetname", out strWord))
+						strWord = entityData["target"];
 					string target = strWord;
-
 					switch (entityData["classname"])
 					{
 						default:
-							targetsOnMap.Add(target, new Target(origin, angle));
-							break;
+							List<Target> targetList = null;
+							if (targetsOnMap.TryGetValue(target, out targetList))
+								targetList.Add(new Target(origin, angle));
+							else
+							{
+								targetList = new List<Target>
+								{
+									new Target(origin, angle)
+								};
+								targetsOnMap.Add(target, targetList);
+							}
+						break;
 						case "func_timer": //Timers
 							timersOnMap.Add(target, entityData);
 							break;
@@ -544,8 +553,7 @@ public partial class ThingsManager : Node
 						speed = int.Parse(strWord);
 					nodeAnim.rotFPS = speed;
 					nodeAnim.rotEnable = true;
-					strWord = entity.entityData["model2"];
-					if (!string.IsNullOrEmpty(strWord))
+					if (entity.entityData.TryGetValue("model2", out strWord))
 					{
 						ModelController modelController = new ModelController();
 						thingObject.AddChild(modelController);
@@ -592,9 +600,9 @@ public partial class ThingsManager : Node
 						GameManager.Print("Angle " + strWord);
 					if (entity.entityData.TryGetValue("target", out strWord))
 					{
-						lookAt = targetsOnMap[strWord].destination;
+						lookAt = targetsOnMap[strWord][0].destination;
 						thingObject.LookAt(lookAt, Vector3.Up);
-						angle = targetsOnMap[strWord].angle;
+						angle = targetsOnMap[strWord][0].angle;
 						GameManager.Print("Target " + strWord);
 						GameManager.Print("Angle " + angle);
 					}
@@ -655,7 +663,7 @@ public partial class ThingsManager : Node
 					strWord = entity.entityData["model"];
 					int model = int.Parse(strWord.Trim('*'));
 					string target = entity.entityData["target"];
-					Vector3 destination = targetsOnMap[target].destination;
+					Vector3 destination = targetsOnMap[target][0].destination;
 					MapLoader.GenerateJumpPadCollider(jumpPad, model);
 					jumpPad.Init(destination);
 				}
@@ -668,10 +676,8 @@ public partial class ThingsManager : Node
 					strWord = entity.entityData["model"];
 					int model = int.Parse(strWord.Trim('*'));
 					string target = entity.entityData["target"];
-					Vector3 destination = targetsOnMap[target].destination;
-					int angle = targetsOnMap[target].angle;
 					MapLoader.GenerateGeometricCollider(thingObject, teleporter, model, ContentFlags.Teleporter);
-					teleporter.Init(destination, angle);
+					teleporter.Init(targetsOnMap[target]);
 				}
 				break;
 				//Location
@@ -783,6 +789,39 @@ public partial class ThingsManager : Node
 					}
 					else if (entity.entityData.ContainsKey("random"))
 						AddRandomTimeToSound(thingObject, entity.entityData, audioStream2D, audioStream, isAudio3d);
+				}
+				break;
+				//Worldspawn
+				case "worldspawn":
+				{
+					if (entity.entityData.TryGetValue("message", out strWord))
+						GameManager.Print("Map Message: " + strWord);
+					if (entity.entityData.TryGetValue("music", out strWord))
+					{
+						if (GameManager.Instance.musicType == GameManager.MusicType.Static)
+						{
+							string[] keyValue = strWord.Split(' ');
+							if (keyValue.Length > 0)
+							{
+								strWord = keyValue[0].Split('.')[0].Replace('\\', '/');
+								GameManager.Print("Music : " + strWord);
+								MultiAudioStream audioStream = new MultiAudioStream();
+								GameManager.Instance.TemporaryObjectsHolder.AddChild(audioStream);
+								audioStream.Is2DAudio = true;
+								audioStream.VolumeDb = 14;
+								audioStream.Name = "Music";
+								audioStream.Bus = "BKGBus";
+								audioStream.Stream = SoundManager.LoadSound(strWord, true, true);
+								audioStream.Play();
+							}
+						}
+					}
+					if (entity.entityData.TryGetValue("gravity", out strWord))
+					{
+						GameManager.Print("Gravity : " + strWord);
+						int gravity = int.Parse(strWord);
+						GameManager.Instance.gravity = gravity * GameManager.sizeDividor;
+					}
 				}
 				break;
 			}
