@@ -110,8 +110,7 @@ public partial class DoorController : AnimatableBody3D, Damageable
 	}
 	public void Init(int angle, int hp, int sp, float wait, int openlip, Aabb box, int dmg = 0)
 	{
-		if (angle != 0)
-			SetAngle(angle);
+		SetAngle(angle);
 
 		hitpoints = hp;
 		speed = sp * GameManager.sizeDividor;

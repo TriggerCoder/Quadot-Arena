@@ -23,7 +23,15 @@ public partial class ThingsManager : Node
 	[Export]
 	public PackedScene[] _armorPrefabs;
 	[Export]
-	public PackedScene[] _gameplayPrefabs;
+	public PackedScene[] _funcPrefabs;
+	[Export]
+	public PackedScene[] _infoPrefabs;
+	[Export]
+	public PackedScene[] _miscPrefabs;
+	[Export]
+	public PackedScene[] _targetPrefabs;
+	[Export]
+	public PackedScene[] _triggerPrefabs;
 
 	public static Dictionary<string, PackedScene> thingsPrefabs = new Dictionary<string, PackedScene>();
 	public static List<Entity> entitiesOnMap = new List<Entity>();
@@ -33,7 +41,7 @@ public partial class ThingsManager : Node
 	public static Dictionary<string, TriggerController> triggerToActivate = new Dictionary<string, TriggerController>();
 	public static Dictionary<string, Dictionary<string, string>> timersOnMap = new Dictionary<string, Dictionary<string, string>>();
 	public static Dictionary<string, Dictionary<string, string>> triggersOnMap = new Dictionary<string, Dictionary<string, string>>();
-	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group" };
+	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group", "info_null" };
 	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_position", "info_notnull", "misc_teleporter_dest" };
 	public static List<Portal> portalsOnMap = new List<Portal>();
 	public override void _Ready()
@@ -94,14 +102,41 @@ public partial class ThingsManager : Node
 			GameManager.Print("Armor Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
-		foreach (var thing in _gameplayPrefabs)
+		foreach (var thing in _funcPrefabs)
 		{
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);
-			GameManager.Print("Gamplay Item: " + prefabName);
+			GameManager.Print("Func: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
-		
+		foreach (var thing in _infoPrefabs)
+		{
+			SceneState sceneState = thing.GetState();
+			string prefabName = sceneState.GetNodeName(0);
+			GameManager.Print("Info : " + prefabName);
+			thingsPrefabs.Add(prefabName, thing);
+		}
+		foreach (var thing in _miscPrefabs)
+		{
+			SceneState sceneState = thing.GetState();
+			string prefabName = sceneState.GetNodeName(0);
+			GameManager.Print("Misc : " + prefabName);
+			thingsPrefabs.Add(prefabName, thing);
+		}
+		foreach (var thing in _targetPrefabs)
+		{
+			SceneState sceneState = thing.GetState();
+			string prefabName = sceneState.GetNodeName(0);
+			GameManager.Print("Target : " + prefabName);
+			thingsPrefabs.Add(prefabName, thing);
+		}
+		foreach (var thing in _triggerPrefabs)
+		{
+			SceneState sceneState = thing.GetState();
+			string prefabName = sceneState.GetNodeName(0);
+			GameManager.Print("Trigger : " + prefabName);
+			thingsPrefabs.Add(prefabName, thing);
+		}
 	}
 	public static void ReadEntities(byte[] entities)
 	{
@@ -290,11 +325,32 @@ public partial class ThingsManager : Node
 				continue;
 
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
-
+			thingObject.Name = entity.name;
 			switch (entity.name)
 			{
 				default:
 					thingObject.GlobalPosition = entity.origin;
+				break;
+				// Solid Model
+				case "func_static":
+				{
+					thingObject.GlobalPosition = entity.origin;
+					if (entity.entityData.TryGetValue("model", out strWord))
+					{
+						int model = int.Parse(strWord.Trim('*'));
+						MapLoader.GenerateGeometricSurface(thingObject, model);
+						MapLoader.GenerateGeometricCollider(thingObject, null, model, 0, false);
+					}
+					else if (entity.entityData.TryGetValue("model2", out strWord))
+					{
+						ModelController modelController = new ModelController();
+						thingObject.AddChild(modelController);
+						modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
+						modelController.modelAnimation = new AnimData();
+						modelController.textureAnimation = new AnimData();
+						modelController.Init();
+					}
+				}
 				break;
 				//Switch
 				case "func_button":
@@ -616,6 +672,14 @@ public partial class ThingsManager : Node
 					int angle = targetsOnMap[target].angle;
 					MapLoader.GenerateGeometricCollider(thingObject, teleporter, model, ContentFlags.Teleporter);
 					teleporter.Init(destination, angle);
+				}
+				break;
+				//Location
+				case "target_location":
+				{
+					thingObject.GlobalPosition = entity.origin;
+					thingObject.EditorDescription = entity.entityData["message"];
+					MapLoader.Locations.Add(thingObject);
 				}
 				break;
 				//Speaker

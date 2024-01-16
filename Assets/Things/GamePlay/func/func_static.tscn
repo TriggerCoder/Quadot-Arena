@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://crc0nbdbusq2l"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_1wobr"]
+
+[node name="func_static" type="Node3D"]
+script = ExtResource("1_1wobr")
+respawnSound = ""
+thingType = 1

@@ -33,6 +33,7 @@ public static class MapLoader
 	public static Node3D MapMesh;
 	public static Node3D MapFlares;
 	public static Node3D ColliderGroup;
+	public static List<Node3D> Locations;
 
 	public static int MAX_MESH_SURFACES = 256;
 	public enum LightMapSize
@@ -79,6 +80,9 @@ public static class MapLoader
 
 		//Clear noMarks
 		noMarks = new HashSet<CollisionObject3D>();
+
+		//Clean Locations
+		Locations = new List<Node3D>();
 
 		//header
 		{
@@ -308,7 +312,7 @@ public static class MapLoader
 		LerpColorOnRepeatedVertex();
 		GetMapTextures();
 		BSPMap.Close();
-
+		
 		return true;
 	}
 
@@ -503,7 +507,7 @@ public static class MapLoader
 			if (!Mesher.GenerateBrushCollider(brushes[models[num].firstBrush + i], ColliderGroup, jumpPad, false, ContentFlags.JumpPad))
 				continue;
 
-			CollisionShape3D mc = jumpPad.GetChild<CollisionShape3D>(0);
+/*			CollisionShape3D mc = jumpPad.GetChild<CollisionShape3D>(0);
 			Shape3D boxShape = mc.Shape;
 			Aabb box = boxShape.GetDebugMesh().GetAabb();
 			Vector3 center = box.GetCenter();
@@ -512,7 +516,7 @@ public static class MapLoader
 			jumpPadCollider.Radius = max * .5f;
 			mc.Shape = jumpPadCollider;
 			jumpPad.GlobalPosition = center;
-		}
+*/		}
 	}
 	public static void GetMapTextures()
 	{

@@ -24,6 +24,7 @@ driver/mix_rate=48000
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
+window/size/resizable=false
 
 [dotnet]
 
@@ -33,7 +34,8 @@ project/assembly_name="Quadot Arena"
 
 folder_colors={
 "res://Assets/Player/Weapons/": "red",
-"res://Assets/Scripts/": "gray"
+"res://Assets/Scripts/": "gray",
+"res://Assets/Things/": "green"
 }
 
 [input]

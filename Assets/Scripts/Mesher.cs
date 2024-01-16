@@ -55,7 +55,10 @@ public static class Mesher
 	public static void GenerateBezObject(int shaderId, int lmIndex, int indexId, Node3D holder, QSurface[] surfaces, bool addPVS = true)
 	{
 		if (surfaces == null || surfaces.Length == 0)
+		{
+			GameManager.Print("GenerateBezObject: Failed to create bezier object " + indexId + " there are no surfaces", GameManager.PrintType.Warning);
 			return;
+		}
 
 		bool isTrigger = false;
 		string textureName = MapLoader.mapTextures[shaderId].name;
@@ -284,7 +287,7 @@ public static class Mesher
 	{
 		if (surfaces == null || surfaces.Length == 0)
 		{
-			GameManager.Print("Failed to create polygon object because there are no surfaces", GameManager.PrintType.Warning);
+			GameManager.Print("GeneratePolygonObject: Failed to create polygon there are no surfaces", GameManager.PrintType.Warning);
 			return;
 		}
 
@@ -620,7 +623,7 @@ public static class Mesher
 				if (useCommon && !currentTransparent)
 				{
 					MultiMeshInstance3D mesh = new MultiMeshInstance3D();
-					mesh.Name = modelMesh.name;
+					mesh.Name = "MultiMesh_" + model.name;
 					mesh.Multimesh = multiMesh;
 					mesh.Layers = layer;
 					if (!castShadows)
@@ -747,7 +750,7 @@ public static class Mesher
 					if (useCommon && !currentTransparent)
 					{
 						MultiMeshInstance3D mesh = new MultiMeshInstance3D();
-						mesh.Name = Name;
+						mesh.Name = "MultiMesh_" + model.name;
 						mesh.Multimesh = multiMesh;
 						mesh.Layers = layer;
 						if (!castShadows)
@@ -855,6 +858,7 @@ public static class Mesher
 					if (!MultiMeshesInstances.ContainsKey(skinMaterial.commonMesh))
 					{
 						MultiMeshInstance3D mesh = new MultiMeshInstance3D();
+						mesh.Name = "MultiMesh_" + model.name;
 						mesh.Multimesh = skinMaterial.commonMesh;
 						mesh.Layers = layer;
 						if (!castShadows)
@@ -880,6 +884,7 @@ public static class Mesher
 					md3Model.data[model.meshes[i].meshNum].arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 					md3Model.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, skinMaterial.readyMaterials);
 					md3Model.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(md3Model.data[model.meshes[i].meshNum].arrMesh, 0);
+					mesh.Name = "Mesh_" + model.name;
 					mesh.Mesh = md3Model.data[model.meshes[i].meshNum].arrMesh;
 					mesh.Layers = layer;
 					if (!castShadows)
@@ -939,6 +944,7 @@ public static class Mesher
 					if (!MultiMeshesInstances.ContainsKey(skinMaterial.commonMesh))
 					{
 						MultiMeshInstance3D mesh = new MultiMeshInstance3D();
+						mesh.Name = "MultiMesh_" + model.name;
 						mesh.Multimesh = skinMaterial.commonMesh;
 						mesh.Layers = layer;
 						if (!castShadows)

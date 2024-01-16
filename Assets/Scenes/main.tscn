@@ -1,6 +1,5 @@
-[gd_scene load_steps=58 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=57 format=3 uid="uid://dkadw51a54t5j"]
 
-[ext_resource type="Texture2D" uid="uid://dv1ug6ajvhega" path="res://Assets/Textures/Skyboxes/Gehenna/gehenna.png" id="1_si63v"]
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
 [ext_resource type="Material" uid="uid://cuswccc2jvs1t" path="res://Assets/Materials/illegal.tres" id="5_7m0rp"]
@@ -38,32 +37,27 @@
 [ext_resource type="PackedScene" uid="uid://ce5jta4khvm71" path="res://Assets/Things/Pickups/Armor/item_armor_shard.tscn" id="30_8nwr7"]
 [ext_resource type="PackedScene" uid="uid://bgc0fdktol7v8" path="res://Assets/Things/Pickups/Health/item_health_small.tscn" id="30_u4mvd"]
 [ext_resource type="PackedScene" uid="uid://b32kn8otikx3m" path="res://Assets/Things/Pickups/Health/item_health_mega.tscn" id="31_g11tp"]
-[ext_resource type="PackedScene" uid="uid://tpqffol7j0t" path="res://Assets/Things/GamePlay/target_speaker.tscn" id="31_tr8jk"]
-[ext_resource type="PackedScene" uid="uid://bmyv04u863exh" path="res://Assets/Things/GamePlay/target_position.tscn" id="32_b20ey"]
+[ext_resource type="PackedScene" uid="uid://tpqffol7j0t" path="res://Assets/Things/GamePlay/target/target_speaker.tscn" id="31_tr8jk"]
+[ext_resource type="PackedScene" uid="uid://bmyv04u863exh" path="res://Assets/Things/GamePlay/target/target_position.tscn" id="32_b20ey"]
 [ext_resource type="PackedScene" uid="uid://bpu8u0uujgexx" path="res://Assets/Things/Pickups/Armor/item_armor_combat.tscn" id="32_pviff"]
-[ext_resource type="PackedScene" uid="uid://dcd4jomshlogt" path="res://Assets/Things/GamePlay/info_player_deathmatch.tscn" id="33_epjyi"]
-[ext_resource type="PackedScene" uid="uid://bqw0rqw0imck6" path="res://Assets/Things/GamePlay/func_timer.tscn" id="34_nkc1v"]
-[ext_resource type="PackedScene" uid="uid://7xtnpc5tfejv" path="res://Assets/Things/GamePlay/trigger_push.tscn" id="35_1ytnq"]
-[ext_resource type="PackedScene" uid="uid://b4tn1bjywoe4s" path="res://Assets/Things/GamePlay/trigger_teleport.tscn" id="36_7m5u6"]
-[ext_resource type="PackedScene" uid="uid://bv34dp76ma2dk" path="res://Assets/Things/GamePlay/misc_teleporter_dest.tscn" id="37_kkxgn"]
-[ext_resource type="PackedScene" uid="uid://bdkb25lv7sp7t" path="res://Assets/Things/GamePlay/func_door.tscn" id="38_2vxeb"]
-[ext_resource type="PackedScene" uid="uid://w6lesdgsukjc" path="res://Assets/Things/GamePlay/func_button.tscn" id="39_63dug"]
-[ext_resource type="PackedScene" uid="uid://bddv7ddaa8jd0" path="res://Assets/Things/GamePlay/trigger_multiple.tscn" id="40_yfkkd"]
-[ext_resource type="PackedScene" uid="uid://c3wij33wsqbg" path="res://Assets/Things/GamePlay/trigger_hurt.tscn" id="45_ge4jt"]
-[ext_resource type="PackedScene" uid="uid://dumbqwobmx7ko" path="res://Assets/Things/GamePlay/info_notnull.tscn" id="46_6njgx"]
-[ext_resource type="PackedScene" uid="uid://bwx6v47koleqb" path="res://Assets/Things/GamePlay/func_rotating.tscn" id="47_g2dqw"]
-[ext_resource type="PackedScene" uid="uid://mp5ryxp1smn2" path="res://Assets/Things/GamePlay/misc_portal_camera.tscn" id="48_uv6co"]
-[ext_resource type="PackedScene" uid="uid://p0n8fxq1vf8t" path="res://Assets/Things/GamePlay/misc_portal_surface.tscn" id="49_gicjp"]
-
-[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_7oboo"]
-panorama = ExtResource("1_si63v")
-
-[sub_resource type="Sky" id="Sky_smrr4"]
-sky_material = SubResource("PanoramaSkyMaterial_7oboo")
+[ext_resource type="PackedScene" uid="uid://dcd4jomshlogt" path="res://Assets/Things/GamePlay/info/info_player_deathmatch.tscn" id="33_epjyi"]
+[ext_resource type="PackedScene" uid="uid://bqw0rqw0imck6" path="res://Assets/Things/GamePlay/func/func_timer.tscn" id="34_nkc1v"]
+[ext_resource type="PackedScene" uid="uid://7xtnpc5tfejv" path="res://Assets/Things/GamePlay/trigger/trigger_push.tscn" id="35_1ytnq"]
+[ext_resource type="PackedScene" uid="uid://b4tn1bjywoe4s" path="res://Assets/Things/GamePlay/trigger/trigger_teleport.tscn" id="36_7m5u6"]
+[ext_resource type="PackedScene" uid="uid://bv34dp76ma2dk" path="res://Assets/Things/GamePlay/misc/misc_teleporter_dest.tscn" id="37_kkxgn"]
+[ext_resource type="PackedScene" uid="uid://bdkb25lv7sp7t" path="res://Assets/Things/GamePlay/func/func_door.tscn" id="38_2vxeb"]
+[ext_resource type="PackedScene" uid="uid://w6lesdgsukjc" path="res://Assets/Things/GamePlay/func/func_button.tscn" id="39_63dug"]
+[ext_resource type="PackedScene" uid="uid://crc0nbdbusq2l" path="res://Assets/Things/GamePlay/func/func_static.tscn" id="40_xap66"]
+[ext_resource type="PackedScene" uid="uid://bddv7ddaa8jd0" path="res://Assets/Things/GamePlay/trigger/trigger_multiple.tscn" id="40_yfkkd"]
+[ext_resource type="PackedScene" uid="uid://c3wij33wsqbg" path="res://Assets/Things/GamePlay/trigger/trigger_hurt.tscn" id="45_ge4jt"]
+[ext_resource type="PackedScene" uid="uid://dumbqwobmx7ko" path="res://Assets/Things/GamePlay/info/info_notnull.tscn" id="46_6njgx"]
+[ext_resource type="PackedScene" uid="uid://bwx6v47koleqb" path="res://Assets/Things/GamePlay/func/func_rotating.tscn" id="47_g2dqw"]
+[ext_resource type="PackedScene" uid="uid://mp5ryxp1smn2" path="res://Assets/Things/GamePlay/misc/misc_portal_camera.tscn" id="48_uv6co"]
+[ext_resource type="PackedScene" uid="uid://p0n8fxq1vf8t" path="res://Assets/Things/GamePlay/misc/misc_portal_surface.tscn" id="49_gicjp"]
+[ext_resource type="PackedScene" uid="uid://dlo5rcwan3lx" path="res://Assets/Things/GamePlay/target/target_location.tscn" id="49_mb0ac"]
 
 [sub_resource type="Environment" id="Environment_rcj1l"]
 background_mode = 2
-sky = SubResource("Sky_smrr4")
 ambient_light_source = 2
 ambient_light_color = Color(0.376471, 0.376471, 0.376471, 1)
 tonemap_mode = 2
@@ -78,6 +72,7 @@ environment = SubResource("Environment_rcj1l")
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
 Sun = NodePath("../SunLight")
+autoloadMap = "q3dm12"
 tessellations = 10
 playerViewPort = NodePath("SplitScreen/PlayerViewPort")
 playerPrefab = ExtResource("7_rdgk2")
@@ -105,7 +100,11 @@ _debrisPrefabs = Array[PackedScene]([ExtResource("18_dkfmq"), ExtResource("19_fl
 _weaponsPrefabs = Array[PackedScene]([ExtResource("24_5ts3k"), ExtResource("25_5i6m0"), ExtResource("26_6gxqa")])
 _healthsPrefabs = Array[PackedScene]([ExtResource("27_5pqil"), ExtResource("28_dpe7f"), ExtResource("30_u4mvd"), ExtResource("31_g11tp")])
 _armorPrefabs = Array[PackedScene]([ExtResource("29_slqlw"), ExtResource("30_8nwr7"), ExtResource("32_pviff")])
-_gameplayPrefabs = Array[PackedScene]([ExtResource("31_tr8jk"), ExtResource("32_b20ey"), ExtResource("33_epjyi"), ExtResource("34_nkc1v"), ExtResource("35_1ytnq"), ExtResource("36_7m5u6"), ExtResource("37_kkxgn"), ExtResource("38_2vxeb"), ExtResource("39_63dug"), ExtResource("40_yfkkd"), ExtResource("45_ge4jt"), ExtResource("46_6njgx"), ExtResource("47_g2dqw"), ExtResource("48_uv6co"), ExtResource("49_gicjp")])
+_funcPrefabs = Array[PackedScene]([ExtResource("39_63dug"), ExtResource("38_2vxeb"), ExtResource("47_g2dqw"), ExtResource("40_xap66"), ExtResource("34_nkc1v")])
+_infoPrefabs = Array[PackedScene]([ExtResource("46_6njgx"), ExtResource("33_epjyi")])
+_miscPrefabs = Array[PackedScene]([ExtResource("48_uv6co"), ExtResource("49_gicjp"), ExtResource("37_kkxgn")])
+_targetPrefabs = Array[PackedScene]([ExtResource("32_b20ey"), ExtResource("31_tr8jk"), ExtResource("49_mb0ac")])
+_triggerPrefabs = Array[PackedScene]([ExtResource("45_ge4jt"), ExtResource("40_yfkkd"), ExtResource("35_1ytnq"), ExtResource("36_7m5u6")])
 
 [node name="MultiAudioListener" type="AudioListener3D" parent="Quadot Arena"]
 current = true
