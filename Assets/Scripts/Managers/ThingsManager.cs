@@ -596,15 +596,13 @@ public partial class ThingsManager : Node
 
 					int angle = 0;
 					Vector3 lookAt = Vector3.Forward;
-					if (entity.entityData.TryGetValue("angle", out strWord))
-						GameManager.Print("Angle " + strWord);
+//					if (entity.entityData.TryGetValue("angle", out strWord))
+//						GameManager.Print("Angle " + strWord);
 					if (entity.entityData.TryGetValue("target", out strWord))
 					{
 						lookAt = targetsOnMap[strWord][0].destination;
 						thingObject.LookAt(lookAt, Vector3.Up);
 						angle = targetsOnMap[strWord][0].angle;
-						GameManager.Print("Target " + strWord);
-						GameManager.Print("Angle " + angle);
 					}
 					if (entity.entityData.TryGetValue("targetname", out strWord))
 					{
@@ -612,10 +610,9 @@ public partial class ThingsManager : Node
 						thingObject.AddChild(camera);
 						camera.CullMask = GameManager.AllPlayerViewMask;
 						portalCameras.Add(strWord, camera);
-						GameManager.Print("TargetName " + strWord);
 					}
-					if (entity.entityData.TryGetValue("roll", out strWord))
-						GameManager.Print("Roll " + strWord);
+//					if (entity.entityData.TryGetValue("roll", out strWord))
+//						GameManager.Print("Roll " + strWord);
 				}
 				break;
 				//Portal Surface

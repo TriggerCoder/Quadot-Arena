@@ -417,36 +417,42 @@ public static class Mesher
 		}
 
 		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex);
+		for (int offset = 0, n = 0; offset < surface.numOfIndices; offset += 6, n++)
+		{
+			if (offset > 0)
+				addPVS = false;
 
-		MeshInstance3D mesh = new MeshInstance3D();
-		ArrayMesh arrMesh = new ArrayMesh();
-		string Name = "Mesh_Surfaces_" + surface.surfaceId;
+			MeshInstance3D mesh = new MeshInstance3D();
+			ArrayMesh arrMesh = new ArrayMesh();
+			string Name = "Mesh_Surfaces_" + surface.surfaceId;
 
-		Vector3 center = GenerateBillBoardMesh(surface, lmIndex);
+			Vector3 center = GenerateBillBoardMesh(surface, lmIndex, n);
 
-		Node3D billBoard = new Node3D();
-		holder.AddChild(billBoard);
-		billBoard.GlobalPosition = center;
+			Node3D billBoard = new Node3D();
+			holder.AddChild(billBoard);
+			billBoard.GlobalPosition = center;
 
-		FinalizePolygonMesh(arrMesh);
-		arrMesh.SurfaceSetMaterial(0, material);
-		billBoard.AddChild(mesh);
-		if (addPVS)
-			mesh.Layers = GameManager.InvisibleMask;
-		else //As dynamic surface don't have bsp data, assign it to the always visible layer 
-			mesh.Layers = GameManager.AllPlayerViewMask;
-		mesh.Name = Name;
-		mesh.Mesh = arrMesh;
+			FinalizePolygonMesh(arrMesh);
+			arrMesh.SurfaceSetMaterial(0, material);
+			billBoard.AddChild(mesh);
+			if (addPVS)
+				mesh.Layers = GameManager.InvisibleMask;
+			else //As dynamic surface don't have bsp data, assign it to the always visible layer 
+				mesh.Layers = GameManager.AllPlayerViewMask;
+			mesh.Name = Name;
+			mesh.Mesh = arrMesh;
 
-//		if (MaterialManager.IsSkyTexture(textureName))
+			//		if (MaterialManager.IsSkyTexture(textureName))
 			mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
-//		else
-//			mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.DoubleSided;
-		//PVS only add on Static Geometry, as it has BSP Nodes
-		if (addPVS)
-			ClusterPVSManager.Instance.RegisterClusterAndSurface(mesh, surface);
+			//		else
+			//			mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.DoubleSided;
+			//PVS only add on Static Geometry, as it has BSP Nodes
+			if (addPVS)
+				ClusterPVSManager.Instance.RegisterClusterAndSurface(mesh, surface);
+
+		}
 	}
-	public static Vector3 GenerateBillBoardMesh(QSurface surface, int lm_index)
+	public static Vector3 GenerateBillBoardMesh(QSurface surface, int lm_index, int offset)
 	{
 		Vector3 center = Vector3.Zero;
 		Vector3 normal = Vector3.Zero;
@@ -460,15 +466,26 @@ public static class Mesher
 		vertsColor.Clear();
 
 		int vstep = surface.startVertIndex;
-		for (int n = 0; n < surface.numOfVerts; n++)
+		int mstep = surface.startIndex + (offset * 6);
+		for (int n = 0; n < 6; n++)
 		{
-			Vector3 pos = MapLoader.verts[vstep].position;
-			vertsCache.Add(pos);
-			center += pos;
-			vstep++;
+			int index = MapLoader.vertIndices[mstep];
+			if (!indiciesCache.Contains(index))
+				indiciesCache.Add(index);
+			mstep++;
 		}
 
-		center /= surface.numOfVerts;
+		indiciesCache.Sort();
+
+		for (int n = 0; n < indiciesCache.Count; n++)
+		{
+			Vector3 pos = MapLoader.verts[vstep + indiciesCache[n]].position;
+			vertsCache.Add(pos);
+			center += pos;
+			mstep++;
+		}
+
+		center /= vertsCache.Count;
 		CanForm3DConvexHull(vertsCache, ref normal);
 
 		if (Mathf.IsZeroApprox(normal.Dot(Vector3.Up)))
@@ -477,29 +494,30 @@ public static class Mesher
 			changeRotation = Transform3D.Identity.LookingAt(normal, Vector3.Forward).Basis.GetRotationQuaternion();
 
 		vertsCache.Clear();
-		vstep = surface.startVertIndex;
-		for (int n = 0; n < surface.numOfVerts; n++)
+
+		for (int n = 0; n < indiciesCache.Count; n++)
 		{
-			Vector3 pos = changeRotation * (MapLoader.verts[vstep].position - center);
+			Vector3 pos = changeRotation * (MapLoader.verts[vstep + indiciesCache[n]].position - center);
 			vertsCache.Add(pos);
-			uvCache.Add(MapLoader.verts[vstep].textureCoord);
-			uv2Cache.Add(MapLoader.verts[vstep].lightmapCoord);
-			normalsCache.Add(MapLoader.verts[vstep].normal);
+			uvCache.Add(MapLoader.verts[vstep + indiciesCache[n]].textureCoord);
+			uv2Cache.Add(MapLoader.verts[vstep + indiciesCache[n]].lightmapCoord);
+			normalsCache.Add(MapLoader.verts[vstep + indiciesCache[n]].normal);
 
 			//Need to compensate for Color lightning as lightmapped textures will change
 			if (lm_index >= 0)
-				vertsColor.Add(MapLoader.verts[vstep].color);
+				vertsColor.Add(MapLoader.verts[vstep + indiciesCache[n]].color);
 			else
-				vertsColor.Add(TextureLoader.ChangeColorLighting(MapLoader.verts[vstep].color));
-			vstep++;
+				vertsColor.Add(TextureLoader.ChangeColorLighting(MapLoader.verts[vstep + indiciesCache[n]].color));
 		}
 
+		indiciesCache.Clear();
 		// Rip meshverts / triangles
-		int mstep = surface.startIndex;
-		for (int n = 0; n < surface.numOfIndices; n++)
+		int triOffset = 4 * offset;
+		mstep = surface.startIndex + (offset * 6);
+		for (int n = 0; n < 6; n++)
 		{
-			indiciesCache.Add(MapLoader.vertIndices[mstep]);
-			mstep++;
+			int index = MapLoader.vertIndices[mstep + n] - triOffset;
+			indiciesCache.Add(index);
 		}
 
 		return center;
