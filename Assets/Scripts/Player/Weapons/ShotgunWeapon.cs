@@ -73,6 +73,9 @@ public partial class ShotgunWeapon : PlayerWeapon
 			audioStream.Play();
 		}
 
+		if (hasQuad)
+			SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(quadSound));
+
 		//Hitscan attack
 		Transform3D global = playerInfo.playerCamera.GlobalTransform;
 		Vector3 d = global.ForwardVector();

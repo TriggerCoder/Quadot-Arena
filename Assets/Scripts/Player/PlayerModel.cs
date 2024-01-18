@@ -155,6 +155,7 @@ public partial class PlayerModel : Node3D
 	public bool Bleed { get { return true; } }
 	public BloodType BloodColor { get { return BloodType.Red; } }
 
+	public bool hasQuad = false;
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -387,6 +388,12 @@ public partial class PlayerModel : Node3D
 				currentLower = nextLower;
 				currentFrameLower = nextFrameLower;
 			}
+		}
+
+		if (hasQuad != playerControls.playerInfo.quadDamage)
+		{
+			hasQuad = playerControls.playerInfo.quadDamage;
+			ChangeQuadFx(hasQuad);
 		}
 	}
 
@@ -712,6 +719,8 @@ public partial class PlayerModel : Node3D
 			muzzleFlash.Visible = false;
 		}
 		AddAllMeshInstance3D(weaponNode);
+		if (hasQuad)
+			ChangeQuadFx(true);
 	}
 
 	public void UnloadWeapon()
@@ -866,6 +875,22 @@ public partial class PlayerModel : Node3D
 		return true;
 	}
 
+	private void ChangeQuadFx(MeshInstance3D mesh, bool enable)
+	{
+		ShaderMaterial material = (ShaderMaterial)mesh.Mesh.SurfaceGetMaterial(0).Duplicate();
+		if (enable)
+		{
+			material.NextPass = MaterialManager.quadFxMaterial;
+			mesh.SetSurfaceOverrideMaterial(0, material);
+		}
+		else
+			mesh.SetSurfaceOverrideMaterial(0, null);
+	}
+	private void ChangeQuadFx(bool enable)
+	{
+		for (int i = 0; i < modelsMeshes.Count; i++)
+			ChangeQuadFx(modelsMeshes[i], enable);
+	}
 	public void ChangeLayer(uint layer)
 	{
 		for (int i = 0; i < modelsMeshes.Count; i++)
@@ -880,6 +905,9 @@ public partial class PlayerModel : Node3D
 		{
 			if (child is MeshInstance3D mesh)
 			{
+				if (modelsMeshes.Contains(mesh))
+					continue;
+
 				modelsMeshes.Add(mesh);
 				MeshInstance3D shadowMesh = new MeshInstance3D();
 				shadowMesh.Mesh = mesh.Mesh;

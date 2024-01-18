@@ -1,4 +1,4 @@
-[gd_scene load_steps=58 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=59 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
@@ -44,6 +44,7 @@
 [ext_resource type="PackedScene" uid="uid://bqw0rqw0imck6" path="res://Assets/Things/GamePlay/func/func_timer.tscn" id="34_nkc1v"]
 [ext_resource type="PackedScene" uid="uid://7xtnpc5tfejv" path="res://Assets/Things/GamePlay/trigger/trigger_push.tscn" id="35_1ytnq"]
 [ext_resource type="PackedScene" uid="uid://b4tn1bjywoe4s" path="res://Assets/Things/GamePlay/trigger/trigger_teleport.tscn" id="36_7m5u6"]
+[ext_resource type="PackedScene" uid="uid://co3yi5bf647t1" path="res://Assets/Things/Pickups/PowerUps/item_quad.tscn" id="37_60yxr"]
 [ext_resource type="PackedScene" uid="uid://bv34dp76ma2dk" path="res://Assets/Things/GamePlay/misc/misc_teleporter_dest.tscn" id="37_kkxgn"]
 [ext_resource type="PackedScene" uid="uid://bdkb25lv7sp7t" path="res://Assets/Things/GamePlay/func/func_door.tscn" id="38_2vxeb"]
 [ext_resource type="PackedScene" uid="uid://w6lesdgsukjc" path="res://Assets/Things/GamePlay/func/func_button.tscn" id="39_63dug"]
@@ -101,6 +102,7 @@ _debrisPrefabs = Array[PackedScene]([ExtResource("18_dkfmq"), ExtResource("19_fl
 _weaponsPrefabs = Array[PackedScene]([ExtResource("24_5ts3k"), ExtResource("25_5i6m0"), ExtResource("26_6gxqa")])
 _healthsPrefabs = Array[PackedScene]([ExtResource("27_5pqil"), ExtResource("28_dpe7f"), ExtResource("30_u4mvd"), ExtResource("31_g11tp")])
 _armorPrefabs = Array[PackedScene]([ExtResource("29_slqlw"), ExtResource("30_8nwr7"), ExtResource("32_pviff")])
+_powerUpsPrefabs = Array[PackedScene]([ExtResource("37_60yxr")])
 _funcPrefabs = Array[PackedScene]([ExtResource("39_63dug"), ExtResource("38_2vxeb"), ExtResource("47_g2dqw"), ExtResource("40_xap66"), ExtResource("34_nkc1v")])
 _infoPrefabs = Array[PackedScene]([ExtResource("46_6njgx"), ExtResource("33_epjyi"), ExtResource("44_er3mv")])
 _miscPrefabs = Array[PackedScene]([ExtResource("48_uv6co"), ExtResource("49_gicjp"), ExtResource("37_kkxgn")])

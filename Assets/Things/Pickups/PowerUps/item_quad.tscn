@@ -1,0 +1,75 @@
+[gd_scene load_steps=10 format=3 uid="uid://co3yi5bf647t1"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_7gx40"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_6sajv"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_nuw42"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="4_hgpyt"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_oupac"]
+
+[sub_resource type="Resource" id="Resource_h1upd"]
+script = ExtResource("3_nuw42")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_6cloq"]
+script = ExtResource("3_nuw42")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_sejmd"]
+script = ExtResource("3_nuw42")
+fps = 0.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+
+[node name="item_quad" type="Node3D"]
+script = ExtResource("1_7gx40")
+respawnTime = 30.0
+thingType = 2
+
+[node name="Rings" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+script = ExtResource("2_6sajv")
+modelName = "powerups/instant/quad_ring"
+receiveShadows = true
+castShadows = true
+modelAnimation = SubResource("Resource_h1upd")
+textureAnimation = SubResource("Resource_6cloq")
+
+[node name="NodeAnimation" type="Node3D" parent="Rings"]
+script = ExtResource("4_hgpyt")
+rotEnable = true
+rotFPS = 100.0
+rotClockwise = false
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Quad" type="Node3D" parent="."]
+script = ExtResource("2_6sajv")
+modelName = "powerups/instant/quad"
+receiveShadows = true
+castShadows = true
+modelAnimation = SubResource("Resource_h1upd")
+textureAnimation = SubResource("Resource_sejmd")
+
+[node name="NodeAnimation" type="Node3D" parent="Quad"]
+script = ExtResource("4_hgpyt")
+rotEnable = true
+rotFPS = 100.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("5_oupac")
+thingController = NodePath("..")
+itemType = 11
+bonus = true
+PickupSound = "items/quaddamage"
+PickupIcon = "icons/quad"
+PickupText = "Quad Damage"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

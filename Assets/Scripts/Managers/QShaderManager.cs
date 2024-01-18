@@ -35,7 +35,7 @@ public static class QShaderManager
 
 		return false;
 	}
-	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, ref bool alphaIsTransparent, ref bool hasPortal, List<int> multiPassList = null)
+	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, ref bool alphaIsTransparent, ref bool hasPortal, List<int> multiPassList = null, bool forceView = false)
 	{
 		string code = "";
 		string GSHeader = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, ";
@@ -286,8 +286,11 @@ public static class QShaderManager
 		code += GSVaryings;
 		code += "global uniform float MsTime;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
-		code += "instance uniform float ShadowIntensity : hint_range(0, 1) = 0.0;\n";
-		code += "instance uniform bool ViewModel = false;\n";
+		if (multiPassList == null)
+		{
+			code += "instance uniform float ShadowIntensity : hint_range(0, 1) = 0.0;\n";
+			code += "instance uniform bool ViewModel = false;\n";
+		}
 		if (helperRotate)
 		{
 			code += "\nvec2 rotate(vec2 uv, vec2 pivot, float angle)\n{\n\tmat2 rotation = mat2(vec2(sin(angle), -cos(angle)),vec2(cos(angle), sin(angle)));\n";
@@ -300,11 +303,12 @@ public static class QShaderManager
 		//Vertex
 		{
 			code += GSVertexH;
-			code += GetVertex(qShader);
+			code += GetVertex(qShader, (multiPassList == null), forceView);
 			code += GSVertexUvs + "}\n";
 		}
 
 		//Lightning
+		if (multiPassList == null)
 		{
 			code += GSLigtH;
 			code += GetDiffuseLightning();
@@ -415,7 +419,7 @@ public static class QShaderManager
 		code += "instance uniform float OffSetTime = 0.0;\n";
 		code += "const bool ViewModel = false;\n";
 		code += "void vertex()\n{ \n";
-		code += GetVertex(qShader) + "}\n";
+		code += GetVertex(qShader, false, false) + "}\n";
 		code += "void fragment()\n{\n\tvec2 uv_0 = SCREEN_UV;\n\tvec4 Stage_0 = texture(Tex_0, uv_0);\n";
 		code += "\tvec4 ambient = vec4(" + GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.R.ToString("0.00") + "," + GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.G.ToString("0.00") + "," + GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.B.ToString("0.00") + ", 1.0 );\n";
 		code += "\tvec4 vertx_color = COLOR;\n";
@@ -442,7 +446,7 @@ public static class QShaderManager
 		return DiffuseLight;
 	}
 
-	public static string GetVertex(QShaderData qShader)
+	public static string GetVertex(QShaderData qShader, bool useView, bool forceView)
 	{
 		string Vertex = "";
 
@@ -470,8 +474,13 @@ public static class QShaderManager
 		if (qShader.qShaderGlobal.deformVertexes == null)
 		{
 			Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);\n";
-			Vertex += "\tif (ViewModel)\n";
-			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
+			if (forceView)
+				Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
+			else if (useView)
+			{
+				Vertex += "\tif (ViewModel)\n";
+				Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
+			}
 			return Vertex;
 		}
 
@@ -565,8 +574,13 @@ public static class QShaderManager
 		Vertex += Vars;
 		Vertex += Verts;
 		Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);\n";
-		Vertex += "\tif (ViewModel)\n";
-		Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
+		if (forceView)
+			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
+		else if (useView)
+		{
+			Vertex += "\tif (ViewModel)\n";
+			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
+		}
 		return Vertex;
 	}
 	public static string GetUVGen(QShaderData qShader, int currentStage, ref string GSVaryings)

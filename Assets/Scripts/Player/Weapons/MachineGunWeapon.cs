@@ -75,6 +75,9 @@ public partial class MachineGunWeapon : PlayerWeapon
 			audioStream.Play();
 		}
 		
+		if (hasQuad)
+			SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(quadSound));
+
 		//Hitscan attack
 		{
 			Transform3D global = playerInfo.playerCamera.GlobalTransform;

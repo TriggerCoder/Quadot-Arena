@@ -169,6 +169,8 @@ public partial class GameManager : Node
 		TemporaryObjectsHolder.Name = "TemporaryObjectsHolder";
 		AddChild(TemporaryObjectsHolder);
 		PakManager.LoadPK3Files();
+		QShaderManager.ProcessShaders();
+		MaterialManager.LoadFXShaders();
 		if (MapLoader.Load(autoloadMap))
 		{
 			ClusterPVSManager.Instance.ResetClusterList();

@@ -15,11 +15,15 @@ public partial class PlayerInfo : Node3D
 	[Export]
 	public Node3D WeaponHand;
 
-	public int[] Ammo = new int[8] { 1000, 0, 0, 0, 0, 0, 0, 0 }; //bullets, shells, grenades, rockets, lightning, slugs, cells, bfgammo
-	public bool[] Weapon = new bool[9] { false, true, false, false, false, false, false, false, false }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k
+	//Weapons and Ammo
+	public int[] Ammo = new int[8] { 1000, 0, 0, 50, 0, 0, 0, 0 }; //bullets, shells, grenades, rockets, lightning, slugs, cells, bfgammo
+	public bool[] Weapon = new bool[9] { false, true, false, false, true, false, false, false, false }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k
 	public int[] MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 200 };
 
+	//PowerUps
 	public bool godMode = false;
+	public bool quadDamage = false;
+
 	public int MaxHealth = 100;
 	public int MaxBonusHealth = 200;
 	public int MaxArmor = 100;
@@ -48,8 +52,8 @@ public partial class PlayerInfo : Node3D
 
 	public void Reset()
 	{
-		Ammo = new int[8] { 100, 0, 0, 0, 0, 0, 0, 0 };
-		Weapon = new bool[9] { false, true, false, false, false, false, false, false, false };
+		Ammo = new int[8] { 100, 0, 0, 50, 0, 0, 0, 0 };
+		Weapon = new bool[9] { false, true, false, false, true, false, false, false, false };
 		MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 200 };
 
 		godMode = false;

@@ -95,7 +95,6 @@ public static class MapLoader
 			ThingsManager.ReadEntities(BSPMap.ReadBytes(header.Directory[LumpType.Entities].Length));
 		}
 
-		QShaderManager.ProcessShaders();
 		//shaders (textures)
 		{
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.Shaders].Offset, SeekOrigin.Begin);

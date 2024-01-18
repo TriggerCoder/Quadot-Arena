@@ -26,6 +26,13 @@ public partial class MaterialManager : Node
 	[Export]
 	public string[] _decalsNames;
 
+	//PowerUps FX Material
+	public static ShaderMaterial quadFxMaterial;
+	public static string quadFxShader = "powerups/quad";
+	public static ShaderMaterial quadWeaponFxMaterial;
+	public static string quadWeaponFxShader = "powerups/quadWeapon";
+
+	[Export]
 	public bool applyLightmaps = true;
 
 	public static string shadowProperty = "ShadowIntensity";
@@ -60,6 +67,20 @@ public partial class MaterialManager : Node
 			Decals.Add(upperName);
 		}
 	}
+
+	public static void LoadFXShaders()
+	{
+		bool useAlpha = true;
+		bool hasPortal = false;
+		List<int> stage = new List<int>
+		{
+			0
+		};
+
+		quadFxMaterial = QShaderManager.GetShadedMaterial(quadFxShader, -1, ref useAlpha, ref hasPortal, stage);
+		quadWeaponFxMaterial = QShaderManager.GetShadedMaterial(quadWeaponFxShader, -1, ref useAlpha, ref hasPortal, stage, true);
+	}
+
 
 	public static void AddBillBoard(string shaderName)
 	{
@@ -105,7 +126,7 @@ public partial class MaterialManager : Node
 		bool hasPortal = false;
 		return GetMaterials(textureName, lm_index, ref forceSkinAlpha, ref hasPortal);
 	}
-	public static ShaderMaterial GetMaterials(string textureName, int lm_index , ref bool forceSkinAlpha, ref bool hasPortal)
+	public static ShaderMaterial GetMaterials(string textureName, int lm_index , ref bool forceSkinAlpha, ref bool hasPortal, bool forceView = false)
 	{
 		ShaderMaterial mat;
 

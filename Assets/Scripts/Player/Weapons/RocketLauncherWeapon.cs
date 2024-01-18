@@ -66,6 +66,9 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 			audioStream.Play();
 		}
 
+		if (hasQuad)
+			SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(quadSound));
+
 		//Projectile attack
 		{
 			Transform3D global = playerInfo.playerCamera.GlobalTransform;

@@ -1,6 +1,6 @@
-using ExtensionMethods;
 using Godot;
-using System;
+using System.Collections.Generic;
+using ExtensionMethods;
 public partial class PlayerWeapon : Node3D
 {
 	[Export]
@@ -72,7 +72,10 @@ public partial class PlayerWeapon : Node3D
 
 	private float interp = 0;
 	private Vector3 oldPosition = Vector3.Down;
-	// Called when the node enters the scene tree for the first time.
+
+	public string quadSound = "items/damage3";
+	private List<MeshInstance3D> modelsMeshes = new List<MeshInstance3D>();
+	public bool hasQuad = false;
 	public override void _Ready()
 	{
 		Sounds = new AudioStreamWav[_sounds.Length];
@@ -131,9 +134,33 @@ public partial class PlayerWeapon : Node3D
 
 //		playerInfo.playerHUD.HUDUpdateAmmoNum();
 		OnInit();
+		AddAllMeshInstance3D(playerInfo.WeaponHand);
 	}
-
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
+	private void AddAllMeshInstance3D(Node parent)
+	{
+		var Childrens = GameManager.GetAllChildrens(parent);
+		foreach (var child in Childrens)
+		{
+			if (child is MeshInstance3D mesh)
+				modelsMeshes.Add(mesh);
+		}
+	}
+	private void ChangeQuadFx(bool enable)
+	{
+		for (int i = 0; i < modelsMeshes.Count; i++)
+		{
+			ShaderMaterial material = (ShaderMaterial)modelsMeshes[i].Mesh.SurfaceGetMaterial(0).Duplicate();
+			if (enable)
+			{
+				material.NextPass = MaterialManager.quadWeaponFxMaterial;
+				modelsMeshes[i].SetSurfaceOverrideMaterial(0, material);
+			}
+			else
+			{
+				modelsMeshes[i].SetSurfaceOverrideMaterial(0, null);
+			}
+		}
+	}
 	public override void _Process(double delta)
 	{
 		if (GameManager.Paused)
@@ -141,6 +168,12 @@ public partial class PlayerWeapon : Node3D
 
 		if (!Visible)
 			Show();
+
+		if (hasQuad != playerInfo.quadDamage) 
+		{
+			hasQuad = playerInfo.quadDamage;
+			ChangeQuadFx(hasQuad);
+		}
 
 		float deltaTime = (float)delta;
 		if (GameOptions.UseMuzzleLight)

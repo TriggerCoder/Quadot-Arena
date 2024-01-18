@@ -16,6 +16,7 @@ public partial class ItemPickup : Area3D
 		Slugs,
 		Cells,
 		Bfgammo,
+		Quad
 	}
 	[Export]
 	public ThingController thingController;
@@ -170,6 +171,10 @@ public partial class ItemPickup : Area3D
 							player.armor = player.playerInfo.MaxArmor;
 					}
 
+					disable = true;
+					break;
+				case ItemType.Quad:
+					player.playerInfo.quadDamage = true;
 					disable = true;
 					break;
 			}

@@ -23,6 +23,8 @@ public partial class ThingsManager : Node
 	[Export]
 	public PackedScene[] _armorPrefabs;
 	[Export]
+	public PackedScene[] _powerUpsPrefabs;
+	[Export]
 	public PackedScene[] _funcPrefabs;
 	[Export]
 	public PackedScene[] _infoPrefabs;
@@ -100,6 +102,13 @@ public partial class ThingsManager : Node
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);
 			GameManager.Print("Armor Name: " + prefabName);
+			thingsPrefabs.Add(prefabName, thing);
+		}
+		foreach (var thing in _powerUpsPrefabs)
+		{
+			SceneState sceneState = thing.GetState();
+			string prefabName = sceneState.GetNodeName(0);
+			GameManager.Print("PowerUp Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _funcPrefabs)
