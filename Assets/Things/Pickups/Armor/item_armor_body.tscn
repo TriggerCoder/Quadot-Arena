@@ -15,6 +15,7 @@ script = ExtResource("4_56fnb")
 fps = 0.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+radius = 0.7
 
 [node name="item_armor_body" type="Node3D"]
 script = ExtResource("1_5v22c")

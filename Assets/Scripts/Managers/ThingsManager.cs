@@ -282,9 +282,40 @@ public partial class ThingsManager : Node
 		{
 			string target = trigger.Key;
 			Dictionary<string, string> entityData = trigger.Value;
+
+			switch(GameManager.Instance.gameType)
+			{
+				default:
+				break;
+				case GameManager.GameType.FreeForAll:
+				case GameManager.GameType.Tournament:
+				case GameManager.GameType.OneFlagCTF:
+				{
+					if (entityData.ContainsKey("notfree"))
+						continue;
+				}
+				break;
+				case GameManager.GameType.TeamDeathmatch:
+				case GameManager.GameType.CaptureTheFlag:
+				case GameManager.GameType.Overload:
+				case GameManager.GameType.Harvester:
+				{
+					if (entityData.ContainsKey("notteam"))
+						continue;
+				}
+				break;
+				case GameManager.GameType.SinglePlayer:
+				{
+					if (entityData.ContainsKey("notsingle"))
+						continue;
+				}
+				break;
+			}
+
 			ThingController thingObject = (ThingController)thingsPrefabs[entityData["classname"]].Instantiate();
 			if (thingObject == null)
 				continue;
+
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
 			thingObject.Name = "Trigger " + target;
 			TriggerController tc = new TriggerController();
@@ -338,6 +369,35 @@ public partial class ThingsManager : Node
 
 		foreach (Entity entity in entitiesOnMap)
 		{
+			switch (GameManager.Instance.gameType)
+			{
+				default:
+				break;
+				case GameManager.GameType.FreeForAll:
+				case GameManager.GameType.Tournament:
+				case GameManager.GameType.OneFlagCTF:
+				{
+					if (entity.entityData.ContainsKey("notfree"))
+						continue;
+				}
+				break;
+				case GameManager.GameType.TeamDeathmatch:
+				case GameManager.GameType.CaptureTheFlag:
+				case GameManager.GameType.Overload:
+				case GameManager.GameType.Harvester:
+				{
+					if (entity.entityData.ContainsKey("notteam"))
+						continue;
+				}
+				break;
+				case GameManager.GameType.SinglePlayer:
+				{
+					if (entity.entityData.ContainsKey("notsingle"))
+						continue;
+				}
+				break;
+			}
+
 			ThingController thingObject = (ThingController)thingsPrefabs[entity.name].Instantiate();
 			if (thingObject == null)
 				continue;

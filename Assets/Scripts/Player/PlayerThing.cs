@@ -53,7 +53,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 		playerControls.collider = new CapsuleShape3D();
 		playerControls.collider.Radius = .5f;
-		playerControls.collider.Height = 1.5f;
+		playerControls.collider.Height = 1.6f;
 		Torso.Shape = playerControls.collider;
 	}
 	public void InitPlayer()
@@ -194,7 +194,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 		Vector3 position = GlobalPosition;
 		Vector3 horizontalVelocity = destination - position;
-		float height = destination.Y - position.Y;
+		float height = destination.Y - (position.Y - playerControls.feetRay.Length);
 
 		if (height <= 0)
 		{

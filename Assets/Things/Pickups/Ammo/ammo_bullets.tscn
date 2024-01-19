@@ -15,6 +15,7 @@ script = ExtResource("3_64lx6")
 fps = 0.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+radius = 0.7
 
 [node name="ammo_bullets" type="Node3D"]
 script = ExtResource("1_eht21")

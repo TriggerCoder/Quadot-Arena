@@ -17,8 +17,8 @@ public partial class PlayerControls : InterpolatedNode3D
 
 	public CapsuleShape3D	collider;
 
-	private Vector2 centerHeight = new Vector2(0.4f, 0.2f);	// character controller center height, x standing, y crouched
-	private Vector2 height = new Vector2(1.5f, 1.1f);		// character controller height, x standing, y crouched
+	private Vector2 centerHeight = new Vector2(0.5f, 0.2f);	// character controller center height, x standing, y crouched
+	private Vector2 height = new Vector2(1.6f, 1.1f);		// character controller height, x standing, y crouched
 	private float camerasHeight = .05f;
 	private float ccHeight = .05f;
 

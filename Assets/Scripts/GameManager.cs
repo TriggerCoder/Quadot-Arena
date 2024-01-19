@@ -113,6 +113,8 @@ public partial class GameManager : Node
 	public PackedScene playerPrefab;
 	[Export]
 	public MusicType musicType = MusicType.None;
+	[Export]
+	public GameType gameType = GameType.FreeForAll;
 
 	public List<PlayerThing> Players = new List<PlayerThing>();
 	public enum FuncState
@@ -133,6 +135,17 @@ public partial class GameManager : Node
 		None,
 		Static,
 		Dynamic
+	}
+	public enum GameType
+	{
+		SinglePlayer,
+		FreeForAll,
+		Tournament,
+		TeamDeathmatch,
+		CaptureTheFlag,
+		OneFlagCTF,
+		Overload,
+		Harvester
 	}
 	public static class ControllerType
 	{
