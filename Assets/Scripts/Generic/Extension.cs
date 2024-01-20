@@ -97,4 +97,24 @@ namespace ExtensionMethods
 			return String;
 		}
 	}
+
+	public static class Vector3Extension
+	{
+		public static Vector3 GetLenghtAndNormalize(this Vector3 vector3, out float num)
+		{
+			num = vector3.LengthSquared();
+			if (num == 0f)
+			{
+				vector3.X = (vector3.Y = (vector3.Z = 0f));
+				return vector3;
+			}
+
+			num = Mathf.Sqrt(num);
+			vector3.X /= num;
+			vector3.Y /= num;
+			vector3.Z /= num;
+
+			return vector3;
+		}
+	}
 }

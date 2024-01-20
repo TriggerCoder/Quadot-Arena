@@ -143,7 +143,7 @@ public partial class PlayerModel : Node3D
 	private Quaternion QuaternionZero = new Quaternion(0, 0, 0, 0);
 	private Quaternion turnTo = new Quaternion(0, 0, 0, 0);
 	private List<MeshInstance3D> modelsMeshes = new List<MeshInstance3D>();
-
+	private List<MeshInstance3D> fxMeshes = new List<MeshInstance3D>();
 	private int hitpoints = 50;
 
 	//Needed to keep impulse once it turn into ragdoll
@@ -647,11 +647,14 @@ public partial class PlayerModel : Node3D
 		if (destroyWeapon)
 			DestroyWeapon();
 
+		bool addBarrel = false;
+
 		if (!string.IsNullOrEmpty(completeModelName))
 		{
 			weapon = ModelsManager.GetModel(completeModelName);
 			if (weapon == null)
 				return;
+			addBarrel = true;
 		}
 		else
 			weapon = newWeapon;
@@ -663,7 +666,7 @@ public partial class PlayerModel : Node3D
 		weaponModel.node.Name = "weapon";
 		weaponNode.AddChild(weaponModel.node);
 
-		if (!string.IsNullOrEmpty(completeModelName))
+		if (addBarrel)
 		{
 			Vector3 OffSet = Vector3.Zero;
 			barrel = new Node3D();
@@ -696,10 +699,6 @@ public partial class PlayerModel : Node3D
 				Mesher.GenerateModelFromMeshes(muzzle, currentLayer, false, false, muzzleFlash, true, false);
 			else
 				Mesher.FillModelFromProcessedData(muzzle, currentLayer, false, false, muzzleFlash, false);
-
-			//Muzzle Flash never cast shadow
-//			for (int i = 0; i < muzzle.readyMeshes.Count; i++)
-//				muzzleUnityConverted.data[i].meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
 			//Such Vanity
 			if (barrel == null)
@@ -875,26 +874,26 @@ public partial class PlayerModel : Node3D
 		return true;
 	}
 
-	private void ChangeQuadFx(MeshInstance3D mesh, bool enable)
-	{
-		ShaderMaterial material = (ShaderMaterial)mesh.Mesh.SurfaceGetMaterial(0).Duplicate();
-		if (enable)
-		{
-			material.NextPass = MaterialManager.quadFxMaterial;
-			mesh.SetSurfaceOverrideMaterial(0, material);
-		}
-		else
-			mesh.SetSurfaceOverrideMaterial(0, null);
-	}
 	private void ChangeQuadFx(bool enable)
 	{
-		for (int i = 0; i < modelsMeshes.Count; i++)
-			ChangeQuadFx(modelsMeshes[i], enable);
+		for (int i = 0; i < fxMeshes.Count; i++)
+		{
+			MeshInstance3D mesh = fxMeshes[i];
+			if (enable)
+			{
+				mesh.SetSurfaceOverrideMaterial(0, MaterialManager.quadFxMaterial);
+				mesh.Visible = true;
+			}
+			else
+				mesh.Visible = false;
+		}
 	}
 	public void ChangeLayer(uint layer)
 	{
 		for (int i = 0; i < modelsMeshes.Count; i++)
 			modelsMeshes[i].Layers = layer;
+		for (int i = 0; i < fxMeshes.Count; i++)
+			fxMeshes[i].Layers = layer;
 		currentLayer = layer;
 	}
 
@@ -908,12 +907,28 @@ public partial class PlayerModel : Node3D
 				if (modelsMeshes.Contains(mesh))
 					continue;
 
+				//Check if UI Self Shadow
+				if (mesh.CastShadow == GeometryInstance3D.ShadowCastingSetting.ShadowsOnly)
+					continue;
+
+				if (fxMeshes.Contains(mesh))
+					continue;
 				modelsMeshes.Add(mesh);
+
+				//UI Self Shadow
 				MeshInstance3D shadowMesh = new MeshInstance3D();
 				shadowMesh.Mesh = mesh.Mesh;
 				shadowMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
 				shadowMesh.Layers = playerControls.playerInfo.uiLayer;
 				mesh.AddChild(shadowMesh);
+
+				//FX Mesh
+				MeshInstance3D fxMesh = new MeshInstance3D();
+				fxMesh.Mesh = mesh.Mesh;
+				fxMesh.Layers = currentLayer;
+				fxMesh.Visible = false;
+				mesh.AddChild(fxMesh);
+				fxMeshes.Add(fxMesh);
 			}
 		}
 	}
@@ -924,9 +939,10 @@ public partial class PlayerModel : Node3D
 		{
 			if (child is MeshInstance3D mesh)
 			{
-				if (!modelsMeshes.Contains(mesh))
-					continue;
-				modelsMeshes.Remove(mesh);
+				if (fxMeshes.Contains(mesh))
+					fxMeshes.Remove(mesh);
+				if (modelsMeshes.Contains(mesh))
+					modelsMeshes.Remove(mesh);
 			}
 		}
 	}

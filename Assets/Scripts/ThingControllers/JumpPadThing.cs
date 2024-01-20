@@ -11,7 +11,7 @@ public partial class JumpPadThing : Area3D
 	{
 		BodyEntered += OnBodyEntered;
 	}
-	public void Init(Vector3 dest)
+	public void Init(Vector3 dest, Vector3 center)
 	{
 		destination = dest;
 		position = GlobalPosition;
@@ -20,6 +20,7 @@ public partial class JumpPadThing : Area3D
 
 		audioStream = new MultiAudioStream();
 		AddChild(audioStream);
+		audioStream.GlobalPosition = center;
 		audioStream.Bus = "BKGBus";
 		audioStream.Stream = SoundManager.LoadSound(BoingSound);
 	}

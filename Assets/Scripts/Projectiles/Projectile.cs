@@ -163,13 +163,13 @@ public partial class Projectile : InterpolatedNode3D
 				{
 					Vector3 hPosition = collider.Position;
 					Vector3 Distance = (hPosition - Collision);
-					Vector3 impulseDir = Distance.Normalized();
 					float lenght;
+					Vector3 impulseDir = Distance.GetLenghtAndNormalize(out lenght);
+
 					switch (damageType)
 					{
 						case DamageType.Explosion:
 						case DamageType.Rocket:
-							lenght = Distance.Length();
 							damageable.Damage(Mathf.CeilToInt(Mathf.Lerp(blastDamage, 1, lenght / explosionRadius)), DamageType.Explosion, owner);
 							damageable.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, lenght / explosionRadius));
 						break;
@@ -186,7 +186,6 @@ public partial class Projectile : InterpolatedNode3D
 								damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
 						break;
 						case DamageType.Telefrag:
-							lenght = Distance.Length();
 							damageable.Damage(blastDamage, DamageType.Telefrag, owner);
 							damageable.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, lenght / explosionRadius));
 						break;

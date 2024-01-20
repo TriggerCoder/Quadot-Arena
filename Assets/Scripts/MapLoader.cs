@@ -499,23 +499,29 @@ public static class MapLoader
 		return OwnerShapeId;
 	}
 
-	public static void GenerateJumpPadCollider(Area3D jumpPad, int num)
+	public static Vector3 GenerateJumpPadCollider(Area3D jumpPad, int num)
 	{
+		Vector3 center = Vector3.Zero;
+		int numCenters = 0;
 		for (int i = 0; i < models[num].numBrushes; i++)
 		{
 			if (!Mesher.GenerateBrushCollider(brushes[models[num].firstBrush + i], ColliderGroup, jumpPad, false, ContentFlags.JumpPad))
 				continue;
 
-/*			CollisionShape3D mc = jumpPad.GetChild<CollisionShape3D>(0);
+			CollisionShape3D mc = jumpPad.GetChild<CollisionShape3D>(0);
 			Shape3D boxShape = mc.Shape;
 			Aabb box = boxShape.GetDebugMesh().GetAabb();
-			Vector3 center = box.GetCenter();
-			float max = box.GetLongestAxisSize();
+			center += box.GetCenter();
+			numCenters++;
+/*			float max = box.GetLongestAxisSize();
 			SphereShape3D jumpPadCollider = new SphereShape3D();
 			jumpPadCollider.Radius = max * .5f;
 			mc.Shape = jumpPadCollider;
 			jumpPad.GlobalPosition = center;
-*/		}
+*/
+		}
+		center /= numCenters;
+		return center;
 	}
 	public static void GetMapTextures()
 	{

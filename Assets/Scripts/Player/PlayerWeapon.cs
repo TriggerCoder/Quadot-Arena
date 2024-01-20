@@ -74,7 +74,7 @@ public partial class PlayerWeapon : Node3D
 	private Vector3 oldPosition = Vector3.Down;
 
 	public string quadSound = "items/damage3";
-	private List<MeshInstance3D> modelsMeshes = new List<MeshInstance3D>();
+	private List<MeshInstance3D> fxMeshes = new List<MeshInstance3D>();
 	public bool hasQuad = false;
 	public override void _Ready()
 	{
@@ -110,6 +110,8 @@ public partial class PlayerWeapon : Node3D
 		if (model.tagsIdbyName.TryGetValue("tag_flash", out int tagId))
 			MuzzleOffset = model.tagsbyId[tagId][0].origin;
 
+		AddAllMeshInstance3D(playerInfo.WeaponHand);
+
 		if (!string.IsNullOrEmpty(MuzzleModelName))
 		{
 			muzzleObject = new Node3D();
@@ -134,7 +136,6 @@ public partial class PlayerWeapon : Node3D
 
 //		playerInfo.playerHUD.HUDUpdateAmmoNum();
 		OnInit();
-		AddAllMeshInstance3D(playerInfo.WeaponHand);
 	}
 	private void AddAllMeshInstance3D(Node parent)
 	{
@@ -142,23 +143,29 @@ public partial class PlayerWeapon : Node3D
 		foreach (var child in Childrens)
 		{
 			if (child is MeshInstance3D mesh)
-				modelsMeshes.Add(mesh);
+			{
+				MeshInstance3D fxMesh = new MeshInstance3D();
+				fxMesh.Mesh = mesh.Mesh;
+				fxMesh.Layers = mesh.Layers;
+				fxMesh.Visible = false;
+				mesh.AddChild(fxMesh);
+				fxMeshes.Add(fxMesh);
+			}
+
 		}
 	}
 	private void ChangeQuadFx(bool enable)
 	{
-		for (int i = 0; i < modelsMeshes.Count; i++)
+		for (int i = 0; i < fxMeshes.Count; i++)
 		{
-			ShaderMaterial material = (ShaderMaterial)modelsMeshes[i].Mesh.SurfaceGetMaterial(0).Duplicate();
+			MeshInstance3D mesh = fxMeshes[i];
 			if (enable)
 			{
-				material.NextPass = MaterialManager.quadWeaponFxMaterial;
-				modelsMeshes[i].SetSurfaceOverrideMaterial(0, material);
+				mesh.SetSurfaceOverrideMaterial(0, MaterialManager.quadWeaponFxMaterial);
+				mesh.Visible = true;
 			}
 			else
-			{
-				modelsMeshes[i].SetSurfaceOverrideMaterial(0, null);
-			}
+				mesh.Visible = false;
 		}
 	}
 	public override void _Process(double delta)

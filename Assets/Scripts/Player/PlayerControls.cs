@@ -461,9 +461,8 @@ public partial class PlayerControls : InterpolatedNode3D
 
 		wishdir = new Vector3(cMove.sidewaysSpeed, 0, cMove.forwardSpeed);
 		wishdir = playerInfo.Transform.Basis * wishdir;
-		wishdir = wishdir.Normalized();
-
-		float wishspeed = wishdir.Length();
+		float wishspeed;
+		wishdir = wishdir.GetLenghtAndNormalize(out wishspeed);
 		wishspeed *= moveSpeed;
 
 		Accelerate(wishdir, wishspeed, runAcceleration, deltaTime, runSpeed);
@@ -536,10 +535,9 @@ public partial class PlayerControls : InterpolatedNode3D
 
 		wishdir = new Vector3(cMove.sidewaysSpeed, 0, cMove.forwardSpeed);
 		wishdir = playerInfo.Transform.Basis * wishdir;
-		float wishspeed = wishdir.Length();
+		float wishspeed;
+		wishdir = wishdir.GetLenghtAndNormalize(out wishspeed);
 		wishspeed *= moveSpeed;
-
-		wishdir = wishdir.Normalized();
 
 		//Aircontrol
 		float wishspeed2 = wishspeed;
@@ -578,9 +576,7 @@ public partial class PlayerControls : InterpolatedNode3D
 			return;
 		zspeed = playerVelocity.Y;
 		playerVelocity.Y = 0;
-		/* Next two lines are equivalent to idTech's VectorNormalize() */
-		speed = playerVelocity.Length();
-		playerVelocity = playerVelocity.Normalized();
+		playerVelocity = playerVelocity.GetLenghtAndNormalize(out speed);
 
 		dot = playerVelocity.Dot(wishdir);
 		k = 32;

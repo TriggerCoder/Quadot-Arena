@@ -1,6 +1,6 @@
 using Godot;
 using System.Collections.Generic;
-
+using ExtensionMethods;
 public partial class PlayerThing : CharacterBody3D, Damageable
 {
 	[Export]
@@ -206,8 +206,10 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		float verticalVelocity = time * GameManager.Instance.gravity;
 
 		horizontalVelocity.Y = 0;
-		float forward = horizontalVelocity.Length() / time;
-		horizontalVelocity = horizontalVelocity.Normalized() * forward;
+		float dist;
+		horizontalVelocity = horizontalVelocity.GetLenghtAndNormalize(out dist);
+		float forward = dist / time;
+		horizontalVelocity = horizontalVelocity * forward;
 		playerControls.jumpPadVel = horizontalVelocity;
 		playerControls.jumpPadVel.Y = verticalVelocity;
 		playerControls.playerVelocity = Vector3.Zero;

@@ -724,14 +724,15 @@ public partial class ThingsManager : Node
 				*/                //JumpPad
 				case "trigger_push":
 				{
+					thingObject.GlobalPosition = entity.origin;
 					JumpPadThing jumpPad = new JumpPadThing();
 					thingObject.AddChild(jumpPad);
 					strWord = entity.entityData["model"];
 					int model = int.Parse(strWord.Trim('*'));
 					string target = entity.entityData["target"];
 					Vector3 destination = targetsOnMap[target][0].destination;
-					MapLoader.GenerateJumpPadCollider(jumpPad, model);
-					jumpPad.Init(destination);
+					Vector3 center = MapLoader.GenerateJumpPadCollider(jumpPad, model);
+					jumpPad.Init(destination, center);
 				}
 				break;
 				//Teleporter
