@@ -155,10 +155,17 @@ public partial class PlayerModel : Node3D
 	public bool Bleed { get { return true; } }
 	public BloodType BloodColor { get { return BloodType.Red; } }
 
+	protected OmniLight3D FxLight;
+
 	public bool hasQuad = false;
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		FxLight = new OmniLight3D();
+		FxLight.Visible = false;
+		FxLight.Layers = GameManager.AllPlayerViewMask;
+		AddChild(FxLight);
+		FxLight.Position = Vector3.Up;
 	}
 	void ApplySimpleMove(float deltaTime)
 	{
@@ -504,6 +511,7 @@ public partial class PlayerModel : Node3D
 		upperAnimation = deathNum;
 		lowerAnimation = deathNum;
 
+		FxLight.Visible = false;
 		ownerDead = true;
 	}
 
@@ -684,6 +692,8 @@ public partial class PlayerModel : Node3D
 
 		upperAnimation = UpperAnimation.Raise;
 
+		AddAllMeshInstance3D(weaponNode);
+
 		if (!string.IsNullOrEmpty(muzzleModelName))
 		{
 			Vector3 OffSet = Vector3.Zero;
@@ -717,7 +727,7 @@ public partial class PlayerModel : Node3D
 			muzzleFlash.Position = OffSet;
 			muzzleFlash.Visible = false;
 		}
-		AddAllMeshInstance3D(weaponNode);
+		AddAllMeshInstance3D(weaponNode, false);
 		if (hasQuad)
 			ChangeQuadFx(true);
 	}
@@ -876,6 +886,8 @@ public partial class PlayerModel : Node3D
 
 	private void ChangeQuadFx(bool enable)
 	{
+		FxLight.LightColor = new Color(0.2f, 0.2f, 1);
+		FxLight.Visible = enable;
 		for (int i = 0; i < fxMeshes.Count; i++)
 		{
 			MeshInstance3D mesh = fxMeshes[i];
@@ -897,7 +909,7 @@ public partial class PlayerModel : Node3D
 		currentLayer = layer;
 	}
 
-	private void AddAllMeshInstance3D(Node parent)
+	private void AddAllMeshInstance3D(Node parent, bool addFx = true)
 	{		
 		var Childrens = GameManager.GetAllChildrens(parent);
 		foreach(var child in Childrens)
@@ -921,6 +933,9 @@ public partial class PlayerModel : Node3D
 				shadowMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
 				shadowMesh.Layers = playerControls.playerInfo.uiLayer;
 				mesh.AddChild(shadowMesh);
+
+				if (!addFx)
+					continue;
 
 				//FX Mesh
 				MeshInstance3D fxMesh = new MeshInstance3D();
@@ -1123,7 +1138,7 @@ public partial class PlayerModel : Node3D
 
 		while (!SkinFile.EndOfStream)
 		{
-			strLine = SkinFile.ReadLine();
+			strLine = SkinFile.ReadLine().ToUpper();
 
 			for (int i = 0; i < model.meshes.Count; i++)
 			{

@@ -64,6 +64,8 @@ ambient_light_source = 2
 ambient_light_color = Color(0.376471, 0.376471, 0.376471, 1)
 tonemap_mode = 2
 glow_enabled = true
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.0
 
 [node name="main" type="Node3D"]
 
@@ -74,6 +76,7 @@ environment = SubResource("Environment_rcj1l")
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
 Sun = NodePath("../SunLight")
+autoloadMap = "q3dm7"
 tessellations = 10
 playerViewPort = NodePath("SplitScreen/PlayerViewPort")
 playerPrefab = ExtResource("7_rdgk2")

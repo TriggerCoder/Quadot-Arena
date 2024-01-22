@@ -28,35 +28,33 @@ public static class TextureLoader
 	}
 	public static bool HasTextureOrAddTexture(string textureName, bool forceAlpha)
 	{
-		string upperName = textureName.ToUpper();
 		if (forceAlpha)
 		{
-			if (TransparentTextures.ContainsKey(upperName))
+			if (TransparentTextures.ContainsKey(textureName))
 				return true;
 		}
-		else if (Textures.ContainsKey(upperName))
+		else if (Textures.ContainsKey(textureName))
 			return true;
 
-		GameManager.Print("GetTextureOrAddTexture: No texture \"" + upperName + "\"");
-		AddNewTexture(upperName, forceAlpha);
-		if (Textures.ContainsKey(upperName))
+		GameManager.Print("GetTextureOrAddTexture: No texture \"" + textureName + "\"");
+		AddNewTexture(textureName, forceAlpha);
+		if (Textures.ContainsKey(textureName))
 			return true;
 		return false;
 	}
 	public static ImageTexture GetTextureOrAddTexture(string textureName, bool forceAlpha)
 	{
-		string upperName = textureName.ToUpper();
 		if (forceAlpha)
 		{
-			if (TransparentTextures.ContainsKey(upperName))
-				return TransparentTextures[upperName];
+			if (TransparentTextures.ContainsKey(textureName))
+				return TransparentTextures[textureName];
 		}
-		else if (Textures.ContainsKey(upperName))
-			return Textures[upperName];
+		else if (Textures.ContainsKey(textureName))
+			return Textures[textureName];
 
-		GameManager.Print("GetTextureOrAddTexture: No texture \"" + upperName + "\"");
-		AddNewTexture(upperName, forceAlpha);
-		return GetTexture(upperName, forceAlpha);
+		GameManager.Print("GetTextureOrAddTexture: No texture \"" + textureName + "\"");
+		AddNewTexture(textureName, forceAlpha);
+		return GetTexture(textureName, forceAlpha);
 	}
 	public static bool HasTexture(string textureName)
 	{
@@ -70,27 +68,25 @@ public static class TextureLoader
 	}
 	public static ImageTexture GetTexture(string textureName, bool forceAlpha = false)
 	{
-		string upperName = textureName.ToUpper();
 		if (forceAlpha)
 		{
-			if (TransparentTextures.ContainsKey(upperName))
-				return TransparentTextures[upperName];
+			if (TransparentTextures.ContainsKey(textureName))
+				return TransparentTextures[textureName];
 		}
-		else if (Textures.ContainsKey(upperName))
-			return Textures[upperName];
+		else if (Textures.ContainsKey(textureName))
+			return Textures[textureName];
 
-		GameManager.Print("GetTexture: Texture not found \"" + upperName + "\"");
+		GameManager.Print("GetTexture: Texture not found \"" + textureName + "\"");
 		return illegal;
 	}
 	public static void LoadTextures(List<QShader> mapTextures, bool ignoreShaders, ImageFormat imageFormat = ImageFormat.JPG)
 	{
 		foreach (QShader tex in mapTextures)
 		{
-			string upperName = tex.name.ToUpper();
-			string path = upperName;
+			string path = tex.name;
 
 			if (ignoreShaders)
-				if (QShaderManager.QShaders.ContainsKey(upperName))
+				if (QShaderManager.QShaders.ContainsKey(tex.name))
 					continue;
 
 			if (imageFormat == ImageFormat.TGA)
@@ -150,33 +146,33 @@ public static class TextureLoader
 				ImageTexture readyTex = ImageTexture.CreateFromImage(baseTex);
 				readyTex.ResourceName = Convert.ToBase64String(BitConverter.GetBytes(luminance));
 
-				if (Textures.ContainsKey(upperName))
+				if (Textures.ContainsKey(tex.name))
 				{
 					if ((tex.addAlpha) || (baseTex.DetectAlpha() != AlphaMode.None))
 					{
-						GameManager.Print("Adding transparent texture with name " + upperName + "." + imageFormat);
-						TransparentTextures.Add(upperName, readyTex);
+						GameManager.Print("Adding transparent texture with name " + tex.name + "." + imageFormat);
+						TransparentTextures.Add(tex.name, readyTex);
 					}
 					else
 					{
-						GameManager.Print("Updating texture with name " + upperName + "." + imageFormat);
-						Textures[upperName] = readyTex;
+						GameManager.Print("Updating texture with name " + tex.name + "." + imageFormat);
+						Textures[tex.name] = readyTex;
 					}
 				}
 				else
 				{
 					if ((tex.addAlpha) || (baseTex.DetectAlpha() != AlphaMode.None))
 					{
-						GameManager.Print("Adding transparent texture with name " + upperName + "."+ imageFormat);
-						TransparentTextures.Add(upperName, readyTex);
+						GameManager.Print("Adding transparent texture with name " + tex.name + "."+ imageFormat);
+						TransparentTextures.Add(tex.name, readyTex);
 					}
 					else
-						GameManager.Print("Adding texture with name " + upperName + "." + imageFormat);
-					Textures.Add(upperName, readyTex);
+						GameManager.Print("Adding texture with name " + tex.name + "." + imageFormat);
+					Textures.Add(tex.name, readyTex);
 				}
 			}
 			else
-				GameManager.Print("Image not found " + upperName + "." + imageFormat);
+				GameManager.Print("Image not found " + tex.name + "." + imageFormat);
 		}
 	}
 

@@ -42,6 +42,7 @@ public partial class MaterialManager : Node
 	public static string mixBrightness = "shader_parameter/mixBrightness";
 
 	public static List<string> Decals = new List<string>();
+	public static List<string> FogShaders = new List<string>();
 	public static List<string> HasBillBoard = new List<string>() { "FLARESHADER" };
 	public static List<string> PortalMaterials = new List<string>();
 	public static List<ShaderMaterial> AllMaterials = new List<ShaderMaterial>();
@@ -76,18 +77,25 @@ public partial class MaterialManager : Node
 		{
 			0
 		};
+		quadFxShader = quadFxShader.ToUpper();
+		quadWeaponFxShader = quadWeaponFxShader.ToUpper();
 
 		quadFxMaterial = QShaderManager.GetShadedMaterial(quadFxShader, -1, ref useAlpha, ref hasPortal, stage);
 		quadWeaponFxMaterial = QShaderManager.GetShadedMaterial(quadWeaponFxShader, -1, ref useAlpha, ref hasPortal, stage, true);
 	}
 
-
 	public static void AddBillBoard(string shaderName)
 	{
-		shaderName = shaderName.ToUpper();
 		if (HasBillBoard.Contains(shaderName))
 			return;
 		HasBillBoard.Add(shaderName);
+	}
+
+	public static void AddFog(string shaderName)
+	{
+		if (FogShaders.Contains(shaderName))
+			return;
+		FogShaders.Add(shaderName);
 	}
 
 	public static void AddPortalMaterial(string shaderName)
@@ -96,7 +104,6 @@ public partial class MaterialManager : Node
 			return;
 		PortalMaterials.Add(shaderName);
 	}
-
 	public static bool IsPortalMaterial(string shaderName)
 	{
 		if (PortalMaterials.Contains(shaderName))
@@ -105,10 +112,18 @@ public partial class MaterialManager : Node
 	}
 	public static bool IsSkyTexture(string textureName)
 	{
-		if (textureName.ToUpper().Contains("/SKIES/"))
+		if (textureName.Contains("/SKIES/"))
 			return true;
 		return false;
 	}
+
+	public static bool IsFogMaterial(string shaderName)
+	{
+		if (FogShaders.Contains(shaderName))
+			return true;
+		return false;
+	}
+
 	void AddAditionalTextures(string textureName, bool addAlpha = false)
 	{
 		QShader shader = new QShader(textureName, 0, 0, addAlpha);

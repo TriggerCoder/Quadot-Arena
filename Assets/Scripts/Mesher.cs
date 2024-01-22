@@ -291,6 +291,13 @@ public static class Mesher
 			return;
 		}
 
+		if (MaterialManager.IsFogMaterial(textureName))
+		{
+			GameManager.Print("GeneratePolygonObject: Object is FOG " + textureName + " so no Meshes are going to be made");
+			return;
+		}
+
+
 		bool hasPortal = false;
 		bool forceSkinAlpha = false;
 		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex, ref forceSkinAlpha, ref hasPortal);
@@ -1297,6 +1304,31 @@ public static class Mesher
 
 		return true;
 	}
+
+	public static void GenerateVolumetricFog(QBrush brush, Node3D holder, string textureName)
+	{
+
+		FogVolume Fog = new FogVolume();
+		Fog.Name = "Effect_" + textureName;
+		holder.AddChild(Fog);
+
+		ConvexPolygonShape3D convexHull = GenerateBrushCollider(brush);
+		if (convexHull == null)
+			return;
+
+		GameManager.Print("FOG: " + textureName);
+		Aabb box = convexHull.GetDebugMesh().GetAabb();
+		FogMaterial fogMaterial = new FogMaterial();
+		fogMaterial.Density = .15f;
+		fogMaterial.Emission = new Color(.75f, .38f, 0);
+		Fog.Material = fogMaterial;
+		Fog.Layers = GameManager.AllPlayerViewMask;
+		Fog.GlobalPosition = box.GetCenter();
+		Fog.Shape = RenderingServer.FogVolumeShape.Box;
+		Fog.Size = box.Size;
+
+	}
+
 	public static bool CanForm3DConvexHull(List<Vector3> points, ref Vector3 normal)
 	{
 		const float EPSILON = 0.00001f;

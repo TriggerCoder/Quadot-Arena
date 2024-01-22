@@ -26,6 +26,7 @@ public static class MapLoader
 	public static List<int> leafsBrushes;
 	public static List<QBrushSide> brushSides;
 	public static List<QShader> mapTextures;
+	public static List<QFog> mapFog;
 	public static QVisData visData;
 
 	public static LightMapSize currentLightMapSize = LightMapSize.Q3_QL;
@@ -242,6 +243,18 @@ public static class MapLoader
 			}
 		}
 
+		//effects (Fog)
+		{
+			BSPMap.BaseStream.Seek(header.Directory[LumpType.Effects].Offset, SeekOrigin.Begin);
+			int num = header.Directory[LumpType.Effects].Length / 72;
+			mapFog = new List<QFog>(num);
+			GameManager.Print("mapFog " + num);
+			for (int i = 0; i < num; i++)
+			{
+				mapFog.Add(new QFog(new string(BSPMap.ReadChars(64)), BSPMap.ReadInt32(), BSPMap.ReadInt32()));
+			}
+		}
+
 		//We need to determine the max number in order to check lightmap type
 		int maxlightMapNum = 0;
 		//surfaces
@@ -361,7 +374,7 @@ public static class MapLoader
 		{
 			bool billBoard = false;
 			int ChunkSize = MAX_MESH_SURFACES;
-			string shaderName = mapTextures[bigGroup.ElementAt(0).shaderId].name.ToUpper();
+			string shaderName = mapTextures[bigGroup.ElementAt(0).shaderId].name;
 			if (MaterialManager.HasBillBoard.Contains(shaderName))
 			{
 				billBoard = true;
@@ -403,6 +416,16 @@ public static class MapLoader
 
 		System.GC.Collect(2, System.GCCollectionMode.Forced);
 	}
+
+	public static void GenerateMapFog()
+	{
+		for (int i = 0; i < mapFog.Count; i++)
+		{
+			QBrush brush = brushes[mapFog[i].brushNum];
+			Mesher.GenerateVolumetricFog(brush, ColliderGroup, mapFog[i].name);
+		}
+	}
+
 	public static void LerpColorOnRepeatedVertex()
 	{
 		// We are only looking for bezier type

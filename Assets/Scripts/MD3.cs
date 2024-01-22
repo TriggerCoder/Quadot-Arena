@@ -273,7 +273,7 @@ public class MD3Mesh
 		meshNum = MeshNum;
 		meshId = Md3ModelFile.ReadInt32();
 		fullName = (new string(Md3ModelFile.ReadChars(64))).Split('\0');
-		name = fullName[0].Replace("\0", string.Empty);
+		name = fullName[0].Replace("\0", string.Empty).ToUpper();
 
 //		GameManager.Print("Loading Mesh: " + name + " , " + meshId);
 
@@ -298,6 +298,7 @@ public class MD3Mesh
 			string skinName = fullName[0].Replace("\0", string.Empty);
 			//Need to strip extension
 			fullName = skinName.Split('.');
+			fullName[0] = fullName[0].ToUpper();
 
 			int num = Md3ModelFile.ReadInt32();
 

@@ -188,6 +188,7 @@ public partial class GameManager : Node
 		{
 			ClusterPVSManager.Instance.ResetClusterList();
 			MapLoader.GenerateMapCollider();
+			MapLoader.GenerateMapFog();
 			MapLoader.GenerateSurfaces();
 			ThingsManager.AddThingsToMap();
 		}

@@ -28,7 +28,7 @@ public class QShader
 	public QShader(string name, uint surfaceFlags, uint contentsFlags, bool addAlpha)
 	{
 		//The string is read as 64 characters, which includes a bunch of null bytes.  We strip them to avoid oddness when printing and using the texture names.
-		this.name = name.Replace("\0", string.Empty);
+		this.name = name.Replace("\0", string.Empty).ToUpper();
 		this.surfaceFlags = surfaceFlags;
 		this.contentsFlags = contentsFlags;
 		this.addAlpha = addAlpha;
@@ -217,6 +217,20 @@ public class QVertex
 		lightmapCoord.Y = lmY;
 	}
 }
+public class QFog
+{
+	public string name;				// The name of the shader of this effect 
+	public int brushNum;			// The brush that generated this effect
+	public int reserved;			// Reserved
+	public QFog(string name, int brushNum, int reserved)
+	{
+		//The string is read as 64 characters, which includes a bunch of null bytes.  We strip them to avoid oddness when printing and using the texture names.
+		this.name = name.Replace("\0", string.Empty);
+		this.brushNum = brushNum;
+		this.reserved = reserved;
+	}
+}
+
 public class QSurface
 {
 	public int surfaceId;               // The index of this surface

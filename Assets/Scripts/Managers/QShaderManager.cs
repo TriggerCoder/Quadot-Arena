@@ -6,6 +6,7 @@ using ExtensionMethods;
 public static class QShaderManager
 {
 	public static Dictionary<string, QShaderData> QShaders = new Dictionary<string, QShaderData>();
+	public static Dictionary<string, QShaderData> FogShaders = new Dictionary<string, QShaderData>();
 	public static List<string> QShadersFiles = new List<string>();
 	public enum GenFuncType
 	{
@@ -29,10 +30,8 @@ public static class QShaderManager
 
 	public static bool HasShader(string shaderName)
 	{
-		string upperName = shaderName.ToUpper();
-		if (QShaders.ContainsKey(upperName))
+		if (QShaders.ContainsKey(shaderName))
 			return true;
-
 		return false;
 	}
 	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, ref bool alphaIsTransparent, ref bool hasPortal, List<int> multiPassList = null, bool forceView = false)
@@ -56,12 +55,11 @@ public static class QShaderManager
 		List<string> textures = new List<string>();
 		Dictionary<string, int> TexIndex = new Dictionary<string, int>();
 
-		string upperName = shaderName.ToUpper();
-		if (!QShaders.ContainsKey(upperName))
+		if (!QShaders.ContainsKey(shaderName))
 			return null;
 
-		QShaderData qShader = QShaders[upperName];
-		GameManager.Print("Shader found: " + upperName);
+		QShaderData qShader = QShaders[shaderName];
+		GameManager.Print("Shader found: " + shaderName);
 
 		GetSunData(qShader);
 
@@ -374,7 +372,7 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (upperName.Contains("PORTAL_SFX"))
+		if (shaderName.Contains("PORTAL_SFX"))
 			GameManager.Print(code);
 
 		Shader shader = new Shader();
@@ -1013,16 +1011,30 @@ public static class QShaderManager
 						node--;
 						if (node == 0)
 						{
-							if (QShaders.ContainsKey(qShaderData.Name))
+							if (qShaderData.qShaderGlobal.isFog)
 							{
-								GameManager.Print("Shader already on the list: " + qShaderData.Name + " md5: "+ qShaderData.Name.Md5Text(), GameManager.PrintType.Info);
-								QShaders[qShaderData.Name] = qShaderData;
+								if (FogShaders.ContainsKey(qShaderData.Name))
+								{
+									GameManager.Print("Fog Shader already on the list: " + qShaderData.Name + " md5: " + qShaderData.Name.Md5Text(), GameManager.PrintType.Info);
+									FogShaders[qShaderData.Name] = qShaderData;
+								}
+								else
+									FogShaders.Add(qShaderData.Name, qShaderData);
+								MaterialManager.AddFog(qShaderData.Name);
 							}
 							else
-								QShaders.Add(qShaderData.Name, qShaderData);
-							if (qShaderData.qShaderGlobal.billboard != BaseMaterial3D.BillboardModeEnum.Disabled)
-								MaterialManager.AddBillBoard(qShaderData.Name);
-						   qShaderData = null;
+							{
+								if (QShaders.ContainsKey(qShaderData.Name))
+								{
+									GameManager.Print("Shader already on the list: " + qShaderData.Name + " md5: " + qShaderData.Name.Md5Text(), GameManager.PrintType.Info);
+									QShaders[qShaderData.Name] = qShaderData;
+								}
+								else
+									QShaders.Add(qShaderData.Name, qShaderData);
+								if (qShaderData.qShaderGlobal.billboard != BaseMaterial3D.BillboardModeEnum.Disabled)
+									MaterialManager.AddBillBoard(qShaderData.Name);
+							}
+							qShaderData = null;
 							stage = 0;
 						}
 						i = strWord.Length;
@@ -1173,7 +1185,7 @@ public class QShaderGlobal
 	public List<string> surfaceParms = null;
 	public List<string> skyParms = null;
 	public List<string[]> deformVertexes = null;
-	public List<string> fogParms = null;
+	public string[] fogParms = null;
 	public SortType sort = SortType.Opaque;
 	public string[] sunParams = null;
 	public List<string> tessSize = null;
@@ -1186,6 +1198,7 @@ public class QShaderGlobal
 	public CullType cullType = CullType.Back;
 	public BaseMaterial3D.BillboardModeEnum billboard = BaseMaterial3D.BillboardModeEnum.Disabled;
 	public bool isSky = false;
+	public bool isFog = false;
 	public bool unShaded = false;
 	public bool trans = false;
 	public bool lava = false;
@@ -1272,9 +1285,8 @@ public class QShaderGlobal
 				}
 			break;
 			case "FOGPARMS":
-				if (fogParms == null)
-					fogParms = new List<string>();
-				fogParms.Add(Value);
+				fogParms = Value.Split(' ');
+				isFog = true;
 			break;
 			case "SORT":
 				switch (Value)

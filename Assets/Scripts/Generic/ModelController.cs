@@ -79,6 +79,7 @@ public partial class ModelController : Node3D
 		Dictionary<string, string> meshToSkin = null;
 		if (!string.IsNullOrEmpty(shaderName))
 		{
+			shaderName = shaderName.ToUpper();
 			meshToSkin = new Dictionary<string, string>
 			{
 				{ md3Model.meshes[0].name, shaderName }

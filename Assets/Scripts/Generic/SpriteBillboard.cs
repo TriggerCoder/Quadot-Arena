@@ -25,6 +25,8 @@ public partial class SpriteBillboard : Sprite3D
 		if (string.IsNullOrEmpty(spriteName))
 			return;
 
+		spriteName = spriteName.ToUpper();
+
 		bool isTransparent = Transparent;
 		if (Billboard != BaseMaterial3D.BillboardModeEnum.Disabled)
 			MaterialManager.AddBillBoard(spriteName);
