@@ -45,6 +45,7 @@ public partial class GameManager : Node
 	public const short Player7Layer = 13;
 	public const short Player8Layer = 14;
 	public const short RagdollLayer = 15;
+	public const short FogLayer = 16;
 
 	//3DRender Layer
 	public const short Player1ViewLayer = 0;

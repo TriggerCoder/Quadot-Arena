@@ -202,6 +202,7 @@ Escape={
 3d_physics/layer_14="Player7Layer"
 3d_physics/layer_15="Player8Layer"
 3d_physics/layer_16="RagdollLayer"
+3d_physics/layer_17="FogLayer"
 
 [network]
 

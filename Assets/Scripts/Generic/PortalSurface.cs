@@ -40,7 +40,7 @@ public partial class PortalSurface : Area3D
 		CollisionShape3D mc = new CollisionShape3D();
 		mc.Name = "Portal Area";
 		AddChild(mc);
-		CollisionLayer = (1 << GameManager.ColliderLayer);
+		CollisionLayer = (1 << GameManager.WalkTriggerLayer);
 		CollisionMask = GameManager.TakeDamageMask;
 
 		SphereShape3D sphere = new SphereShape3D();

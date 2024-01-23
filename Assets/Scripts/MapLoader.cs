@@ -422,7 +422,7 @@ public static class MapLoader
 		for (int i = 0; i < mapFog.Count; i++)
 		{
 			QBrush brush = brushes[mapFog[i].brushNum];
-			Mesher.GenerateVolumetricFog(brush, ColliderGroup, mapFog[i].name);
+			Mesher.GenerateVolumetricFog(i, brush, ColliderGroup, mapFog[i].name);
 		}
 	}
 
@@ -531,6 +531,7 @@ public static class MapLoader
 			if (!Mesher.GenerateBrushCollider(brushes[models[num].firstBrush + i], ColliderGroup, jumpPad, false, ContentFlags.JumpPad))
 				continue;
 
+			jumpPad.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
 			CollisionShape3D mc = jumpPad.GetChild<CollisionShape3D>(0);
 			Shape3D boxShape = mc.Shape;
 			Aabb box = boxShape.GetDebugMesh().GetAabb();

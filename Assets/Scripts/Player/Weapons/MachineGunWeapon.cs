@@ -104,7 +104,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 				if (Sounds.Length > 3)
 					SoundManager.Create3DSound(collision, Sounds[GD.RandRange(3, Sounds.Length - 1)]);
 
-				if (!MapLoader.noMarks.Contains(collider))
+				if (CheckIfCanMark(SpaceState, collider, collision))
 				{
 					Node3D BulletMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletMark);

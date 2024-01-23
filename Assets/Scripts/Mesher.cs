@@ -1305,16 +1305,25 @@ public static class Mesher
 		return true;
 	}
 
-	public static void GenerateVolumetricFog(QBrush brush, Node3D holder, string textureName)
+	public static void GenerateVolumetricFog(int index, QBrush brush, Node3D holder, string textureName)
 	{
-
-		FogVolume Fog = new FogVolume();
-		Fog.Name = "Effect_" + textureName;
-		holder.AddChild(Fog);
-
 		ConvexPolygonShape3D convexHull = GenerateBrushCollider(brush);
 		if (convexHull == null)
 			return;
+
+		FogVolume Fog = new FogVolume();
+		Fog.Name = "FogVolume_" + index + "_"+ textureName;
+		holder.AddChild(Fog);
+
+		Area3D fogArea = new Area3D();
+		fogArea.Name = "FogArea_" + index;
+		fogArea.CollisionLayer = (1 << GameManager.FogLayer);
+		fogArea.CollisionMask = (1 << GameManager.NoCollisionLayer);
+		holder.AddChild(fogArea);
+
+		CollisionShape3D mc = new CollisionShape3D();
+		mc.Shape = convexHull;
+		fogArea.AddChild(mc);
 
 		Aabb box = convexHull.GetDebugMesh().GetAabb();
 		Fog.Layers = GameManager.AllPlayerViewMask;

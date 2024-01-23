@@ -72,6 +72,7 @@ public partial class PlayerWeapon : Node3D
 
 	private float interp = 0;
 	private Vector3 oldPosition = Vector3.Down;
+	private PhysicsPointQueryParameters3D PointIntersect;
 
 	public string quadSound = "items/damage3";
 	private List<MeshInstance3D> fxMeshes = new List<MeshInstance3D>();
@@ -87,6 +88,12 @@ public partial class PlayerWeapon : Node3D
 //			if (muzzleLight != null)
 //				muzzleLight.SetProcess(false);
 		}
+
+		PointIntersect = new PhysicsPointQueryParameters3D();
+		PointIntersect.CollideWithAreas = true;
+		PointIntersect.CollideWithBodies = false;
+		PointIntersect.CollisionMask = (1 << GameManager.FogLayer);
+
 		Hide();
 	}
 
@@ -335,5 +342,21 @@ public partial class PlayerWeapon : Node3D
 		if (dx * dx + dy * dy <= 1)
 			return dispersion * avgDispersion;
 		return dispersion * maxDispersion;
+	}
+
+	public bool CheckIfCanMark(PhysicsDirectSpaceState3D SpaceState, CollisionObject3D collider, Vector3 collision)
+	{
+		//Check if mapcollider are noMarks
+		if (MapLoader.noMarks.Contains(collider))
+			return false;
+		
+		//Check if collision in inside a fog Area
+		PointIntersect.Position = collision;
+
+		var hits = SpaceState.IntersectPoint(PointIntersect);
+		if (hits.Count == 0)
+			return true;
+
+		return false;
 	}
 }

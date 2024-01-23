@@ -57,6 +57,7 @@ public partial class Projectile : InterpolatedNode3D
 	float time = 0f;
 	private Rid Sphere;
 	private PhysicsShapeQueryParameters3D SphereCast;
+	private PhysicsPointQueryParameters3D PointIntersect;
 	public override void _Ready()
 	{
 		if (!string.IsNullOrEmpty(_onFlySound))
@@ -64,9 +65,15 @@ public partial class Projectile : InterpolatedNode3D
 			audioStream.Stream = SoundManager.LoadSound(_onFlySound, true);
 			audioStream.Play();
 		}
+
 		Sphere = PhysicsServer3D.SphereShapeCreate();
 		SphereCast = new PhysicsShapeQueryParameters3D();
 		SphereCast.ShapeRid = Sphere;
+
+		PointIntersect = new PhysicsPointQueryParameters3D();
+		PointIntersect.CollideWithAreas = true;
+		PointIntersect.CollideWithBodies = false;
+		PointIntersect.CollisionMask = (1 << GameManager.FogLayer);
 	}
 	public override void _PhysicsProcess(double delta)
 	{
@@ -211,7 +218,7 @@ public partial class Projectile : InterpolatedNode3D
 			}
 
 			//Check if collider can be marked
-			if (!MapLoader.noMarks.Contains(Hit))
+			if (CheckIfCanMark(SpaceState, Hit, Collision))
 			{
 				Node3D DecalMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
@@ -309,5 +316,20 @@ public partial class Projectile : InterpolatedNode3D
 		*/
 		Position -= d * speed * deltaTime;
 
+	}
+	public bool CheckIfCanMark(PhysicsDirectSpaceState3D SpaceState, CollisionObject3D collider, Vector3 collision)
+	{
+		//Check if mapcollider are noMarks
+		if (MapLoader.noMarks.Contains(collider))
+			return false;
+
+		//Check if collision in inside a fog Area
+		PointIntersect.Position = collision;
+
+		var hits = SpaceState.IntersectPoint(PointIntersect);
+		if (hits.Count == 0)
+			return true;
+
+		return false;
 	}
 }

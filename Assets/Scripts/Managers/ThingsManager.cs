@@ -479,8 +479,8 @@ public partial class ThingsManager : Node
 						CollisionShape3D mc = new CollisionShape3D();
 						mc.Name = "Switch Trigger";
 						triggerCollider.AddChild(mc);
-						triggerCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
-						triggerCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+						triggerCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
+						triggerCollider.CollisionMask = GameManager.TakeDamageMask;
 						SphereShape3D sphere = new SphereShape3D();
 						sphere.Radius = max;
 						mc.Shape = sphere;
@@ -541,7 +541,7 @@ public partial class ThingsManager : Node
 
 					DoorCollider doorCollider = new DoorCollider();
 					door.AddChild(doorCollider);
-					doorCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
+					doorCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
 					doorCollider.CollisionMask = GameManager.TakeDamageMask;
 					doorCollider.door = door;
 					uint bodyShapeId = doorCollider.CreateShapeOwner(door);
@@ -586,8 +586,8 @@ public partial class ThingsManager : Node
 							CollisionShape3D mc = new CollisionShape3D();
 							mc.Name = "Door Trigger";
 							triggerCollider.AddChild(mc);
-							triggerCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
-							triggerCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+							triggerCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
+							triggerCollider.CollisionMask = GameManager.TakeDamageMask;
 
 							SphereShape3D sphere = new SphereShape3D();
 							sphere.Radius = max * .5f;
