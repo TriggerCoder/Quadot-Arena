@@ -1316,17 +1316,13 @@ public static class Mesher
 		if (convexHull == null)
 			return;
 
-		GameManager.Print("FOG: " + textureName);
 		Aabb box = convexHull.GetDebugMesh().GetAabb();
-		FogMaterial fogMaterial = new FogMaterial();
-		fogMaterial.Density = .15f;
-		fogMaterial.Emission = new Color(.75f, .38f, 0);
-		Fog.Material = fogMaterial;
 		Fog.Layers = GameManager.AllPlayerViewMask;
 		Fog.GlobalPosition = box.GetCenter();
 		Fog.Shape = RenderingServer.FogVolumeShape.Box;
 		Fog.Size = box.Size;
-
+		Fog.Material = QShaderManager.GetFog(textureName, Fog.Size.Y);
+		GameManager.Print("FOG: " + textureName + " Height " + Fog.Size.Y);
 	}
 
 	public static bool CanForm3DConvexHull(List<Vector3> points, ref Vector3 normal)

@@ -225,7 +225,7 @@ public class QFog
 	public QFog(string name, int brushNum, int reserved)
 	{
 		//The string is read as 64 characters, which includes a bunch of null bytes.  We strip them to avoid oddness when printing and using the texture names.
-		this.name = name.Replace("\0", string.Empty);
+		this.name = name.Replace("\0", string.Empty).ToUpper();
 		this.brushNum = brushNum;
 		this.reserved = reserved;
 	}

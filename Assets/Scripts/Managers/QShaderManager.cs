@@ -28,6 +28,35 @@ public static class QShaderManager
 		}
 	}
 
+	public static FogMaterial GetFog(string shaderName, float height)
+	{
+		FogMaterial fogMaterial = new FogMaterial();
+
+		if (!FogShaders.ContainsKey(shaderName))
+		{
+			fogMaterial.Density = .15f;
+			fogMaterial.Emission = Colors.Black;
+			return fogMaterial;
+		}
+
+		QShaderData Fog = FogShaders[shaderName];
+		float R = TryToParseFloat(Fog.qShaderGlobal.fogParms[1]);
+		float G = TryToParseFloat(Fog.qShaderGlobal.fogParms[2]);
+		float B = TryToParseFloat(Fog.qShaderGlobal.fogParms[3]);
+		float OpaqueHeight = TryToParseFloat(Fog.qShaderGlobal.fogParms[5]) * GameManager.sizeDividor;
+		if (OpaqueHeight >= height)
+			fogMaterial.Density = height / OpaqueHeight;
+		else
+		{
+			fogMaterial.Density = 1;
+			fogMaterial.HeightFalloff = .15f / OpaqueHeight;
+		}
+
+		fogMaterial.Emission = new Color(R, G, B);
+
+		return fogMaterial;
+	}
+
 	public static bool HasShader(string shaderName)
 	{
 		if (QShaders.ContainsKey(shaderName))
