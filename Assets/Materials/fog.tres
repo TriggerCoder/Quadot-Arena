@@ -1,0 +1,13 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://kujcx0wgflmg"]
+
+[ext_resource type="Shader" path="res://Assets/Shaders/fog.gdshader" id="1_5vdaj"]
+
+[resource]
+shader = ExtResource("1_5vdaj")
+shader_parameter/density = 1.0
+shader_parameter/noiseScale = 0.25
+shader_parameter/speed = 1.0
+shader_parameter/albedo = Color(0, 0, 0, 1)
+shader_parameter/emission = Color(0, 0, 0, 1)
+shader_parameter/height_falloff = 0.0
+shader_parameter/edge_fade = 0.1

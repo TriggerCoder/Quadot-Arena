@@ -28,14 +28,19 @@ public static class QShaderManager
 		}
 	}
 
-	public static FogMaterial GetFog(string shaderName, float height)
+	public static ShaderMaterial GetFog(string shaderName, float height)
 	{
-		FogMaterial fogMaterial = new FogMaterial();
+		const string Density = "shader_parameter/density";
+		const string Albedo = "shader_parameter/albedo";
+		const string Emission = "shader_parameter/emission";
+		const string HeightFalloff = "shader_parameter/height_falloff";
+
+		ShaderMaterial fogMaterial = (ShaderMaterial)MaterialManager.Instance.fogMaterial.Duplicate(true);
 
 		if (!FogShaders.ContainsKey(shaderName))
 		{
-			fogMaterial.Density = .15f;
-			fogMaterial.Emission = Colors.Black;
+			fogMaterial.Set(Density, .15f);
+			fogMaterial.Set(Emission, Colors.Black);
 			return fogMaterial;
 		}
 
@@ -45,14 +50,15 @@ public static class QShaderManager
 		float B = TryToParseFloat(Fog.qShaderGlobal.fogParms[3]);
 		float OpaqueHeight = TryToParseFloat(Fog.qShaderGlobal.fogParms[5]) * GameManager.sizeDividor;
 		if (OpaqueHeight >= height)
-			fogMaterial.Density = height / OpaqueHeight;
+			fogMaterial.Set(Density, height / OpaqueHeight);
 		else
 		{
-			fogMaterial.Density = 1;
-			fogMaterial.HeightFalloff = .15f / OpaqueHeight;
+			fogMaterial.Set(Density, 1);
+			fogMaterial.Set(HeightFalloff, .15f / OpaqueHeight);
 		}
 
-		fogMaterial.Emission = new Color(R, G, B);
+		fogMaterial.Set(Emission, new Color(R, G, B));
+
 
 		return fogMaterial;
 	}

@@ -8,6 +8,8 @@ public partial class MaterialManager : Node
 	[Export]
 	public ShaderMaterial illegal;
 	[Export]
+	public ShaderMaterial fogMaterial;
+	[Export]
 	public ShaderMaterial opaqueMaterial;
 	[Export]
 	public ShaderMaterial defaultMaterial;
