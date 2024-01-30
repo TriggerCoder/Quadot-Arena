@@ -319,9 +319,8 @@ public static class TextureLoader
 		}
 		
 		Color ambient, directional;
-		GameManager.Print("3D LightVol " + num);
 		Vector3I Size = new Vector3I((int)(Mathf.Floor(mapMaxCoord.X / 64) - Mathf.Ceil(mapMinCoord.X / 64) + 1),(int)(Mathf.Floor(mapMaxCoord.Y / 64) - Mathf.Ceil(mapMinCoord.Y / 64) + 1),(int)(Mathf.Floor(mapMaxCoord.Z / 128) - Mathf.Ceil(mapMinCoord.Z / 128) + 1));
-		OffSet = mapMinCoord;
+		OffSet = QuakeToGodot.Vect3(mapMinCoord);
 		Godot.Collections.Array<Image> AmbientImage = new Godot.Collections.Array<Image>();
 		Godot.Collections.Array<Image> DirectionalImage = new Godot.Collections.Array<Image>();
 
@@ -356,7 +355,6 @@ public static class TextureLoader
 			}
 			Ambient.SetData(Size.X, Size.Y, false, Format.Rgba8, dataAmbient);
 			Directional.SetData(Size.X, Size.Y, false, Format.Rgba8, dataDirectional);
-
 			AmbientImage.Add(Ambient);
 			DirectionalImage.Add(Directional);
 		}
@@ -365,7 +363,7 @@ public static class TextureLoader
 		AmbientTex.Create(Format.Rgba8, Size.X, Size.Y, Size.Z, false, AmbientImage);
 		DirectionalTex.Create(Format.Rgba8, Size.X, Size.Y, Size.Z, false, DirectionalImage);
 		GameManager.Print("3D Grid N: X=" + Size.X + " Y=" + Size.Y + " Z=" + Size.Z);
-		Normalize = new Vector3(Size.X * 64, Size.Y * 64, Size.Z * 128);
+		Normalize = new Vector3(Size.X * 2, Size.Y * 2, Size.Z * 4);
 		return (AmbientTex, DirectionalTex);
 	}
 

@@ -2,6 +2,7 @@
 
 [sub_resource type="VisualShaderNodeFloatParameter" id="VisualShaderNodeFloatParameter_sl7qe"]
 parameter_name = "mixBrightness"
+qualifier = 1
 default_value_enabled = true
 default_value = 0.5
 
@@ -39,6 +40,7 @@ color = clamp(color,black,white);"
 
 [sub_resource type="VisualShaderNodeColorParameter" id="VisualShaderNodeColorParameter_h4uj5"]
 parameter_name = "AmbientColor"
+qualifier = 1
 default_value_enabled = true
 
 [sub_resource type="VisualShaderNodeExpression" id="VisualShaderNodeExpression_pdq2v"]
@@ -50,8 +52,8 @@ code = "shader_type spatial;
 render_mode blend_mul, depth_draw_opaque, cull_front, diffuse_lambert, specular_schlick_ggx, unshaded;
 
 uniform sampler2D Tex_0 : repeat_enable;
-uniform vec4 AmbientColor : source_color = vec4(1.000000, 1.000000, 1.000000, 1.000000);
-uniform float mixBrightness = 0.5;
+global uniform vec4 AmbientColor : source_color = vec4(1.000000, 1.000000, 1.000000, 1.000000);
+global uniform float mixBrightness = 0.5;
 
 
 
@@ -127,7 +129,6 @@ void fragment() {
 
 }
 "
-graph_offset = Vector2(1409.63, -29.3125)
 modes/blend = 3
 modes/cull = 1
 flags/unshaded = true

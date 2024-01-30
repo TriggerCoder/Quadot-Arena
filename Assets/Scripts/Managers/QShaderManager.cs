@@ -318,11 +318,24 @@ public static class QShaderManager
 		code += GSUniforms;
 		code += GSVaryings;
 		code += "global uniform float MsTime;\n";
+		code += "global uniform vec4 AmbientColor: source_color;\n";
+		code += "global uniform float mixBrightness;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
+
 		if (multiPassList == null)
 		{
 			code += "instance uniform float ShadowIntensity : hint_range(0, 1) = 0.0;\n";
 			code += "instance uniform bool ViewModel = false;\n";
+			code += "instance uniform bool UseLightVol = false;\n";
+			code += "global uniform vec3 LightVolNormalize;\n";
+			code += "global uniform vec3 LightVolOffset;\n";
+			code += "global uniform sampler3D LightVolAmbient;\n";
+			code += "global uniform sampler3D LightVolDirectonal;\n";
+			code += "varying vec3 WorldPos;\n\n";
+			code += "vec3 GetTextureCoordinates(vec3 Position)\n";
+			code += "{\n\tPosition -= LightVolOffset;\n";
+			code += "\tvec3 Q3Pos = vec3(Position.x / -LightVolNormalize.x, Position.z / LightVolNormalize.y, Position.y / LightVolNormalize.z);\n";
+			code += "\treturn Q3Pos;\n}\n";
 		}
 		if (helperRotate)
 		{
@@ -336,6 +349,11 @@ public static class QShaderManager
 		//Vertex
 		{
 			code += GSVertexH;
+			if (multiPassList == null)
+			{
+				code += "\tif (UseLightVol)\n";
+				code += "\t\nWorldPos = GetTextureCoordinates((MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz);\n";
+			}
 			code += GetVertex(qShader, (multiPassList == null), forceView);
 			code += GSVertexUvs + "}\n";
 		}
@@ -357,9 +375,9 @@ public static class QShaderManager
 		code += GSFragmentRGBs;
 
 		if (qShader.qShaderGlobal.isSky)
-			code += "\tvec4 ambient = vec4(" + GameManager.ambientLight.R.ToString("0.00") + "," + GameManager.ambientLight.G.ToString("0.00") + "," + GameManager.ambientLight.B.ToString("0.00") + ", 1.0 );\n";
+			code += "\tvec4 ambient = AmbientColor;\n";
 		else if (lightmapStage < 0)
-			code += "\tvec4 ambient = vec4("+ GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.R.ToString("0.00") + ","+ GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.G.ToString("0.00") + ","+ GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.B.ToString("0.00") + ", 1.0 );\n";
+			code += "\tvec4 ambient = AmbientColor * mixBrightness;\n";
 
 		if (lightmapStage >= 0)
 			code += "\tvec4 color = Stage_" + lightmapStage + ";\n";
@@ -382,19 +400,33 @@ public static class QShaderManager
 		code += "\tvec4 white = vec4(1.0, 1.0, 1.0, 1.0);\n";
 		code += GSFragmentBlends;
 
-		if (!qShader.qShaderGlobal.isSky)
-		{
-			code += "\tALBEDO = (color.rgb * vertx_color.rgb);\n";
-			if (lightmapStage >= 0)
-				code += "\tEMISSION = mix((Stage_" + lightmapStage + ".rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n";
-			else
-				code += "\tEMISSION = mix((ambient.rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n";
-		}
-		else
+		if (qShader.qShaderGlobal.isSky)
 		{
 			code += "\tALBEDO = (color.rgb * ambient.rgb);\n";
 			code += "\tEMISSION = ambient.rgb;\n";
 		}
+		else
+		{
+			code += "\tvec3 emission = color.rgb * vertx_color.rgb;\n";
+			if (lightmapStage >= 0)
+				code += "\temission = mix(Stage_" + lightmapStage + ".rgb * color.rgb, color.rgb, mixBrightness);\n";
+			else
+			{
+				if (multiPassList == null)
+				{
+					code += "\tif (UseLightVol)\n";
+					code += "{\n\t\tvec3 dyn = texture(LightVolAmbient,WorldPos).rgb;\n";
+					code += "\t\temission *= mix(dyn, color.rgb , mixBrightness);\n";
+					code += "\t}\n";
+					code += "\telse\n\temission = mix((ambient.rgb * color.rgb), color.rgb, mixBrightness);\n";
+				}
+				else
+					code += "\temission = mix((ambient.rgb * color.rgb), color.rgb, mixBrightness);\n";
+			}
+			code += "\tALBEDO = color.rgb * vertx_color.rgb;\n";
+			code += "\tEMISSION = emission;\n";
+		}
+
 		if (qShader.qShaderGlobal.portal)
 		{
 			hasPortal = true;
@@ -449,17 +481,19 @@ public static class QShaderManager
 		code += "uniform sampler2D Tex_0 : repeat_enable;\n";
 		code += "uniform float Transparency : hint_range(0, 1) = 0.0;\n";
 		code += "global uniform float MsTime;\n";
+		code += "global uniform vec4 AmbientColor: source_color;\n";
+		code += "global uniform float mixBrightness;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
 		code += "const bool ViewModel = false;\n";
 		code += "void vertex()\n{ \n";
 		code += GetVertex(qShader, false, false) + "}\n";
 		code += "void fragment()\n{\n\tvec2 uv_0 = SCREEN_UV;\n\tvec4 Stage_0 = texture(Tex_0, uv_0);\n";
-		code += "\tvec4 ambient = vec4(" + GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.R.ToString("0.00") + "," + GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.G.ToString("0.00") + "," + GameManager.Instance.mixBrightness.ToString("0.00") + " * " + GameManager.ambientLight.B.ToString("0.00") + ", 1.0 );\n";
+		code += "\tvec4 ambient = AmbientColor * mixBrightness;\n";
 		code += "\tvec4 vertx_color = COLOR;\n";
 		code += "\tvec4 color = vec4(0.0, 0.0, 0.0, 0.0);\n";
 		code += "\tcolor = Stage_0;\n";
 		code += "\tALBEDO = (color.rgb * vertx_color.rgb);\n";
-		code += "\tEMISSION = mix((ambient.rgb * color.rgb), color.rgb, " + GameManager.Instance.mixBrightness.ToString("0.00") + ");\n";
+		code += "\tEMISSION = mix((ambient.rgb * color.rgb), color.rgb, mixBrightness);\n";
 		code += "\tALPHA = Transparency;\n";
 		code += "}\n\n";
 		Shader shader = new Shader();
@@ -473,7 +507,9 @@ public static class QShaderManager
 	{
 		string DiffuseLight;
 		DiffuseLight = "\tif (LIGHT_IS_DIRECTIONAL)\n\t{\n";
-		DiffuseLight += "\t\tDIFFUSE_LIGHT += ShadowIntensity * vec3(ATTENUATION - 1.0);\n\t}\n";
+		DiffuseLight += "\t\tfloat mul = 1.0;\n";
+		DiffuseLight += "\t\tif (UseLightVol)\n\t\t\tmul = 0.4;\n";
+		DiffuseLight += "\t\tDIFFUSE_LIGHT += ShadowIntensity * mul * vec3(ATTENUATION - 1.0);\n\t}\n";
 		DiffuseLight += "\telse\n\t\tDIFFUSE_LIGHT += clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION * LIGHT_COLOR;\n";
 
 		return DiffuseLight;

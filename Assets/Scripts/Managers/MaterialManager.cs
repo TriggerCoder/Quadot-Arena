@@ -40,8 +40,6 @@ public partial class MaterialManager : Node
 	public static string shadowProperty = "ShadowIntensity";
 	public static string lightMapProperty = "shader_parameter/LightMap";
 	public static string opaqueTexProperty = "shader_parameter/Tex_0";
-	public static string colorProperty = "shader_parameter/AmbientColor";
-	public static string mixBrightness = "shader_parameter/mixBrightness";
 
 	public static List<string> Decals = new List<string>();
 	public static List<string> FogShaders = new List<string>();
@@ -69,6 +67,12 @@ public partial class MaterialManager : Node
 			GameManager.Print("Decal Texture Name: " + upperName);
 			Decals.Add(upperName);
 		}
+	}
+
+	public static void SetAmbient()
+	{
+		RenderingServer.GlobalShaderParameterSet("AmbientColor", GameManager.Instance.ambientLightColor);
+		RenderingServer.GlobalShaderParameterSet("mixBrightness", GameManager.Instance.mixBrightness);
 	}
 
 	public static void LoadFXShaders()
@@ -169,7 +173,6 @@ public partial class MaterialManager : Node
 				ImageTexture tex = TextureLoader.GetTexture(textureName);
 				mat.Set(opaqueTexProperty, tex);
 				mat.Set(lightMapProperty, lmap);
-				mat.Set(mixBrightness, GameManager.Instance.mixBrightness);
 			}
 			else if (hasPortal)
 				AddPortalMaterial(textureName + lm_index.ToString());
@@ -194,8 +197,6 @@ public partial class MaterialManager : Node
 			ImageTexture tex = TextureLoader.GetTexture(textureName);
 			mat = (ShaderMaterial)Instance.decalsMapMaterial.Duplicate(true);
 			mat.Set(opaqueTexProperty, tex);
-			mat.Set(colorProperty, GameManager.ambientLight);
-			mat.Set(mixBrightness, GameManager.Instance.mixBrightness);
 		}
 		else
 			mat = QShaderManager.GetShadedMaterial(textureName, 0, ref forceSkinAlpha, ref hasPortal);
@@ -208,8 +209,6 @@ public partial class MaterialManager : Node
 				mat = (ShaderMaterial)Instance.defaultMaterial.Duplicate(true);
 			ImageTexture tex = TextureLoader.GetTexture(textureName);
 			mat.Set(opaqueTexProperty, tex);
-			mat.Set(colorProperty, GameManager.ambientLight);
-			mat.Set(mixBrightness, GameManager.Instance.mixBrightness);
 		}
 		else if (hasPortal)
 			AddPortalMaterial(textureName);

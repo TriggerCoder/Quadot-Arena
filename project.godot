@@ -235,3 +235,11 @@ LightVolNormalize={
 "type": "vec3",
 "value": Vector3(0, 0, 0)
 }
+AmbientColor={
+"type": "color",
+"value": Color(0.376471, 0.376471, 0.376471, 1)
+}
+mixBrightness={
+"type": "float",
+"value": 0.25
+}

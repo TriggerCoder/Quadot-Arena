@@ -22,6 +22,8 @@ public partial class GameManager : Node
 	public PlayerViewPort playerViewPort;
 
 	public static GameManager Instance;
+
+	public Color ambientLightColor;
 	// Quake3 also uses Doom and Wolf3d scaling down
 	public const float sizeDividor = 1f / 32f;
 	public const float modelScale = 1f / 64f;
@@ -94,8 +96,6 @@ public partial class GameManager : Node
 	public bool paused = true;
 	public static bool Paused { get { return Instance.paused; } }
 
-	public static Color ambientLight { get { return Instance.ambientLightColor; } }
-
 	private float timeMs = 0.0f;
 	public static float CurrentTimeMsec { get { return Instance.timeMs; } }
 	public float gravity = 25f;					//default 800 * sizeDividor
@@ -106,7 +106,6 @@ public partial class GameManager : Node
 	public float PlayerDamageReceive = 1f;
 	public int PlayerAmmoReceive = 1;
 	private Godot.Environment environment;
-	private Color ambientLightColor;
 
 	public int skipFrames = 5;
 	public Node3D TemporaryObjectsHolder;
@@ -185,6 +184,7 @@ public partial class GameManager : Node
 		PakManager.LoadPK3Files();
 		QShaderManager.ProcessShaders();
 		MaterialManager.LoadFXShaders();
+		MaterialManager.SetAmbient();
 		if (MapLoader.Load(autoloadMap))
 		{
 			ClusterPVSManager.Instance.ResetClusterList();

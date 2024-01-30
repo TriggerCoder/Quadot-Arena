@@ -679,6 +679,7 @@ public static class Mesher
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					if (isViewModel)
 						mesh.SetInstanceShaderParameter("ViewModel", true);
+					mesh.SetInstanceShaderParameter("UseLightVol", true);
 					if (!currentTransparent && receiveShadows)
 					{
 						Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
@@ -806,6 +807,7 @@ public static class Mesher
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 						if (isViewModel)
 							mesh.SetInstanceShaderParameter("ViewModel", true);
+						mesh.SetInstanceShaderParameter("UseLightVol", true);
 						if (receiveShadows)
 						{
 							Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
@@ -918,6 +920,7 @@ public static class Mesher
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					if (isViewModel)
 						mesh.SetInstanceShaderParameter("ViewModel", true);
+					mesh.SetInstanceShaderParameter("UseLightVol", true);
 					if (receiveShadows)
 					{
 						Texture mainText = (Texture2D)skinMaterial.readyMaterials.Get("shader_parameter/Tex_0");
@@ -993,6 +996,7 @@ public static class Mesher
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					if (isViewModel)
 						mesh.SetInstanceShaderParameter("ViewModel", true);
+					mesh.SetInstanceShaderParameter("UseLightVol", true);
 				}
 			}
 		}

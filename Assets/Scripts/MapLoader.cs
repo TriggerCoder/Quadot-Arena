@@ -364,9 +364,6 @@ public static class MapLoader
 		mapMinCoord = QuakeToGodot.Vect3(models[0].bb_Min);
 		mapMaxCoord = QuakeToGodot.Vect3(models[0].bb_Max);
 
-		GameManager.Print("3D Grid Max: X=" + models[0].bb_Max.X + " Y=" + models[0].bb_Max.Y + " Z=" + models[0].bb_Max.Z);
-		GameManager.Print("3D Grid Min: X=" + models[0].bb_Min.X + " Y=" + models[0].bb_Min.Y + " Z=" + models[0].bb_Min.Z);
-
 		// Each surface group is its own object
 		var groups = staticGeometry.GroupBy(x => new { x.type, x.shaderId, x.lightMapID });
 		int groupId = 0;

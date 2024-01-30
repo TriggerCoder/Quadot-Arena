@@ -13,6 +13,7 @@ expression = "color = input0 * input1;"
 
 [sub_resource type="VisualShaderNodeFloatParameter" id="VisualShaderNodeFloatParameter_8bq7o"]
 parameter_name = "mixBrightness"
+qualifier = 1
 default_value_enabled = true
 default_value = 0.5
 
@@ -64,7 +65,7 @@ render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_s
 
 uniform sampler2D Tex_0 : repeat_enable;
 uniform sampler2D LightMap : hint_default_black, repeat_enable;
-uniform float mixBrightness = 0.5;
+global uniform float mixBrightness = 0.5;
 instance uniform float ShadowIntensity : hint_range(0, 1) = 0;
 
 
@@ -154,7 +155,7 @@ void light() {
 
 }
 "
-graph_offset = Vector2(-743, 119)
+graph_offset = Vector2(-785.258, 225.489)
 nodes/vertex/0/position = Vector2(640, 140)
 nodes/fragment/0/position = Vector2(1800, 260)
 nodes/fragment/2/node = SubResource("VisualShaderNodeTexture_hufbw")
