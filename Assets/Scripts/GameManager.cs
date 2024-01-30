@@ -191,6 +191,7 @@ public partial class GameManager : Node
 			MapLoader.GenerateMapCollider();
 			MapLoader.GenerateMapFog();
 			MapLoader.GenerateSurfaces();
+			MapLoader.SetLightVolData();
 			ThingsManager.AddThingsToMap();
 		}
 		currentState = FuncState.Ready;

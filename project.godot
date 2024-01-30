@@ -219,3 +219,19 @@ MsTime={
 "type": "float",
 "value": 0.0
 }
+LightVolOffset={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+LightVolAmbient={
+"type": "sampler3D",
+"value": ""
+}
+LightVolDirectonal={
+"type": "sampler3D",
+"value": ""
+}
+LightVolNormalize={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}

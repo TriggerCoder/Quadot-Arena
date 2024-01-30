@@ -151,8 +151,8 @@ public class QModel
 		this.numSurfaces = numSurfaces;
 		this.firstBrush = firstBrush;
 		this.numBrushes = numBrushes;
-		this.bb_Min = QuakeToGodot.Vect3(bb_Min);
-		this.bb_Max = QuakeToGodot.Vect3(bb_Max);
+		this.bb_Min = bb_Min; //QuakeToGodot.Vect3(bb_Min);
+		this.bb_Max = bb_Max; //QuakeToGodot.Vect3(bb_Max);
 	}
 };
 

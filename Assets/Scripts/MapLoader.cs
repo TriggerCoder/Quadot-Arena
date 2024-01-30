@@ -51,17 +51,14 @@ public static class MapLoader
 	//Don't add decals nor marks to these surfaces
 	public static HashSet<CollisionObject3D> noMarks;
 
-	//Map Data Limits
-	public static int minX = int.MaxValue;
-	public static int maxX = int.MinValue;
-	public static int minY = int.MaxValue;
-	public static int maxY = int.MinValue;
-	public static int minZ = int.MaxValue;
-	public static int maxZ = int.MinValue;
-
 	public static Vector3 mapMinCoord;
 	public static Vector3 mapMaxCoord;
 
+	//Light Vol Data
+	public static Vector3 LightVolNormalize;
+	public static Vector3 LightVolOffset;
+	public static ImageTexture3D LightVolAmbient;
+	public static ImageTexture3D LightVolDirectonal;
 	public static bool Load(string mapName)
 	{
 
@@ -177,8 +174,8 @@ public static class MapLoader
 			GameManager.Print("map geometry " + num);
 			for (int i = 0; i < num; i++)
 			{
-				models.Add(new QModel(new Vector3(BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32()),
-										new Vector3(BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32()),
+				models.Add(new QModel(new Vector3(BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle()),
+										new Vector3(BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle()),
 										BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32(), BSPMap.ReadInt32()));
 			}
 		}
@@ -219,16 +216,7 @@ public static class MapLoader
 													BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle(),
 													new Vector3(BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle()), BSPMap.ReadBytes(4)));
 				Vector3 vertex = verts[i].position;
-				//Set Limits
-				if (vertex.X < minX) minX = Mathf.FloorToInt(vertex.X);
-				if (vertex.X > maxX) maxX = Mathf.CeilToInt(vertex.X);
-				if (vertex.Y < minY) minY = Mathf.FloorToInt(vertex.Y);
-				if (vertex.Y > maxY) maxY = Mathf.CeilToInt(vertex.Y);
-				if (vertex.Z < minZ) minZ = Mathf.FloorToInt(vertex.Z);
-				if (vertex.Z > maxZ) maxZ = Mathf.CeilToInt(vertex.Z);
 			}
-			mapMinCoord = new Vector3(minX, minY, minZ);
-			mapMaxCoord = new Vector3(maxX, maxY, maxZ);
 		}
 
 		//vertex indices
@@ -311,6 +299,12 @@ public static class MapLoader
 			}
 		}
 
+		//Light Vols
+		{
+			BSPMap.BaseStream.Seek(header.Directory[LumpType.LightGrid].Offset, SeekOrigin.Begin);
+			(LightVolAmbient, LightVolDirectonal) = TextureLoader.CreateLightVolTextures(BSPMap.ReadBytes(header.Directory[LumpType.LightGrid].Length), models[0].bb_Min, models[0].bb_Max, ref LightVolNormalize, ref LightVolOffset);
+		}
+
 		//vis data
 		{
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.VisData].Offset, SeekOrigin.Begin);
@@ -366,6 +360,12 @@ public static class MapLoader
 		List<QSurface> staticGeometry = new List<QSurface>();
 		for (int i = 0; i < models[0].numSurfaces; i++)
 			staticGeometry.Add(surfaces[models[0].firstSurface + i]);
+
+		mapMinCoord = QuakeToGodot.Vect3(models[0].bb_Min);
+		mapMaxCoord = QuakeToGodot.Vect3(models[0].bb_Max);
+
+		GameManager.Print("3D Grid Max: X=" + models[0].bb_Max.X + " Y=" + models[0].bb_Max.Y + " Z=" + models[0].bb_Max.Z);
+		GameManager.Print("3D Grid Min: X=" + models[0].bb_Min.X + " Y=" + models[0].bb_Min.Y + " Z=" + models[0].bb_Min.Z);
 
 		// Each surface group is its own object
 		var groups = staticGeometry.GroupBy(x => new { x.type, x.shaderId, x.lightMapID });
@@ -426,7 +426,15 @@ public static class MapLoader
 		}
 	}
 
-	public static void LerpColorOnRepeatedVertex()
+	public static void SetLightVolData()
+	{
+		RenderingServer.GlobalShaderParameterSet("LightVolNormalize", LightVolNormalize);
+		RenderingServer.GlobalShaderParameterSet("LightVolOffset", LightVolOffset);
+		RenderingServer.GlobalShaderParameterSet("LightVolAmbient", LightVolAmbient);
+		RenderingServer.GlobalShaderParameterSet("LightVolDirectonal", LightVolDirectonal);
+	}
+
+public static void LerpColorOnRepeatedVertex()
 	{
 		// We are only looking for bezier type
 		var groupsurfaces = surfaces.Where(s => s.type == QSurfaceType.Patch);

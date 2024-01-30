@@ -308,6 +308,68 @@ public static class TextureLoader
 		return tex;
 	}
 
+	public static (ImageTexture3D, ImageTexture3D) CreateLightVolTextures(byte[] data, Vector3 mapMinCoord, Vector3 mapMaxCoord, ref Vector3 Normalize, ref Vector3 OffSet)
+	{
+		int num = data.Length / 8;
+		if (num == 0)
+		{
+			Normalize = Vector3.Zero;
+			OffSet = Vector3.Zero;
+			return (null, null);
+		}
+		
+		Color ambient, directional;
+		GameManager.Print("3D LightVol " + num);
+		Vector3I Size = new Vector3I((int)(Mathf.Floor(mapMaxCoord.X / 64) - Mathf.Ceil(mapMinCoord.X / 64) + 1),(int)(Mathf.Floor(mapMaxCoord.Y / 64) - Mathf.Ceil(mapMinCoord.Y / 64) + 1),(int)(Mathf.Floor(mapMaxCoord.Z / 128) - Mathf.Ceil(mapMinCoord.Z / 128) + 1));
+		OffSet = mapMinCoord;
+		Godot.Collections.Array<Image> AmbientImage = new Godot.Collections.Array<Image>();
+		Godot.Collections.Array<Image> DirectionalImage = new Godot.Collections.Array<Image>();
+
+		int k = 0;
+		int index;
+		byte[] dataAmbient = new byte[Size.X * Size.Y * 4];
+		byte[] dataDirectional = new byte[Size.X * Size.Y * 4];
+		for (int z = 0; z < Size.Z; z++)
+		{
+			Image Ambient = new Image();
+			Image Directional = new Image();
+			index = 0;
+			for (int y = 0; y < Size.Y; y++)
+			{
+				for (int x = 0; x < Size.X; x++)
+				{
+					ambient = ChangeColorLighting(data[k++], data[k++], data[k++]);
+					directional = ChangeColorLighting(data[k++], data[k++], data[k++]);
+
+					dataAmbient[index] = (byte)ambient.R8;
+					dataDirectional[index++] = (byte)directional.R8;
+
+					dataAmbient[index] = (byte)ambient.G8;
+					dataDirectional[index++] = (byte)directional.G8;
+
+					dataAmbient[index] = (byte)ambient.B8;
+					dataDirectional[index++] = (byte)directional.B8;
+
+					dataAmbient[index] = data[k++]; //phi
+					dataDirectional[index++] = data[k++]; // theta
+				}
+			}
+			Ambient.SetData(Size.X, Size.Y, false, Format.Rgba8, dataAmbient);
+			Directional.SetData(Size.X, Size.Y, false, Format.Rgba8, dataDirectional);
+
+			AmbientImage.Add(Ambient);
+			DirectionalImage.Add(Directional);
+		}
+		ImageTexture3D AmbientTex = new ImageTexture3D();
+		ImageTexture3D DirectionalTex = new ImageTexture3D();
+		AmbientTex.Create(Format.Rgba8, Size.X, Size.Y, Size.Z, false, AmbientImage);
+		DirectionalTex.Create(Format.Rgba8, Size.X, Size.Y, Size.Z, false, DirectionalImage);
+		GameManager.Print("3D Grid N: X=" + Size.X + " Y=" + Size.Y + " Z=" + Size.Z);
+		Normalize = new Vector3(Size.X * 64, Size.Y * 64, Size.Z * 128);
+		return (AmbientTex, DirectionalTex);
+	}
+
+
 	public static Color ChangeColorLighting(byte r, byte g, byte b)
 	{
 		float scale = 1.0f, temp;
