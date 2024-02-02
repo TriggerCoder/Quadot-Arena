@@ -20,6 +20,7 @@ expression = "color = input0 * input1;"
 
 [sub_resource type="VisualShaderNodeColorParameter" id="VisualShaderNodeColorParameter_h4uj5"]
 parameter_name = "AmbientColor"
+qualifier = 1
 default_value_enabled = true
 
 [sub_resource type="VisualShaderNodeExpression" id="VisualShaderNodeExpression_pdq2v"]
@@ -31,7 +32,7 @@ code = "shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_disabled, diffuse_lambert, specular_schlick_ggx;
 
 uniform sampler2D Tex_0 : repeat_enable;
-uniform vec4 AmbientColor : source_color = vec4(1.000000, 1.000000, 1.000000, 1.000000);
+global uniform vec4 AmbientColor : source_color = vec4(1.000000, 1.000000, 1.000000, 1.000000);
 
 
 
@@ -78,6 +79,7 @@ void fragment() {
 
 }
 "
+graph_offset = Vector2(420.512, 140.997)
 modes/cull = 2
 nodes/vertex/0/position = Vector2(640, 140)
 nodes/fragment/0/position = Vector2(1780, 140)

@@ -331,7 +331,9 @@ public static class QShaderManager
 			code += "global uniform vec3 LightVolOffset;\n";
 			code += "global uniform sampler3D LightVolAmbient;\n";
 			code += "global uniform sampler3D LightVolDirectonal;\n";
-			code += "varying vec3 WorldPos;\n\n";
+			code += "varying vec3 ambientColor;\n";
+			code += "varying vec3 dirColor;\n";
+			code += "varying vec3 dirVector;\n\n";
 			code += "vec3 GetTextureCoordinates(vec3 Position)\n";
 			code += "{\n\tPosition -= LightVolOffset;\n";
 			code += "\tvec3 Q3Pos = vec3(Position.x / -LightVolNormalize.x, Position.z / LightVolNormalize.y, Position.y / LightVolNormalize.z);\n";
@@ -351,8 +353,14 @@ public static class QShaderManager
 			code += GSVertexH;
 			if (multiPassList == null)
 			{
-				code += "\tif (UseLightVol)\n";
-				code += "\t\nWorldPos = GetTextureCoordinates((MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz);\n";
+				code += "\tvec3 WorldPos = GetTextureCoordinates((MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz);\n";
+				code += "\tvec4 ambient = texture(LightVolAmbient, WorldPos);\n";
+				code += "\tvec4 dir = texture(LightVolDirectonal, WorldPos);\n";
+				code += "\tambientColor = ambient.rgb;\n";
+				code += "\tdirColor = dir.rgb;\n";
+				code += "\tfloat lng = ambient.a * (PI) / 128.0f;\n";
+				code += "\tfloat lat = dir.a * (PI) / 128.0f;\n";
+				code += "\tdirVector = vec3(-cos(lat) * sin(lng), cos(lng), sin(lat) * sin(lng));\n";
 			}
 			code += GetVertex(qShader, (multiPassList == null), forceView);
 			code += GSVertexUvs + "}\n";
@@ -375,9 +383,9 @@ public static class QShaderManager
 		code += GSFragmentRGBs;
 
 		if (qShader.qShaderGlobal.isSky)
-			code += "\tvec4 ambient = AmbientColor;\n";
+			code += "\tvec3 ambient = AmbientColor.rgb;\n";
 		else if (lightmapStage < 0)
-			code += "\tvec4 ambient = AmbientColor * mixBrightness;\n";
+			code += "\tvec3 ambient = AmbientColor.rgb * mixBrightness;\n";
 
 		if (lightmapStage >= 0)
 			code += "\tvec4 color = Stage_" + lightmapStage + ";\n";
@@ -402,28 +410,27 @@ public static class QShaderManager
 
 		if (qShader.qShaderGlobal.isSky)
 		{
-			code += "\tALBEDO = (color.rgb * ambient.rgb);\n";
-			code += "\tEMISSION = ambient.rgb;\n";
+			code += "\tALBEDO = (color.rgb * ambient);\n";
+			code += "\tEMISSION = ambient;\n";
 		}
 		else
 		{
-			code += "\tvec3 emission = color.rgb * vertx_color.rgb;\n";
+			code += "\tvec3 albedo = color.rgb * vertx_color.rgb;\n";
+			code += "\tvec3 emission = color.rgb;\n";
 			if (lightmapStage >= 0)
 				code += "\temission = mix(Stage_" + lightmapStage + ".rgb * color.rgb, color.rgb, mixBrightness);\n";
 			else
 			{
+				code += "\tvec3 defaultEmission = mix(emission * ambient, emission, mixBrightness);\n";
 				if (multiPassList == null)
 				{
-					code += "\tif (UseLightVol)\n";
-					code += "{\n\t\tvec3 dyn = texture(LightVolAmbient,WorldPos).rgb;\n";
-					code += "\t\temission *= mix(dyn, color.rgb , mixBrightness);\n";
-					code += "\t}\n";
-					code += "\telse\n\temission = mix((ambient.rgb * color.rgb), color.rgb, mixBrightness);\n";
+					code += "\tvec3 useLightVolEmission = emission * mix(ambientColor, emission, mixBrightness);\n";
+					code += "\temission = mix(defaultEmission, useLightVolEmission, float(UseLightVol));\n";
 				}
 				else
-					code += "\temission = mix((ambient.rgb * color.rgb), color.rgb, mixBrightness);\n";
+					code += "\temission = defaultEmission;\n";
 			}
-			code += "\tALBEDO = color.rgb * vertx_color.rgb;\n";
+			code += "\tALBEDO = albedo;\n";
 			code += "\tEMISSION = emission;\n";
 		}
 
@@ -506,11 +513,13 @@ public static class QShaderManager
 	public static string GetDiffuseLightning()
 	{
 		string DiffuseLight;
-		DiffuseLight = "\tif (LIGHT_IS_DIRECTIONAL)\n\t{\n";
-		DiffuseLight += "\t\tfloat mul = 1.0;\n";
-		DiffuseLight += "\t\tif (UseLightVol)\n\t\t\tmul = 0.4;\n";
-		DiffuseLight += "\t\tDIFFUSE_LIGHT += ShadowIntensity * mul * vec3(ATTENUATION - 1.0);\n\t}\n";
-		DiffuseLight += "\telse\n\t\tDIFFUSE_LIGHT += clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION * LIGHT_COLOR;\n";
+
+		DiffuseLight = "\tfloat isLightDir = float(LIGHT_IS_DIRECTIONAL);\n";
+		DiffuseLight += "\tfloat useLightVol = float(UseLightVol);\n";
+		DiffuseLight += "\tfloat mul = mix(1.0, 0.4, useLightVol);\n";
+		DiffuseLight += "\tDIFFUSE_LIGHT += ShadowIntensity * mul * vec3(ATTENUATION - 1.0) * isLightDir;\n";
+		DiffuseLight += "\tDIFFUSE_LIGHT += clamp(dot(NORMAL, dirVector), 0.0, 1.0) * dirColor * isLightDir * useLightVol;\n";
+		DiffuseLight += "\tDIFFUSE_LIGHT += clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION * LIGHT_COLOR * (1.0 - isLightDir);\n";
 
 		return DiffuseLight;
 	}
@@ -544,12 +553,9 @@ public static class QShaderManager
 		{
 			Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);\n";
 			if (forceView)
-				Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
+				Vertex += "\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
 			else if (useView)
-			{
-				Vertex += "\tif (ViewModel)\n";
-				Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
-			}
+				Vertex += "\tPOSITION.z = mix(POSITION.z, mix(POSITION.z, 0, 0.999), float(ViewModel));\n";
 			return Vertex;
 		}
 
@@ -646,10 +652,7 @@ public static class QShaderManager
 		if (forceView)
 			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
 		else if (useView)
-		{
-			Vertex += "\tif (ViewModel)\n";
-			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
-		}
+			Vertex += "\tPOSITION.z = mix(POSITION.z, mix(POSITION.z, 0, 0.999), float(ViewModel));\n";
 		return Vertex;
 	}
 	public static string GetUVGen(QShaderData qShader, int currentStage, ref string GSVaryings)

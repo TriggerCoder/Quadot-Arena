@@ -12,7 +12,9 @@ global uniform vec3 LightVolOffset;
 global uniform sampler3D LightVolAmbient;
 global uniform sampler3D LightVolDirectonal;
 
-varying vec3 WorldPos;
+varying vec3 ambientColor;
+varying vec3 dirColor;
+varying vec3 dirVector;
 
 vec3 GetTextureCoordinates(vec3 Position)
 {
@@ -23,12 +25,16 @@ vec3 GetTextureCoordinates(vec3 Position)
 
 void vertex()
 {
-	if (UseLightVol)
-		WorldPos = GetTextureCoordinates((MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz);
-	 
+	vec3 WorldPos = GetTextureCoordinates((MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz);
+	vec4 ambient = texture(LightVolAmbient,WorldPos);
+	vec4 dir = texture(LightVolDirectonal,WorldPos);
+	ambientColor = ambient.rgb;
+	dirColor = dir.rgb;
+	float lng = ambient.a * (PI) / 128.0f;
+	float lat = dir.a * (PI) / 128.0f;
+	dirVector = vec3(- cos(lat) * sin(lng), cos(lng), sin(lat) * sin(lng));
 	POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);
-	if (ViewModel)
-		POSITION.z = mix(POSITION.z, 0, 0.999);
+	POSITION.z = mix(POSITION.z, mix(POSITION.z, 0, 0.999), float(ViewModel));
 }
 
 
@@ -38,26 +44,22 @@ void fragment()
 	vec4 Stage_0 = texture(Tex_0, uv_0);
 	vec4 vertx_color = COLOR;
 	vec4 color = Stage_0;
-	vec4 ambient = AmbientColor * mixBrightness;
-	vec3 emission = color.rgb * vertx_color.rgb;
-	if (UseLightVol)
-	{
-		vec3 dyn = texture(LightVolAmbient,WorldPos).rgb;
-		emission *= mix(dyn, color.rgb , mixBrightness);
-	}
-	else
-		emission *= mix(ambient.rgb, color.rgb , mixBrightness);
+	vec3 albedo = color.rgb * vertx_color.rgb;
+	vec3 emission = color.rgb;
+	vec3 ambient = AmbientColor.rgb * mixBrightness;
 	
-	ALBEDO = color.rgb * vertx_color.rgb;
+	vec3 useLightVolEmission = emission * mix(ambientColor, emission, mixBrightness);
+	vec3 defaultEmission = mix(albedo * ambient, albedo , mixBrightness);
+	emission = mix(defaultEmission, useLightVolEmission, float(UseLightVol));
+
+	ALBEDO = albedo;
 	EMISSION = emission;
 }
 
 void light()
 {
-	if (LIGHT_IS_DIRECTIONAL)
-	{
-		DIFFUSE_LIGHT += ShadowIntensity * 0.4 * vec3(ATTENUATION - 1.0);
-	}
-	else
-		DIFFUSE_LIGHT += clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION * LIGHT_COLOR;
+	float isLightDir = float(LIGHT_IS_DIRECTIONAL);
+	DIFFUSE_LIGHT += ShadowIntensity * 0.4 * vec3(ATTENUATION - 1.0) * isLightDir;
+	DIFFUSE_LIGHT += clamp(dot(NORMAL, dirVector), 0.0, 1.0) * dirColor * isLightDir * float(UseLightVol);
+	DIFFUSE_LIGHT += clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION * LIGHT_COLOR * (1.0 - isLightDir);
 }
