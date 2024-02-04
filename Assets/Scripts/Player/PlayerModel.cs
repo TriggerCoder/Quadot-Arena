@@ -163,6 +163,7 @@ public partial class PlayerModel : Node3D
 	{
 		FxLight = new OmniLight3D();
 		FxLight.Visible = false;
+		FxLight.LightCullMask = GameManager.AllPlayerViewMask;
 		FxLight.Layers = GameManager.AllPlayerViewMask;
 		AddChild(FxLight);
 		FxLight.Position = Vector3.Up;

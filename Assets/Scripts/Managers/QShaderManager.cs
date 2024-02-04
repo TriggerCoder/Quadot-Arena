@@ -152,16 +152,31 @@ public static class QShaderManager
 				{
 					int index;
 					if (TexIndex.TryGetValue(qShaderStage.map[0], out index))
-						GSFragmentTexs += "\tvec4 Stage_" + currentStage + " = texture(" + "Tex_" + index + ", uv_" + currentStage + ");\n";
+					{
+						if (qShaderStage.isLightmap)
+							GSFragmentTexs += "\tvec4 Stage_" + currentStage + " = texture(" + "LightMap, uv_" + currentStage + ");\n";
+						else
+							GSFragmentTexs += "\tvec4 Stage_" + currentStage + " = texture(" + "Tex_" + index + ", uv_" + currentStage + ");\n";
+					}
 					else
 					{
 						index = textures.Count;
-						GSUniforms += "uniform sampler2D " + "Tex_" + index;
+						if (qShaderStage.isLightmap)
+						{
+							GSUniforms += "uniform sampler2D " + "LightMap";
+							GSFragmentTexs += "\tvec4 Stage_" + currentStage + " = texture(" + "LightMap, uv_" + currentStage + ");\n";
+						}
+						else
+						{
+							GSUniforms += "uniform sampler2D " + "Tex_" + index;
+							GSFragmentTexs += "\tvec4 Stage_" + currentStage + " = texture(" + "Tex_" + index + ", uv_" + currentStage + ");\n";
+						}
+
 						if (qShaderStage.clamp)
 							GSUniforms += " : repeat_disable;\n";
 						else
 							GSUniforms += " : repeat_enable;\n";
-						GSFragmentTexs += "\tvec4 Stage_" + currentStage + " = texture(" + "Tex_" + index + ", uv_" + currentStage + ");\n";
+
 						TexIndex.Add(qShaderStage.map[0], index);
 						textures.Add(qShaderStage.map[0]);
 					}
@@ -446,7 +461,7 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (shaderName.Contains("PORTAL_SFX"))
+		if (shaderName.Contains("MAIN_Q3ABANNER"))
 			GameManager.Print(code);
 
 		Shader shader = new Shader();
@@ -457,10 +472,15 @@ public static class QShaderManager
 		for (int i = 0; i < textures.Count; i++)
 		{
 			if (textures[i].Contains("$LIGHTMAP"))
+			{
 				tex = MapLoader.lightMaps[lm_index];
+				shaderMaterial.SetShaderParameter("LightMap", tex);
+			}
 			else
+			{
 				tex = TextureLoader.GetTextureOrAddTexture(textures[i], alphaIsTransparent);
-			shaderMaterial.SetShaderParameter("Tex_" + i, tex);
+				shaderMaterial.SetShaderParameter("Tex_" + i, tex);
+			}
 		}
 
 		if (hasPortal)
@@ -537,9 +557,8 @@ public static class QShaderManager
 				break;
 				case BaseMaterial3D.BillboardModeEnum.FixedY:
 					Vertex = "\tivec2 tex_size = textureSize(Tex_0, 0);\n";
-					Vertex += "\tif(tex_size.x > tex_size.y)\n";
-					Vertex += "\t\ttex_size = ivec2(0,1);\n\telse\n";
-					Vertex += "\t\ttex_size = ivec2(1,0);\n";
+					Vertex += "\tint isXLarger = int((tex_size.x - tex_size.y) > 0);\n";
+					Vertex += "\ttex_size = ivec2(1,0) * (1 - isXLarger) + ivec2(0,1) * isXLarger;\n";
 					Vertex += "\tvec3 local_up = MODEL_MATRIX[tex_size.x].xyz;\n";
 					Vertex += "\tvec4 ax = vec4(normalize(cross(local_up, INV_VIEW_MATRIX[2].xyz)), 0.0);\n";
 					Vertex += "\tvec4 ay = vec4(local_up.xyz, 0.0);\n";
@@ -691,7 +710,7 @@ public static class QShaderManager
 			}
 			else if (qShader.qShaderStages[currentStage].map != null)
 			{
-				if (qShader.qShaderStages[currentStage].map[0].Contains("$LIGHTMAP"))
+				if (qShader.qShaderStages[currentStage].isLightmap)
 				{
 					lightmapStage = currentStage;
 					TcGen = "\tvec2 uv_" + currentStage + " = UV2;\n";
@@ -1429,6 +1448,7 @@ public class QShaderStage
 {
 	public string[] map = null;
 	public bool clamp = false;
+	public bool isLightmap = false;
 	public float animFreq = 0;
 	public string[] blendFunc = null;
 	public string[] rgbGen = null;
@@ -1446,6 +1466,8 @@ public class QShaderStage
 		{
 			case "MAP":
 				map = new string[1] { Value.StripExtension() };
+				if (map[0].Contains("$LIGHTMAP"))
+					isLightmap = true;
 			break;
 			case "CLAMPMAP":
 				clamp = true;

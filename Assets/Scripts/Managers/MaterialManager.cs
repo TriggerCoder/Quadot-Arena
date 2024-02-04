@@ -150,43 +150,31 @@ public partial class MaterialManager : Node
 	public static ShaderMaterial GetMaterials(string textureName, int lm_index , ref bool forceSkinAlpha, ref bool hasPortal, bool forceView = false)
 	{
 		ShaderMaterial mat;
+		ImageTexture lmap = null;
 
 		// Lightmapping is on, so calc the lightmaps
 		if (lm_index >= 0 && Instance.applyLightmaps)
-		{
-			if (Materials.ContainsKey(textureName + lm_index.ToString()))
-			{
-				if (hasPortal = IsPortalMaterial(textureName + lm_index.ToString()))
-					return (ShaderMaterial)Materials[textureName + lm_index.ToString()].Duplicate(true);
-				return Materials[textureName + lm_index.ToString()];
-			}
-			bool useTransparent = false;
-			mat = QShaderManager.GetShadedMaterial(textureName, lm_index, ref useTransparent, ref hasPortal);
-			if (mat == null)
-			{
-				// Lightmapping
-				ImageTexture lmap = MapLoader.lightMaps[lm_index];
-				if (forceSkinAlpha)
-					mat = (ShaderMaterial)Instance.defaultTransparentLightMapMaterial.Duplicate(true);
-				else
-					mat = (ShaderMaterial)Instance.defaultLightMapMaterial.Duplicate(true);
-				ImageTexture tex = TextureLoader.GetTexture(textureName);
-				mat.Set(opaqueTexProperty, tex);
-				mat.Set(lightMapProperty, lmap);
-			}
-			else if (hasPortal)
-				AddPortalMaterial(textureName + lm_index.ToString());
-
-			forceSkinAlpha = useTransparent;
-			Materials.Add(textureName + lm_index.ToString(), mat);
-			return mat;
-		}
+			lmap = MapLoader.lightMaps[lm_index];
 
 		if (Materials.ContainsKey(textureName))
 		{
 			if (hasPortal = IsPortalMaterial(textureName))
-				return (ShaderMaterial)Materials[textureName].Duplicate(true);
-			return Materials[textureName];
+			{
+				mat = (ShaderMaterial)Materials[textureName].Duplicate(true);
+				if (lm_index >= 0 && Instance.applyLightmaps)
+					mat.Set(lightMapProperty, lmap);
+				return mat;
+			}
+
+			if (lm_index >= 0 && Instance.applyLightmaps)
+			{
+				mat = (ShaderMaterial)Materials[textureName].Duplicate(true);
+				mat.Set(lightMapProperty, lmap);
+			}
+			else
+				mat = Materials[textureName];
+
+			return mat;
 		}
 
 		if (Decals.Contains(textureName))
@@ -199,19 +187,37 @@ public partial class MaterialManager : Node
 			mat.Set(opaqueTexProperty, tex);
 		}
 		else
-			mat = QShaderManager.GetShadedMaterial(textureName, 0, ref forceSkinAlpha, ref hasPortal);
+			mat = QShaderManager.GetShadedMaterial(textureName, lm_index, ref forceSkinAlpha, ref hasPortal);
 		if (mat == null)
 		{
-			// Lightmapping is off, so don't.
-			if (forceSkinAlpha)
-				mat = (ShaderMaterial)Instance.defaultTransparentMaterial.Duplicate(true);
+			if (lm_index >= 0 && Instance.applyLightmaps)
+			{
+				if (forceSkinAlpha)
+					mat = (ShaderMaterial)Instance.defaultTransparentLightMapMaterial.Duplicate(true);
+				else
+					mat = (ShaderMaterial)Instance.defaultLightMapMaterial.Duplicate(true);
+				mat.Set(lightMapProperty, lmap);
+			}
 			else
-				mat = (ShaderMaterial)Instance.defaultMaterial.Duplicate(true);
+			{
+				if (forceSkinAlpha)
+					mat = (ShaderMaterial)Instance.defaultTransparentMaterial.Duplicate(true);
+				else
+					mat = (ShaderMaterial)Instance.defaultMaterial.Duplicate(true);
+			}
+
 			ImageTexture tex = TextureLoader.GetTexture(textureName);
 			mat.Set(opaqueTexProperty, tex);
 		}
 		else if (hasPortal)
+		{
 			AddPortalMaterial(textureName);
+			if (lm_index >= 0 && Instance.applyLightmaps)
+				mat.Set(lightMapProperty, lmap);
+		}
+		else if (lm_index >= 0 && Instance.applyLightmaps)
+			mat.Set(lightMapProperty, lmap);
+
 		Materials.Add(textureName, mat);
 		return mat;
 	}
