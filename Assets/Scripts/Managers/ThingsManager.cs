@@ -687,15 +687,15 @@ public partial class ThingsManager : Node
 				//Portal Surface
 				case "misc_portal_surface":
 				{
+					PortalSurface portalSurface = new PortalSurface();
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(portalSurface);
+					portalSurface.GlobalPosition = entity.origin;
 					if (entity.entityData.TryGetValue("target", out strWord))
 					{
-						PortalSurface portalSurface = new PortalSurface();
-						GameManager.Instance.TemporaryObjectsHolder.AddChild(portalSurface);
-						portalSurface.GlobalPosition = entity.origin;
 						portalSurface.targetName = strWord;
-						portalSurfaces.Add(portalSurface);
 						GameManager.Print("TargetName " + strWord);
 					}
+					portalSurfaces.Add(portalSurface);
 				}
 				break;
 				//Remove PowerUps
@@ -901,7 +901,31 @@ public partial class ThingsManager : Node
 			Portal portal = null;
 			float closestPortal = 0;
 			Camera3D camera;
-			if (portalCameras.TryGetValue(portalSurface.targetName, out camera))
+			if (string.IsNullOrEmpty(portalSurface.targetName))
+			{
+				GameManager.Print("Found Mirror");
+				Node3D mirror = new Node3D();
+				mirror.Name = "Mirror";
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(mirror);
+				camera = new Camera3D();
+				mirror.AddChild(camera);
+				camera.Fov = 75;
+				camera.CullMask = GameManager.AllPlayerViewMask;
+				for (int i = 0; i < portalsOnMap.Count; i++)
+				{
+					float distance = (portalsOnMap[i].position - portalSurface.GlobalPosition).LengthSquared();
+					if ((portal == null) || (distance < closestPortal))
+					{
+						portal = portalsOnMap[i];
+						closestPortal = distance;
+					}
+				}
+				if (portal != null)
+					portalSurface.SetUpPortal(camera, portal, true);
+				else
+					portalSurface.QueueFree();
+			}
+			else if (portalCameras.TryGetValue(portalSurface.targetName, out camera))
 			{
 				GameManager.Print("Found Portal Camera " + camera.Name);
 				for (int i = 0; i < portalsOnMap.Count; i++)

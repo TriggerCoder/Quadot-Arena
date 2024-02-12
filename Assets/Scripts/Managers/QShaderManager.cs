@@ -102,8 +102,11 @@ public static class QShaderManager
 		bool helperRotate = false;
 		bool animStages = false;
 		bool depthWrite = false;
+
+		//Needed for Mutipass
 		int needMultiPass = 0;
 		bool forceAlpha = alphaIsTransparent;
+		QShaderGlobal.SortType sortType = qShader.qShaderGlobal.sort;
 		int totalStages;
 
 		if (multiPassList == null)
@@ -206,9 +209,9 @@ public static class QShaderManager
 			List<int> matPass = new List<int>();
 			for (int i = 0; i < needMultiPass; i++)
 				matPass.Add(i);
-			if (lightmapStage >= 0)
-				if (!matPass.Contains(lightmapStage))
-					matPass.Add(lightmapStage);
+//			if (lightmapStage >= 0)
+//				if (!matPass.Contains(lightmapStage))
+//					matPass.Add(lightmapStage);
 			bool baseAlpha = forceAlpha;
 			ShaderMaterial passZeroMaterial = GetShadedMaterial(shaderName, lm_index, ref baseAlpha, ref hasPortal, matPass);
 
@@ -219,11 +222,12 @@ public static class QShaderManager
 				if (!matPass.Contains(lightmapStage))
 					matPass.Add(lightmapStage);
 
+			qShader.qShaderGlobal.sort = sortType;
 			ShaderMaterial passOneMaterial = GetShadedMaterial(shaderName, lm_index, ref forceAlpha, ref hasPortal, matPass);
 //			passZeroMaterial.RenderPriority = -1;
 //			passOneMaterial.RenderPriority = 0;
 			passZeroMaterial.NextPass = passOneMaterial;
-			alphaIsTransparent |= forceAlpha | baseAlpha;
+			alphaIsTransparent = forceAlpha | baseAlpha;
 
 			return passZeroMaterial;
 		}
@@ -461,7 +465,7 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (shaderName.Contains("MAIN_Q3ABANNER"))
+		if (shaderName.Contains("MIRROR2"))
 			GameManager.Print(code);
 
 		Shader shader = new Shader();
