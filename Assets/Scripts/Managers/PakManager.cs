@@ -14,7 +14,7 @@ public static class PakManager
 		string path = Directory.GetCurrentDirectory()+"/StreamingAssets/";
 		GameManager.Print("Open Directory " + path);
 		DirectoryInfo dir = new DirectoryInfo(path);
-		var info = dir.GetFiles("*.PK3").OrderBy(file => Regex.Replace(file.Name, @"\d+", match => match.Value.PadLeft(4, '0')));
+		var info = dir.GetFiles("*.pk3").OrderBy(file => Regex.Replace(file.Name, @"\d+", match => match.Value.PadLeft(4, '0')));
 		foreach (FileInfo zipfile in info)
 		{
 			string FileName = path + zipfile.Name;

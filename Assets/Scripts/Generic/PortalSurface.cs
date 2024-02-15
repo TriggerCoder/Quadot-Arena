@@ -16,27 +16,22 @@ public partial class PortalSurface : Area3D
 		BodyEntered += OnBodyEntered;
 		BodyExited += OnBodyExit;
 		radiusSquared = radius * radius;
+		RenderingServer.FramePreDraw += () => OnPreRender();
 	}
 
-	public override void _Process(double delta)
+	public void OnPreRender()
 	{
 		for (int i = 0; i < currentPlayers.Count; i++) 
 		{
 			Camera3D playerCamera = currentPlayers[i].playerInfo.playerCamera.CurrentCamera;
 			ClusterPVSManager.CheckPVS(currentPlayers[i].playerInfo.viewLayer, destCamera.GlobalPosition);
 			Basis globalBasis = playerCamera.GlobalTransform.Basis;
-
 			if (mirror)
 			{
-//				Vector3 forward = -globalBasis.Z;
-//				Vector3 reflection = destPortal.normal * 2 * (forward.Dot(destPortal.normal)) - forward;
-				if (!currentPlayers[i].playerInfo.playerCamera.currentThirdPerson)
-				{
-					Vector3 globalPosition = destCamera.GlobalPosition;
-					globalPosition.Y = playerCamera.GlobalPosition.Y;
-					destCamera.GlobalPosition = globalPosition;
-				}
-//				globalBasis = Transform3D.Identity.LookingAt(reflection, Vector3.Down).Basis;
+				Vector3 forward = GlobalPosition - playerCamera.GlobalPosition;
+				Vector3 reflection = destPortal.normal * 2 * (forward.Dot(destPortal.normal)) - forward;
+				destCamera.GlobalPosition = GlobalPosition + reflection;
+				destCamera.Near = reflection.Length() - .25f;
 			}
 			else
 			{
