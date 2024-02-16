@@ -346,6 +346,8 @@ public static class Mesher
 				normals += normalsCache[i];
 
 			portal.normal = normals.Normalized();
+			portal.mesh = mesh;
+			portal.size = box.Size;
 			ThingsManager.AddPortalToMap(portal);
 			mesh.Layers = GameManager.AllPlayerViewMask;
 		}

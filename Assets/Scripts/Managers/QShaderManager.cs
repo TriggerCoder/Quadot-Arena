@@ -511,14 +511,16 @@ public static class QShaderManager
 		string code = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, depth_draw_always, blend_mix, cull_back;\n\n";
 		code += "uniform sampler2D Tex_0 : repeat_enable;\n";
 		code += "uniform float Transparency : hint_range(0, 1) = 0.0;\n";
+		code += "uniform float Mirror : hint_range(0, 1) = 0.0;\n";
 		code += "global uniform float MsTime;\n";
 		code += "global uniform vec4 AmbientColor: source_color;\n";
 		code += "global uniform float mixBrightness;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
 		code += "const bool ViewModel = false;\n";
-		code += "void vertex()\n{ \n";
+		code += "void vertex()\n{\n";
+		code += "\tUV.x = mix(UV.x, 1.0 - UV.x, Mirror)\n;";
 		code += GetVertex(qShader, false, false) + "}\n";
-		code += "void fragment()\n{\n\tvec2 uv_0 = SCREEN_UV;\n\tvec4 Stage_0 = texture(Tex_0, uv_0);\n";
+		code += "void fragment()\n{\n\tvec2 uv_0 = mix(SCREEN_UV, UV, Mirror);\n\tvec4 Stage_0 = texture(Tex_0, uv_0);\n";
 		code += "\tvec4 ambient = AmbientColor * mixBrightness;\n";
 		code += "\tvec4 vertx_color = COLOR;\n";
 		code += "\tvec4 color = vec4(0.0, 0.0, 0.0, 0.0);\n";

@@ -909,7 +909,7 @@ public partial class ThingsManager : Node
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(mirror);
 				camera = new Camera3D();
 				mirror.AddChild(camera);
-				camera.Fov = 75;
+				camera.Projection = Camera3D.ProjectionType.Frustum;
 				camera.CullMask = GameManager.AllPlayerViewMask;
 				for (int i = 0; i < portalsOnMap.Count; i++)
 				{
@@ -1017,6 +1017,9 @@ public class Portal
 {
 	public Vector3 position;
 	public Vector3 normal;
+	public Vector3 size;
+	public MeshInstance3D mesh;
+
 	public ShaderMaterial material;
 	public Portal(ShaderMaterial material)
 	{
