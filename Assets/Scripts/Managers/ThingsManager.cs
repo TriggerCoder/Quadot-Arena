@@ -1015,15 +1015,18 @@ public class RespawnItem
 }
 public class Portal
 {
+	public string shaderName;
 	public Vector3 position;
 	public Vector3 normal;
-	public Vector3 size;
-	public MeshInstance3D mesh;
+	public ArrayMesh arrMesh;
 
+	public ShaderMaterial baseMat;
 	public ShaderMaterial material;
-	public Portal(ShaderMaterial material)
+	public Portal(string shaderName, ShaderMaterial baseMat)
 	{
-		this.material = (ShaderMaterial)material.NextPass;
+		this.shaderName = shaderName;
+		this.baseMat = baseMat;
+		material = (ShaderMaterial)baseMat.NextPass;
 	}
 }
 

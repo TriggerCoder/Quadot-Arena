@@ -47,6 +47,7 @@ public partial class MaterialManager : Node
 	public static List<string> PortalMaterials = new List<string>();
 	public static List<ShaderMaterial> AllMaterials = new List<ShaderMaterial>();
 	public static Dictionary<string, ShaderMaterial> Materials = new Dictionary<string, ShaderMaterial>();
+	public static Dictionary<string, ShaderMaterial> MirrorMaterials = new Dictionary<string, ShaderMaterial>();
 	public static Dictionary<string, QShader> AditionalTextures = new Dictionary<string, QShader>();
 
 	public static readonly string[] rgbGenTextures = { "_S_Texture", "_W_Texture", "_IW_Texture" };
@@ -219,6 +220,15 @@ public partial class MaterialManager : Node
 			mat.Set(lightMapProperty, lmap);
 
 		Materials.Add(textureName, mat);
+		return mat;
+	}
+	public static ShaderMaterial GetMirrorMaterial(string shaderName)
+	{
+		if (MirrorMaterials.ContainsKey(shaderName))
+			return MirrorMaterials[shaderName];
+
+		ShaderMaterial mat = QShaderManager.MirrorShader(shaderName);
+		MirrorMaterials.Add(shaderName, mat);
 		return mat;
 	}
 }

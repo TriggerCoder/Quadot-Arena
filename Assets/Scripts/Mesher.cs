@@ -338,7 +338,7 @@ public static class Mesher
 
 		if (hasPortal)
 		{
-			Portal portal = new Portal(material);
+			Portal portal = new Portal(textureName, material);
 			Aabb box = arrMesh.GetAabb();
 			portal.position = box.GetCenter();
 			Vector3 normals = Vector3.Zero;
@@ -346,8 +346,7 @@ public static class Mesher
 				normals += normalsCache[i];
 
 			portal.normal = normals.Normalized();
-			portal.mesh = mesh;
-			portal.size = box.Size;
+			portal.arrMesh = arrMesh;
 			ThingsManager.AddPortalToMap(portal);
 			mesh.Layers = GameManager.AllPlayerViewMask;
 		}
