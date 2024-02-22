@@ -238,7 +238,7 @@ public static class QShaderManager
 			{
 				if (alphaIsTransparent)
 					GSHeader += "depth_prepass_alpha, ";
-				if (depthWrite)
+				if ((depthWrite) || (forceAlpha))
 					GSHeader += "depth_draw_always, blend_mix, ";
 				else
 					GSHeader += "depth_draw_opaque, blend_mix, ";
@@ -475,11 +475,9 @@ public static class QShaderManager
 		shaderMaterial.Shader = shader;
 		for (int i = 0; i < textures.Count; i++)
 		{
+			//Lightmap will be added outside of the shader creation
 			if (textures[i].Contains("$LIGHTMAP"))
-			{
-				tex = MapLoader.lightMaps[lm_index];
-				shaderMaterial.SetShaderParameter("LightMap", tex);
-			}
+				continue;
 			else
 			{
 				tex = TextureLoader.GetTextureOrAddTexture(textures[i], alphaIsTransparent);

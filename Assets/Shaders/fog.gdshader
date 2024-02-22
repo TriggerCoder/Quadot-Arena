@@ -64,7 +64,7 @@ void fog()
 	float color = noise * 0.75 + 0.25;
 	DENSITY = density * clamp(exp2(-height_falloff * (WORLD_POSITION.y - OBJECT_POSITION.y)), 0.0, 1.0);
 	DENSITY *= pow(clamp(-2.0 * SDF / min(min(SIZE.x, SIZE.y), SIZE.z), 0.0, 1.0), edge_fade);
-	DENSITY *= noise * 0.25 + 0.75;;
+	DENSITY *= noise * 0.25 + 0.75;
 	ALBEDO = albedo.rgb;
 	EMISSION = emission.rgb * color;
 }

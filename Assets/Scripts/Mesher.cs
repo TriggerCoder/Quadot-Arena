@@ -60,7 +60,7 @@ public static class Mesher
 			return;
 		}
 
-		bool isTrigger = false;
+		bool addCollider = true;
 		string textureName = MapLoader.mapTextures[shaderId].name;
 		string Name = "Bezier_Surfaces";
 		int[] numPatches = new int[surfaces.Length];
@@ -82,37 +82,40 @@ public static class Mesher
 		contentType.Init(type);
 
 		if ((contentType.value & MaskPlayerSolid) == 0)
-			isTrigger = true;
+			addCollider = false;
 
-		CollisionObject3D collider;
-		if (isTrigger)
-			collider = new Area3D();
-		else
+		CollisionObject3D collider = null;
+		uint OwnerShapeId = 0;
+		if (addCollider)
+		{
 			collider = new StaticBody3D();
-		MapLoader.ColliderGroup.AddChild(collider);
-		collider.Name = "Bezier_" + indexId + "_collider";
-		collider.AddChild(contentType);
+			MapLoader.ColliderGroup.AddChild(collider);
+			collider.Name = "Bezier_" + indexId + "_collider";
+			collider.AddChild(contentType);
+			OwnerShapeId = collider.CreateShapeOwner(holder);
+		}
 
-		uint OwnerShapeId = collider.CreateShapeOwner(holder);
 		int offset = 0;
-
 		for (int i = 0; i < surfaces.Length; i++)
 		{
 			for (int n = 0; n < numPatches[i]; n++)
 				GenerateBezMesh(OwnerShapeId, collider, surfaces[i], n, (surfaceType.NoDraw == false), ref offset);
 		}
 
-		if ((surfaceType.value & MaskTransparent) != 0)
-			collider.CollisionLayer = (1 << GameManager.InvisibleBlockerLayer);
-		else
-			collider.CollisionLayer = (1 << GameManager.ColliderLayer);
+		if (addCollider)
+		{
+			if ((surfaceType.value & MaskTransparent) != 0)
+				collider.CollisionLayer = (1 << GameManager.InvisibleBlockerLayer);
+			else
+				collider.CollisionLayer = (1 << GameManager.ColliderLayer);
 
-		//If noMarks add it to the table
-		if ((surfaceType.value & NoMarks) != 0)
-			MapLoader.noMarks.Add(collider);
+			//If noMarks add it to the table
+			if ((surfaceType.value & NoMarks) != 0)
+				MapLoader.noMarks.Add(collider);
 
-		collider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
-		collider.AddChild(surfaceType);
+			collider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+			collider.AddChild(surfaceType);
+		}
 
 		if (surfaceType.NoDraw)
 			return;
@@ -279,7 +282,8 @@ public static class Mesher
 
 		if (draw)
 			BezierMesh.GenerateBezierMesh(GameManager.Instance.tessellations, bverts, uv, uv2, color, ref offset);
-		BezierMesh.BezierColliderMesh(OwnerShapeId, collider, surface.surfaceId, patchNumber, bverts);
+		if (collider != null)
+			BezierMesh.BezierColliderMesh(OwnerShapeId, collider, surface.surfaceId, patchNumber, bverts);
 
 		return;
 	}
@@ -1446,11 +1450,11 @@ public static class Mesher
 		{
 			bool isUnique = true;
 			for (int j = i + 1; j < test.Count; j++)
-			{
-				if (FloatAprox(test[i].X, test[j].X))
-					if (FloatAprox(test[i].Y, test[j].Y))
-						if (FloatAprox(test[i].Z, test[j].Z))
-							isUnique = false;
+			{ 
+				if (FloatAprox(test[i].X, test[j].X) &&
+					FloatAprox(test[i].Y, test[j].Y) &&
+					FloatAprox(test[i].Z, test[j].Z))
+						isUnique = false;
 			}
 			if (isUnique)
 				uniqueVector.Add(new Vector3(RoundUp4Decimals(test[i].X), RoundUp4Decimals(test[i].Y), RoundUp4Decimals(test[i].Z)));

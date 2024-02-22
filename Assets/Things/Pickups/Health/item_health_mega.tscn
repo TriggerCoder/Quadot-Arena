@@ -24,6 +24,7 @@ thingType = 2
 [node name="Sphere" type="Node3D" parent="."]
 script = ExtResource("2_1qjbm")
 modelName = "powerups/health/mega_sphere"
+isTransparent = true
 castShadows = true
 modelAnimation = SubResource("Resource_h1upd")
 textureAnimation = SubResource("Resource_sejmd")

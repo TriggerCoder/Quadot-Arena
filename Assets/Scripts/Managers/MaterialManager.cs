@@ -148,7 +148,7 @@ public partial class MaterialManager : Node
 		bool hasPortal = false;
 		return GetMaterials(textureName, lm_index, ref forceSkinAlpha, ref hasPortal);
 	}
-	public static ShaderMaterial GetMaterials(string textureName, int lm_index , ref bool forceSkinAlpha, ref bool hasPortal, bool forceView = false)
+	public static ShaderMaterial GetMaterials(string textureName, int lm_index , ref bool forceSkinAlpha, ref bool hasPortal)
 	{
 		ShaderMaterial mat;
 		ImageTexture lmap = null;
@@ -188,7 +188,11 @@ public partial class MaterialManager : Node
 			mat.Set(opaqueTexProperty, tex);
 		}
 		else
+		{
 			mat = QShaderManager.GetShadedMaterial(textureName, lm_index, ref forceSkinAlpha, ref hasPortal);
+			if ((mat != null) && (lm_index >= 0 && Instance.applyLightmaps))
+				mat.Set(lightMapProperty, lmap);
+		}
 		if (mat == null)
 		{
 			if (lm_index >= 0 && Instance.applyLightmaps)
