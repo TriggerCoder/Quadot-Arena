@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using ExtensionMethods;
+
 public static class QShaderManager
 {
 	public static Dictionary<string, QShaderData> QShaders = new Dictionary<string, QShaderData>();
@@ -208,16 +209,38 @@ public static class QShaderManager
 			GameManager.Print("Shader needs multipass " + needMultiPass);
 			List<int> matPass = new List<int>();
 			for (int i = 0; i < needMultiPass; i++)
-				matPass.Add(i);
+			{
+				int currentStage;
+				if (multiPassList == null)
+					currentStage = i;
+				else
+					currentStage = multiPassList[i];
+				matPass.Add(currentStage);
+			}
 //			if (lightmapStage >= 0)
 //				if (!matPass.Contains(lightmapStage))
 //					matPass.Add(lightmapStage);
 			bool baseAlpha = forceAlpha;
 			ShaderMaterial passZeroMaterial = GetShadedMaterial(shaderName, lm_index, ref baseAlpha, ref hasPortal, matPass);
+			ShaderMaterial lastMaterial = passZeroMaterial;
+
+			while (lastMaterial.NextPass != null)
+				lastMaterial = (ShaderMaterial)lastMaterial.NextPass;
 
 			matPass = new List<int>();
-			for (int i = needMultiPass; i < qShader.qShaderStages.Count; i++)
-				matPass.Add(i);
+			if (multiPassList == null)
+				totalStages = qShader.qShaderStages.Count;
+			else
+				totalStages = multiPassList.Count;
+			for (int i = needMultiPass; i < totalStages; i++)
+			{
+				int currentStage;
+				if (multiPassList == null)
+					currentStage = i;
+				else
+					currentStage = multiPassList[i];
+				matPass.Add(currentStage);
+			}
 			if (lightmapStage >= 0)
 				if (!matPass.Contains(lightmapStage))
 					matPass.Add(lightmapStage);
@@ -226,7 +249,7 @@ public static class QShaderManager
 			ShaderMaterial passOneMaterial = GetShadedMaterial(shaderName, lm_index, ref forceAlpha, ref hasPortal, matPass);
 //			passZeroMaterial.RenderPriority = -1;
 //			passOneMaterial.RenderPriority = 0;
-			passZeroMaterial.NextPass = passOneMaterial;
+			lastMaterial.NextPass = passOneMaterial;
 			alphaIsTransparent = forceAlpha | baseAlpha;
 
 			return passZeroMaterial;
@@ -340,7 +363,6 @@ public static class QShaderManager
 		code += "global uniform vec4 AmbientColor: source_color;\n";
 		code += "global uniform float mixBrightness;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
-
 		if (multiPassList == null)
 		{
 			code += "instance uniform float ShadowIntensity : hint_range(0, 1) = 0.0;\n";
@@ -465,7 +487,7 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (shaderName.Contains("MIRROR2"))
+		if (shaderName.Contains("RED_TELEP"))
 			GameManager.Print(code);
 
 		Shader shader = new Shader();
@@ -801,7 +823,7 @@ public static class QShaderManager
 					float amp = TryToParseFloat(shaderTCMod.value[2]);
 					float phase = TryToParseFloat(shaderTCMod.value[3]);
 					float freq = TryToParseFloat(shaderTCMod.value[4]);
-					TcMod += "\tfloat str_" + currentStage + " = " + basis.ToString("0.00") + " + " + amp.ToString("0.00") + " * (sin((Time)*" + freq.ToString("0.00") + "*6.28)+" + phase.ToString("0.00") + ");\n";
+					TcMod += "\tfloat str_" + currentStage + " = 1.0 / (" + basis.ToString("0.00") + " + " + amp.ToString("0.00") + " * (sin((Time)*" + freq.ToString("0.00") + "*6.28)+" + phase.ToString("0.00") + "));\n";
 					TcMod += "\tuv_" + currentStage + "  = uv_" + currentStage + " *(str_" + currentStage + ") - vec2(1.0,1.0)*str_" + currentStage + "*0.5 + vec2(0.5,0.5);\n";
 				}
 				break;
@@ -817,7 +839,7 @@ public static class QShaderManager
 					float freq = TryToParseFloat(shaderTCMod.value[3]);
 					string turbX = "(sin( (2.0 *" + freq.ToString("0.00") + ") * (Time * 6.28) + " + phase.ToString("0.00") + ") * " + amp.ToString("0.00") + " )";
 					string turbY = "(cos( (2.0 *" + freq.ToString("0.00") + ") * (Time * 6.28) + " + phase.ToString("0.00") + ") * " + amp.ToString("0.00") + " )";
-					TcMod += "\tuv_" + currentStage + " += vec2(" + turbX + "," + turbY + "); \n";				
+					TcMod += "\tuv_" + currentStage + " += vec2(" + turbX + "," + turbY + "); \n";
 				}
 				break;
 			}
