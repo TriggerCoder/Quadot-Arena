@@ -241,9 +241,9 @@ public static class QShaderManager
 					currentStage = multiPassList[i];
 				matPass.Add(currentStage);
 			}
-			if (lightmapStage >= 0)
-				if (!matPass.Contains(lightmapStage))
-					matPass.Add(lightmapStage);
+//			if (lightmapStage >= 0)
+//				if (!matPass.Contains(lightmapStage))
+//					matPass.Add(lightmapStage);
 
 			qShader.qShaderGlobal.sort = sortType;
 			ShaderMaterial passOneMaterial = GetShadedMaterial(shaderName, lm_index, ref forceAlpha, ref hasPortal, matPass);

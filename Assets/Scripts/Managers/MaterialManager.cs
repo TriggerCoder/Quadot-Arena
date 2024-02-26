@@ -190,8 +190,12 @@ public partial class MaterialManager : Node
 		else
 		{
 			mat = QShaderManager.GetShadedMaterial(textureName, lm_index, ref forceSkinAlpha, ref hasPortal);
-			if ((mat != null) && (lm_index >= 0 && Instance.applyLightmaps))
-				mat.Set(lightMapProperty, lmap);
+			ShaderMaterial lastMaterial = mat;
+			while ((lastMaterial != null) && (lm_index >= 0 && Instance.applyLightmaps))
+			{
+				lastMaterial.Set(lightMapProperty, lmap);
+				lastMaterial = (ShaderMaterial)lastMaterial.NextPass;
+			}
 		}
 		if (mat == null)
 		{
