@@ -6,6 +6,8 @@ public partial class WaterSurface : Area3D
 {
 	public List<Aabb> Boxes = new List<Aabb>();
 	private List<PlayerThing> currentPlayers = new List<PlayerThing>();
+	//Anti Bounce
+	private Dictionary<Node3D, int> CurrentColliders = new Dictionary<Node3D, int>();
 	public string waterIn = "player/watr_in";
 	public string waterOut = "player/watr_out";
 	private AudioStreamWav inSound;
@@ -24,6 +26,13 @@ public partial class WaterSurface : Area3D
 		for (int i = 0; i < currentPlayers.Count; i++)
 		{
 			PlayerThing currentPlayer = currentPlayers[i];
+			if (currentPlayer.Dead)
+			{
+//				GameManager.Print(currentPlayer.Name + "died in the Water " + Name);
+				currentPlayers.Remove(currentPlayer);
+				continue;
+			}
+
 			for (int j = 0; j < Boxes.Count; j++) 
 			{
 				if (Boxes[j].HasPoint(currentPlayer.GlobalPosition))
@@ -37,6 +46,36 @@ public partial class WaterSurface : Area3D
 		}
 	}
 
+	public override void _PhysicsProcess(double delta)
+	{
+		if (GameManager.Paused)
+			return;
+
+		if (CurrentColliders.Count == 0)
+			return;
+
+		var CurrentBodies = GetOverlappingBodies();
+		int CurrentBodiesNum = CurrentBodies.Count;
+		if (CurrentBodiesNum == 0)
+		{
+			CurrentColliders.Clear();
+			return;
+		}
+
+		for (int i = 0; i < CurrentBodiesNum; i++)
+		{
+			Node3D CurrentBody = CurrentBodies[i];
+			if (CurrentColliders.ContainsKey(CurrentBody))
+			{
+				int value = CurrentColliders[CurrentBody]++;
+				if (value > 1)
+				{
+					PlayerEnterIntoWater(CurrentBody as PlayerThing);
+					CurrentColliders.Remove(CurrentBody);
+				}
+			}
+		}
+	}
 	void OnBodyEntered(Node3D other)
 	{
 		if (GameManager.Paused)
@@ -44,13 +83,8 @@ public partial class WaterSurface : Area3D
 
 		if (other is PlayerThing playerThing)
 		{
-			if (!currentPlayers.Contains(playerThing))
-			{
-				playerThing.waterLever = 1;
-				SoundManager.Create3DSound(playerThing.GlobalPosition, inSound);
-				currentPlayers.Add(playerThing);
-				GameManager.Print(other.Name + " Jump into the Water " + Name);
-			}
+			if (!CurrentColliders.ContainsKey(other))
+				CurrentColliders.Add(other, 0);
 		}
 	}
 
@@ -64,10 +98,23 @@ public partial class WaterSurface : Area3D
 			if (currentPlayers.Contains(playerThing))
 			{
 				playerThing.waterLever = 0;
+				playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.Jump;
 				SoundManager.Create3DSound(playerThing.GlobalPosition, outSound);
 				currentPlayers.Remove(playerThing);
-				GameManager.Print("Finally " + other.Name + "got out of the Water " + Name);
+//				GameManager.Print("Finally " + other.Name + "got out of the Water " + Name);
 			}
 		}
 	}
+
+	void PlayerEnterIntoWater(PlayerThing playerThing)
+	{
+		if (!currentPlayers.Contains(playerThing))
+		{
+			playerThing.waterLever = 1;
+			SoundManager.Create3DSound(playerThing.GlobalPosition, inSound);
+			currentPlayers.Add(playerThing);
+//			GameManager.Print(playerThing.Name + " Jump into the Water " + Name);
+		}
+	}
+
 }

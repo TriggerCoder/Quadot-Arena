@@ -53,6 +53,7 @@ public partial class PlayerModel : Node3D
 	private bool ragDoll = false;
 	private bool ownerDead = false;
 	private bool destroyWeapon = false;
+	private bool deadWater = false;
 	public class ModelAnimation
 	{
 		public int index;
@@ -184,6 +185,8 @@ public partial class PlayerModel : Node3D
 		var hit = SpaceState.GetRestInfo(SphereCast);
 		if (hit.ContainsKey("collider_id"))
 			gravityAccumulator = 0f;
+		else if (deadWater)
+			gravityAccumulator = GameManager.Instance.waterDeadFall;
 		else
 			gravityAccumulator = GameManager.Instance.gravity;
 		Vector3 gravity = Vector3.Down * gravityAccumulator;
@@ -497,6 +500,8 @@ public partial class PlayerModel : Node3D
 		modelCollider.CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.RagdollLayer));
 		impulseVector = playerControls.impulseVector;
 		playerControls.playerThing.CollisionLayer = (1 << GameManager.NoCollisionLayer);
+		if (playerControls.playerThing.waterLever > 0)
+			deadWater = true;
 		ragDoll = true;
 		Reparent(GameManager.Instance.TemporaryObjectsHolder);
 		playerControls.playerThing.interpolatedTransform.QueueFree();
@@ -556,6 +561,13 @@ public partial class PlayerModel : Node3D
 
 		lowerNode.Quaternion = lowerNode.Quaternion.Slerp(rotate, lowerRotationFPS * deltaTime);
 	}
+
+	public void Swim()
+	{
+		lowerNode.Quaternion = Quaternion.Identity;
+		lowerAnimation = LowerAnimation.Swim;
+	}
+
 	public void TurnLegs(int moveType, float sideMove, float forwardMove, float deltaTime)
 	{
 		if (ownerDead)

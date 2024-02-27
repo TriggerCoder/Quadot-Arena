@@ -41,7 +41,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	public float moveSpeed;                         // Ground move speed
 	public float runAcceleration = 14.0f;           // Ground accel
 	public float runDeacceleration = 10.0f;         // Deacceleration that occurs when running on the ground
-	public float waterAcceleration = 12.0f;          // Water accel
+	public float waterAcceleration = 8.0f;          // Water accel
 	public float airAcceleration = 2.0f;            // Air accel
 	public float airDecceleration = 2.0f;           // Deacceleration experienced when ooposite strafing
 	public float airControl = 0.3f;                 // How precise air control is
@@ -278,7 +278,10 @@ public partial class PlayerControls : InterpolatedNode3D
 		//Movement Checks
 		if (playerThing.waterLever > 0)
 		{
-			playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.Swim;
+			if (controllerIsGrounded)
+				playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed, deltaTime);
+			else
+				playerThing.avatar.Swim();
 			if (playerThing.waterLever > 1)
 				wishJump = Input.IsActionPressed(playerInput.Action_Jump);
 		}
@@ -339,7 +342,10 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (playerThing.Dead)
 		{
 			// Reset the gravity velocity
-			playerVelocity = Vector3.Down * GameManager.Instance.gravity;
+			float gravityAccumulator = GameManager.Instance.gravity;
+			if (playerThing.waterLever > 0)
+				gravityAccumulator = GameManager.Instance.waterDeadFall;
+			playerVelocity = Vector3.Down * gravityAccumulator;
 			ApplyMove(deltaTime);
 			return;
 		}
@@ -468,8 +474,6 @@ public partial class PlayerControls : InterpolatedNode3D
 		Vector3 wishdir;
 		float curreAcel;
 
-		//Check Water Jump
-
 		playerVelocity.Y *= ApplyFriction(1.0f, deltaTime);
 
 		SetMovementDir();
@@ -542,9 +546,7 @@ public partial class PlayerControls : InterpolatedNode3D
 			drop = control * GameManager.Instance.friction * deltaTime * t;
 		}
 		if (playerThing.waterLever > 0)
-		{
 			drop += speed * GameManager.Instance.waterFriction * playerThing.waterLever * deltaTime * t;
-		}
 
 		newspeed = speed - drop;
 
