@@ -1088,7 +1088,8 @@ public static class Mesher
 
 	public static uint GenerateGroupBrushCollider(int indexId, Node3D holder, QBrush[] brushes, CollisionObject3D objCollider = null, uint extraContentFlag = 0)
 	{
-		bool isTrigger = false;
+		WaterSurface waterSurface = null;
+		bool isWater = false;
 		uint type = MapLoader.mapTextures[brushes[0].shaderId].contentsFlags;
 		uint stype = MapLoader.mapTextures[brushes[0].shaderId].surfaceFlags;
 		if (((type & ContentFlags.Details) != 0) || ((type & ContentFlags.Structural) != 0))
@@ -1100,18 +1101,23 @@ public static class Mesher
 /*		if ((stype & SurfaceFlags.NonSolid) != 0)
 		{
 			GameManager.Print("brushes: " + indexId + " Is not solid, Surface Type is: " + stype);
-			return;
+			return 0;
 		}
 */		ContentType contentType = new ContentType();
 		contentType.Init(type | extraContentFlag);
 
-		if ((contentType.value & MaskPlayerSolid) == 0)
-			isTrigger = true;
+		if ((contentType.value & ContentFlags.Water) != 0)
+			isWater = true;
+		else if ((contentType.value & MaskPlayerSolid) == 0)
+			return 0;
 
 		if (objCollider == null)
 		{
-			if (isTrigger)
-				objCollider = new Area3D();
+			if (isWater)
+			{
+				waterSurface = new WaterSurface();
+				objCollider = waterSurface;
+			}
 			else
 				objCollider = new StaticBody3D();
 
@@ -1126,8 +1132,14 @@ public static class Mesher
 			ConvexPolygonShape3D convexHull = GenerateBrushCollider(brushes[i]);
 			if (convexHull != null)
 				objCollider.ShapeOwnerAddShape(OwnerShapeId, convexHull);
+			if (isWater)
+			{
+				Aabb box = convexHull.GetDebugMesh().GetAabb();
+				waterSurface.Boxes.Add(box);
+			}
 		}
 		
+
 		SurfaceType surfaceType = new SurfaceType();
 		surfaceType.Init(stype);
 

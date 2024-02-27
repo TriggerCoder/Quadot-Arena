@@ -60,7 +60,7 @@ public partial class PlayerInfo : Node3D
 
 //		playerHUD.pickupFlashTime = 0f;
 //		playerHUD.painFlashTime = 0f;
-
+		playerThing.waterLever = 0;
 		playerThing.hitpoints = 100;
 		playerThing.armor = 0;
 

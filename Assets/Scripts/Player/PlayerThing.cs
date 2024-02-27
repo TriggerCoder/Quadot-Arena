@@ -16,7 +16,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 	public InterpolatedTransform interpolatedTransform;
 	public string modelName = "crash";
-	public string skinName = "cc-crash_blue";
+	public string skinName = "default";
 
 	[Export]
 	public Node3D player;
@@ -29,6 +29,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 	public int hitpoints = 100;
 	public int armor = 0;
+	public int waterLever = 0;
 	public float painTime = 0f;
 	public float lookTime = .5f;
 	public bool finished = false;

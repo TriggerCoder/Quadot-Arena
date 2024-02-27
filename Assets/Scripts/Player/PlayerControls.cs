@@ -41,6 +41,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	public float moveSpeed;                         // Ground move speed
 	public float runAcceleration = 14.0f;           // Ground accel
 	public float runDeacceleration = 10.0f;         // Deacceleration that occurs when running on the ground
+	public float waterAcceleration = 12.0f;          // Water accel
 	public float airAcceleration = 2.0f;            // Air accel
 	public float airDecceleration = 2.0f;           // Deacceleration experienced when ooposite strafing
 	public float airControl = 0.3f;                 // How precise air control is
@@ -275,18 +276,26 @@ public partial class PlayerControls : InterpolatedNode3D
 		}
 
 		//Movement Checks
-		if (currentMoveType != MoveType.Crouch)
-			QueueJump();
-		if (controllerIsGrounded)
+		if (playerThing.waterLever > 0)
 		{
-			if (playerThing.avatar.enableOffset)
-				playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed, deltaTime);
-			if (wishJump)
-				AnimateLegsOnJump();
+			playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.Swim;
+			if (playerThing.waterLever > 1)
+				wishJump = Input.IsActionPressed(playerInput.Action_Jump);
 		}
 		else
-			playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed, deltaTime);
-
+		{
+			if (currentMoveType != MoveType.Crouch)
+				QueueJump();
+			if (controllerIsGrounded)
+			{
+				if (playerThing.avatar.enableOffset)
+					playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed, deltaTime);
+				if (wishJump)
+					AnimateLegsOnJump();
+			}
+			else
+				playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed, deltaTime);
+		}
 		if ((GlobalPosition - lastGlobalPosition).LengthSquared() > .0001f)
 			bobActive = true;
 		else
@@ -339,7 +348,14 @@ public partial class PlayerControls : InterpolatedNode3D
 			return;
 
 		//Movement Checks
-		if (controllerIsGrounded)
+		if (playerThing.waterLever > 0)
+		{
+			if (playerThing.waterLever > 1)
+				WaterMove(deltaTime);
+			else
+				AirMove(deltaTime);
+		}
+		else if (controllerIsGrounded)
 			GroundMove(deltaTime);
 		else
 			AirMove(deltaTime);
@@ -447,6 +463,37 @@ public partial class PlayerControls : InterpolatedNode3D
 		return bob;
 	}
 
+	private void WaterMove(float deltaTime)
+	{
+		Vector3 wishdir;
+		float curreAcel;
+
+		//Check Water Jump
+
+		playerVelocity.Y *= ApplyFriction(1.0f, deltaTime);
+
+		SetMovementDir();
+
+		wishdir = new Vector3(cMove.sidewaysSpeed, 0, cMove.forwardSpeed);
+		if (wishdir.LengthSquared() == 0)
+		{
+			if (!wishJump)
+				wishdir.Y = -1;
+		}
+		else
+			wishdir.Y = -cMove.forwardSpeed * viewDirection.X / 90;
+		wishdir = playerInfo.Transform.Basis * wishdir;
+		float wishspeed;
+		wishdir = wishdir.GetLenghtAndNormalize(out wishspeed);
+		wishspeed *= moveSpeed;
+
+		curreAcel = Accelerate(wishdir, wishspeed, waterAcceleration, deltaTime);
+		playerVelocity.Y += curreAcel * wishdir.Y;
+		if (wishJump)
+			playerVelocity.Y += 1f;
+
+	}
+
 	private void GroundMove(float deltaTime)
 	{
 		Vector3 wishdir;
@@ -470,14 +517,14 @@ public partial class PlayerControls : InterpolatedNode3D
 		// Reset the gravity velocity
 		playerVelocity.Y = -GameManager.Instance.gravity * deltaTime;
 
-		if (wishJump)
+		if ((controllerIsGrounded) && (wishJump))
 		{
 			playerVelocity.Y = jumpSpeed;
 			wishJump = false;
 		}
 	}
 
-	private void ApplyFriction(float t, float deltaTime)
+	private float ApplyFriction(float t, float deltaTime)
 	{
 		Vector3 vec = playerVelocity;
 		float speed;
@@ -489,11 +536,14 @@ public partial class PlayerControls : InterpolatedNode3D
 		speed = vec.Length();
 		drop = 0.0f;
 
-		//Player is always grounded when we are here, no need to re-check
-		//if (controllerIsGrounded)
+		if (playerThing.waterLever < 2)
 		{
 			control = speed < runDeacceleration ? runDeacceleration : speed;
 			drop = control * GameManager.Instance.friction * deltaTime * t;
+		}
+		if (playerThing.waterLever > 0)
+		{
+			drop += speed * GameManager.Instance.waterFriction * playerThing.waterLever * deltaTime * t;
 		}
 
 		newspeed = speed - drop;
@@ -505,8 +555,9 @@ public partial class PlayerControls : InterpolatedNode3D
 
 		playerVelocity.X *= newspeed;
 		playerVelocity.Z *= newspeed;
+		return newspeed;
 	}
-	private void Accelerate(Vector3 wishdir, float wishspeed, float accel, float deltaTime, float wishaccel = 0)
+	private float Accelerate(Vector3 wishdir, float wishspeed, float accel, float deltaTime, float wishaccel = 0)
 	{
 		float addspeed;
 		float accelspeed;
@@ -515,7 +566,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		currentspeed = playerVelocity.Dot(wishdir);
 		addspeed = wishspeed - currentspeed;
 		if (addspeed <= 0)
-			return;
+			return 0;
 		if (wishaccel == 0)
 			wishaccel = wishspeed;
 		accelspeed = accel * deltaTime * wishaccel;
@@ -524,6 +575,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 		playerVelocity.X += accelspeed * wishdir.X;
 		playerVelocity.Z += accelspeed * wishdir.Z;
+		return accelspeed;
 	}
 
 	private void AirMove(float deltaTime)

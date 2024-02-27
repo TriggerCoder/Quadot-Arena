@@ -100,8 +100,10 @@ public partial class GameManager : Node
 	public static float CurrentTimeMsec { get { return Instance.timeMs; } }
 	public float gravity = 25f;					//default 800 * sizeDividor
 	public float friction = 6;
+	public float waterFriction = 6;
 	public float terminalVelocity = 100f;
 	public float barrierVelocity = 1024f;
+	public float playerHeight = 1.2f;
 
 	public float PlayerDamageReceive = 1f;
 	public int PlayerAmmoReceive = 1;
