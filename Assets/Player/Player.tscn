@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://xi3ybp7mrio2"]
+[gd_scene load_steps=15 format=3 uid="uid://xi3ybp7mrio2"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerThing.cs" id="1_da8o2"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerControls.cs" id="1_g37r6"]
@@ -11,6 +11,12 @@
 [ext_resource type="PackedScene" uid="uid://dpl55sl78gnh4" path="res://Assets/Player/Weapons/PlasmagunWeapon.tscn" id="6_yhj32"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="7_qljl7"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="10_h25w0"]
+[ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerHUD.cs" id="11_lpte2"]
+[ext_resource type="Material" uid="uid://b1ikorkoscxl3" path="res://Assets/Materials/cameraUnderWater.tres" id="12_g1u6j"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_qgyo8"]
+flip_faces = true
+size = Vector2(2, 2)
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Torso", "Feets", "playerInfo", "playerControls", "audioStream", "player") groups=["Player"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
@@ -47,21 +53,24 @@ playerCamera = NodePath("../PlayerInfo/MainCameras")
 [node name="PlayerModel" type="Node3D" parent="PlayerControls"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 
-[node name="PlayerInfo" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "playerCamera", "audioStream", "playerThing", "WeaponHand")]
+[node name="PlayerInfo" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "playerCamera", "audioStream", "playerThing", "playerHUD", "WeaponHand")]
 script = ExtResource("2_jjym4")
 playerControls = NodePath("../PlayerControls")
 playerCamera = NodePath("MainCameras")
 audioStream = NodePath("../PlayerVoiceAudioStream")
 playerThing = NodePath("..")
+playerHUD = NodePath("InterpolatedTransform/ViewPortCamera/PlayerHUD")
 WeaponHand = NodePath("InterpolatedTransform/ViewCamera/WeaponHand")
 WeaponPrefabs = [null, ExtResource("4_4obu3"), ExtResource("5_mrmdb"), null, ExtResource("5_jwttf"), null, null, ExtResource("6_yhj32"), null]
 
-[node name="MainCameras" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("playerControls", "ThirdPerson", "ViewCamera")]
+[node name="MainCameras" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("playerControls", "ThirdPerson", "ViewCamera", "ViewPortCamera", "ViewPort")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 script = ExtResource("3_bs0x2")
 playerControls = NodePath("../../PlayerControls")
 ThirdPerson = NodePath("../InterpolatedTransform/SpringArm3D/ThirdPersonCamera")
 ViewCamera = NodePath("../InterpolatedTransform/ViewCamera")
+ViewPortCamera = NodePath("../InterpolatedTransform/ViewPortCamera")
+ViewPort = NodePath("../InterpolatedTransform/ViewPortCamera/PlayerViewport")
 
 [node name="VirtualAudioListener" type="Node3D" parent="PlayerInfo"]
 script = ExtResource("6_ve4m7")
@@ -89,6 +98,24 @@ margin = 0.05
 cull_mask = 0
 near = 0.1
 far = 300.0
+
+[node name="ViewPortCamera" type="Camera3D" parent="PlayerInfo/InterpolatedTransform"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 2)
+cull_mask = 0
+near = 0.001
+far = 300.0
+
+[node name="PlayerHUD" type="MeshInstance3D" parent="PlayerInfo/InterpolatedTransform/ViewPortCamera"]
+layers = 0
+extra_cull_margin = 0.1
+mesh = SubResource("QuadMesh_qgyo8")
+skeleton = NodePath("../..")
+script = ExtResource("11_lpte2")
+cameraUnderWaterMaterial = ExtResource("12_g1u6j")
+
+[node name="PlayerViewport" type="SubViewport" parent="PlayerInfo/InterpolatedTransform/ViewPortCamera"]
+size = Vector2i(1280, 720)
+render_target_update_mode = 4
 
 [node name="PlayerVoiceAudioStream" type="Node3D" parent="."]
 script = ExtResource("7_qljl7")

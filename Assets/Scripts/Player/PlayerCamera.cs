@@ -9,7 +9,10 @@ public partial class PlayerCamera : Node3D
 	public Camera3D ThirdPerson;
 	[Export]
 	public Camera3D ViewCamera;
-
+	[Export]
+	public Camera3D ViewPortCamera;
+	[Export]
+	public SubViewport ViewPort;
 	public Camera3D CurrentCamera;
 	private Vector3 rotAngle = Vector3.Zero;
 	public bool currentThirdPerson = false;
@@ -22,7 +25,9 @@ public partial class PlayerCamera : Node3D
 	public override void _Ready()
 	{
 		CurrentCamera = ViewCamera;
-		GameManager.Instance.SetViewPortToCamera(ViewCamera);
+		SetLocalViewPortToCamera(ViewCamera, false);
+		ViewPortCamera.Current = true;
+		GameManager.Instance.SetViewPortToCamera(ViewPortCamera);
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -55,13 +60,19 @@ public partial class PlayerCamera : Node3D
 		{
 			ThirdPerson.Visible = true;
 			CurrentCamera = ThirdPerson;
-			GameManager.Instance.SetViewPortToCamera(ThirdPerson);
+			SetLocalViewPortToCamera(ThirdPerson,true);
 			playerControls.playerThing.avatar.ChangeLayer(GameManager.AllPlayerViewMask);
 			return;
 		}
 		CurrentCamera = ViewCamera;
-		GameManager.Instance.SetViewPortToCamera(ViewCamera);
+		SetLocalViewPortToCamera(ViewCamera,false);
 		ThirdPerson.Visible = false;
 		playerControls.playerThing.avatar.ChangeLayer(GameManager.AllPlayerViewMask & ~((uint)(playerControls.playerInfo.viewLayer)));
+	}
+	public void SetLocalViewPortToCamera(Camera3D camera, bool debug)
+	{
+		var CamRID = camera.GetCameraRid();
+		var viewPortRID = ViewPort.GetViewportRid();
+		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 	}
 }

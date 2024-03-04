@@ -10,7 +10,8 @@ public partial class PlayerInfo : Node3D
 	public MultiAudioStream audioStream;
 	[Export]
 	public PlayerThing playerThing;
-//	public PlayerHUD playerHUD;
+	[Export]
+	public PlayerHUD playerHUD;
 //	public Canvas UICanvas;
 	[Export]
 	public Node3D WeaponHand;
@@ -48,6 +49,10 @@ public partial class PlayerInfo : Node3D
 		uiLayer = (uint)(1 << (GameManager.Player1UIViewLayer + localPlayerNum));
 		playerCamera.ViewCamera.CullMask = (uint)viewLayer | uiLayer;
 		playerCamera.ThirdPerson.CullMask = (uint)viewLayer;
+		playerCamera.ViewPortCamera.CullMask = uiLayer;
+		playerHUD.Layers = uiLayer;
+		playerHUD.SetTexture(playerCamera.ViewPort);
+		playerHUD.Init();
 	}
 
 	public void Reset()
