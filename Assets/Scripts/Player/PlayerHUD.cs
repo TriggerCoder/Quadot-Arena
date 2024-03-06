@@ -10,9 +10,9 @@ public partial class PlayerHUD : MeshInstance3D
 		Mesh.SurfaceSetMaterial(0, cameraUnderWaterMaterial);
 	}
 
-	public void SetTexture(SubViewport viewport)
+	public void SetTexture(string texture, SubViewport viewport)
 	{
-		cameraUnderWaterMaterial.SetShaderParameter("screen_texture", viewport.GetTexture());
+		cameraUnderWaterMaterial.SetShaderParameter(texture, viewport.GetTexture());
 	}
 
 

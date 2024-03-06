@@ -1,0 +1,55 @@
+[gd_scene load_steps=7 format=3 uid="uid://qov23ls4iuhu"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerPostProcessing.cs" id="1_maglr"]
+[ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerHUD.cs" id="1_ubqha"]
+[ext_resource type="Material" uid="uid://b1ikorkoscxl3" path="res://Assets/Materials/cameraUnderWater.tres" id="2_cqr73"]
+[ext_resource type="Material" uid="uid://cpth41nj3vmg2" path="res://Assets/Materials/normalDepthTexture.tres" id="4_jcn6a"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_0iqvi"]
+flip_faces = true
+size = Vector2(2, 2)
+
+[sub_resource type="QuadMesh" id="QuadMesh_30o3k"]
+flip_faces = true
+size = Vector2(2, 2)
+
+[node name="PostProcessing" type="Node3D" node_paths=PackedStringArray("ViewPortCamera", "NormalDepthCamera", "ViewPort", "NormalDepthViewPort", "playerHUD")]
+script = ExtResource("1_maglr")
+ViewPortCamera = NodePath("ViewPortCamera")
+NormalDepthCamera = NodePath("NormalDepthCamera")
+ViewPort = NodePath("ViewPortCamera/PlayerViewport")
+NormalDepthViewPort = NodePath("NormalDepthCamera/NormalDepthViewport")
+playerHUD = NodePath("ViewPortCamera/PlayerHUD")
+
+[node name="ViewPortCamera" type="Camera3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 2)
+cull_mask = 0
+near = 0.001
+far = 300.0
+
+[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera"]
+layers = 0
+extra_cull_margin = 0.1
+mesh = SubResource("QuadMesh_0iqvi")
+skeleton = NodePath("../..")
+script = ExtResource("1_ubqha")
+cameraUnderWaterMaterial = ExtResource("2_cqr73")
+
+[node name="PlayerViewport" type="SubViewport" parent="ViewPortCamera"]
+size = Vector2i(1280, 720)
+render_target_update_mode = 4
+
+[node name="NormalDepthCamera" type="Camera3D" parent="."]
+cull_mask = 65536
+near = 0.1
+far = 300.0
+
+[node name="NormalDepthFilter" type="MeshInstance3D" parent="NormalDepthCamera"]
+layers = 65536
+extra_cull_margin = 0.1
+mesh = SubResource("QuadMesh_30o3k")
+surface_material_override/0 = ExtResource("4_jcn6a")
+
+[node name="NormalDepthViewport" type="SubViewport" parent="NormalDepthCamera"]
+size = Vector2i(1280, 720)
+render_target_clear_mode = 1

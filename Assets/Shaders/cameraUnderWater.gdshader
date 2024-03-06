@@ -2,8 +2,7 @@ shader_type spatial;
 render_mode unshaded;
 
 uniform sampler2D screen_texture: source_color, repeat_disable;
-uniform sampler2D normal_texture : hint_normal_roughness_texture, filter_linear_mipmap;
-uniform sampler2D depth_texture : source_color, hint_depth_texture;
+uniform sampler2D normal_depth_texture : source_color, repeat_disable;
 
 uniform float depth_range:hint_range(0.1, 100.0, 0.1);
 global uniform float MsTime;
@@ -55,30 +54,64 @@ void vertex()
 	POSITION = vec4(VERTEX, 1.0);
 }
 
+vec2 cartesian_to_spherical(vec3 cartesianVector)
+{
+	float theta, phi;
+    theta = acos(cartesianVector.z); // Polar angle
+	if ((cartesianVector.x == 0.0) && (cartesianVector.y == 0.0))
+	{
+		theta = PI;
+		if (cartesianVector.z > 0.0)
+			theta = 0.0;
+		phi = 0.0;
+	}	
+	else
+	{	
+		float add = PI;
+		phi = PI / 2.0;
+		if (cartesianVector.y < 0.0)
+			add = -PI;
+
+		if (cartesianVector.x != 0.0)
+	    {
+			phi = atan(cartesianVector.y / cartesianVector.x); // Azimuthal angle
+			if (cartesianVector.x < 0.0)
+				phi += add;
+		}
+	}
+	phi = (phi + PI) / (2.0 * PI);
+	theta /= PI;
+    return vec2(theta, phi);
+}
+
+vec3 spherical_to_cartesian(vec2 sphericalVector) 
+{
+	sphericalVector.x *= PI;
+	sphericalVector.y = (2.0 * sphericalVector.y) - 1.0;
+	sphericalVector.y *= PI;
+    float x = sin(sphericalVector.x) * cos(sphericalVector.y);
+    float y = sin(sphericalVector.x) * sin(sphericalVector.y);
+    float z = cos(sphericalVector.x);
+    return vec3(x, y, z);
+}
+
 void fragment()
 {
 	vec2 uv = SCREEN_UV;
 	
 	vec3 screen_color = texture(screen_texture, uv).rgb;
-	vec3 normal = texture(normal_texture, uv).rgb;
-	float roughness =  texture(normal_texture, uv).w;
-	
-	float depth = texture(depth_texture, SCREEN_UV).x;
-	vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth);
-	vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
-	view.xyz /= view.w;
-	float linear_depth = -view.z / depth_range;
-	
-	// your code goes here!
+	float depth = texture(normal_depth_texture, uv).b;
 	
 	
-	// example outputs
-	
-	//ALBEDO = vec3(linear_depth); 	// showing depth texture
+	//ALBEDO = vec3(depth); 	// showing depth texture
 	//ALBEDO = normal; 				// showing normal texture
 	//ALBEDO = vec3(roughness); 	// showing roughness texture
 	vec3 noise_color = vec3(psrdnoise(SCREEN_UV + (TIME / 10.0)));
 	vec3 color = texture(screen_texture,SCREEN_UV + (noise_color.b / 20.0)).rgb;
+	vec3 normal = texture(normal_depth_texture,SCREEN_UV + (noise_color.b / 20.0)).rgb;
+	vec2 sphericalVector = normal.rg;
+	vec3 dirVector = spherical_to_cartesian(sphericalVector);
+	dirVector = (dirVector + 1.0) * 0.5;
 	
-	ALBEDO = color;		// showing screen texture
+	ALBEDO = dirVector*normal.b;		// showing screen texture
 }
