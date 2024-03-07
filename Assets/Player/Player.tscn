@@ -48,12 +48,13 @@ playerCamera = NodePath("../PlayerInfo/MainCameras")
 [node name="PlayerModel" type="Node3D" parent="PlayerControls"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 
-[node name="PlayerInfo" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "playerCamera", "audioStream", "playerThing", "WeaponHand")]
+[node name="PlayerInfo" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "playerCamera", "audioStream", "playerThing", "playerPostProcessing", "WeaponHand")]
 script = ExtResource("2_jjym4")
 playerControls = NodePath("../PlayerControls")
 playerCamera = NodePath("MainCameras")
 audioStream = NodePath("../PlayerVoiceAudioStream")
 playerThing = NodePath("..")
+playerPostProcessing = NodePath("InterpolatedTransform/PostProcessing")
 WeaponHand = NodePath("InterpolatedTransform/ViewCamera/WeaponHand")
 WeaponPrefabs = [null, ExtResource("4_4obu3"), ExtResource("5_mrmdb"), null, ExtResource("5_jwttf"), null, null, ExtResource("6_yhj32"), null]
 

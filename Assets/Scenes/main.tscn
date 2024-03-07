@@ -1,4 +1,4 @@
-[gd_scene load_steps=60 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=62 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
@@ -12,8 +12,10 @@
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/ClusterPVSManager.cs" id="8_vpkit"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/ThingsManager.cs" id="9_71i1l"]
 [ext_resource type="Material" uid="uid://85rrj4iybhqg" path="res://Assets/Materials/decals.tres" id="9_xagb5"]
+[ext_resource type="Material" uid="uid://dat36ek6x8gj6" path="res://Assets/Materials/baseCamera.tres" id="11_1vb85"]
 [ext_resource type="PackedScene" uid="uid://0ys87si5lkyg" path="res://Assets/Things/FX/WeaponHits/BulletHit.tscn" id="11_rh4dk"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioListener.cs" id="12_8hqnu"]
+[ext_resource type="Material" uid="uid://b1ikorkoscxl3" path="res://Assets/Materials/underWaterCamera.tres" id="12_8i4o0"]
 [ext_resource type="PackedScene" uid="uid://dw2it7pnea5rd" path="res://Assets/Things/Projectiles/RocketProjectile.tscn" id="12_6703q"]
 [ext_resource type="PackedScene" uid="uid://cbqf3w6nv54ds" path="res://Assets/Things/FX/WeaponHits/RocketExplosion.tscn" id="13_l5hcy"]
 [ext_resource type="PackedScene" uid="uid://bki6ifu2qtbfo" path="res://Assets/Player/PlayerViewPort.tscn" id="13_tu0mj"]
@@ -77,7 +79,6 @@ environment = SubResource("Environment_rcj1l")
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
 Sun = NodePath("../SunLight")
-autoloadMap = "q3dm7"
 tessellations = 10
 playerViewPort = NodePath("SplitScreen/PlayerViewPort")
 playerPrefab = ExtResource("7_rdgk2")
@@ -92,6 +93,8 @@ defaultTransparentMaterial = ExtResource("6_fojn5")
 defaultLightMapMaterial = ExtResource("6_i1nl1")
 defaultTransparentLightMapMaterial = ExtResource("7_wtcy7")
 decalsMapMaterial = ExtResource("9_xagb5")
+baseCameraMaterial = ExtResource("11_1vb85")
+underWaterMaterial = ExtResource("12_8i4o0")
 _decalsNames = PackedStringArray("gfx/damage/burn_med_mrk", "gfx/damage/bullet_mrk", "gfx/damage/plasma_mrk")
 
 [node name="ClusterPVSManager" type="Node" parent="Quadot Arena"]

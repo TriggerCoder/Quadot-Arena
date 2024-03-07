@@ -24,12 +24,35 @@ public partial class PlayerPostProcessing : Node3D
 	public void InitPost()
 	{
 		ViewPortCamera.CullMask = UIMask;
-		NormalDepthCamera.CullMask |= ViewMask;
+		NormalDepthCamera.CullMask = ViewMask | UIMask | (1 << GameManager.PlayerNormalDepthLayer);
 		SetLocalViewPortToCamera(NormalDepthCamera, NormalDepthViewPort);
 		playerHUD.Layers = UIMask;
-		playerHUD.SetTexture("screen_texture",ViewPort);
-		playerHUD.SetTexture("normal_depth_texture", NormalDepthViewPort);
+		playerHUD.baseViewPortTexture = ViewPort.GetTexture();
+		playerHUD.normalDepthViewPortTexture = NormalDepthViewPort.GetTexture();
+		playerHUD.NormalDepthCamera = NormalDepthCamera;
 		playerHUD.Init();
+	}
+
+	public void SetWaterEffect()
+	{
+		playerHUD.SetCameraReplacementeMaterial(MaterialManager.Instance.underWaterMaterial);
+	}
+
+	public void ResetEffects()
+	{
+		playerHUD.SetCameraReplacementeMaterial(null);
+	}
+
+	public void ChangeCurrentCamera(Camera3D camera, bool thirdPerson)
+	{
+		if (!camera.IsAncestorOf(NormalDepthCamera))
+		{
+			NormalDepthCamera.Reparent(camera);
+			NormalDepthCamera.Transform = Transform3D.Identity;
+		}
+		NormalDepthCamera.CullMask = ViewMask | (1 << GameManager.PlayerNormalDepthLayer);
+		if (!thirdPerson)
+			NormalDepthCamera.CullMask |= UIMask;
 	}
 
 	public void SetLocalViewPortToCamera(Camera3D camera, Viewport viewport = null)

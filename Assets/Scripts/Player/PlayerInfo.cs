@@ -10,7 +10,8 @@ public partial class PlayerInfo : Node3D
 	public MultiAudioStream audioStream;
 	[Export]
 	public PlayerThing playerThing;
-//	public Canvas UICanvas;
+	[Export]
+	public PlayerPostProcessing playerPostProcessing;
 	[Export]
 	public Node3D WeaponHand;
 
@@ -60,6 +61,7 @@ public partial class PlayerInfo : Node3D
 
 		godMode = false;
 
+		playerPostProcessing.ResetEffects();
 //		playerHUD.pickupFlashTime = 0f;
 //		playerHUD.painFlashTime = 0f;
 		playerThing.waterLever = 0;

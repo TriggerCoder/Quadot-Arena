@@ -4,7 +4,6 @@ render_mode unshaded;
 uniform sampler2D screen_texture: source_color, repeat_disable;
 uniform sampler2D normal_depth_texture : source_color, repeat_disable;
 
-uniform float depth_range:hint_range(0.1, 100.0, 0.1);
 global uniform float MsTime;
 
 // psrdnoise (c) Stefan Gustavson and Ian McEwan,
@@ -22,7 +21,7 @@ float psrdnoise(vec2 x)
 	vec2 v1 = vec2(v0.x + o1.x - o1.y * 0.5, v0.y + o1.y);
 	vec2 v2 = vec2(v0.x + 0.5, v0.y + 1.0);
 	vec2 x0 = x - v0, x1 = x - v1, x2 = x - v2;
-	vec3 iu, iv, xw, yw;
+	vec3 iu, iv;
 	iu = vec3(i0.x, i1.x, i2.x); iv = vec3(i0.y, i1.y, i2.y);
 
 	vec3 hash = mod(iu, 289.0);
@@ -37,10 +36,6 @@ float psrdnoise(vec2 x)
 	w = max(w, 0.0); vec3 w2 = w * w; vec3 w4 = w2 * w2;
 	vec3 gdotx = vec3(dot(g0, x0), dot(g1, x1), dot(g2, x2));
 	float n = dot(w4, gdotx);
-	vec3 w3 = w2 * w; vec3 dw = -8.0 * w3 * gdotx;
-	vec2 dn0 = w4.x * g0 + dw.x * x0;
-	vec2 dn1 = w4.y * g1 + dw.y * x1;
-	vec2 dn2 = w4.z * g2 + dw.z * x2;
 	return (5.45 * n) + 0.5;
 }
 
@@ -52,36 +47,6 @@ void light()
 void vertex()
 {
 	POSITION = vec4(VERTEX, 1.0);
-}
-
-vec2 cartesian_to_spherical(vec3 cartesianVector)
-{
-	float theta, phi;
-    theta = acos(cartesianVector.z); // Polar angle
-	if ((cartesianVector.x == 0.0) && (cartesianVector.y == 0.0))
-	{
-		theta = PI;
-		if (cartesianVector.z > 0.0)
-			theta = 0.0;
-		phi = 0.0;
-	}	
-	else
-	{	
-		float add = PI;
-		phi = PI / 2.0;
-		if (cartesianVector.y < 0.0)
-			add = -PI;
-
-		if (cartesianVector.x != 0.0)
-	    {
-			phi = atan(cartesianVector.y / cartesianVector.x); // Azimuthal angle
-			if (cartesianVector.x < 0.0)
-				phi += add;
-		}
-	}
-	phi = (phi + PI) / (2.0 * PI);
-	theta /= PI;
-    return vec2(theta, phi);
 }
 
 vec3 spherical_to_cartesian(vec2 sphericalVector) 
@@ -99,19 +64,15 @@ void fragment()
 {
 	vec2 uv = SCREEN_UV;
 	
-	vec3 screen_color = texture(screen_texture, uv).rgb;
-	float depth = texture(normal_depth_texture, uv).b;
+//	vec3 screen_color = texture(screen_texture, uv).rgb;
+//	float depth = texture(normal_depth_texture, uv).b;
 	
+	float noise_color = psrdnoise(uv + (MsTime / 10.0)) / 20.0;
+	vec3 color = texture(screen_texture,uv + noise_color).rgb;
+	vec3 normal = texture(normal_depth_texture,uv + noise_color).rgb;
+//	vec2 sphericalVector = normal.rg;
+//	vec3 dirVector = spherical_to_cartesian(sphericalVector);
+//	dirVector = (dirVector + 1.0) * 0.5;
 	
-	//ALBEDO = vec3(depth); 	// showing depth texture
-	//ALBEDO = normal; 				// showing normal texture
-	//ALBEDO = vec3(roughness); 	// showing roughness texture
-	vec3 noise_color = vec3(psrdnoise(SCREEN_UV + (TIME / 10.0)));
-	vec3 color = texture(screen_texture,SCREEN_UV + (noise_color.b / 20.0)).rgb;
-	vec3 normal = texture(normal_depth_texture,SCREEN_UV + (noise_color.b / 20.0)).rgb;
-	vec2 sphericalVector = normal.rg;
-	vec3 dirVector = spherical_to_cartesian(sphericalVector);
-	dirVector = (dirVector + 1.0) * 0.5;
-	
-	ALBEDO = dirVector*normal.b;		// showing screen texture
+	ALBEDO = color+normal.b;
 }

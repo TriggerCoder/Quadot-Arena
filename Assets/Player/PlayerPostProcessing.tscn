@@ -1,8 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://qov23ls4iuhu"]
+[gd_scene load_steps=6 format=3 uid="uid://qov23ls4iuhu"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerPostProcessing.cs" id="1_maglr"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerHUD.cs" id="1_ubqha"]
-[ext_resource type="Material" uid="uid://b1ikorkoscxl3" path="res://Assets/Materials/cameraUnderWater.tres" id="2_cqr73"]
 [ext_resource type="Material" uid="uid://cpth41nj3vmg2" path="res://Assets/Materials/normalDepthTexture.tres" id="4_jcn6a"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_0iqvi"]
@@ -33,14 +32,14 @@ extra_cull_margin = 0.1
 mesh = SubResource("QuadMesh_0iqvi")
 skeleton = NodePath("../..")
 script = ExtResource("1_ubqha")
-cameraUnderWaterMaterial = ExtResource("2_cqr73")
 
 [node name="PlayerViewport" type="SubViewport" parent="ViewPortCamera"]
 size = Vector2i(1280, 720)
 render_target_update_mode = 4
 
 [node name="NormalDepthCamera" type="Camera3D" parent="."]
-cull_mask = 65536
+visible = false
+cull_mask = 0
 near = 0.1
 far = 300.0
 

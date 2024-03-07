@@ -67,7 +67,7 @@ public partial class GameManager : Node
 	public const short Player6UIViewLayer = 13;
 	public const short Player7UIViewLayer = 14;
 	public const short Player8UIViewLayer = 15;
-
+	public const short PlayerNormalDepthLayer = 16;
 	public const short NotVisibleLayer = 20;
 
 	//Physic Masks

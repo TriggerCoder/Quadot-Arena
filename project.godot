@@ -186,6 +186,7 @@ Escape={
 3d_render/layer_14="Player6UIViewLayer"
 3d_render/layer_15="Player7UIViewLayer"
 3d_render/layer_16="Player8UIViewLayer"
+3d_render/layer_17="PlayerNormalDepthLayer"
 3d_physics/layer_1="DefaultLayer"
 3d_physics/layer_2="NoCollisionLayer"
 3d_physics/layer_3="ColliderLayer"

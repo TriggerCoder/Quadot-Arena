@@ -10,13 +10,7 @@ public partial class MaterialManager : Node
 	[Export]
 	public ShaderMaterial fogMaterial;
 	[Export]
-	public ShaderMaterial opaqueMaterial;
-	[Export]
 	public ShaderMaterial defaultMaterial;
-	[Export]
-	public ShaderMaterial billBoardMaterial;
-	[Export]
-	public ShaderMaterial spriteMaterial;
 	[Export]
 	public ShaderMaterial defaultTransparentMaterial;
 	[Export]
@@ -25,6 +19,10 @@ public partial class MaterialManager : Node
 	public ShaderMaterial defaultTransparentLightMapMaterial;
 	[Export]
 	public ShaderMaterial decalsMapMaterial;
+	[Export]
+	public ShaderMaterial baseCameraMaterial;
+	[Export]
+	public ShaderMaterial underWaterMaterial;
 	[Export]
 	public string[] _decalsNames;
 
@@ -40,6 +38,8 @@ public partial class MaterialManager : Node
 	public static string shadowProperty = "ShadowIntensity";
 	public static string lightMapProperty = "shader_parameter/LightMap";
 	public static string opaqueTexProperty = "shader_parameter/Tex_0";
+	public static string screenTexure = "screen_texture";
+	public static string normalDepthTexture = "normal_depth_texture";
 
 	public static List<string> Decals = new List<string>();
 	public static List<string> FogShaders = new List<string>();

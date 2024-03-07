@@ -5,4 +5,4 @@
 [resource]
 render_priority = 0
 shader = ExtResource("1_1r4j2")
-shader_parameter/depth_range = 84.0
+shader_parameter/depth_range = 80.0

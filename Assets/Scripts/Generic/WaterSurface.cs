@@ -98,6 +98,7 @@ public partial class WaterSurface : Area3D
 			if (currentPlayers.Contains(playerThing))
 			{
 				playerThing.waterLever = 0;
+				playerThing.playerInfo.playerPostProcessing.ResetEffects();
 				playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.Jump;
 				SoundManager.Create3DSound(playerThing.GlobalPosition, outSound);
 				currentPlayers.Remove(playerThing);
@@ -111,6 +112,7 @@ public partial class WaterSurface : Area3D
 		if (!currentPlayers.Contains(playerThing))
 		{
 			playerThing.waterLever = 1;
+			playerThing.playerInfo.playerPostProcessing.SetWaterEffect();
 			SoundManager.Create3DSound(playerThing.GlobalPosition, inSound);
 			currentPlayers.Add(playerThing);
 //			GameManager.Print(playerThing.Name + " Jump into the Water " + Name);
