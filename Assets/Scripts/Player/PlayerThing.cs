@@ -150,16 +150,16 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 //		playerInfo.playerHUD.HUDUpdateHealthNum();
 //		playerInfo.playerHUD.HUDUpdateArmorNum();
 
-/*
+
 		if (amount > 60)
-			playerInfo.playerHUD.painFlashTime = 2.5f;
+			playerInfo.playerPostProcessing.playerHUD.painFlashTime(2.5f);
 		else if (amount > 40)
-			playerInfo.playerHUD.painFlashTime = 2f;
+			playerInfo.playerPostProcessing.playerHUD.painFlashTime(2f);
 		else if (amount > 20)
-			playerInfo.playerHUD.painFlashTime = 1.5f;
+			playerInfo.playerPostProcessing.playerHUD.painFlashTime(1.5f);
 		else
-			playerInfo.playerHUD.painFlashTime = 1f;
-*/
+			playerInfo.playerPostProcessing.playerHUD.painFlashTime(1f);
+
 		if (hitpoints <= 0)
 		{
 //			playerInfo.doomHUD.HUDUpdateMugshot(DoomHUD.MugType.Dead);

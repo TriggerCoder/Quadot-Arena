@@ -195,14 +195,13 @@ public partial class ItemPickup : Area3D
 
 			if (disable)
 			{
-//				player.playerInfo.playerHUD.pickupFlashTime = .5f;
+				player.playerInfo.playerPostProcessing.playerHUD.pickupFlashTime(.5f);
 				thingController.DisableThing();
 				if (!string.IsNullOrEmpty(PickupSound))
 					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(PickupSound));
 //				player.playerInfo.playerHUD.HUDUpdateAmmoNum();
 //				player.playerInfo.playerHUD.HUDUpdateHealthNum();
 //				player.playerInfo.playerHUD.HUDUpdateArmorNum();
-//				gameObject.SetActive(false);
 			}
 		}
 	}

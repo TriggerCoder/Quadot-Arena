@@ -40,6 +40,8 @@ public partial class MaterialManager : Node
 	public static string opaqueTexProperty = "shader_parameter/Tex_0";
 	public static string screenTexure = "screen_texture";
 	public static string normalDepthTexture = "normal_depth_texture";
+	public static string painTexure = "pain_texture";
+	public static string pickUpTexture = "pick_up_texture";
 
 	public static List<string> Decals = new List<string>();
 	public static List<string> FogShaders = new List<string>();
