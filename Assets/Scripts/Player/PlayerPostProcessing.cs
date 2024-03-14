@@ -21,7 +21,7 @@ public partial class PlayerPostProcessing : Node3D
 		GameManager.Instance.SetViewPortToCamera(ViewPortCamera);
 	}
 
-	public void InitPost()
+	public void InitPost(PlayerInfo p)
 	{
 		ViewPortCamera.CullMask = UIMask;
 		NormalDepthCamera.CullMask = ViewMask | UIMask | (1 << GameManager.PlayerNormalDepthLayer);
@@ -30,7 +30,7 @@ public partial class PlayerPostProcessing : Node3D
 		playerHUD.baseViewPortTexture = ViewPort.GetTexture();
 		playerHUD.normalDepthViewPortTexture = NormalDepthViewPort.GetTexture();
 		playerHUD.NormalDepthCamera = NormalDepthCamera;
-		playerHUD.Init();
+		playerHUD.Init(p);
 	}
 
 	public void SetWaterEffect()

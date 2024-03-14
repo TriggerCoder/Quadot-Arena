@@ -570,7 +570,7 @@ public static class Mesher
 	{
 		return GenerateModelFromMeshes(model, layer, true, true, null, false, false, meshToSkin);
 	}
-	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false)
+	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false, bool useLightVol = true)
 	{
 		if (model == null || model.meshes.Count == 0)
 		{
@@ -684,7 +684,8 @@ public static class Mesher
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					if (isViewModel)
 						mesh.SetInstanceShaderParameter("ViewModel", true);
-					mesh.SetInstanceShaderParameter("UseLightVol", true);
+					if (useLightVol)
+						mesh.SetInstanceShaderParameter("UseLightVol", true);
 					if (!currentTransparent && receiveShadows)
 					{
 						Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
@@ -812,7 +813,8 @@ public static class Mesher
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 						if (isViewModel)
 							mesh.SetInstanceShaderParameter("ViewModel", true);
-						mesh.SetInstanceShaderParameter("UseLightVol", true);
+						if (useLightVol)
+							mesh.SetInstanceShaderParameter("UseLightVol", true);
 						if (receiveShadows)
 						{
 							Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
@@ -838,7 +840,7 @@ public static class Mesher
 		return FillModelFromProcessedData(model, layer, true, true, null, false, meshToSkin);
 	}
 
-	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool forceSkinAlpha = false, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false)
+	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool forceSkinAlpha = false, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false, bool useLightVol = true)
 	{
 		if (ownerObject == null)
 		{
@@ -925,7 +927,8 @@ public static class Mesher
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					if (isViewModel)
 						mesh.SetInstanceShaderParameter("ViewModel", true);
-					mesh.SetInstanceShaderParameter("UseLightVol", true);
+					if (useLightVol)
+						mesh.SetInstanceShaderParameter("UseLightVol", true);
 					if (receiveShadows)
 					{
 						Texture mainText = (Texture2D)skinMaterial.readyMaterials.Get("shader_parameter/Tex_0");
@@ -1001,7 +1004,8 @@ public static class Mesher
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					if (isViewModel)
 						mesh.SetInstanceShaderParameter("ViewModel", true);
-					mesh.SetInstanceShaderParameter("UseLightVol", true);
+					if (useLightVol)
+						mesh.SetInstanceShaderParameter("UseLightVol", true);
 				}
 			}
 		}

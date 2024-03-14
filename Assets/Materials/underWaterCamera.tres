@@ -5,4 +5,7 @@
 [resource]
 render_priority = 0
 shader = ExtResource("1_y5ebm")
-shader_parameter/depth_range = 84.0
+shader_parameter/pain_start_time = 0.0
+shader_parameter/pick_up_start_time = 0.0
+shader_parameter/pain_duration = 0.001
+shader_parameter/pick_up_duration = 0.001

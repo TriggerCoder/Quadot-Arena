@@ -8,6 +8,15 @@ public partial class PlayerHUD : MeshInstance3D
 	public Texture2D painEffect;
 	[Export]
 	public Texture2D pickupEffect;
+	[Export]
+	public Node3D viewHeadContainer;
+	[Export]
+	public Node3D viewHead;
+	[Export]
+	public AnimationPlayer headAnimation;
+	[Export]
+	public Vector3 headOffset = new Vector3(0, -1f, -1.5f);
+	public PlayerInfo playerInfo;
 	public ShaderMaterial baseCamera;
 	public ShaderMaterial currentMaterial;
 	public ViewportTexture baseViewPortTexture;
@@ -16,7 +25,11 @@ public partial class PlayerHUD : MeshInstance3D
 	public Camera3D NormalDepthCamera;
 	public Dictionary<ShaderMaterial, ViewMaterial> ReplacementMaterial = new Dictionary<ShaderMaterial, ViewMaterial>();
 
-	public void Init()
+	public bool hasQuad = false;
+	private List<MeshInstance3D> fxMeshes;
+	private MD3GodotConverted head;
+
+	public void Init(PlayerInfo p)
 	{
 		baseCamera = (ShaderMaterial)MaterialManager.Instance.baseCameraMaterial.Duplicate(true);
 		Mesh.SurfaceSetMaterial(0, baseCamera);
@@ -24,7 +37,21 @@ public partial class PlayerHUD : MeshInstance3D
 		baseCamera.SetShaderParameter(MaterialManager.painTexure, painEffect);
 		baseCamera.SetShaderParameter(MaterialManager.pickUpTexture, pickupEffect);
 		currentMaterial = baseCamera;
-		RenderingServer.FramePreDraw += () => OnPreRender();
+		playerInfo = p;
+		viewHeadContainer.Position = headOffset;
+	}
+
+	public void InitHUD(MD3 headModel, Dictionary<string, string> meshToSkin)
+	{
+		if (headModel != null)
+		{
+			if (headModel.readySurfaceArray.Count == 0)
+				head = Mesher.GenerateModelFromMeshes(headModel, Layers, false, false, viewHead, false, false, meshToSkin, true, false, true, false);
+			else
+				head = Mesher.FillModelFromProcessedData(headModel, Layers, false, false, viewHead, false, meshToSkin, false, true, false, true, false);
+		}
+		fxMeshes = GameManager.CreateFXMeshInstance3D(viewHeadContainer);
+		headAnimation.Play("idle");
 	}
 
 	public void SetCameraReplacementeMaterial(ShaderMaterial shaderMaterial)
@@ -84,9 +111,18 @@ public partial class PlayerHUD : MeshInstance3D
 		currentMaterial.SetShaderParameter("pick_up_start_time", GameManager.CurrentTimeMsec);
 	}
 
-	public void OnPreRender()
+	public override void _Process(double delta)
 	{
-		//		GameManager.Print("PreRender");
+		if (GameManager.Paused)
+			return;
+
+		float deltaTime = (float)delta;
+
+		if (hasQuad != playerInfo.quadDamage)
+		{
+			hasQuad = playerInfo.quadDamage;
+			GameManager. ChangeQuadFx(fxMeshes,hasQuad);
+		}
 	}
 	public class ViewMaterial
 	{

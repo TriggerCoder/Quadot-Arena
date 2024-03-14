@@ -75,7 +75,7 @@ public partial class PlayerWeapon : Node3D
 	private PhysicsPointQueryParameters3D PointIntersect;
 
 	public string quadSound = "items/damage3";
-	private List<MeshInstance3D> fxMeshes = new List<MeshInstance3D>();
+	private List<MeshInstance3D> fxMeshes;
 	public bool hasQuad = false;
 	public override void _Ready()
 	{
@@ -117,7 +117,7 @@ public partial class PlayerWeapon : Node3D
 		if (model.tagsIdbyName.TryGetValue("tag_flash", out int tagId))
 			MuzzleOffset = model.tagsbyId[tagId][0].origin;
 
-		AddAllMeshInstance3D(playerInfo.WeaponHand);
+		fxMeshes = GameManager.CreateFXMeshInstance3D(playerInfo.WeaponHand);
 
 		if (!string.IsNullOrEmpty(MuzzleModelName))
 		{
@@ -144,37 +144,6 @@ public partial class PlayerWeapon : Node3D
 //		playerInfo.playerHUD.HUDUpdateAmmoNum();
 		OnInit();
 	}
-	private void AddAllMeshInstance3D(Node parent)
-	{
-		var Childrens = GameManager.GetAllChildrens(parent);
-		foreach (var child in Childrens)
-		{
-			if (child is MeshInstance3D mesh)
-			{
-				MeshInstance3D fxMesh = new MeshInstance3D();
-				fxMesh.Mesh = mesh.Mesh;
-				fxMesh.Layers = mesh.Layers;
-				fxMesh.Visible = false;
-				mesh.AddChild(fxMesh);
-				fxMeshes.Add(fxMesh);
-			}
-
-		}
-	}
-	private void ChangeQuadFx(bool enable)
-	{
-		for (int i = 0; i < fxMeshes.Count; i++)
-		{
-			MeshInstance3D mesh = fxMeshes[i];
-			if (enable)
-			{
-				mesh.SetSurfaceOverrideMaterial(0, MaterialManager.quadWeaponFxMaterial);
-				mesh.Visible = true;
-			}
-			else
-				mesh.Visible = false;
-		}
-	}
 	public override void _Process(double delta)
 	{
 		if (GameManager.Paused)
@@ -186,7 +155,7 @@ public partial class PlayerWeapon : Node3D
 		if (hasQuad != playerInfo.quadDamage) 
 		{
 			hasQuad = playerInfo.quadDamage;
-			ChangeQuadFx(hasQuad);
+			GameManager.ChangeQuadFx(fxMeshes,hasQuad);
 		}
 
 		float deltaTime = (float)delta;

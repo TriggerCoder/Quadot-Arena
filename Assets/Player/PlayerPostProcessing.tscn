@@ -1,10 +1,48 @@
-[gd_scene load_steps=8 format=3 uid="uid://qov23ls4iuhu"]
+[gd_scene load_steps=12 format=3 uid="uid://qov23ls4iuhu"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerPostProcessing.cs" id="1_maglr"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerHUD.cs" id="1_ubqha"]
 [ext_resource type="Texture2D" uid="uid://ddbd10afb4ltf" path="res://Assets/Textures/pain_flash.png" id="3_cwmu1"]
 [ext_resource type="Material" uid="uid://cpth41nj3vmg2" path="res://Assets/Materials/normalDepthTexture.tres" id="4_jcn6a"]
 [ext_resource type="Texture2D" uid="uid://cx8oxtpvs8p2u" path="res://Assets/Textures/pickup_flash.png" id="4_txoxd"]
+
+[sub_resource type="Animation" id="Animation_7pvft"]
+resource_name = "idle"
+loop_mode = 1
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.25, 1, 0, 0, 0.013, 1, 0.5, 1, 0, 0, 0, 1, 0.75, 1, 0, 0, -0.013, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="Animation" id="Animation_4dj4l"]
+resource_name = "look_right"
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 1, 1, 0, 0.301, 0, 0.954)
+
+[sub_resource type="Animation" id="Animation_q4lfx"]
+resource_name = "look_left"
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 1, 1, 0, -0.301, 0, 0.954)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_pxr8j"]
+_data = {
+"idle": SubResource("Animation_7pvft"),
+"look_left": SubResource("Animation_q4lfx"),
+"look_right": SubResource("Animation_4dj4l")
+}
 
 [sub_resource type="QuadMesh" id="QuadMesh_0iqvi"]
 flip_faces = true
@@ -25,10 +63,20 @@ playerHUD = NodePath("ViewPortCamera/PlayerHUD")
 [node name="ViewPortCamera" type="Camera3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 2)
 cull_mask = 0
-near = 0.001
+near = 0.01
 far = 300.0
 
-[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera"]
+[node name="ViewHeadContainer" type="Node3D" parent="ViewPortCamera"]
+transform = Transform3D(-3.58063e-08, -2.50718e-08, 1, -0.573576, 0.819152, 0, -0.819152, -0.573576, -4.37114e-08, 0, 0, 0)
+
+[node name="ViewHead" type="Node3D" parent="ViewPortCamera/ViewHeadContainer"]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="ViewPortCamera/ViewHeadContainer/ViewHead"]
+libraries = {
+"": SubResource("AnimationLibrary_pxr8j")
+}
+
+[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "viewHead", "headAnimation")]
 layers = 0
 extra_cull_margin = 0.1
 mesh = SubResource("QuadMesh_0iqvi")
@@ -36,6 +84,9 @@ skeleton = NodePath("../..")
 script = ExtResource("1_ubqha")
 painEffect = ExtResource("3_cwmu1")
 pickupEffect = ExtResource("4_txoxd")
+viewHeadContainer = NodePath("../ViewHeadContainer")
+viewHead = NodePath("../ViewHeadContainer/ViewHead")
+headAnimation = NodePath("../ViewHeadContainer/ViewHead/AnimationPlayer")
 
 [node name="PlayerViewport" type="SubViewport" parent="ViewPortCamera"]
 size = Vector2i(1280, 720)

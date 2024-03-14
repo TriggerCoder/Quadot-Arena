@@ -50,7 +50,7 @@ public partial class PlayerInfo : Node3D
 		playerCamera.ThirdPerson.CullMask = (uint)viewLayer;
 		playerCamera.playerPostProcessing.ViewMask = (uint)viewLayer;
 		playerCamera.playerPostProcessing.UIMask = uiLayer;
-		playerCamera.playerPostProcessing.InitPost();
+		playerCamera.playerPostProcessing.InitPost(this);
 	}
 
 	public void Reset()
@@ -60,6 +60,7 @@ public partial class PlayerInfo : Node3D
 		MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 200 };
 
 		godMode = false;
+		quadDamage = false;
 
 		playerPostProcessing.ResetEffects();
 //		playerHUD.pickupFlashTime = 0f;

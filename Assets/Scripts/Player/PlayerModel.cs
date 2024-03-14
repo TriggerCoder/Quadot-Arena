@@ -168,6 +168,7 @@ public partial class PlayerModel : Node3D
 		FxLight.Layers = GameManager.AllPlayerViewMask;
 		AddChild(FxLight);
 		FxLight.Position = Vector3.Up;
+		FxLight.LightColor = new Color(0.2f, 0.2f, 1);
 	}
 	void ApplySimpleMove(float deltaTime)
 	{
@@ -404,7 +405,8 @@ public partial class PlayerModel : Node3D
 		if (hasQuad != playerControls.playerInfo.quadDamage)
 		{
 			hasQuad = playerControls.playerInfo.quadDamage;
-			ChangeQuadFx(hasQuad);
+			FxLight.Visible = hasQuad;
+			GameManager.ChangeQuadFx(fxMeshes,hasQuad);
 		}
 	}
 
@@ -742,7 +744,7 @@ public partial class PlayerModel : Node3D
 		}
 		AddAllMeshInstance3D(weaponNode, false);
 		if (hasQuad)
-			ChangeQuadFx(true);
+			GameManager.ChangeQuadFx(fxMeshes,true);
 	}
 
 	public void UnloadWeapon()
@@ -894,24 +896,9 @@ public partial class PlayerModel : Node3D
 		currentLayer = layer;
 		
 		AddAllMeshInstance3D(playerModel);
-		return true;
-	}
 
-	private void ChangeQuadFx(bool enable)
-	{
-		FxLight.LightColor = new Color(0.2f, 0.2f, 1);
-		FxLight.Visible = enable;
-		for (int i = 0; i < fxMeshes.Count; i++)
-		{
-			MeshInstance3D mesh = fxMeshes[i];
-			if (enable)
-			{
-				mesh.SetSurfaceOverrideMaterial(0, MaterialManager.quadFxMaterial);
-				mesh.Visible = true;
-			}
-			else
-				mesh.Visible = false;
-		}
+		playerControls.playerInfo.playerPostProcessing.playerHUD.InitHUD(head, meshToSkin);
+		return true;
 	}
 	public void ChangeLayer(uint layer)
 	{

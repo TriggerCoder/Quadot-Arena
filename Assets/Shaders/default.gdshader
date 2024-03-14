@@ -5,6 +5,7 @@ uniform sampler2D Tex_0 : repeat_enable;
 instance uniform float ShadowIntensity : hint_range(0, 1) = 0;
 instance uniform bool ViewModel = false;
 instance uniform bool UseLightVol = false;
+global uniform float ViewCameraFOV;
 global uniform vec4 AmbientColor : source_color;
 global uniform float mixBrightness;
 global uniform vec3 LightVolNormalize;
@@ -33,6 +34,10 @@ void vertex()
 	float lng = ambient.a * (PI) / 128.0f;
 	float lat = dir.a * (PI) / 128.0f;
 	dirVector = vec3(- cos(lat) * sin(lng), cos(lng), sin(lat) * sin(lng));
+	float InvTanFOV = 1.0f / tan(0.5f * (ViewCameraFOV * PI / 180.0f));
+	float Aspect = VIEWPORT_SIZE.x / VIEWPORT_SIZE.y;
+	PROJECTION_MATRIX[1][1] = mix(PROJECTION_MATRIX[1][1],-InvTanFOV,float(ViewModel));
+	PROJECTION_MATRIX[0][0] = mix(PROJECTION_MATRIX[0][0],InvTanFOV / Aspect,float(ViewModel));	
 	POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);
 	POSITION.z = mix(POSITION.z, mix(POSITION.z, 0, 0.999), float(ViewModel));
 }

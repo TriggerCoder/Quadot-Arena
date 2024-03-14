@@ -66,6 +66,9 @@ public partial class TriggerController : Node3D
 		GameManager.Print("Someone "+ other.Name + " tried to activate this " + Name);
 		if (other is PlayerThing player)
 		{
+			if (!player.ready)
+				return;
+
 			//Dead player don't activate stuff
 			if (player.Dead)
 				return;
@@ -102,11 +105,18 @@ public partial class TriggerController : Node3D
 			Node3D CurrentBody = CurrentBodies[i];
 			if (CurrentColliders.ContainsKey(CurrentBody))
 			{
+				PlayerThing playerThing = CurrentBody as PlayerThing;
+				if ((!playerThing.ready) || (playerThing.Dead))
+				{
+					CurrentColliders.Remove(CurrentBody);
+					continue;
+				}
+
 				int value = CurrentColliders[CurrentBody]++;
 				if (value > 1)
 				{
 					GameManager.Print("Someone " + CurrentBody.Name + " activated this " + Name);
-					Activate(CurrentBody as PlayerThing);
+					Activate(playerThing);
 					CurrentColliders.Remove(CurrentBody);
 				}
 			}

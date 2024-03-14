@@ -287,6 +287,39 @@ public partial class GameManager : Node
 			list.AddRange(GetAllChildrens(child));
 		return list;
 	}
+
+	public static List<MeshInstance3D> CreateFXMeshInstance3D(Node parent)
+	{
+		var Childrens = GetAllChildrens(parent);
+		List<MeshInstance3D> fxMeshes = new List<MeshInstance3D>();
+		foreach (var child in Childrens)
+		{
+			if (child is MeshInstance3D mesh)
+			{
+				MeshInstance3D fxMesh = new MeshInstance3D();
+				fxMesh.Mesh = mesh.Mesh;
+				fxMesh.Layers = mesh.Layers;
+				fxMesh.Visible = false;
+				mesh.AddChild(fxMesh);
+				fxMeshes.Add(fxMesh);
+			}
+		}
+		return fxMeshes;
+	}
+	public static void ChangeQuadFx(List<MeshInstance3D> fxMeshes, bool enable)
+	{
+		for (int i = 0; i < fxMeshes.Count; i++)
+		{
+			MeshInstance3D mesh = fxMeshes[i];
+			if (enable)
+			{
+				mesh.SetSurfaceOverrideMaterial(0, MaterialManager.quadWeaponFxMaterial);
+				mesh.Visible = true;
+			}
+			else
+				mesh.Visible = false;
+		}
+	}
 	public static void Print(string Message, PrintType type = PrintType.Log)
 	{
 		if (type >= printType)

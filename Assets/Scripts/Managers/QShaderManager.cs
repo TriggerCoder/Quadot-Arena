@@ -359,6 +359,7 @@ public static class QShaderManager
 		code += GSHeader;
 		code += GSUniforms;
 		code += GSVaryings;
+		code += "global uniform float ViewCameraFOV;\n";
 		code += "global uniform float MsTime;\n";
 		code += "global uniform vec4 AmbientColor: source_color;\n";
 		code += "global uniform float mixBrightness;\n";
@@ -487,7 +488,7 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (shaderName.Contains("RED_TELEP"))
+		if (shaderName.Contains("QUADWEAPON"))
 			GameManager.Print(code);
 
 		Shader shader = new Shader();
@@ -626,6 +627,20 @@ public static class QShaderManager
 		}
 		if (qShader.qShaderGlobal.deformVertexes == null)
 		{
+			if (useView)
+			{
+				Vertex += "\tfloat InvTanFOV = 1.0f / tan(0.5f * (ViewCameraFOV * PI / 180.0f));\n";
+				Vertex += "\tfloat Aspect = VIEWPORT_SIZE.x / VIEWPORT_SIZE.y;\n";
+				Vertex += "\tPROJECTION_MATRIX[1][1] = mix(PROJECTION_MATRIX[1][1], -InvTanFOV, float(ViewModel));\n";
+				Vertex += "\tPROJECTION_MATRIX[0][0] = mix(PROJECTION_MATRIX[0][0], InvTanFOV / Aspect, float(ViewModel));\n";
+			}
+			else if (forceView)
+			{
+				Vertex += "\tfloat InvTanFOV = 1.0f / tan(0.5f * (ViewCameraFOV * PI / 180.0f));\n";
+				Vertex += "\tfloat Aspect = VIEWPORT_SIZE.x / VIEWPORT_SIZE.y;\n";
+				Vertex += "\tPROJECTION_MATRIX[1][1] = -InvTanFOV;\n";
+				Vertex += "\tPROJECTION_MATRIX[0][0] =  InvTanFOV / Aspect;\n";
+			}
 			Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);\n";
 			if (forceView)
 				Vertex += "\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
@@ -723,6 +738,20 @@ public static class QShaderManager
 		}
 		Vertex += Vars;
 		Vertex += Verts;
+		if (useView)
+		{
+			Vertex += "\tfloat InvTanFOV = 1.0f / tan(0.5f * (ViewCameraFOV * PI / 180.0f));\n";
+			Vertex += "\tfloat Aspect = VIEWPORT_SIZE.x / VIEWPORT_SIZE.y;\n";
+			Vertex += "\tPROJECTION_MATRIX[1][1] = mix(PROJECTION_MATRIX[1][1], -InvTanFOV, float(ViewModel));\n";
+			Vertex += "\tPROJECTION_MATRIX[0][0] = mix(PROJECTION_MATRIX[0][0], InvTanFOV / Aspect, float(ViewModel));\n";
+		}
+		else if (forceView)
+		{
+			Vertex += "\tfloat InvTanFOV = 1.0f / tan(0.5f * (ViewCameraFOV * PI / 180.0f));\n";
+			Vertex += "\tfloat Aspect = VIEWPORT_SIZE.x / VIEWPORT_SIZE.y;\n";
+			Vertex += "\tPROJECTION_MATRIX[1][1] = -InvTanFOV;\n";
+			Vertex += "\tPROJECTION_MATRIX[0][0] =  InvTanFOV / Aspect;\n";
+		}
 		Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);\n";
 		if (forceView)
 			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
@@ -1351,6 +1380,7 @@ public class QShaderGlobal
 	public bool unShaded = false;
 	public bool trans = false;
 	public bool lava = false;
+	public bool water = false;
 	public bool noPicMip = false;
 	public bool portal = false;
 	public bool noMipMap = false;
@@ -1396,6 +1426,9 @@ public class QShaderGlobal
 						lava = true;
 						if (trans)
 							trans = false;
+					break;
+					case "WATER":
+						water = true;
 					break;
 				}
 				break;

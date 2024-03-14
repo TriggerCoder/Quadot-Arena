@@ -81,7 +81,7 @@ public partial class WaterSurface : Area3D
 		if (GameManager.Paused)
 			return;
 
-		if (other is PlayerThing playerThing)
+		if (other is PlayerThing)
 		{
 			if (!CurrentColliders.ContainsKey(other))
 				CurrentColliders.Add(other, 0);

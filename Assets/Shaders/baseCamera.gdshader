@@ -20,7 +20,8 @@ void light()
 
 void vertex()
 {
-	POSITION = vec4(VERTEX, 1.0);
+	POSITION = vec4(VERTEX.xyz, 1.0);
+	POSITION.z = 0.1;
 }
 
 void fragment()
@@ -43,7 +44,7 @@ void fragment()
 	float clampPickUp = clamp(0.0,1.0,pick_up_duration);
 	float pickUpTrans = mix(0.0, pickUpText.a, isPickUp * lerpPickUp * clampPickUp);
 	
-	color = pickUpText.rgb * pickUpTrans + color * (1.0 - pickUpTrans);
+	color = pickUpText.rgb * pickUpTrans * clampPickUp + color * (1.0 - pickUpTrans);
 	
 	ALBEDO = color;
 }
