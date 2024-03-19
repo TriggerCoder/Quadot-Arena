@@ -62,6 +62,7 @@ public partial class PlayerWeapon : Node3D
 	[Export]
 	public float _fireRate = .4f;
 	public float fireTime = 0f;
+	public float faceTime = 1.5f;
 	[Export]
 	public float _muzzleTime = .1f;
 	public float muzzleTimer = 0f;
@@ -231,6 +232,7 @@ public partial class PlayerWeapon : Node3D
 
 		if (fireTime <= 0f)
 		{
+			faceTime = 1.5f;
 			if ((useCooldown) && (cooldown))
 			{
 				coolTimer += deltaTime;
@@ -247,6 +249,7 @@ public partial class PlayerWeapon : Node3D
 
 			if (fireTime <= 0)
 			{
+				faceTime = 1.5f;
 				coolTimer = 0;
 				if (useCooldown)
 					cooldown = true;
@@ -257,6 +260,12 @@ public partial class PlayerWeapon : Node3D
 			else
 			{
 				coolTimer += deltaTime;
+				faceTime -= deltaTime;
+				if (faceTime <= 0)
+				{
+					faceTime = 0.5f;
+					playerInfo.playerPostProcessing.playerHUD.SetAttackFace();
+				}
 			}
 		}
 	}

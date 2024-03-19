@@ -2,53 +2,32 @@ using Godot;
 using System.Collections;
 using System.Collections.Generic;
 
-public partial class ContentType : Node
+public class ContentType
 {
 	public uint value;
-	[Export]
 	public bool Solid = false;
-	[Export]
 	public bool Lava = false;
-	[Export]
 	public bool Slime = false;
-	[Export]
 	public bool Water = false;
-	[Export]
 	public bool Fog = false;
-	[Export]
 	public bool AreaPortal = false;
-	[Export]
 	public bool PlayerClip = false;
-	[Export]
 	public bool MonsterClip = false;
-	[Export]
 	public bool Teleporter = false;
-	[Export]
 	public bool JumpPad = false;
-	[Export]
 	public bool ClusterPortal = false;
-	[Export]
 	public bool BotsNotEnter = false;
-	[Export]
 	public bool Origin = false;
-	[Export]
 	public bool Body = false;
-	[Export]
 	public bool Corpse = false;
-	[Export]
 	public bool Details = false;
-	[Export]
 	public bool Structural = false;
-	[Export]
 	public bool Translucent = false;
-	[Export]
 	public bool Trigger = false;
-	[Export]
 	public bool NoDrop = false;
 	public void Init(uint contentType)
 	{
 		value = contentType;
-		Name = "ContentType: "+value;
 		if ((contentType & ContentFlags.Solid) != 0)
 			Solid = true;
 		if ((contentType & ContentFlags.Lava) != 0)

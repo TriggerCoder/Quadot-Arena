@@ -59,7 +59,10 @@ public partial class ModelController : Node3D
 		DestroyAfterModelLastFrame,
 		DestroyAfterTextureLastFrame
 	}
-	// Called when the node enters the scene tree for the first time.
+
+	private Vector3 lastGlobalPosition = new Vector3(0, 0, 0);
+	private Basis	lastGlobalBasis = Basis.Identity;	
+
 	public override void _Ready()
 	{
 		Init();
@@ -140,6 +143,9 @@ public partial class ModelController : Node3D
 			return;
 		}
 
+		if (currentFrame == nextFrame)
+			return;
+
 		for (int i = 0; i < modelAnim.Count; i++)
 		{
 			MD3Mesh currentMesh = md3Model.meshes[modelAnim[i]];
@@ -174,6 +180,7 @@ public partial class ModelController : Node3D
 
 			int currentFrame = textureCurrentFrame[i];
 			int nextFrame = currentFrame + 1;
+
 			if (nextFrame >= currentMesh.numSkins)
 				nextFrame = 0;
 			if ((nextFrame == 0) && (destroyType == DestroyType.DestroyAfterTextureLastFrame))
@@ -181,6 +188,10 @@ public partial class ModelController : Node3D
 				Destroy();
 				return;
 			}
+
+			if (currentFrame == nextFrame)
+				continue;
+
 			if (TextureCurrentLerpTime >= 1.0f)
 			{
 				model.data[currentMesh.meshNum].meshDataTool.SetMaterial(materials[i][nextFrame]);
@@ -232,13 +243,26 @@ public partial class ModelController : Node3D
 
 	void UpdateMultiMesh()
 	{
-		for (int i = 0; i < multiMeshDataList.Count; i++)
+		if (multiMeshDataList.Count == 0)
+			return;
+
+		if (((GlobalPosition - lastGlobalPosition).LengthSquared() > Mathf.Epsilon) ||
+			((GlobalBasis.X - lastGlobalBasis.X).LengthSquared() > Mathf.Epsilon) ||
+			((GlobalBasis.Y - lastGlobalBasis.Y).LengthSquared() > Mathf.Epsilon) ||
+			((GlobalBasis.Z - lastGlobalBasis.Z).LengthSquared() > Mathf.Epsilon))
 		{
-			if (alphaFade)
-				Mesher.UpdateInstanceMultiMesh(multiMeshDataList[i].multiMesh, this, Modulate);
-			else
-				Mesher.UpdateInstanceMultiMesh(multiMeshDataList[i].multiMesh, this);
+
+			for (int i = 0; i < multiMeshDataList.Count; i++)
+			{
+				if (alphaFade)
+					Mesher.UpdateInstanceMultiMesh(multiMeshDataList[i].multiMesh, this, Modulate);
+				else
+					Mesher.UpdateInstanceMultiMesh(multiMeshDataList[i].multiMesh, this);
+			}
 		}
+
+		lastGlobalPosition = GlobalPosition;
+		lastGlobalBasis = GlobalBasis;	
 	}
 
 	public void Destroy()

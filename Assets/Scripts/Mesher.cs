@@ -26,7 +26,7 @@ public static class Mesher
 	public const float APROX_ERROR = 0.001f;
 
 	public const int LOW_USE_MULTIMESHES = 128;
-	public const int HIGH_USE_MULTIMESHES = 1024;
+	public const int HIGH_USE_MULTIMESHES = 512;
 
 	public const uint MaskSolid = ContentFlags.Solid;
 	public const uint MaskPlayerSolid = ContentFlags.Solid | ContentFlags.PlayerClip | ContentFlags.Body;
@@ -91,7 +91,7 @@ public static class Mesher
 			collider = new StaticBody3D();
 			MapLoader.ColliderGroup.AddChild(collider);
 			collider.Name = "Bezier_" + indexId + "_collider";
-			collider.AddChild(contentType);
+			MapLoader.mapContentTypes.Add(collider, contentType);
 			OwnerShapeId = collider.CreateShapeOwner(holder);
 		}
 
@@ -102,6 +102,7 @@ public static class Mesher
 				GenerateBezMesh(OwnerShapeId, collider, surfaces[i], n, (surfaceType.NoDraw == false), ref offset);
 		}
 
+		bool noDraw = surfaceType.NoDraw;
 		if (addCollider)
 		{
 			if ((surfaceType.value & MaskTransparent) != 0)
@@ -114,10 +115,10 @@ public static class Mesher
 				MapLoader.noMarks.Add(collider);
 
 			collider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
-			collider.AddChild(surfaceType);
+			MapLoader.mapSurfaceTypes.Add(collider, surfaceType);
 		}
 
-		if (surfaceType.NoDraw)
+		if (noDraw)
 			return;
 
 		bool hasPortal = false;
@@ -135,8 +136,10 @@ public static class Mesher
 			Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
 			float luminance = .25f;
 			if (mainText != null)
-				if (!string.IsNullOrEmpty(mainText.ResourceName))
-					luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+				if (mainText.HasMeta("luminance"))
+					luminance = (float)mainText.GetMeta("luminance");
+//				if (!string.IsNullOrEmpty(mainText.ResourceName))
+//					luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 			mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 		}
 
@@ -335,8 +338,10 @@ public static class Mesher
 			Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
 			float luminance = .25f;
 			if (mainText != null)
-				if (!string.IsNullOrEmpty(mainText.ResourceName))
-					luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+				if (mainText.HasMeta("luminance"))
+					luminance = (float)mainText.GetMeta("luminance");
+//				if (!string.IsNullOrEmpty(mainText.ResourceName))
+//					luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 			mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 		}
 
@@ -664,8 +669,10 @@ public static class Mesher
 						Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
 						float luminance = .25f;
 						if (mainText != null)
-							if (!string.IsNullOrEmpty(mainText.ResourceName))
-								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+							if (mainText.HasMeta("luminance"))
+								luminance = (float)mainText.GetMeta("luminance");
+//							if (!string.IsNullOrEmpty(mainText.ResourceName))
+//								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 					}
 
@@ -691,8 +698,10 @@ public static class Mesher
 						Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
 						float luminance = .25f;
 						if (mainText != null)
-							if (!string.IsNullOrEmpty(mainText.ResourceName))
-								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+							if (mainText.HasMeta("luminance"))
+								luminance = (float)mainText.GetMeta("luminance");
+//							if (!string.IsNullOrEmpty(mainText.ResourceName))
+//								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 					}
 
@@ -793,8 +802,10 @@ public static class Mesher
 							Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
 							float luminance = .25f;
 							if (mainText != null)
-								if (!string.IsNullOrEmpty(mainText.ResourceName))
-									luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+								if (mainText.HasMeta("luminance"))
+									luminance = (float)mainText.GetMeta("luminance");
+//								if (!string.IsNullOrEmpty(mainText.ResourceName))
+//									luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 						}
 
@@ -820,8 +831,10 @@ public static class Mesher
 							Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
 							float luminance = .25f;
 							if (mainText != null)
-								if (!string.IsNullOrEmpty(mainText.ResourceName))
-									luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+								if (mainText.HasMeta("luminance"))
+									luminance = (float)mainText.GetMeta("luminance");
+//								if (!string.IsNullOrEmpty(mainText.ResourceName))
+//									luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 						}
 
@@ -905,8 +918,10 @@ public static class Mesher
 							Texture mainText = (Texture2D)skinMaterial.readyMaterials.Get("shader_parameter/Tex_0");
 							float luminance = .25f;
 							if (mainText != null)
-								if (!string.IsNullOrEmpty(mainText.ResourceName))
-									luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+								if (mainText.HasMeta("luminance"))
+									luminance = (float)mainText.GetMeta("luminance");
+//								if (!string.IsNullOrEmpty(mainText.ResourceName))
+//									luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 						}
 					}
@@ -934,8 +949,10 @@ public static class Mesher
 						Texture mainText = (Texture2D)skinMaterial.readyMaterials.Get("shader_parameter/Tex_0");
 						float luminance = .25f;
 						if (mainText != null)
-							if (!string.IsNullOrEmpty(mainText.ResourceName))
-								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
+							if (mainText.HasMeta("luminance"))
+								luminance = (float)mainText.GetMeta("luminance");
+//							if (!string.IsNullOrEmpty(mainText.ResourceName))
+//								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 					}
 				}
@@ -1102,18 +1119,22 @@ public static class Mesher
 			return 0;
 		}
 
-/*		if ((stype & SurfaceFlags.NonSolid) != 0)
-		{
-			GameManager.Print("brushes: " + indexId + " Is not solid, Surface Type is: " + stype);
-			return 0;
-		}
-*/		ContentType contentType = new ContentType();
-		contentType.Init(type | extraContentFlag);
+		/*		if ((stype & SurfaceFlags.NonSolid) != 0)
+				{
+					GameManager.Print("brushes: " + indexId + " Is not solid, Surface Type is: " + stype);
+					return 0;
+				}
+		*/
 
-		if ((contentType.value & ContentFlags.Water) != 0)
+		type |= extraContentFlag;
+
+		if ((type & ContentFlags.Water) != 0)
 			isWater = true;
-		else if ((contentType.value & MaskPlayerSolid) == 0)
+		else if ((type & MaskPlayerSolid) == 0)
 			return 0;
+
+		ContentType contentType = new ContentType();
+		contentType.Init(type);
 
 		if (objCollider == null)
 		{
@@ -1128,7 +1149,7 @@ public static class Mesher
 			objCollider.Name = "Polygon_" + indexId + "_collider";
 			holder.AddChild(objCollider);
 		}
-		objCollider.AddChild(contentType);
+		MapLoader.mapContentTypes.Add(objCollider, contentType);
 
 		uint OwnerShapeId = objCollider.CreateShapeOwner(holder);
 		for (int i = 0; i < brushes.Length; i++)
@@ -1157,7 +1178,7 @@ public static class Mesher
 			MapLoader.noMarks.Add(objCollider);
 
 		objCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
-		objCollider.AddChild(surfaceType);
+		MapLoader.mapSurfaceTypes.Add(objCollider, surfaceType);
 
 		return OwnerShapeId;
 	}
@@ -1304,7 +1325,7 @@ public static class Mesher
 		CollisionShape3D mc = new CollisionShape3D();
 		mc.Name = "brushSide: " + brush.brushSide;
 		objCollider.AddChild(mc);
-		objCollider.AddChild(contentType);
+		MapLoader.mapContentTypes.Add(objCollider, contentType);
 
 		ConvexPolygonShape3D convexHull = new ConvexPolygonShape3D();
 		convexHull.Points = intersectPoint.ToArray();
@@ -1316,7 +1337,7 @@ public static class Mesher
 		type = MapLoader.mapTextures[brush.shaderId].surfaceFlags;
 		SurfaceType surfaceType = new SurfaceType();
 		surfaceType.Init(type);
-		objCollider.AddChild(surfaceType);
+		MapLoader.mapSurfaceTypes.Add(objCollider, surfaceType);
 
 //		if ((surfaceType.value & NoMarks) != 0)
 //			MapLoader.noMarks.Add(mc);
@@ -1497,17 +1518,56 @@ public static class Mesher
 		if (MultiMeshes.ContainsKey(multiMesh))
 		{
 			List<Node3D> multiMeshList = MultiMeshes[multiMesh];
-			instanceNum = multiMeshList.Count;
-/*			int threshold = (multiMesh.InstanceCount >> 1);
-			if (instanceNum > threshold)
-			{
-				DestroyAfterTime destroy = new DestroyAfterTime();
-				destroy.parent = owner.GetParentNode3D();
-				multiMeshList[0].AddChild(destroy);
-			}
-*/
+
 			if (multiMeshList.Contains(owner))
 				return;
+
+			instanceNum = multiMeshList.Count;
+			int threshold = (multiMesh.InstanceCount >> 1);
+			if (instanceNum > threshold)
+			{
+				for (int i = 0; i < multiMeshList.Count; i++)
+				{
+					Node3D node3D = multiMeshList[i];
+					if (node3D.HasMeta("destroying"))
+						continue;
+
+					Node parent = node3D.GetParent();
+					{
+						Node child = node3D;
+						while (parent != GameManager.Instance.TemporaryObjectsHolder)
+						{
+							child = parent;
+							parent = child.GetParent();
+						}
+						parent = child;
+					}
+//This is slow but correct
+/*
+					bool foundDestroy = false;
+					var Childrens = GameManager.GetAllChildrens(parent);
+					DestroyAfterTime destroy = null;
+					foreach (var child in Childrens)
+					{
+						if (child is DestroyAfterTime d)
+						{
+							destroy = d;
+							foundDestroy = true;
+							break;
+						}
+					}
+					if (!foundDestroy)
+					{
+*/						DestroyAfterTime destroy = new DestroyAfterTime();
+						parent.AddChild(destroy);
+						destroy.Start();
+/*					}
+					else
+						destroy.destroyTimer = 3;
+*/					node3D.SetMeta("destroying", true);
+					break;
+				}
+			}
 
 			multiMeshList.Add(owner);
 			if (multiMesh.UseColors)
@@ -1559,7 +1619,7 @@ public static class Mesher
 		{
 			List<Node3D> multiMeshList = MultiMeshes[multiMesh];
 			for (int i = 0 ; i < multiMeshList.Count; i++)
-				multiMesh.SetInstanceTransform(i, multiMeshList[i].Transform);
+				multiMesh.SetInstanceTransform(i, multiMeshList[i].GlobalTransform);
 			multiMesh.VisibleInstanceCount = multiMeshList.Count;
 		}
 	}

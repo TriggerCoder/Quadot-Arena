@@ -13,7 +13,7 @@ public partial class PlayerHUD : MeshInstance3D
 	[Export]
 	public Node3D viewHead;
 	[Export]
-	public AnimationPlayer headAnimation;
+	public AnimationTree headAnimation;
 	[Export]
 	public Vector3 headOffset = new Vector3(0, -1f, -1.5f);
 	public PlayerInfo playerInfo;
@@ -26,9 +26,19 @@ public partial class PlayerHUD : MeshInstance3D
 	public Dictionary<ShaderMaterial, ViewMaterial> ReplacementMaterial = new Dictionary<ShaderMaterial, ViewMaterial>();
 
 	public bool hasQuad = false;
+	private float lookTime = 0;
+	private bool faceAttack = false;
 	private List<MeshInstance3D> fxMeshes;
 	private MD3GodotConverted head;
+	public enum HeadDir
+	{
+		Left,
+		Center,
+		Right
+	}
 
+	public HeadDir headState = HeadDir.Center;
+	private float currentDir = 0;
 	public void Init(PlayerInfo p)
 	{
 		baseCamera = (ShaderMaterial)MaterialManager.Instance.baseCameraMaterial.Duplicate(true);
@@ -51,7 +61,7 @@ public partial class PlayerHUD : MeshInstance3D
 				head = Mesher.FillModelFromProcessedData(headModel, Layers, false, false, viewHead, false, meshToSkin, false, true, false, true, false);
 		}
 		fxMeshes = GameManager.CreateFXMeshInstance3D(viewHeadContainer);
-		headAnimation.Play("idle");
+//		headAnimation.Play("idle");
 	}
 
 	public void SetCameraReplacementeMaterial(ShaderMaterial shaderMaterial)
@@ -111,6 +121,107 @@ public partial class PlayerHUD : MeshInstance3D
 		currentMaterial.SetShaderParameter("pick_up_start_time", GameManager.CurrentTimeMsec);
 	}
 
+	public void SetAttackFace()
+	{
+		if (faceAttack)
+			return;
+
+		if (currentDir > 0)
+		{
+			if (headState != HeadDir.Left)
+			{
+				headState = HeadDir.Left;
+				lookTime = .5f;
+			}
+		}
+		else if (currentDir < 0)
+		{
+			if (headState != HeadDir.Right)
+			{
+				headState = HeadDir.Right;
+				lookTime = .5f;
+			}
+		}
+		else
+		{
+			if (headState == HeadDir.Center)
+			{
+				lookTime = .5f;
+				return;
+			}
+
+			if (headState == HeadDir.Right)
+			{
+				currentDir = 1;
+				headState = HeadDir.Left;
+			}
+			if (headState == HeadDir.Left)
+			{
+				currentDir = -1;
+				headState = HeadDir.Right;
+			}
+			lookTime = .5f - lookTime;
+		}
+		faceAttack = true;
+	}
+
+	public void CheckNextHeadAnimation(float deltaTime)
+	{
+		if (lookTime > 0)
+		{
+			lookTime -= deltaTime;
+			if (lookTime < 0)
+				lookTime = 0;
+			float value = Mathf.Clamp(2 * (0.5f - lookTime), 0, 1);
+			switch (headState)
+			{
+				default:
+				break;
+				case HeadDir.Left:
+					headAnimation.Set("parameters/Look/left_right/blend_position", -value + currentDir);
+				break;
+				case HeadDir.Right:
+					headAnimation.Set("parameters/Look/left_right/blend_position", value + currentDir);
+				break;
+			}
+		}
+		else
+		{
+			int index;
+			float oldDir = currentDir;
+			currentDir = (float)headAnimation.Get("parameters/Look/left_right/blend_position");
+
+			if (oldDir != currentDir)
+			{
+				lookTime = .5f;
+				headState = HeadDir.Center;
+				return;
+			}
+
+			if (currentDir > 0)
+				index = GD.RandRange(-1, 0);
+			else if (currentDir < 0)
+				index = GD.RandRange(0, 1);
+			else
+				index = GD.RandRange(-1, 1);
+
+			switch (index)
+			{
+				default:
+					headState = HeadDir.Center;
+				break;
+				case -1:
+					headState = HeadDir.Left;
+				break;
+				case 1:
+					headState = HeadDir.Right;
+				break;
+			}
+			lookTime = .5f;
+			faceAttack = false;
+		}
+	}
+
 	public override void _Process(double delta)
 	{
 		if (GameManager.Paused)
@@ -123,6 +234,8 @@ public partial class PlayerHUD : MeshInstance3D
 			hasQuad = playerInfo.quadDamage;
 			GameManager. ChangeQuadFx(fxMeshes,hasQuad);
 		}
+
+		CheckNextHeadAnimation(deltaTime);
 	}
 	public class ViewMaterial
 	{

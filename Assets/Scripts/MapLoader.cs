@@ -50,6 +50,8 @@ public static class MapLoader
 
 	//Don't add decals nor marks to these surfaces
 	public static HashSet<CollisionObject3D> noMarks;
+	public static Dictionary<CollisionObject3D, SurfaceType> mapSurfaceTypes;
+	public static Dictionary<CollisionObject3D, ContentType> mapContentTypes;
 
 	public static Vector3 mapMinCoord;
 	public static Vector3 mapMaxCoord;
@@ -78,6 +80,12 @@ public static class MapLoader
 
 		//Clear noMarks
 		noMarks = new HashSet<CollisionObject3D>();
+
+		//Clear SurfaceType
+		mapSurfaceTypes = new Dictionary<CollisionObject3D, SurfaceType>();
+
+		//Clear ContentType
+		mapContentTypes = new Dictionary<CollisionObject3D, ContentType>();
 
 		//Clean Locations
 		Locations = new List<Node3D>();

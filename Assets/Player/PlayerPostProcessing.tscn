@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://qov23ls4iuhu"]
+[gd_scene load_steps=20 format=3 uid="uid://qov23ls4iuhu"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerPostProcessing.cs" id="1_maglr"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerHUD.cs" id="1_ubqha"]
@@ -44,6 +44,43 @@ _data = {
 "look_right": SubResource("Animation_4dj4l")
 }
 
+[sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_r0fmo"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_yh43a"]
+animation = &"idle"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_memv6"]
+animation = &"look_left"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_hfyu3"]
+animation = &"look_right"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_r8imu"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_memv6")
+blend_point_0/pos = -1.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_hfyu3")
+blend_point_1/pos = 1.0
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_x0rcd"]
+graph_offset = Vector2(173.493, -42.5549)
+nodes/Blend/node = SubResource("AnimationNodeAdd2_r0fmo")
+nodes/Blend/position = Vector2(760, 120)
+nodes/idle_look/node = SubResource("AnimationNodeAnimation_yh43a")
+nodes/idle_look/position = Vector2(560, 80)
+nodes/left_right/node = SubResource("AnimationNodeBlendSpace1D_r8imu")
+nodes/left_right/position = Vector2(540, 220)
+nodes/output/position = Vector2(1020, 160)
+node_connections = [&"Blend", 0, &"idle_look", &"Blend", 1, &"left_right", &"output", 0, &"Blend"]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_h6a68"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_3c74r"]
+states/Look/node = SubResource("AnimationNodeBlendTree_x0rcd")
+states/Look/position = Vector2(338, 45)
+states/Start/position = Vector2(183, 114)
+transitions = ["Start", "Look", SubResource("AnimationNodeStateMachineTransition_h6a68")]
+
 [sub_resource type="QuadMesh" id="QuadMesh_0iqvi"]
 flip_faces = true
 size = Vector2(2, 2)
@@ -70,11 +107,22 @@ far = 300.0
 transform = Transform3D(-3.58063e-08, -2.50718e-08, 1, -0.573576, 0.819152, 0, -0.819152, -0.573576, -4.37114e-08, 0, 0, 0)
 
 [node name="ViewHead" type="Node3D" parent="ViewPortCamera/ViewHeadContainer"]
+transform = Transform3D(0.999738, 0.0228973, 2.97976e-08, -0.0228973, 0.999738, -3.41187e-10, -2.97976e-08, -3.41187e-10, 1, 0, 0, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="ViewPortCamera/ViewHeadContainer/ViewHead"]
+deterministic = true
 libraries = {
 "": SubResource("AnimationLibrary_pxr8j")
 }
+
+[node name="AnimationTree" type="AnimationTree" parent="ViewPortCamera/ViewHeadContainer/ViewHead"]
+libraries = {
+"": SubResource("AnimationLibrary_pxr8j")
+}
+tree_root = SubResource("AnimationNodeStateMachine_3c74r")
+anim_player = NodePath("../AnimationPlayer")
+parameters/Look/Blend/add_amount = 1.0
+parameters/Look/left_right/blend_position = 0
 
 [node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "viewHead", "headAnimation")]
 layers = 0
@@ -86,7 +134,7 @@ painEffect = ExtResource("3_cwmu1")
 pickupEffect = ExtResource("4_txoxd")
 viewHeadContainer = NodePath("../ViewHeadContainer")
 viewHead = NodePath("../ViewHeadContainer/ViewHead")
-headAnimation = NodePath("../ViewHeadContainer/ViewHead/AnimationPlayer")
+headAnimation = NodePath("../ViewHeadContainer/ViewHead/AnimationTree")
 
 [node name="PlayerViewport" type="SubViewport" parent="ViewPortCamera"]
 size = Vector2i(1280, 720)

@@ -144,7 +144,8 @@ public static class TextureLoader
 				luminance = Mathf.Clamp(luminance, 0f, .35f);
 				baseTex.ResizeToPo2(false, Interpolation.Lanczos);
 				ImageTexture readyTex = ImageTexture.CreateFromImage(baseTex);
-				readyTex.ResourceName = Convert.ToBase64String(BitConverter.GetBytes(luminance));
+				readyTex.SetMeta("luminance", luminance);
+//				readyTex.ResourceName = Convert.ToBase64String(BitConverter.GetBytes(luminance));
 
 				if (Textures.ContainsKey(tex.name))
 				{
