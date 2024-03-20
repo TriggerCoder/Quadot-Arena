@@ -84,6 +84,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 //		playerInfo.playerHUD.HUDUpdateHealthNum();
 //		playerInfo.playerHUD.HUDUpdateArmorNum();
 
+		playerInfo.playerPostProcessing.playerHUD.UpdatePainMug(hitpoints);
 		playerControls.playerCamera.ChangeThirdPersonCamera(false);
 		ready = true;
 	}
@@ -187,6 +188,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 			painTime = 1f;
 		}
+		playerInfo.playerPostProcessing.playerHUD.UpdatePainMug(hitpoints);
 	}
 	public void JumpPadDest(Vector3 destination)
 	{

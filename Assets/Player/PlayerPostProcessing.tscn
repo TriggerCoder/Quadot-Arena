@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://qov23ls4iuhu"]
+[gd_scene load_steps=24 format=3 uid="uid://qov23ls4iuhu"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerPostProcessing.cs" id="1_maglr"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerHUD.cs" id="1_ubqha"]
@@ -17,16 +17,6 @@ tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.25, 1, 0, 0, 0.013, 1, 0.5, 1, 0, 0, 0, 1, 0.75, 1, 0, 0, -0.013, 1, 1, 1, 0, 0, 0, 1)
 
-[sub_resource type="Animation" id="Animation_4dj4l"]
-resource_name = "look_right"
-tracks/0/type = "rotation_3d"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 1, 1, 0, 0.301, 0, 0.954)
-
 [sub_resource type="Animation" id="Animation_q4lfx"]
 resource_name = "look_left"
 tracks/0/type = "rotation_3d"
@@ -37,14 +27,39 @@ tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 1, 1, 0, -0.301, 0, 0.954)
 
+[sub_resource type="Animation" id="Animation_4dj4l"]
+resource_name = "look_right"
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 1, 1, 0, 0.301, 0, 0.954)
+
+[sub_resource type="Animation" id="Animation_ic6nf"]
+resource_name = "dead"
+loop_mode = 1
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0.259, 0.966)
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_pxr8j"]
 _data = {
+"dead": SubResource("Animation_ic6nf"),
 "idle": SubResource("Animation_7pvft"),
 "look_left": SubResource("Animation_q4lfx"),
 "look_right": SubResource("Animation_4dj4l")
 }
 
-[sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_r0fmo"]
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_t4d4d"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_e4qut"]
+animation = &"dead"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_yh43a"]
 animation = &"idle"
@@ -61,16 +76,26 @@ blend_point_0/pos = -1.0
 blend_point_1/node = SubResource("AnimationNodeAnimation_hfyu3")
 blend_point_1/pos = 1.0
 
+[sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_r0fmo"]
+
+[sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_xbgmm"]
+
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_x0rcd"]
-graph_offset = Vector2(173.493, -42.5549)
-nodes/Blend/node = SubResource("AnimationNodeAdd2_r0fmo")
-nodes/Blend/position = Vector2(760, 120)
+graph_offset = Vector2(-46.0001, -85.6198)
+nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_t4d4d")
+nodes/TimeScale/position = Vector2(420, -40)
+nodes/dead_angle/node = SubResource("AnimationNodeAnimation_e4qut")
+nodes/dead_angle/position = Vector2(360, 120)
 nodes/idle_look/node = SubResource("AnimationNodeAnimation_yh43a")
-nodes/idle_look/position = Vector2(560, 80)
+nodes/idle_look/position = Vector2(260, -20)
 nodes/left_right/node = SubResource("AnimationNodeBlendSpace1D_r8imu")
 nodes/left_right/position = Vector2(540, 220)
 nodes/output/position = Vector2(1020, 160)
-node_connections = [&"Blend", 0, &"idle_look", &"Blend", 1, &"left_right", &"output", 0, &"Blend"]
+nodes/side_limit/node = SubResource("AnimationNodeAdd2_r0fmo")
+nodes/side_limit/position = Vector2(760, 120)
+nodes/up_limit/node = SubResource("AnimationNodeAdd2_xbgmm")
+nodes/up_limit/position = Vector2(600, -40)
+node_connections = [&"TimeScale", 0, &"idle_look", &"output", 0, &"side_limit", &"side_limit", 0, &"up_limit", &"side_limit", 1, &"left_right", &"up_limit", 0, &"TimeScale", &"up_limit", 1, &"dead_angle"]
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_h6a68"]
 advance_mode = 2
@@ -107,7 +132,7 @@ far = 300.0
 transform = Transform3D(-3.58063e-08, -2.50718e-08, 1, -0.573576, 0.819152, 0, -0.819152, -0.573576, -4.37114e-08, 0, 0, 0)
 
 [node name="ViewHead" type="Node3D" parent="ViewPortCamera/ViewHeadContainer"]
-transform = Transform3D(0.999738, 0.0228973, 2.97976e-08, -0.0228973, 0.999738, -3.41187e-10, -2.97976e-08, -3.41187e-10, 1, 0, 0, 0)
+transform = Transform3D(0.999989, 0.00469273, 0, -0.00469273, 0.999989, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="ViewPortCamera/ViewHeadContainer/ViewHead"]
 deterministic = true
@@ -121,8 +146,10 @@ libraries = {
 }
 tree_root = SubResource("AnimationNodeStateMachine_3c74r")
 anim_player = NodePath("../AnimationPlayer")
-parameters/Look/Blend/add_amount = 1.0
+parameters/Look/TimeScale/scale = 1.0
 parameters/Look/left_right/blend_position = 0
+parameters/Look/side_limit/add_amount = 1.0
+parameters/Look/up_limit/add_amount = 0.0
 
 [node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "viewHead", "headAnimation")]
 layers = 0

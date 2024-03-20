@@ -61,7 +61,6 @@ public partial class PlayerHUD : MeshInstance3D
 				head = Mesher.FillModelFromProcessedData(headModel, Layers, false, false, viewHead, false, meshToSkin, false, true, false, true, false);
 		}
 		fxMeshes = GameManager.CreateFXMeshInstance3D(viewHeadContainer);
-//		headAnimation.Play("idle");
 	}
 
 	public void SetCameraReplacementeMaterial(ShaderMaterial shaderMaterial)
@@ -222,6 +221,15 @@ public partial class PlayerHUD : MeshInstance3D
 		}
 	}
 
+	public void UpdatePainMug(int hitpoint)
+	{
+		float currentPain = Mathf.Clamp(hitpoint / 100f, 0, 1);
+
+		headAnimation.Set("parameters/Look/TimeScale/scale", currentPain);
+		headAnimation.Set("parameters/Look/side_limit/add_amount", currentPain);
+		headAnimation.Set("parameters/Look/up_limit/add_amount", 1 - currentPain);
+
+	}
 	public override void _Process(double delta)
 	{
 		if (GameManager.Paused)

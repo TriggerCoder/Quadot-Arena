@@ -90,7 +90,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 			var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | ~((playerInfo.playerLayer) | (1 << GameManager.InvisibleBlockerLayer) | (1 << GameManager.RagdollLayer))));
 			var SpaceState = GetWorld3D().DirectSpaceState;
 			var hit = SpaceState.IntersectRay(RayCast);
-			if (hit.ContainsKey("collider"))
+			if (hit.Count > 0)
 			{
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
 				Vector3 collision = (Vector3)hit["position"];

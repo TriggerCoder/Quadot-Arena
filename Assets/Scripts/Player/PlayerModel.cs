@@ -184,7 +184,7 @@ public partial class PlayerModel : Node3D
 		SphereCast.Transform = new Transform3D(Basis.Identity, upperBody.GlobalPosition);
 		var SpaceState = GetWorld3D().DirectSpaceState;
 		var hit = SpaceState.GetRestInfo(SphereCast);
-		if (hit.ContainsKey("collider_id"))
+		if (hit.Count > 0)
 			gravityAccumulator = 0f;
 		else if (deadWater)
 			gravityAccumulator = GameManager.Instance.waterDeadFall;

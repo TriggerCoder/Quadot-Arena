@@ -43,8 +43,6 @@ public partial class TeleporterThing : Area3D
 		for (int i = 0; i < max; i++)
 		{
 			var hit = hits[i];
-			if (!hit.ContainsKey("collider"))
-				continue;
 
 			CollisionObject3D collider = (CollisionObject3D)hit["collider"];
 			if (collider is Damageable damageable)

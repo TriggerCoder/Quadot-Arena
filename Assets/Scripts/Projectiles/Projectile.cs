@@ -115,7 +115,7 @@ public partial class Projectile : InterpolatedNode3D
 			{
 				SphereCast.Transform = new Transform3D(GlobalTransform.Basis, GlobalTransform.Origin + (SphereCast.Motion * result[1]));
 				var hit = SpaceState.GetRestInfo(SphereCast);
-				if (hit.ContainsKey("collider_id"))
+				if (hit.Count > 0)
 				{
 					CollisionObject3D collider = (CollisionObject3D)InstanceFromId((ulong)hit["collider_id"]);
 					if (collider != owner)
@@ -161,8 +161,6 @@ public partial class Projectile : InterpolatedNode3D
 			for (int i = 0; i < max; i++)
 			{
 				var hit = hits[i];
-				if (!hit.ContainsKey("collider"))
-					continue;
 				
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
 

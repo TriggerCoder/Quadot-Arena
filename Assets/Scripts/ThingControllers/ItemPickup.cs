@@ -195,6 +195,7 @@ public partial class ItemPickup : Area3D
 								if (player.hitpoints > player.playerInfo.MaxHealth)
 									player.hitpoints = player.playerInfo.MaxHealth;
 							}
+							player.playerInfo.playerPostProcessing.playerHUD.UpdatePainMug(player.hitpoints);
 							disable = true;
 						break;
 						case ItemType.Armor:
