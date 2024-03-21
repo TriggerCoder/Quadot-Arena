@@ -6,6 +6,17 @@
 [ext_resource type="Material" uid="uid://cpth41nj3vmg2" path="res://Assets/Materials/normalDepthTexture.tres" id="4_jcn6a"]
 [ext_resource type="Texture2D" uid="uid://cx8oxtpvs8p2u" path="res://Assets/Textures/pickup_flash.png" id="4_txoxd"]
 
+[sub_resource type="Animation" id="Animation_ic6nf"]
+resource_name = "dead"
+loop_mode = 1
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0.259, 0.966)
+
 [sub_resource type="Animation" id="Animation_7pvft"]
 resource_name = "idle"
 loop_mode = 1
@@ -36,17 +47,6 @@ tracks/0/path = NodePath(".")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 1, 1, 0, 0.301, 0, 0.954)
-
-[sub_resource type="Animation" id="Animation_ic6nf"]
-resource_name = "dead"
-loop_mode = 1
-tracks/0/type = "rotation_3d"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0.259, 0.966)
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_pxr8j"]
 _data = {
@@ -132,15 +132,17 @@ far = 300.0
 transform = Transform3D(-3.58063e-08, -2.50718e-08, 1, -0.573576, 0.819152, 0, -0.819152, -0.573576, -4.37114e-08, 0, 0, 0)
 
 [node name="ViewHead" type="Node3D" parent="ViewPortCamera/ViewHeadContainer"]
-transform = Transform3D(0.999989, 0.00469273, 0, -0.00469273, 0.999989, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(0.999953, -0.0097346, 0, 0.0097346, 0.999953, 0, 0, 0, 1, 0, 0, 0)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="ViewPortCamera/ViewHeadContainer/ViewHead"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="ViewPortCamera/ViewHeadContainer"]
 deterministic = true
+root_node = NodePath("../ViewHead")
 libraries = {
 "": SubResource("AnimationLibrary_pxr8j")
 }
 
-[node name="AnimationTree" type="AnimationTree" parent="ViewPortCamera/ViewHeadContainer/ViewHead"]
+[node name="AnimationTree" type="AnimationTree" parent="ViewPortCamera/ViewHeadContainer"]
+root_node = NodePath("../ViewHead")
 libraries = {
 "": SubResource("AnimationLibrary_pxr8j")
 }
@@ -161,7 +163,7 @@ painEffect = ExtResource("3_cwmu1")
 pickupEffect = ExtResource("4_txoxd")
 viewHeadContainer = NodePath("../ViewHeadContainer")
 viewHead = NodePath("../ViewHeadContainer/ViewHead")
-headAnimation = NodePath("../ViewHeadContainer/ViewHead/AnimationTree")
+headAnimation = NodePath("../ViewHeadContainer/AnimationTree")
 
 [node name="PlayerViewport" type="SubViewport" parent="ViewPortCamera"]
 size = Vector2i(1280, 720)

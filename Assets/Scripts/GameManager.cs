@@ -124,7 +124,8 @@ public partial class GameManager : Node
 	{
 		None,
 		Ready,
-		Start
+		Start,
+		End
 	}
 	public enum PrintType
 	{
@@ -260,8 +261,6 @@ public partial class GameManager : Node
 							player.InitPlayer();
 							Players.Add(player);
 						}
-
-
 						paused = false;
 						currentState = FuncState.Start;
 					}
@@ -282,9 +281,14 @@ public partial class GameManager : Node
 		List<Node> list = new List<Node>();
 
 		var Childrens = parent.GetChildren();
-		list.AddRange(Childrens);
 		foreach (var child in Childrens)
+		{
+			if (child.IsQueuedForDeletion())
+				continue;
+
+			list.Add(child);
 			list.AddRange(GetAllChildrens(child));
+		}
 		return list;
 	}
 
@@ -306,14 +310,17 @@ public partial class GameManager : Node
 		}
 		return fxMeshes;
 	}
-	public static void ChangeQuadFx(List<MeshInstance3D> fxMeshes, bool enable)
+	public static void ChangeQuadFx(List<MeshInstance3D> fxMeshes, bool enable, bool viewModel = false)
 	{
 		for (int i = 0; i < fxMeshes.Count; i++)
 		{
 			MeshInstance3D mesh = fxMeshes[i];
 			if (enable)
 			{
-				mesh.SetSurfaceOverrideMaterial(0, MaterialManager.quadWeaponFxMaterial);
+				if (viewModel)
+					mesh.SetSurfaceOverrideMaterial(0, MaterialManager.quadWeaponFxMaterial);
+				else
+					mesh.SetSurfaceOverrideMaterial(0, MaterialManager.quadFxMaterial);
 				mesh.Visible = true;
 			}
 			else

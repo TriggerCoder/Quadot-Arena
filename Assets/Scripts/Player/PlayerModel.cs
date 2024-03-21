@@ -520,6 +520,8 @@ public partial class PlayerModel : Node3D
 		lowerAnimation = deathNum;
 
 		FxLight.Visible = false;
+		GameManager.ChangeQuadFx(fxMeshes, false);
+
 		ownerDead = true;
 	}
 

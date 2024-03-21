@@ -156,7 +156,7 @@ public partial class PlayerWeapon : Node3D
 		if (hasQuad != playerInfo.quadDamage) 
 		{
 			hasQuad = playerInfo.quadDamage;
-			GameManager.ChangeQuadFx(fxMeshes,hasQuad);
+			GameManager.ChangeQuadFx(fxMeshes,hasQuad,true);
 		}
 
 		float deltaTime = (float)delta;

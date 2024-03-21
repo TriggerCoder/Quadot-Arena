@@ -80,7 +80,7 @@ public partial class MaterialManager : Node
 
 	public static void LoadFXShaders()
 	{
-		bool useAlpha = true;
+		bool useAlpha = false;
 		bool hasPortal = false;
 		List<int> stage = new List<int>
 		{

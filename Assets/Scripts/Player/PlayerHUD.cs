@@ -24,6 +24,7 @@ public partial class PlayerHUD : MeshInstance3D
 
 	public Camera3D NormalDepthCamera;
 	public Dictionary<ShaderMaterial, ViewMaterial> ReplacementMaterial = new Dictionary<ShaderMaterial, ViewMaterial>();
+	public List<Node> NodeList = new List<Node>();
 
 	public bool hasQuad = false;
 	private float lookTime = 0;
@@ -53,6 +54,13 @@ public partial class PlayerHUD : MeshInstance3D
 
 	public void InitHUD(MD3 headModel, Dictionary<string, string> meshToSkin)
 	{
+		if (NodeList.Count > 0)
+		{
+			for (int i = 0; i < NodeList.Count; i++)
+				NodeList[i].QueueFree();
+		}
+		NodeList.Clear();
+
 		if (headModel != null)
 		{
 			if (headModel.readySurfaceArray.Count == 0)
@@ -61,6 +69,7 @@ public partial class PlayerHUD : MeshInstance3D
 				head = Mesher.FillModelFromProcessedData(headModel, Layers, false, false, viewHead, false, meshToSkin, false, true, false, true, false);
 		}
 		fxMeshes = GameManager.CreateFXMeshInstance3D(viewHeadContainer);
+		NodeList = GameManager.GetAllChildrens(viewHead);
 	}
 
 	public void SetCameraReplacementeMaterial(ShaderMaterial shaderMaterial)
@@ -84,14 +93,15 @@ public partial class PlayerHUD : MeshInstance3D
 			var Results = RenderingServer.GetShaderParameterList(shaderMaterial.Shader.GetRid());
 			foreach (var result in Results)
 			{
-				if (!result.ContainsKey("name"))
-					continue;
-
-				string name = (string)result["name"];
-				if (name.Contains(MaterialManager.normalDepthTexture))
+				Variant nameVar;
+				if (result.TryGetValue("name", out nameVar))
 				{
-					needNormalDepth = true;
-					break;
+					string name = (string)nameVar;
+					if (name.Contains(MaterialManager.normalDepthTexture))
+					{
+						needNormalDepth = true;
+						break;
+					}
 				}
 			}
 			viewMaterial.needNormalDepth = needNormalDepth;
@@ -240,7 +250,7 @@ public partial class PlayerHUD : MeshInstance3D
 		if (hasQuad != playerInfo.quadDamage)
 		{
 			hasQuad = playerInfo.quadDamage;
-			GameManager. ChangeQuadFx(fxMeshes,hasQuad);
+			GameManager.ChangeQuadFx(fxMeshes,hasQuad, true);
 		}
 
 		CheckNextHeadAnimation(deltaTime);
