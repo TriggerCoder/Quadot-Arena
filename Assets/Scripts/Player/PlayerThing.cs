@@ -81,10 +81,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		if (playerControls.playerWeapon == null)
 			playerControls.SwapToBestWeapon();
 
-//		playerInfo.playerHUD.HUDUpdateHealthNum();
-//		playerInfo.playerHUD.HUDUpdateArmorNum();
-
-		playerInfo.playerPostProcessing.playerHUD.UpdatePainMug(hitpoints);
+		playerInfo.playerPostProcessing.playerHUD.UpdateHealth(hitpoints);
+		playerInfo.playerPostProcessing.playerHUD.UpdateArmor(armor);
 		playerControls.playerCamera.ChangeThirdPersonCamera(false);
 		ready = true;
 	}
@@ -148,10 +146,6 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		if (hitpoints < -99)
 			hitpoints = -99;
 
-//		playerInfo.playerHUD.HUDUpdateHealthNum();
-//		playerInfo.playerHUD.HUDUpdateArmorNum();
-
-
 		if (amount > 60)
 			playerInfo.playerPostProcessing.playerHUD.painFlashTime(2.5f);
 		else if (amount > 40)
@@ -188,7 +182,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 			painTime = 1f;
 		}
-		playerInfo.playerPostProcessing.playerHUD.UpdatePainMug(hitpoints);
+		playerInfo.playerPostProcessing.playerHUD.UpdateHealth(hitpoints);
+		playerInfo.playerPostProcessing.playerHUD.UpdateArmor(armor);
 	}
 	public void JumpPadDest(Vector3 destination)
 	{

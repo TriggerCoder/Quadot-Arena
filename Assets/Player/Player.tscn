@@ -76,6 +76,7 @@ interpolationReset = NodePath("../../PlayerControls")
 
 [node name="ViewCamera" type="Camera3D" parent="PlayerInfo/InterpolatedTransform"]
 cull_mask = 0
+fov = 90.0
 near = 0.1
 far = 300.0
 

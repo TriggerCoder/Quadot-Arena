@@ -195,7 +195,7 @@ public partial class ItemPickup : Area3D
 								if (player.hitpoints > player.playerInfo.MaxHealth)
 									player.hitpoints = player.playerInfo.MaxHealth;
 							}
-							player.playerInfo.playerPostProcessing.playerHUD.UpdatePainMug(player.hitpoints);
+							player.playerInfo.playerPostProcessing.playerHUD.UpdateHealth(player.hitpoints);
 							disable = true;
 						break;
 						case ItemType.Armor:
@@ -217,6 +217,7 @@ public partial class ItemPickup : Area3D
 								if (player.armor > player.playerInfo.MaxArmor)
 									player.armor = player.playerInfo.MaxArmor;
 							}
+							player.playerInfo.playerPostProcessing.playerHUD.UpdateArmor(player.armor);
 							disable = true;
 						break;
 						case ItemType.Quad:

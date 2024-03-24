@@ -11,11 +11,17 @@ public partial class PlayerHUD : MeshInstance3D
 	[Export]
 	public Node3D viewHeadContainer;
 	[Export]
+	public Node3D ArmorShardContainer;
+	[Export]
 	public Node3D viewHead;
 	[Export]
 	public AnimationTree headAnimation;
 	[Export]
 	public Vector3 headOffset = new Vector3(0, -1f, -1.5f);
+	[Export]
+	public Label3D healthLabel;
+	[Export]
+	public Label3D armorLabel;
 	public PlayerInfo playerInfo;
 	public ShaderMaterial baseCamera;
 	public ShaderMaterial currentMaterial;
@@ -26,20 +32,36 @@ public partial class PlayerHUD : MeshInstance3D
 	public Dictionary<ShaderMaterial, ViewMaterial> ReplacementMaterial = new Dictionary<ShaderMaterial, ViewMaterial>();
 	public List<Node> NodeList = new List<Node>();
 
-	public bool hasQuad = false;
-	private float lookTime = 0;
+	private bool hasQuad = false;
+	private bool swapColors = false;
 	private bool faceAttack = false;
+
+	private float spawnColorTime = 0;
+	private float lookTime = 0;
+
 	private List<MeshInstance3D> fxMeshes;
 	private MD3GodotConverted head;
+	private MD3 armorShard = null;
+	public enum HealthColor
+	{
+		Yellow,
+		Red,
+		White
+	}
+
+	private HealthColor curretColor = HealthColor.Yellow;
 	public enum HeadDir
 	{
 		Left,
 		Center,
 		Right
 	}
-
 	public HeadDir headState = HeadDir.Center;
 	private float currentDir = 0;
+
+	private Color YellowColor = new Color(0xEAA000FF);
+	private Color RedColor = new Color(0xE92F2FFF);
+	private Color WhiteColor = new Color(0xEAA0FFFF);
 	public void Init(PlayerInfo p)
 	{
 		baseCamera = (ShaderMaterial)MaterialManager.Instance.baseCameraMaterial.Duplicate(true);
@@ -70,6 +92,18 @@ public partial class PlayerHUD : MeshInstance3D
 		}
 		fxMeshes = GameManager.CreateFXMeshInstance3D(viewHeadContainer);
 		NodeList = GameManager.GetAllChildrens(viewHead);
+
+		if (armorShard == null)
+		{
+			armorShard = ModelsManager.GetModel("powerups/armor/shard", false);
+			if (armorShard != null)
+			{
+				if (armorShard.readySurfaceArray.Count == 0)
+					Mesher.GenerateModelFromMeshes(armorShard, Layers, false, false, ArmorShardContainer, false, false, null, true, false, true, false);
+				else
+					Mesher.FillModelFromProcessedData(armorShard, Layers, false, false, ArmorShardContainer, false, null, false, true, false, true, false);
+			}
+		}
 	}
 
 	public void SetCameraReplacementeMaterial(ShaderMaterial shaderMaterial)
@@ -230,15 +264,39 @@ public partial class PlayerHUD : MeshInstance3D
 			faceAttack = false;
 		}
 	}
-
-	public void UpdatePainMug(int hitpoint)
+	public void UpdateArmor(int armor)
 	{
-		float currentPain = Mathf.Clamp(hitpoint / 100f, 0, 1);
+		armorLabel.Text = "" + armor;
+	}
 
+	public void UpdateHealth(int hitpoint)
+	{
+		
+		float currentPain = Mathf.Clamp(hitpoint / 100f, 0, 1);
+		healthLabel.Text = "" + hitpoint;
 		headAnimation.Set("parameters/Look/TimeScale/scale", currentPain);
 		headAnimation.Set("parameters/Look/side_limit/add_amount", currentPain);
 		headAnimation.Set("parameters/Look/up_limit/add_amount", 1 - currentPain);
-
+		if (hitpoint < 0)
+		{
+			swapColors = false;
+			if (curretColor != HealthColor.Red)
+			{
+				curretColor = HealthColor.Red;
+				healthLabel.Modulate = RedColor;
+			}
+		}
+		else if (hitpoint < 30)
+			swapColors = true;
+		else
+		{
+			swapColors = false;
+			if (curretColor == HealthColor.Red)
+			{
+				curretColor = HealthColor.Yellow;
+				healthLabel.Modulate = YellowColor;
+			}
+		}
 	}
 	public override void _Process(double delta)
 	{
@@ -247,6 +305,24 @@ public partial class PlayerHUD : MeshInstance3D
 
 		float deltaTime = (float)delta;
 
+		if (swapColors)
+		{
+			spawnColorTime -= deltaTime;
+			if (spawnColorTime <= 0)
+			{
+				spawnColorTime = .5f;
+				if (curretColor != HealthColor.Red)
+				{
+					curretColor = HealthColor.Red;
+					healthLabel.Modulate = RedColor;
+				}
+				else
+				{
+					curretColor = HealthColor.Yellow;
+					healthLabel.Modulate = YellowColor;
+				}
+			}
+		}
 		if (hasQuad != playerInfo.quadDamage)
 		{
 			hasQuad = playerInfo.quadDamage;
