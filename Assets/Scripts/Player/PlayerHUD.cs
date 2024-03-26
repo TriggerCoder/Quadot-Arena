@@ -11,7 +11,9 @@ public partial class PlayerHUD : MeshInstance3D
 	[Export]
 	public Node3D viewHeadContainer;
 	[Export]
-	public Node3D ArmorShardContainer;
+	public Node3D ArmorContainer;
+	[Export]
+	public Node3D AmmoContainer;
 	[Export]
 	public Node3D viewHead;
 	[Export]
@@ -22,6 +24,8 @@ public partial class PlayerHUD : MeshInstance3D
 	public Label3D healthLabel;
 	[Export]
 	public Label3D armorLabel;
+	[Export]
+	public Label3D ammoLabel;
 	public PlayerInfo playerInfo;
 	public ShaderMaterial baseCamera;
 	public ShaderMaterial currentMaterial;
@@ -40,16 +44,20 @@ public partial class PlayerHUD : MeshInstance3D
 	private float lookTime = 0;
 
 	private List<MeshInstance3D> fxMeshes;
-	private MD3GodotConverted head;
-	private MD3 armorShard = null;
-	public enum HealthColor
+	private List<Node3D> ammoContainers = new List<Node3D>();
+
+	private static string ammoModelPath = "powerups/ammo/";
+	private static string armorModel = "powerups/armor/shard";
+	private static readonly string[] ammoModels = { "machinegunam", "shotgunam", "grenadeam", "rocketam", "lightningam", "railgunam", "plasmaam", "bfgam" };
+	public enum NumColor
 	{
 		Yellow,
 		Red,
 		White
 	}
 
-	private HealthColor curretColor = HealthColor.Yellow;
+	private NumColor curretHealthColor = NumColor.Yellow;
+	private NumColor curretAmmoColor = NumColor.Yellow;
 	public enum HeadDir
 	{
 		Left,
@@ -61,7 +69,7 @@ public partial class PlayerHUD : MeshInstance3D
 
 	private Color YellowColor = new Color(0xEAA000FF);
 	private Color RedColor = new Color(0xE92F2FFF);
-	private Color WhiteColor = new Color(0xEAA0FFFF);
+	private Color WhiteColor = new Color(0xD5D5D5FF);
 	public void Init(PlayerInfo p)
 	{
 		baseCamera = (ShaderMaterial)MaterialManager.Instance.baseCameraMaterial.Duplicate(true);
@@ -72,6 +80,33 @@ public partial class PlayerHUD : MeshInstance3D
 		currentMaterial = baseCamera;
 		playerInfo = p;
 		viewHeadContainer.Position = headOffset;
+
+		//Load HUD Models
+		MD3 model = ModelsManager.GetModel(armorModel, false);
+		if (model != null)
+		{
+			if (model.readySurfaceArray.Count == 0)
+				Mesher.GenerateModelFromMeshes(model, Layers, false, false, ArmorContainer, false, false, null, true, false, true, false);
+			else
+				Mesher.FillModelFromProcessedData(model, Layers, false, false, ArmorContainer, false, null, false, true, false, true, false);
+		}
+
+		for (int i = 0; i < ammoModels.Length; i++)
+		{
+			Node3D container = new Node3D();
+			container.Name = ammoModels[i];
+			AmmoContainer.AddChild(container);
+			model = ModelsManager.GetModel(ammoModelPath + ammoModels[i], false);
+			if (model != null)
+			{
+				if (model.readySurfaceArray.Count == 0)
+					Mesher.GenerateModelFromMeshes(model, Layers, false, false, container, false, false, null, true, false, true, false);
+				else
+					Mesher.FillModelFromProcessedData(model, Layers, false, false, container, false, null, false, true, false, true, false);
+			}
+			container.Hide();
+			ammoContainers.Add(container);
+		}
 	}
 
 	public void InitHUD(MD3 headModel, Dictionary<string, string> meshToSkin)
@@ -86,24 +121,12 @@ public partial class PlayerHUD : MeshInstance3D
 		if (headModel != null)
 		{
 			if (headModel.readySurfaceArray.Count == 0)
-				head = Mesher.GenerateModelFromMeshes(headModel, Layers, false, false, viewHead, false, false, meshToSkin, true, false, true, false);
+				Mesher.GenerateModelFromMeshes(headModel, Layers, false, false, viewHead, false, false, meshToSkin, true, false, true, false);
 			else
-				head = Mesher.FillModelFromProcessedData(headModel, Layers, false, false, viewHead, false, meshToSkin, false, true, false, true, false);
+				Mesher.FillModelFromProcessedData(headModel, Layers, false, false, viewHead, false, meshToSkin, false, true, false, true, false);
 		}
 		fxMeshes = GameManager.CreateFXMeshInstance3D(viewHeadContainer);
 		NodeList = GameManager.GetAllChildrens(viewHead);
-
-		if (armorShard == null)
-		{
-			armorShard = ModelsManager.GetModel("powerups/armor/shard", false);
-			if (armorShard != null)
-			{
-				if (armorShard.readySurfaceArray.Count == 0)
-					Mesher.GenerateModelFromMeshes(armorShard, Layers, false, false, ArmorShardContainer, false, false, null, true, false, true, false);
-				else
-					Mesher.FillModelFromProcessedData(armorShard, Layers, false, false, ArmorShardContainer, false, null, false, true, false, true, false);
-			}
-		}
 	}
 
 	public void SetCameraReplacementeMaterial(ShaderMaterial shaderMaterial)
@@ -264,6 +287,50 @@ public partial class PlayerHUD : MeshInstance3D
 			faceAttack = false;
 		}
 	}
+
+	public void SetAmmoCoolDown(bool cooldown)
+	{
+		if (cooldown)
+		{
+			if (curretAmmoColor != NumColor.White)
+			{
+				curretAmmoColor = NumColor.White;
+				ammoLabel.Modulate = WhiteColor;
+			}
+			return;
+		}
+
+		if (curretAmmoColor != NumColor.Yellow)
+		{
+			curretAmmoColor = NumColor.Yellow;
+			ammoLabel.Modulate = YellowColor;
+		}
+	}
+
+	public void HideAmmo()
+	{
+		for (int i = 0; i < ammoContainers.Count; i++)
+			ammoContainers[i].Hide();
+	}
+	public void UpdateAmmoType(int type)
+	{
+		if (ammoContainers.Count > type)
+			ammoContainers[type].Show();
+	}
+
+	public void UpdateAmmo(int ammo, int type = -1)
+	{
+		if (type >= 0)
+		{
+			if (ammoContainers[type].Visible == false)
+				return;
+		}
+
+		string ammoText = "";
+		if (ammo >= 0)
+			ammoText = "" + ammo;
+		ammoLabel.Text = ammoText;
+	}
 	public void UpdateArmor(int armor)
 	{
 		armorLabel.Text = "" + armor;
@@ -280,9 +347,9 @@ public partial class PlayerHUD : MeshInstance3D
 		if (hitpoint < 0)
 		{
 			swapColors = false;
-			if (curretColor != HealthColor.Red)
+			if (curretHealthColor != NumColor.Red)
 			{
-				curretColor = HealthColor.Red;
+				curretHealthColor = NumColor.Red;
 				healthLabel.Modulate = RedColor;
 			}
 		}
@@ -291,9 +358,9 @@ public partial class PlayerHUD : MeshInstance3D
 		else
 		{
 			swapColors = false;
-			if (curretColor == HealthColor.Red)
+			if (curretHealthColor == NumColor.Red)
 			{
-				curretColor = HealthColor.Yellow;
+				curretHealthColor = NumColor.Yellow;
 				healthLabel.Modulate = YellowColor;
 			}
 		}
@@ -311,14 +378,14 @@ public partial class PlayerHUD : MeshInstance3D
 			if (spawnColorTime <= 0)
 			{
 				spawnColorTime = .5f;
-				if (curretColor != HealthColor.Red)
+				if (curretHealthColor != NumColor.Red)
 				{
-					curretColor = HealthColor.Red;
+					curretHealthColor = NumColor.Red;
 					healthLabel.Modulate = RedColor;
 				}
 				else
 				{
-					curretColor = HealthColor.Yellow;
+					curretHealthColor = NumColor.Yellow;
 					healthLabel.Modulate = YellowColor;
 				}
 			}

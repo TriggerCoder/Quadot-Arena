@@ -18,7 +18,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 
 	protected override void OnUpdate()
 	{
-		if (playerInfo.Ammo[0] <= 0 && fireTime < .1f)
+		if (playerInfo.Ammo[PlayerInfo.bulletsAmmo] <= 0 && fireTime < .1f)
 		{
 			if ((!putAway) && (Sounds.Length > 1))
 			{
@@ -37,6 +37,8 @@ public partial class MachineGunWeapon : PlayerWeapon
 			audioStream.Stream = Sounds[2];
 			audioStream.Play();
 		}
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmoType(PlayerInfo.bulletsAmmo);
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.bulletsAmmo]);
 	}
 	public override bool Fire()
 	{
@@ -47,10 +49,11 @@ public partial class MachineGunWeapon : PlayerWeapon
 		if (fireTime > 0.05f)
 			return false;
 
-		if (playerInfo.Ammo[0] <= 0)
+		if (playerInfo.Ammo[PlayerInfo.bulletsAmmo] <= 0)
 			return false;
 
-		playerInfo.Ammo[0]--;
+		playerInfo.Ammo[PlayerInfo.bulletsAmmo]--;
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.bulletsAmmo]);
 
 		if (GameOptions.UseMuzzleLight)
 		{

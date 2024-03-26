@@ -11,7 +11,7 @@ public partial class PlasmagunWeapon : PlayerWeapon
 	public Vector3 spawnPos;
 	protected override void OnUpdate()
 	{
-		if (playerInfo.Ammo[6] <= 0 && fireTime < .1f)
+		if (playerInfo.Ammo[PlayerInfo.cellsAmmo] <= 0 && fireTime < .1f)
 		{
 			if ((!putAway) && (Sounds.Length > 1))
 			{
@@ -28,6 +28,8 @@ public partial class PlasmagunWeapon : PlayerWeapon
 			audioStream.Stream = Sounds[2];
 			audioStream.Play();
 		}
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmoType(PlayerInfo.cellsAmmo);
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.cellsAmmo]);
 	}
 	public override bool Fire()
 	{
@@ -38,10 +40,11 @@ public partial class PlasmagunWeapon : PlayerWeapon
 		if (fireTime > 0.05f)
 			return false;
 
-		if (playerInfo.Ammo[6] <= 0)
+		if (playerInfo.Ammo[PlayerInfo.cellsAmmo] <= 0)
 			return false;
 
-		playerInfo.Ammo[6]--;
+		playerInfo.Ammo[PlayerInfo.cellsAmmo]--;
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.cellsAmmo]);
 
 		if (GameOptions.UseMuzzleLight)
 		{

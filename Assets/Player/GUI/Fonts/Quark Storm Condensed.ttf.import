@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://dp0fl4m7fx352"
-path="res://.godot/imported/quarkstormcond.ttf-f7dfbc51858b349077e80b27eaeeb3a5.fontdata"
+uid="uid://dr71vpawd8wrt"
+path="res://.godot/imported/Quark Storm Condensed.ttf-939341ccebe5118c733a3b6eaa539388.fontdata"
 
 [deps]
 
-source_file="res://Assets/Player/GUI/Fonts/quarkstormcond.ttf"
-dest_files=["res://.godot/imported/quarkstormcond.ttf-f7dfbc51858b349077e80b27eaeeb3a5.fontdata"]
+source_file="res://Assets/Player/GUI/Fonts/Quark Storm Condensed.ttf"
+dest_files=["res://.godot/imported/Quark Storm Condensed.ttf-939341ccebe5118c733a3b6eaa539388.fontdata"]
 
 [params]
 

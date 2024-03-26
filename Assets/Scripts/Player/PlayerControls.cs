@@ -388,7 +388,6 @@ public partial class PlayerControls : InterpolatedNode3D
 
 			if (playerWeapon.Fire())
 			{
-//				playerInfo.playerHUD.HUDUpdateAmmoNum();
 				playerThing.avatar.Attack();
 			}
 		}
@@ -676,42 +675,46 @@ public partial class PlayerControls : InterpolatedNode3D
 			default:
 				return false;
 
-			case 0:
+			case PlayerInfo.Gauntlet:
 				break;
 
-			case 1:
-				if (playerInfo.Ammo[0] <= 0)
-					return false;
-				break;
-			case 2:
-				if (playerInfo.Ammo[1] <= 0)
+			case PlayerInfo.MachineGun:
+				if (playerInfo.Ammo[PlayerInfo.bulletsAmmo] <= 0)
 					return false;
 				break;
 
-			case 3:
-				if (playerInfo.Ammo[2] <= 0)
+			case PlayerInfo.Shotgun:
+				if (playerInfo.Ammo[PlayerInfo.shellsAmmo] <= 0)
 					return false;
 				break;
 
-			case 4:
-				if (playerInfo.Ammo[3] <= 0)
+			case PlayerInfo.GrenadeLauncher:
+				if (playerInfo.Ammo[PlayerInfo.grenadesAmmo] <= 0)
 					return false;
 				break;
 
-			case 5:
-				if (playerInfo.Ammo[4] <= 0)
+			case PlayerInfo.RocketLauncher:
+				if (playerInfo.Ammo[PlayerInfo.rocketsAmmo] <= 0)
 					return false;
 				break;
-			case 6:
-				if (playerInfo.Ammo[5] <= 0)
+
+			case PlayerInfo.LightningGun:
+				if (playerInfo.Ammo[PlayerInfo.lightningAmmo] <= 0)
 					return false;
 				break;
-			case 7:
-				if (playerInfo.Ammo[6] <= 0)
+
+			case PlayerInfo.Railgun:
+				if (playerInfo.Ammo[PlayerInfo.slugAmmo] <= 0)
 					return false;
 				break;
-			case 8:
-				if (playerInfo.Ammo[7] <= 0)
+
+			case PlayerInfo.PlasmaGun:
+				if (playerInfo.Ammo[PlayerInfo.cellsAmmo] <= 0)
+					return false;
+				break;
+
+			case PlayerInfo.BFG10K:
+				if (playerInfo.Ammo[PlayerInfo.bfgAmmo] <= 0)
 					return false;
 				break;
 		}
@@ -729,15 +732,15 @@ public partial class PlayerControls : InterpolatedNode3D
 	}
 	public void SwapToBestWeapon()
 	{
-		if (TrySwapWeapon(8)) return; //bfg10k
-		if (TrySwapWeapon(5)) return; //lightning gun
-		if (TrySwapWeapon(7)) return; //plasma gun
-		if (TrySwapWeapon(6)) return; //railgun
-		if (TrySwapWeapon(2)) return; //shotgun
-		if (TrySwapWeapon(1)) return; //machinegun
-		if (TrySwapWeapon(4)) return; //rocketlauncher
-		if (TrySwapWeapon(3)) return; //grenade launcher
-		if (TrySwapWeapon(0)) return; //gauntlet
+		if (TrySwapWeapon(PlayerInfo.BFG10K)) return;
+		if (TrySwapWeapon(PlayerInfo.LightningGun)) return;
+		if (TrySwapWeapon(PlayerInfo.PlasmaGun)) return;
+		if (TrySwapWeapon(PlayerInfo.Railgun)) return;
+		if (TrySwapWeapon(PlayerInfo.Shotgun)) return;
+		if (TrySwapWeapon(PlayerInfo.MachineGun)) return;
+		if (TrySwapWeapon(PlayerInfo.RocketLauncher)) return;
+		if (TrySwapWeapon(PlayerInfo.GrenadeLauncher)) return;
+		if (TrySwapWeapon(PlayerInfo.Gauntlet)) return;
 	}
 
 	public void CheckMouseWheelWeaponChange()
@@ -752,7 +755,7 @@ public partial class PlayerControls : InterpolatedNode3D
 					break;
 			}
 			if (!gotWeapon)
-				TrySwapWeapon(0);
+				TrySwapWeapon(PlayerInfo.Gauntlet);
 		}
 		else if (Input.IsActionJustPressed(playerInput.Action_WeaponSwitch_Down))
 		{

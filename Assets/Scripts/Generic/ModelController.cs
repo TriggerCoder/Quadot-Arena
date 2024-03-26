@@ -139,7 +139,7 @@ public partial class ModelController : Node3D
 			nextFrame = 0;
 		if ((nextFrame == 0) && (destroyType == DestroyType.DestroyAfterModelLastFrame))
 		{
-			Destroy();
+			QueueFree();
 			return;
 		}
 
@@ -185,7 +185,7 @@ public partial class ModelController : Node3D
 				nextFrame = 0;
 			if ((nextFrame == 0) && (destroyType == DestroyType.DestroyAfterTextureLastFrame))
 			{
-				Destroy();
+				QueueFree();
 				return;
 			}
 
@@ -264,8 +264,7 @@ public partial class ModelController : Node3D
 		lastGlobalPosition = GlobalPosition;
 		lastGlobalBasis = GlobalBasis;	
 	}
-
-	public void Destroy()
+	public override void _ExitTree()
 	{
 		List<MultiMesh> updateMultiMesh = new List<MultiMesh>();
 		for (int i = 0; i < multiMeshDataList.Count; i++)
@@ -283,7 +282,6 @@ public partial class ModelController : Node3D
 		foreach (MultiMesh multiMesh in updateMultiMesh)
 			Mesher.MultiMeshUpdateInstances(multiMesh);
 
-		QueueFree();
 	}
 	public override void _Process(double delta)
 	{
@@ -313,7 +311,7 @@ public partial class ModelController : Node3D
 		{
 			destroyTimer -= deltaTime;
 			if (destroyTimer < 0)
-				Destroy();
+				QueueFree();
 		}
 	}
 }

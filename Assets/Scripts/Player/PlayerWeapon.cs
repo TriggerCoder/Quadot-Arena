@@ -24,6 +24,8 @@ public partial class PlayerWeapon : Node3D
 	public string MuzzleModelName;
 	[Export]
 	public bool useCrosshair = true;
+	[Export]
+	public bool fullAuto = true;
 	public virtual float avgDispersion { get { return .02f; } } //tan(2.3) / 2
 	public virtual float maxDispersion { get { return .03f; } } //tan(3.4) / 2
 	[Export]
@@ -193,7 +195,10 @@ public partial class PlayerWeapon : Node3D
 
 			LowerAmount = Mathf.Lerp(LowerAmount, 1, deltaTime * swapSpeed);
 			if (LowerAmount > .99f)
+			{
+				playerInfo.playerPostProcessing.playerHUD.HideAmmo();
 				QueueFree();
+			}
 		}
 		else
 			LowerAmount = Mathf.Lerp(LowerAmount, 0, deltaTime * swapSpeed);
@@ -205,7 +210,14 @@ public partial class PlayerWeapon : Node3D
 		}
 
 		if (fireTime > 0)
-			KickAmount = Mathf.Lerp(KickAmount, 1, deltaTime * kickSpeed);
+		{
+			if (fullAuto)
+				KickAmount = Mathf.Lerp(KickAmount, 1, deltaTime * kickSpeed);
+			else if (fireTime < 0.1f)
+				KickAmount = Mathf.Lerp(KickAmount, 0, deltaTime * kickSpeed);
+			else
+				KickAmount = Mathf.Lerp(KickAmount, 1, deltaTime * kickSpeed);
+		}
 		else
 			KickAmount = Mathf.Lerp(KickAmount, 0, deltaTime * kickSpeed);
 		KickAmount = Mathf.Clamp(KickAmount, 0, 1);
@@ -246,6 +258,8 @@ public partial class PlayerWeapon : Node3D
 		else
 		{
 			fireTime -= deltaTime;
+			if (fireTime < 0.1f)
+				playerInfo.playerPostProcessing.playerHUD.SetAmmoCoolDown(false);
 
 			if (fireTime <= 0)
 			{

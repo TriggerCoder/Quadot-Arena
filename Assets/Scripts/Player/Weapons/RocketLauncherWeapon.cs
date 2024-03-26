@@ -11,7 +11,7 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 	public Vector3 spawnPos;
 	protected override void OnUpdate()
 	{
-		if (playerInfo.Ammo[3] <= 0 && fireTime < .1f)
+		if (playerInfo.Ammo[PlayerInfo.rocketsAmmo] <= 0 && fireTime < .1f)
 		{
 			if ((!putAway) && (Sounds.Length > 1))
 			{
@@ -28,6 +28,8 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 			audioStream.Stream = Sounds[2];
 			audioStream.Play();
 		}
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmoType(PlayerInfo.rocketsAmmo);
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.rocketsAmmo]);
 	}
 	public override bool Fire()
 	{
@@ -38,10 +40,11 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 		if (fireTime > 0.05f)
 			return false;
 
-		if (playerInfo.Ammo[3] <= 0)
+		if (playerInfo.Ammo[PlayerInfo.rocketsAmmo] <= 0)
 			return false;
 
-		playerInfo.Ammo[3]--;
+		playerInfo.Ammo[PlayerInfo.rocketsAmmo]--;
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.rocketsAmmo]);
 
 		if (GameOptions.UseMuzzleLight)
 		{
@@ -59,6 +62,7 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 		//maximum fire rate 20/s, unless you use negative number (please don't)
 		fireTime = _fireRate + .05f;
 		coolTimer = 0f;
+		playerInfo.playerPostProcessing.playerHUD.SetAmmoCoolDown(true);
 
 		if (Sounds.Length > 0)
 		{

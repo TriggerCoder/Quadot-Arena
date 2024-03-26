@@ -10,6 +10,7 @@ audioStream = NodePath("WeaponAudioStream")
 _sounds = PackedStringArray("weapons/shotgun/sshotf1b", "weapons/noammo", "weapons/change")
 UIModelName = "weapons2/shotgun/shotgun"
 MuzzleModelName = "weapons2/shotgun/shotgun_flash"
+fullAuto = false
 DamageMin = 8
 DamageMax = 11
 _fireRate = 0.95

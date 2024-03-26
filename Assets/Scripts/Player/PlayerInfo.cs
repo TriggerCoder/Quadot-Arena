@@ -20,6 +20,28 @@ public partial class PlayerInfo : Node3D
 	public bool[] Weapon = new bool[9] { false, true, false, false, true, false, false, false, false }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k
 	public int[] MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 200 };
 
+	//Const Weapon Nums
+	public const int Gauntlet = 0;
+	public const int MachineGun = 1;
+	public const int Shotgun = 2;
+	public const int GrenadeLauncher = 3;
+	public const int RocketLauncher = 4;
+	public const int LightningGun = 5;
+	public const int Railgun = 6;
+	public const int PlasmaGun = 7;
+	public const int BFG10K = 8;
+
+
+	//Const Ammo Nums
+	public const int bulletsAmmo = 0;
+	public const int shellsAmmo = 1;
+	public const int grenadesAmmo = 2;
+	public const int rocketsAmmo = 3;
+	public const int lightningAmmo = 4;
+	public const int slugAmmo = 5;
+	public const int cellsAmmo = 6;
+	public const int bfgAmmo = 7;
+
 	//PowerUps
 	public bool godMode = false;
 	public bool quadDamage = false;
@@ -74,7 +96,6 @@ public partial class PlayerInfo : Node3D
 		playerControls.SwapWeapon = -1;
 //		playerControls.SwapToBestWeapon();
 
-//		playerHUD.HUDUpdateAmmoNum();
 //		playerHUD.HUDUpdateHealthNum();
 //		playerHUD.HUDUpdateArmorNum();
 	}

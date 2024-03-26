@@ -105,75 +105,83 @@ public partial class ItemPickup : Area3D
 						default:
 						break;
 						case ItemType.Bullets:
-							if (player.playerInfo.Ammo[0] == player.playerInfo.MaxAmmo[0])
+							if (player.playerInfo.Ammo[PlayerInfo.bulletsAmmo] == player.playerInfo.MaxAmmo[PlayerInfo.bulletsAmmo])
 								break;
 
-							player.playerInfo.Ammo[0] += (amount * GameManager.Instance.PlayerAmmoReceive);
-							if (player.playerInfo.Ammo[0] > player.playerInfo.MaxAmmo[0])
-								player.playerInfo.Ammo[0] = player.playerInfo.MaxAmmo[0];
+							player.playerInfo.Ammo[PlayerInfo.bulletsAmmo] += (amount * GameManager.Instance.PlayerAmmoReceive);
+							if (player.playerInfo.Ammo[PlayerInfo.bulletsAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.bulletsAmmo])
+								player.playerInfo.Ammo[PlayerInfo.bulletsAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.bulletsAmmo];
+							player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.bulletsAmmo], PlayerInfo.bulletsAmmo);
 							disable = true;
 						break;
 						case ItemType.Shells:
-							if (player.playerInfo.Ammo[1] == player.playerInfo.MaxAmmo[1])
+							if (player.playerInfo.Ammo[PlayerInfo.shellsAmmo] == player.playerInfo.MaxAmmo[PlayerInfo.shellsAmmo])
 								break;
 
-							player.playerInfo.Ammo[1] += (amount * GameManager.Instance.PlayerAmmoReceive);
-							if (player.playerInfo.Ammo[1] > player.playerInfo.MaxAmmo[1])
-								player.playerInfo.Ammo[1] = player.playerInfo.MaxAmmo[1];
+							player.playerInfo.Ammo[PlayerInfo.shellsAmmo] += (amount * GameManager.Instance.PlayerAmmoReceive);
+							if (player.playerInfo.Ammo[PlayerInfo.shellsAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.shellsAmmo])
+								player.playerInfo.Ammo[PlayerInfo.shellsAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.shellsAmmo];
+							player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.shellsAmmo], PlayerInfo.shellsAmmo);
 							disable = true;
 						break;
 						case ItemType.Grenades:
-							if (player.playerInfo.Ammo[2] == player.playerInfo.MaxAmmo[2])
+							if (player.playerInfo.Ammo[PlayerInfo.grenadesAmmo] == player.playerInfo.MaxAmmo[PlayerInfo.grenadesAmmo])
 								break;
 
-							player.playerInfo.Ammo[2] += (amount * GameManager.Instance.PlayerAmmoReceive);
-							if (player.playerInfo.Ammo[2] > player.playerInfo.MaxAmmo[2])
-								player.playerInfo.Ammo[2] = player.playerInfo.MaxAmmo[2];
+							player.playerInfo.Ammo[PlayerInfo.grenadesAmmo] += (amount * GameManager.Instance.PlayerAmmoReceive);
+							if (player.playerInfo.Ammo[PlayerInfo.grenadesAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.grenadesAmmo])
+								player.playerInfo.Ammo[PlayerInfo.grenadesAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.grenadesAmmo];
+							player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.grenadesAmmo], PlayerInfo.grenadesAmmo);
 							disable = true;
 						break;
 						case ItemType.Rockets:
-							if (player.playerInfo.Ammo[3] == player.playerInfo.MaxAmmo[3])
+							if (player.playerInfo.Ammo[PlayerInfo.rocketsAmmo] == player.playerInfo.MaxAmmo[PlayerInfo.rocketsAmmo])
 								break;
 
-							player.playerInfo.Ammo[3] += (amount * GameManager.Instance.PlayerAmmoReceive);
-							if (player.playerInfo.Ammo[3] > player.playerInfo.MaxAmmo[3])
-								player.playerInfo.Ammo[3] = player.playerInfo.MaxAmmo[3];
+							player.playerInfo.Ammo[PlayerInfo.rocketsAmmo] += (amount * GameManager.Instance.PlayerAmmoReceive);
+							if (player.playerInfo.Ammo[PlayerInfo.rocketsAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.rocketsAmmo])
+								player.playerInfo.Ammo[PlayerInfo.rocketsAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.rocketsAmmo];
+							player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.rocketsAmmo], PlayerInfo.rocketsAmmo);
 							disable = true;
 						break;
 						case ItemType.Lightning:
-							if (player.playerInfo.Ammo[4] == player.playerInfo.MaxAmmo[4])
+							if (player.playerInfo.Ammo[PlayerInfo.lightningAmmo] == player.playerInfo.MaxAmmo[PlayerInfo.lightningAmmo])
 								break;
 
-							player.playerInfo.Ammo[4] += (amount * GameManager.Instance.PlayerAmmoReceive);
-							if (player.playerInfo.Ammo[4] > player.playerInfo.MaxAmmo[4])
-								player.playerInfo.Ammo[4] = player.playerInfo.MaxAmmo[4];
+							player.playerInfo.Ammo[PlayerInfo.lightningAmmo] += (amount * GameManager.Instance.PlayerAmmoReceive);
+							if (player.playerInfo.Ammo[PlayerInfo.lightningAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.lightningAmmo])
+								player.playerInfo.Ammo[PlayerInfo.lightningAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.lightningAmmo];
+							player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.lightningAmmo], PlayerInfo.lightningAmmo);
 							disable = true;
 						break;
 						case ItemType.Slugs:
-							if (player.playerInfo.Ammo[5] == player.playerInfo.MaxAmmo[5])
+							if (player.playerInfo.Ammo[PlayerInfo.slugAmmo] == player.playerInfo.MaxAmmo[PlayerInfo.slugAmmo])
 								break;
 
-							player.playerInfo.Ammo[5] += (amount * GameManager.Instance.PlayerAmmoReceive);
-							if (player.playerInfo.Ammo[5] > player.playerInfo.MaxAmmo[5])
-								player.playerInfo.Ammo[5] = player.playerInfo.MaxAmmo[5];
+							player.playerInfo.Ammo[PlayerInfo.slugAmmo] += (amount * GameManager.Instance.PlayerAmmoReceive);
+							if (player.playerInfo.Ammo[PlayerInfo.slugAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.slugAmmo])
+								player.playerInfo.Ammo[PlayerInfo.slugAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.slugAmmo];
+							player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.slugAmmo], PlayerInfo.slugAmmo);
 							disable = true;
 						break;
 						case ItemType.Cells:
-							if (player.playerInfo.Ammo[6] == player.playerInfo.MaxAmmo[6])
+							if (player.playerInfo.Ammo[PlayerInfo.cellsAmmo] == player.playerInfo.MaxAmmo[PlayerInfo.cellsAmmo])
 								break;
 
-							player.playerInfo.Ammo[6] += (amount * GameManager.Instance.PlayerAmmoReceive);
-							if (player.playerInfo.Ammo[6] > player.playerInfo.MaxAmmo[6])
-								player.playerInfo.Ammo[6] = player.playerInfo.MaxAmmo[6];
+							player.playerInfo.Ammo[PlayerInfo.cellsAmmo] += (amount * GameManager.Instance.PlayerAmmoReceive);
+							if (player.playerInfo.Ammo[PlayerInfo.cellsAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.cellsAmmo])
+								player.playerInfo.Ammo[PlayerInfo.cellsAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.cellsAmmo];
+							player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.cellsAmmo], PlayerInfo.cellsAmmo);
 							disable = true;
 						break;
 						case ItemType.Bfgammo:
-							if (player.playerInfo.Ammo[7] == player.playerInfo.MaxAmmo[7])
+							if (player.playerInfo.Ammo[PlayerInfo.bfgAmmo] == player.playerInfo.MaxAmmo[PlayerInfo.bfgAmmo])
 								break;
 
-							player.playerInfo.Ammo[7] += (amount * GameManager.Instance.PlayerAmmoReceive);
-							if (player.playerInfo.Ammo[7] > player.playerInfo.MaxAmmo[7])
-								player.playerInfo.Ammo[7] = player.playerInfo.MaxAmmo[7];
+							player.playerInfo.Ammo[PlayerInfo.bfgAmmo] += (amount * GameManager.Instance.PlayerAmmoReceive);
+							if (player.playerInfo.Ammo[PlayerInfo.bfgAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.bfgAmmo])
+								player.playerInfo.Ammo[PlayerInfo.bfgAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.bfgAmmo];
+							player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.bfgAmmo], PlayerInfo.bfgAmmo);
 							disable = true;
 						break;
 						case ItemType.Health:

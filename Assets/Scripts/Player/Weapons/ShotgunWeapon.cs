@@ -16,7 +16,7 @@ public partial class ShotgunWeapon : PlayerWeapon
 	public float pushForce = 350;
 	protected override void OnUpdate()
 	{
-		if (playerInfo.Ammo[1] <= 0 && fireTime < .1f)
+		if (playerInfo.Ammo[PlayerInfo.shellsAmmo] <= 0 && fireTime < .1f)
 		{
 			if ((!putAway) && (Sounds.Length > 1))
 			{
@@ -35,6 +35,8 @@ public partial class ShotgunWeapon : PlayerWeapon
 			audioStream.Stream = Sounds[2];
 			audioStream.Play();
 		}
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmoType(PlayerInfo.shellsAmmo);
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.shellsAmmo]);
 	}
 	public override bool Fire()
 	{
@@ -45,10 +47,11 @@ public partial class ShotgunWeapon : PlayerWeapon
 		if (fireTime > 0.05f)
 			return false;
 
-		if (playerInfo.Ammo[1] <= 0)
+		if (playerInfo.Ammo[PlayerInfo.shellsAmmo] <= 0)
 			return false;
 
-		playerInfo.Ammo[1]--;
+		playerInfo.Ammo[PlayerInfo.shellsAmmo]--;
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.shellsAmmo]);
 
 		if (GameOptions.UseMuzzleLight)
 		{
@@ -66,6 +69,7 @@ public partial class ShotgunWeapon : PlayerWeapon
 		//maximum fire rate 20/s, unless you use negative number (please don't)
 		fireTime = _fireRate + .05f;
 		coolTimer = 0f;
+		playerInfo.playerPostProcessing.playerHUD.SetAmmoCoolDown(true);
 
 		if (Sounds.Length > 0)
 		{
