@@ -1161,10 +1161,10 @@ public static class Mesher
 			{
 				Aabb box = convexHull.GetDebugMesh().GetAabb();
 				waterSurface.Boxes.Add(box);
+				GenerateWaterFog(indexId + "_" + i, holder, box);
 			}
 		}
 		
-
 		SurfaceType surfaceType = new SurfaceType();
 		surfaceType.Init(stype);
 
@@ -1173,11 +1173,16 @@ public static class Mesher
 		else
 			objCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
 
+		if (isWater)
+			objCollider.CollisionLayer |= (1 << GameManager.FogLayer);
+
 		//If noMarks add it to the table
 		if ((surfaceType.value & NoMarks) != 0)
 			MapLoader.noMarks.Add(objCollider);
 
 		objCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+
+
 		MapLoader.mapSurfaceTypes.Add(objCollider, surfaceType);
 
 		return OwnerShapeId;
@@ -1350,7 +1355,18 @@ public static class Mesher
 
 		return true;
 	}
+	public static void GenerateWaterFog(string Name, Node3D holder, Aabb box)
+	{
+		FogVolume Fog = new FogVolume();
+		Fog.Name = "FogVolume_" + Name;
+		holder.AddChild(Fog);
 
+		Fog.Layers = GameManager.AllPlayerViewMask;
+		Fog.GlobalPosition = box.GetCenter();
+		Fog.Shape = RenderingServer.FogVolumeShape.Box;
+		Fog.Size = box.Size;
+		Fog.Material = MaterialManager.waterFogMaterial;
+	}
 	public static void GenerateVolumetricFog(int index, QBrush brush, Node3D holder, string textureName)
 	{
 		ConvexPolygonShape3D convexHull = GenerateBrushCollider(brush);

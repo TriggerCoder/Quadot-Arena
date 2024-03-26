@@ -31,6 +31,7 @@ public partial class MaterialManager : Node
 	public static string quadFxShader = "powerups/quad";
 	public static ShaderMaterial quadWeaponFxMaterial;
 	public static string quadWeaponFxShader = "powerups/quadWeapon";
+	public static FogMaterial waterFogMaterial;
 
 	[Export]
 	public bool applyLightmaps = true;
@@ -52,13 +53,6 @@ public partial class MaterialManager : Node
 	public static Dictionary<string, ShaderMaterial> MirrorMaterials = new Dictionary<string, ShaderMaterial>();
 	public static Dictionary<string, QShader> AditionalTextures = new Dictionary<string, QShader>();
 
-	public static readonly string[] rgbGenTextures = { "_S_Texture", "_W_Texture", "_IW_Texture" };
-	public static readonly string[] rgbGenBase = { "_S_Base", "_W_Base", "_IW_Base" };
-	public static readonly string[] rgbGenAmp = { "_S_Amp", "_W_Amp", "_IW_Amp" };
-	public static readonly string[] rgbGenPhase = { "_S_Phase", "_W_Phase", "_IW_Phase" };
-	public static readonly string[] rgbGenFreq = { "_S_Freq", "_W_Freq", "_IW_Freq" };
-
-	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		Instance = this;
@@ -70,6 +64,11 @@ public partial class MaterialManager : Node
 			GameManager.Print("Decal Texture Name: " + upperName);
 			Decals.Add(upperName);
 		}
+
+		waterFogMaterial = new FogMaterial();
+		waterFogMaterial.Density = .25f;
+		waterFogMaterial.Albedo = new Color(.16f, .46f, .52f);
+		waterFogMaterial.Emission = new Color(.3f, .3f, .35f);
 	}
 
 	public static void SetAmbient()

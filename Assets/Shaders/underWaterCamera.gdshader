@@ -2,7 +2,7 @@ shader_type spatial;
 render_mode unshaded;
 
 uniform sampler2D screen_texture: source_color, repeat_disable;
-uniform sampler2D normal_depth_texture : source_color, repeat_disable;
+//uniform sampler2D normal_depth_texture : source_color, repeat_disable;
 
 uniform sampler2D pain_texture: source_color, repeat_disable;
 uniform sampler2D pick_up_texture: source_color, repeat_disable;
@@ -78,7 +78,7 @@ void fragment()
 	
 	float noise_color = psrdnoise(uv + (MsTime / 10.0)) / 20.0;
 	vec3 screen_color = texture(screen_texture,uv + noise_color).rgb;	
-	vec3 normal = texture(normal_depth_texture,uv + noise_color).rgb;
+//	vec3 normal = texture(normal_depth_texture,uv + noise_color).rgb;
 //	vec2 sphericalVector = normal.rg;
 //	vec3 dirVector = spherical_to_cartesian(sphericalVector);
 //	dirVector = (dirVector + 1.0) * 0.5;
@@ -96,5 +96,5 @@ void fragment()
 	float pickUpTrans = mix(0.0, pickUpText.a, isPickUp * lerpPickUp * clampPickUp);
 	
 	color = pickUpText.rgb * pickUpTrans * clampPickUp + color * (1.0 - pickUpTrans);
-	ALBEDO = color+normal.b;
+	ALBEDO = color;//+normal.b;
 }

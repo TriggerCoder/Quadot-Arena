@@ -19,8 +19,6 @@ public partial class PlayerHUD : MeshInstance3D
 	[Export]
 	public AnimationTree headAnimation;
 	[Export]
-	public Vector3 headOffset = new Vector3(0, -1f, -1.5f);
-	[Export]
 	public Label3D healthLabel;
 	[Export]
 	public Label3D armorLabel;
@@ -45,6 +43,7 @@ public partial class PlayerHUD : MeshInstance3D
 
 	private List<MeshInstance3D> fxMeshes;
 	private List<Node3D> ammoContainers = new List<Node3D>();
+	private int currentAmmoType = -1;
 
 	private static string ammoModelPath = "powerups/ammo/";
 	private static string armorModel = "powerups/armor/shard";
@@ -79,7 +78,6 @@ public partial class PlayerHUD : MeshInstance3D
 		baseCamera.SetShaderParameter(MaterialManager.pickUpTexture, pickupEffect);
 		currentMaterial = baseCamera;
 		playerInfo = p;
-		viewHeadContainer.Position = headOffset;
 
 		//Load HUD Models
 		MD3 model = ModelsManager.GetModel(armorModel, false);
@@ -311,18 +309,29 @@ public partial class PlayerHUD : MeshInstance3D
 	{
 		for (int i = 0; i < ammoContainers.Count; i++)
 			ammoContainers[i].Hide();
+
+		if (playerInfo.playerThing.Dead)
+			ammoLabel.Hide();
+
+		currentAmmoType = -1;
 	}
 	public void UpdateAmmoType(int type)
 	{
 		if (ammoContainers.Count > type)
+		{
 			ammoContainers[type].Show();
+			currentAmmoType = type;
+			if (ammoLabel.Visible == false)
+				ammoLabel.Show();
+		}
+		SetAmmoCoolDown(false);
 	}
 
 	public void UpdateAmmo(int ammo, int type = -1)
 	{
 		if (type >= 0)
 		{
-			if (ammoContainers[type].Visible == false)
+			if (currentAmmoType !=  type)
 				return;
 		}
 
