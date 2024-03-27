@@ -5,5 +5,3 @@
 [resource]
 render_priority = 0
 shader = ExtResource("1_j20jb")
-shader_parameter/AmbientColor = Color(1, 1, 1, 1)
-shader_parameter/mixBrightness = 0.5

@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://qov23ls4iuhu"]
+[gd_scene load_steps=27 format=3 uid="uid://qov23ls4iuhu"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerPostProcessing.cs" id="1_maglr"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerHUD.cs" id="1_ubqha"]
@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://ddbd10afb4ltf" path="res://Assets/Textures/pain_flash.png" id="3_cwmu1"]
 [ext_resource type="Material" uid="uid://cpth41nj3vmg2" path="res://Assets/Materials/normalDepthTexture.tres" id="4_jcn6a"]
 [ext_resource type="Texture2D" uid="uid://cx8oxtpvs8p2u" path="res://Assets/Textures/pickup_flash.png" id="4_txoxd"]
+[ext_resource type="Texture2D" uid="uid://bqxybe8taeega" path="res://Assets/Player/GUI/CrossHair.png" id="6_eafd0"]
 [ext_resource type="FontFile" uid="uid://dr71vpawd8wrt" path="res://Assets/Player/GUI/Fonts/Quark Storm Condensed.ttf" id="7_4bgd3"]
 
 [sub_resource type="Animation" id="Animation_ic6nf"]
@@ -134,7 +135,7 @@ far = 300.0
 transform = Transform3D(-3.58063e-08, -2.50718e-08, 1, -0.573576, 0.819152, 0, -0.819152, -0.573576, -4.37114e-08, 0, -1, -1.5)
 
 [node name="ViewHead" type="Node3D" parent="ViewPortCamera/ViewHeadContainer"]
-transform = Transform3D(0.999988, 0.00488317, -1.42106e-13, -0.00488317, 0.999988, -5.82021e-11, -1.42106e-13, 5.82022e-11, 1, 0, 0, 0)
+transform = Transform3D(0.99992, -0.0126785, 2.9799e-08, 0.0126785, 0.99992, 1.88911e-10, -2.9799e-08, 1.88911e-10, 1, 0, 0, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="ViewPortCamera/ViewHeadContainer"]
 deterministic = true
@@ -171,7 +172,7 @@ script = ExtResource("2_2cprp")
 rotEnable = true
 rotFPS = 40.0
 
-[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "ArmorContainer", "AmmoContainer", "viewHead", "headAnimation", "healthLabel", "armorLabel", "ammoLabel")]
+[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "ArmorContainer", "AmmoContainer", "viewHead", "headAnimation", "healthLabel", "armorLabel", "ammoLabel", "crossHair")]
 layers = 0
 extra_cull_margin = 0.1
 mesh = SubResource("QuadMesh_0iqvi")
@@ -187,10 +188,18 @@ headAnimation = NodePath("../ViewHeadContainer/AnimationTree")
 healthLabel = NodePath("Health")
 armorLabel = NodePath("Armor")
 ammoLabel = NodePath("Ammo")
+crossHair = NodePath("CrossHair")
+
+[node name="CrossHair" type="Sprite3D" parent="ViewPortCamera/PlayerHUD"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+layers = 0
+double_sided = false
+no_depth_test = true
+texture = ExtResource("6_eafd0")
 
 [node name="Health" type="Label3D" parent="ViewPortCamera/PlayerHUD"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
-layers = 256
+layers = 0
 transparency = 0.4
 offset = Vector2(-50, -235)
 double_sided = false
@@ -205,7 +214,7 @@ horizontal_alignment = 2
 
 [node name="Armor" type="Label3D" parent="ViewPortCamera/PlayerHUD"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
-layers = 256
+layers = 0
 transparency = 0.4
 offset = Vector2(-350, -235)
 double_sided = false
@@ -220,7 +229,7 @@ horizontal_alignment = 2
 
 [node name="Ammo" type="Label3D" parent="ViewPortCamera/PlayerHUD"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
-layers = 256
+layers = 0
 transparency = 0.4
 offset = Vector2(-350, -150)
 double_sided = false

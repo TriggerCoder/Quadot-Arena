@@ -11,4 +11,4 @@ texture_filter = 1
 script = ExtResource("1_apdci")
 spriteName = "rocketExplosion"
 spriteRadius = 8
-destroyTimer = 1.0
+destroyTimer = 0.95

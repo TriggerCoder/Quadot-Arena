@@ -24,6 +24,8 @@ public partial class PlayerHUD : MeshInstance3D
 	public Label3D armorLabel;
 	[Export]
 	public Label3D ammoLabel;
+	[Export]
+	public Sprite3D crossHair;
 	public PlayerInfo playerInfo;
 	public ShaderMaterial baseCamera;
 	public ShaderMaterial currentMaterial;
@@ -105,6 +107,12 @@ public partial class PlayerHUD : MeshInstance3D
 			container.Hide();
 			ammoContainers.Add(container);
 		}
+
+		//Set Layers
+		healthLabel.Layers = Layers;
+		armorLabel.Layers = Layers;
+		ammoLabel.Layers = Layers;
+		crossHair.Layers = Layers;
 	}
 
 	public void InitHUD(MD3 headModel, Dictionary<string, string> meshToSkin)

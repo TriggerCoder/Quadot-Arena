@@ -246,7 +246,8 @@ public partial class ModelController : Node3D
 		if (multiMeshDataList.Count == 0)
 			return;
 
-		if (((GlobalPosition - lastGlobalPosition).LengthSquared() > Mathf.Epsilon) ||
+		if ((alphaFade) ||
+			((GlobalPosition - lastGlobalPosition).LengthSquared() > Mathf.Epsilon) ||
 			((GlobalBasis.X - lastGlobalBasis.X).LengthSquared() > Mathf.Epsilon) ||
 			((GlobalBasis.Y - lastGlobalBasis.Y).LengthSquared() > Mathf.Epsilon) ||
 			((GlobalBasis.Z - lastGlobalBasis.Z).LengthSquared() > Mathf.Epsilon))

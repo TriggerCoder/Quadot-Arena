@@ -16,8 +16,8 @@ public partial class PlayerInfo : Node3D
 	public Node3D WeaponHand;
 
 	//Weapons and Ammo
-	public int[] Ammo = new int[8] { 1000, 0, 0, 50, 0, 0, 0, 0 }; //bullets, shells, grenades, rockets, lightning, slugs, cells, bfgammo
-	public bool[] Weapon = new bool[9] { false, true, false, false, true, false, false, false, false }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k
+	public int[] Ammo = new int[8] { 100, 0, 0, 0, 0, 0, 0, 0 }; //bullets, shells, grenades, rockets, lightning, slugs, cells, bfgammo
+	public bool[] Weapon = new bool[9] { false, true, false, false, false, false, false, false, false }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k
 	public int[] MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 200 };
 
 	//Const Weapon Nums
@@ -77,8 +77,8 @@ public partial class PlayerInfo : Node3D
 
 	public void Reset()
 	{
-		Ammo = new int[8] { 100, 0, 0, 50, 0, 0, 0, 0 };
-		Weapon = new bool[9] { false, true, false, false, true, false, false, false, false };
+		Ammo = new int[8] { 100, 0, 0, 0, 0, 0, 0, 0 };
+		Weapon = new bool[9] { false, true, false, false, false, false, false, false, false };
 		MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 200 };
 
 		godMode = false;
@@ -101,9 +101,9 @@ public partial class PlayerInfo : Node3D
 	}
 	public override void _Process(double delta)
 	{
-		ClusterPVSManager.CheckPVS(viewLayer, GlobalPosition);
+		ClusterPVSManager.CheckPVS(viewLayer, playerCamera.CurrentCamera.GlobalPosition);
 		//if camera is thirdperson, need to make sure at all that it can see 
 		if (playerCamera.currentThirdPerson)
-			ClusterPVSManager.CheckPVS(viewLayer, playerCamera.CurrentCamera.GlobalPosition);
+			ClusterPVSManager.CheckPVS(viewLayer, GlobalPosition);
 	}
 }
