@@ -66,6 +66,7 @@ monitorable = false
 script = ExtResource("5_oupac")
 thingController = NodePath("..")
 itemType = 11
+amount = 30
 bonus = true
 PickupSound = "items/quaddamage"
 PickupIcon = "icons/quad"

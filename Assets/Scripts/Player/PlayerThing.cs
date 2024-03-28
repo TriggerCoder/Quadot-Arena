@@ -30,10 +30,16 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public int hitpoints = 100;
 	public int armor = 0;
 	public int waterLever = 0;
+
 	public float painTime = 0f;
-	public float lookTime = .5f;
+	public float quadTime = 0f;
+	public float hasteTime = 0f;
+	public float invisTime = 0f;
+	public float regenTime = 0f;
+	public float enviroSuitTime = 0f;
+	public float flightTime = 0f;
+
 	public bool finished = false;
-	public bool radsuit = false;
 	public bool invul = false;
 	public bool ready = false;
 
@@ -212,6 +218,30 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.jumpPadVel.Y = verticalVelocity;
 		playerControls.playerVelocity = Vector3.Zero;
 		playerControls.AnimateLegsOnJump();
+	}
+
+	public override void _Process(double delta)
+	{
+		if (GameManager.Paused)
+			return;
+
+		float deltaTime = (float)delta;
+
+		if (painTime > 0f)
+			painTime -= deltaTime;
+
+		if (quadTime > 0f)
+		{
+			quadTime -= deltaTime;
+			playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Quad,Mathf.CeilToInt(quadTime));
+		}
+		else if (quadTime < 0f) 
+		{
+			quadTime = 0;
+			playerInfo.quadDamage = false;
+			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Quad);
+		}
+
 	}
 
 }

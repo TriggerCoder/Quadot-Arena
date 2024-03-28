@@ -26,6 +26,15 @@ public partial class PlayerHUD : MeshInstance3D
 	public Label3D ammoLabel;
 	[Export]
 	public Sprite3D crossHair;
+	[Export]
+	public Sprite3D pickUpIcon;
+	[Export]
+	public Label3D pickUpText;
+	[Export]
+	public Sprite3D[] powerUpIcon;
+	[Export]
+	public Label3D[] powerUpText;
+
 	public PlayerInfo playerInfo;
 	public ShaderMaterial baseCamera;
 	public ShaderMaterial currentMaterial;
@@ -42,6 +51,7 @@ public partial class PlayerHUD : MeshInstance3D
 
 	private float spawnColorTime = 0;
 	private float lookTime = 0;
+	private float pickUpTime = 0;
 
 	private List<MeshInstance3D> fxMeshes;
 	private List<Node3D> ammoContainers = new List<Node3D>();
@@ -71,6 +81,24 @@ public partial class PlayerHUD : MeshInstance3D
 	private Color YellowColor = new Color(0xEAA000FF);
 	private Color RedColor = new Color(0xE92F2FFF);
 	private Color WhiteColor = new Color(0xD5D5D5FF);
+	public enum PowerUpType : int
+	{
+		Quad = 0,
+		Haste = 1,
+		Invis = 2,
+		Regen = 3,
+		EnviroSuit = 4,
+		Flight = 5
+	}
+
+	private class PowerUpInfo
+	{
+		public PowerUpType type;
+		public int displayTime;
+	}
+
+	private List<PowerUpInfo> currentPowerUps = new List<PowerUpInfo>();
+	private static readonly string[] powerUpsIcons = { "ICONS/QUAD", "ICONS/HASTE", "ICONS/INVIS", "ICONS/REGEN", "ICONS/ENVIROSUIT", "ICONS/FLIGHT" };
 	public void Init(PlayerInfo p)
 	{
 		baseCamera = (ShaderMaterial)MaterialManager.Instance.baseCameraMaterial.Duplicate(true);
@@ -113,6 +141,12 @@ public partial class PlayerHUD : MeshInstance3D
 		armorLabel.Layers = Layers;
 		ammoLabel.Layers = Layers;
 		crossHair.Layers = Layers;
+		pickUpIcon.Layers = Layers;
+		pickUpText.Layers = Layers;
+		for (int i = 0; i < powerUpIcon.Length; i++)
+			powerUpIcon[i].Layers = Layers;
+		for (int i = 0; i < powerUpText.Length; i++)
+			powerUpText[i].Layers = Layers;
 	}
 
 	public void InitHUD(MD3 headModel, Dictionary<string, string> meshToSkin)
@@ -237,6 +271,80 @@ public partial class PlayerHUD : MeshInstance3D
 		faceAttack = true;
 	}
 
+	public void RemovePowerUp(PowerUpType type)
+	{
+		int i;
+		for (i = 0; i < currentPowerUps.Count; i++)
+		{
+			if (currentPowerUps[i].type == type)
+			{
+				currentPowerUps.RemoveAt(i);
+				break;
+			}
+		}
+
+		for (i = 0; i < currentPowerUps.Count; i++)
+		{
+			powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsIcons[(int)currentPowerUps[i].type], false);
+			powerUpText[i].Text = "" + currentPowerUps[i].displayTime;
+		}
+
+		for (; i < powerUpIcon.Length; i++)
+		{
+			powerUpIcon[i].Hide();
+			powerUpText[i].Hide();
+		}
+
+	}
+
+
+	public void UpdatePowerUpTime(PowerUpType type, int time)
+	{
+		int i;
+		bool found = false;
+		for (i = 0; i < currentPowerUps.Count; i++)
+		{
+			if (currentPowerUps[i].type == type)
+			{
+				found = true;
+				break;
+			}				
+		}
+		if (found)
+			currentPowerUps[i].displayTime = time;
+		else
+		{
+			PowerUpInfo powerUpInfo = new PowerUpInfo();
+			powerUpInfo.type = type;
+			powerUpInfo.displayTime = time;
+			currentPowerUps.Add(powerUpInfo);
+		}
+
+		for (i = 0; i < currentPowerUps.Count; i++)
+		{
+			if (powerUpIcon[i].Visible == false)
+				powerUpIcon[i].Show();
+			if (powerUpText[i].Visible == false)
+				powerUpText[i].Show();
+			if (!found)
+				powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsIcons[(int)currentPowerUps[i].type], false);
+			powerUpText[i].Text = "" + currentPowerUps[i].displayTime;
+		}
+	}
+
+	public void CheckPickUp(float deltaTime)
+	{
+		if (pickUpTime > 0)
+			pickUpTime -= deltaTime;
+
+		if (pickUpTime < 0)
+		{
+			pickUpTime = 0;
+			pickUpIcon.Hide();
+			pickUpText.Hide();
+		}
+
+	}
 	public void CheckNextHeadAnimation(float deltaTime)
 	{
 		if (lookTime > 0)
@@ -311,6 +419,15 @@ public partial class PlayerHUD : MeshInstance3D
 			curretAmmoColor = NumColor.Yellow;
 			ammoLabel.Modulate = YellowColor;
 		}
+	}
+
+	public void ItemPickUp(string icon, string text)
+	{
+		pickUpIcon.Texture = TextureLoader.GetTextureOrAddTexture(icon, false);
+		pickUpText.Text = text;
+		pickUpTime = 1.5f;
+		pickUpIcon.Show();
+		pickUpText.Show();
 	}
 
 	public void HideAmmo()
@@ -414,6 +531,7 @@ public partial class PlayerHUD : MeshInstance3D
 		}
 
 		CheckNextHeadAnimation(deltaTime);
+		CheckPickUp(deltaTime);
 	}
 	public class ViewMaterial
 	{

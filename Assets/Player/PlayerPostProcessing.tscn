@@ -135,7 +135,7 @@ far = 300.0
 transform = Transform3D(-3.58063e-08, -2.50718e-08, 1, -0.573576, 0.819152, 0, -0.819152, -0.573576, -4.37114e-08, 0, -1, -1.5)
 
 [node name="ViewHead" type="Node3D" parent="ViewPortCamera/ViewHeadContainer"]
-transform = Transform3D(0.99992, -0.0126785, 2.9799e-08, 0.0126785, 0.99992, 1.88911e-10, -2.9799e-08, 1.88911e-10, 1, 0, 0, 0)
+transform = Transform3D(0.999775, -0.0212311, 2.97979e-08, 0.0212311, 0.999775, 3.16357e-10, -2.97979e-08, 3.16357e-10, 1, 0, 0, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="ViewPortCamera/ViewHeadContainer"]
 deterministic = true
@@ -165,14 +165,14 @@ rotEnable = true
 rotFPS = 50.0
 
 [node name="AmmoContainer" type="Node3D" parent="ViewPortCamera"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -3.5, -1.8, -5)
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4.35, -2.2, -6)
 
 [node name="AmmoAnimation" type="Node3D" parent="ViewPortCamera/AmmoContainer"]
 script = ExtResource("2_2cprp")
 rotEnable = true
 rotFPS = 40.0
 
-[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "ArmorContainer", "AmmoContainer", "viewHead", "headAnimation", "healthLabel", "armorLabel", "ammoLabel", "crossHair")]
+[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "ArmorContainer", "AmmoContainer", "viewHead", "headAnimation", "healthLabel", "armorLabel", "ammoLabel", "crossHair", "pickUpIcon", "pickUpText", "powerUpIcon", "powerUpText")]
 layers = 0
 extra_cull_margin = 0.1
 mesh = SubResource("QuadMesh_0iqvi")
@@ -189,6 +189,144 @@ healthLabel = NodePath("Health")
 armorLabel = NodePath("Armor")
 ammoLabel = NodePath("Ammo")
 crossHair = NodePath("CrossHair")
+pickUpIcon = NodePath("PickUpIcon")
+pickUpText = NodePath("PickUpText")
+powerUpIcon = [NodePath("PowerUpsContainer/PowerUpIcon_1"), NodePath("PowerUpsContainer/PowerUpIcon_2"), NodePath("PowerUpsContainer/PowerUpIcon_3"), NodePath("PowerUpsContainer/PowerUpIcon_4"), NodePath("PowerUpsContainer/PowerUpIcon_5"), NodePath("PowerUpsContainer/PowerUpIcon_6")]
+powerUpText = [NodePath("PowerUpsContainer/PowerUpText_1"), NodePath("PowerUpsContainer/PowerUpText_2"), NodePath("PowerUpsContainer/PowerUpText_3"), NodePath("PowerUpsContainer/PowerUpText_4"), NodePath("PowerUpsContainer/PowerUpText_5"), NodePath("PowerUpsContainer/PowerUpText_6")]
+
+[node name="PowerUpsContainer" type="Node3D" parent="ViewPortCamera/PlayerHUD"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3, 0.6, 0)
+
+[node name="PowerUpText_1" type="Label3D" parent="ViewPortCamera/PlayerHUD/PowerUpsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.38419e-07, 0, -2)
+visible = false
+layers = 0
+transparency = 0.4
+offset = Vector2(0, -210)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.913725, 0.184314, 0.184314, 1)
+font = ExtResource("7_4bgd3")
+font_size = 120
+outline_size = 0
+horizontal_alignment = 2
+
+[node name="PowerUpIcon_1" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/PowerUpsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, -1.1, -2.2)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="PowerUpText_2" type="Label3D" parent="ViewPortCamera/PlayerHUD/PowerUpsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.38419e-07, 0, -2)
+visible = false
+layers = 0
+transparency = 0.4
+offset = Vector2(0, -140)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.913725, 0.184314, 0.184314, 1)
+font = ExtResource("7_4bgd3")
+font_size = 120
+outline_size = 0
+horizontal_alignment = 2
+
+[node name="PowerUpIcon_2" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/PowerUpsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, -0.72, -2.2)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="PowerUpIcon_3" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/PowerUpsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, -0.34, -2.2)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="PowerUpText_3" type="Label3D" parent="ViewPortCamera/PlayerHUD/PowerUpsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+visible = false
+layers = 0
+transparency = 0.4
+offset = Vector2(0, -70)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.913725, 0.184314, 0.184314, 1)
+font = ExtResource("7_4bgd3")
+font_size = 120
+outline_size = 0
+horizontal_alignment = 2
+
+[node name="PowerUpText_4" type="Label3D" parent="ViewPortCamera/PlayerHUD/PowerUpsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.38419e-07, 0, -2)
+visible = false
+layers = 0
+transparency = 0.4
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.913725, 0.184314, 0.184314, 1)
+font = ExtResource("7_4bgd3")
+font_size = 120
+outline_size = 0
+horizontal_alignment = 2
+
+[node name="PowerUpIcon_4" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/PowerUpsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.05, -2.2)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="PowerUpText_5" type="Label3D" parent="ViewPortCamera/PlayerHUD/PowerUpsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.38419e-07, 0, -2)
+visible = false
+layers = 0
+transparency = 0.4
+offset = Vector2(0, 70)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.913725, 0.184314, 0.184314, 1)
+font = ExtResource("7_4bgd3")
+font_size = 120
+outline_size = 0
+horizontal_alignment = 2
+
+[node name="PowerUpIcon_5" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/PowerUpsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.43, -2.2)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="PowerUpText_6" type="Label3D" parent="ViewPortCamera/PlayerHUD/PowerUpsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.38419e-07, 0, -2)
+visible = false
+layers = 0
+transparency = 0.4
+offset = Vector2(0, 140)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.913725, 0.184314, 0.184314, 1)
+font = ExtResource("7_4bgd3")
+font_size = 120
+outline_size = 0
+horizontal_alignment = 2
+
+[node name="PowerUpIcon_6" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/PowerUpsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.81, -2.2)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
 
 [node name="CrossHair" type="Sprite3D" parent="ViewPortCamera/PlayerHUD"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
@@ -236,10 +374,33 @@ double_sided = false
 no_depth_test = true
 texture_filter = 1
 modulate = Color(0.917647, 0.627451, 0, 1)
+text = "0"
 font = ExtResource("7_4bgd3")
 font_size = 120
 outline_size = 0
 horizontal_alignment = 2
+
+[node name="PickUpIcon" type="Sprite3D" parent="ViewPortCamera/PlayerHUD"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, -1, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="PickUpText" type="Label3D" parent="ViewPortCamera/PlayerHUD"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+visible = false
+layers = 0
+transparency = 0.4
+offset = Vector2(-500, -100)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.988235, 1, 1, 1)
+font = ExtResource("7_4bgd3")
+font_size = 50
+outline_size = 10
+horizontal_alignment = 0
 
 [node name="PlayerViewport" type="SubViewport" parent="ViewPortCamera"]
 size = Vector2i(1280, 720)

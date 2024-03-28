@@ -39,6 +39,7 @@ public partial class ItemPickup : Area3D
 	private Dictionary<Node3D, int> CurrentColliders = new Dictionary<Node3D, int>();
 	public override void _Ready()
 	{
+		PickupIcon = PickupIcon.ToUpper();
 		BodyEntered += OnBodyEntered;
 	}
 	void OnBodyEntered(Node3D other)
@@ -230,6 +231,7 @@ public partial class ItemPickup : Area3D
 						break;
 						case ItemType.Quad:
 							player.playerInfo.quadDamage = true;
+							player.quadTime += amount;
 							disable = true;
 						break;
 					}
@@ -242,7 +244,6 @@ public partial class ItemPickup : Area3D
 							{
 								player.playerInfo.Weapon[givesWeapon] = true;
 								player.playerControls.TrySwapWeapon(givesWeapon);
-								player.lookTime = 1.5f;
 								disable = true;
 							}
 						}
@@ -254,6 +255,8 @@ public partial class ItemPickup : Area3D
 						thingController.DisableThing();
 						if (!string.IsNullOrEmpty(PickupSound))
 							SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(PickupSound));
+						if (!string.IsNullOrEmpty(PickupText))
+							player.playerInfo.playerPostProcessing.playerHUD.ItemPickUp(PickupIcon, PickupText);
 //						player.playerInfo.playerHUD.HUDUpdateAmmoNum();
 //						player.playerInfo.playerHUD.HUDUpdateHealthNum();
 //						player.playerInfo.playerHUD.HUDUpdateArmorNum();
