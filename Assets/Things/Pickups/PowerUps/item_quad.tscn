@@ -20,10 +20,12 @@ fps = 0.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
 
-[node name="item_quad" type="Node3D"]
+[node name="item_quad" type="Node3D" node_paths=PackedStringArray("itemPickup")]
 script = ExtResource("1_7gx40")
-respawnTime = 30.0
+respawnTime = 120.0
+initDisabled = true
 thingType = 2
+itemPickup = NodePath("Item")
 
 [node name="Rings" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)

@@ -9,6 +9,8 @@ public partial class GameManager : Node
 	[Export]
 	public Node3D Sun;
 	[Export]
+	public Node3D Root;
+	[Export]
 	public string autoloadMap = "q3dm1";
 	[Export]
 	public int tessellations = 5;

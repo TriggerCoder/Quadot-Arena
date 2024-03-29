@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://byqxrs4xryit5"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/DestroyAfterTime.cs" id="1_uyweq"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_x6url"]
+bounce = 0.6
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_y0vk1"]
+
+[node name="ItemDrop" type="RigidBody3D"]
+collision_layer = 2
+collision_mask = 4
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+physics_material_override = SubResource("PhysicsMaterial_x6url")
+
+[node name="BounceShape" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_y0vk1")
+
+[node name="Destroy" type="Node" parent="."]
+script = ExtResource("1_uyweq")
+destroyTimer = 30.0

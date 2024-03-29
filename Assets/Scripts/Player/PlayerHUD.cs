@@ -59,6 +59,8 @@ public partial class PlayerHUD : MeshInstance3D
 
 	private static string ammoModelPath = "powerups/ammo/";
 	private static string armorModel = "powerups/armor/shard";
+	private static string weaponIconPath = "icons/";
+	private static readonly string[] weaponIcons = { "iconw_gauntlet", "iconw_machinegun", "iconw_shotgun", "iconw_grenade", "iconw_rocket", "iconw_lightning", "iconw_railgun", "iconw_plasma", "iconw_bfg", "iconw_grapple" };
 	private static readonly string[] ammoModels = { "machinegunam", "shotgunam", "grenadeam", "rocketam", "lightningam", "railgunam", "plasmaam", "bfgam" };
 	public enum NumColor
 	{
@@ -271,17 +273,32 @@ public partial class PlayerHUD : MeshInstance3D
 		faceAttack = true;
 	}
 
+	public void RemoveAllPowerUps()
+	{
+		currentPowerUps = new List<PowerUpInfo>();
+		for (int i = 0; i < powerUpIcon.Length; i++)
+			powerUpIcon[i].Hide();
+		for (int i = 0; i < powerUpText.Length; i++)
+			powerUpText[i].Hide();
+	}
+
+
 	public void RemovePowerUp(PowerUpType type)
 	{
 		int i;
+		bool found = false;
 		for (i = 0; i < currentPowerUps.Count; i++)
 		{
 			if (currentPowerUps[i].type == type)
 			{
 				currentPowerUps.RemoveAt(i);
+				found = true;
 				break;
 			}
 		}
+
+		if (!found)
+			return;
 
 		for (i = 0; i < currentPowerUps.Count; i++)
 		{
@@ -319,6 +336,9 @@ public partial class PlayerHUD : MeshInstance3D
 			powerUpInfo.displayTime = time;
 			currentPowerUps.Add(powerUpInfo);
 		}
+
+		if (!found)
+			currentPowerUps.Sort((a,b) => { if (a.displayTime > b.displayTime) return 1; else if (a.displayTime == b.displayTime) return 0; else return -1; });
 
 		for (i = 0; i < currentPowerUps.Count; i++)
 		{

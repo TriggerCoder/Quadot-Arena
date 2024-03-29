@@ -1,4 +1,4 @@
-[gd_scene load_steps=62 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=63 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
@@ -60,6 +60,7 @@
 [ext_resource type="PackedScene" uid="uid://mp5ryxp1smn2" path="res://Assets/Things/GamePlay/misc/misc_portal_camera.tscn" id="48_uv6co"]
 [ext_resource type="PackedScene" uid="uid://p0n8fxq1vf8t" path="res://Assets/Things/GamePlay/misc/misc_portal_surface.tscn" id="49_gicjp"]
 [ext_resource type="PackedScene" uid="uid://dlo5rcwan3lx" path="res://Assets/Things/GamePlay/target/target_location.tscn" id="49_mb0ac"]
+[ext_resource type="PackedScene" uid="uid://byqxrs4xryit5" path="res://Assets/Things/Debris/ItemDrop.tscn" id="59_rmbdm"]
 
 [sub_resource type="Environment" id="Environment_rcj1l"]
 background_mode = 2
@@ -75,10 +76,12 @@ volumetric_fog_density = 0.0
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_rcj1l")
 
-[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "Sun", "playerViewPort")]
+[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "Sun", "Root", "playerViewPort")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
 Sun = NodePath("../SunLight")
+Root = NodePath("..")
+autoloadMap = "q3dm6"
 tessellations = 10
 playerViewPort = NodePath("SplitScreen/PlayerViewPort")
 playerPrefab = ExtResource("7_rdgk2")
@@ -106,7 +109,7 @@ _fxPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("13_l5hcy"
 _projectilesPrefabs = Array[PackedScene]([ExtResource("12_6703q"), ExtResource("15_rsp03")])
 _decalsPrefabs = Array[PackedScene]([ExtResource("17_au5sd"), ExtResource("19_rmn3i"), ExtResource("18_occpy"), ExtResource("19_q0xlo")])
 _itemsPrefabs = Array[PackedScene]([ExtResource("19_qacws"), ExtResource("20_88qir"), ExtResource("21_gcmhg"), ExtResource("22_xc5q4")])
-_debrisPrefabs = Array[PackedScene]([ExtResource("18_dkfmq"), ExtResource("19_flqi0")])
+_debrisPrefabs = Array[PackedScene]([ExtResource("18_dkfmq"), ExtResource("19_flqi0"), ExtResource("59_rmbdm")])
 _weaponsPrefabs = Array[PackedScene]([ExtResource("24_5ts3k"), ExtResource("25_5i6m0"), ExtResource("26_6gxqa")])
 _healthsPrefabs = Array[PackedScene]([ExtResource("27_5pqil"), ExtResource("28_dpe7f"), ExtResource("30_u4mvd"), ExtResource("31_g11tp")])
 _armorPrefabs = Array[PackedScene]([ExtResource("29_slqlw"), ExtResource("30_8nwr7"), ExtResource("32_pviff")])

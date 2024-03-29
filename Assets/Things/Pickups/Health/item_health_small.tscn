@@ -16,10 +16,11 @@ fps = 0.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
 
-[node name="item_health_small" type="Node3D"]
+[node name="item_health_small" type="Node3D" node_paths=PackedStringArray("itemPickup")]
 script = ExtResource("1_us0o8")
-respawnTime = 30.0
+respawnTime = 35.0
 thingType = 2
+itemPickup = NodePath("Item")
 
 [node name="Sphere" type="Node3D" parent="."]
 script = ExtResource("2_rrjx0")

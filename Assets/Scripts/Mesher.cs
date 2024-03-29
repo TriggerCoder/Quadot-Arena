@@ -40,7 +40,6 @@ public static class Mesher
 
 	public static Dictionary<MultiMesh, List<Node3D>> MultiMeshes = new Dictionary<MultiMesh, List<Node3D>>();
 	public static Dictionary<MultiMesh, MultiMeshInstance3D> MultiMeshesInstances = new Dictionary<MultiMesh, MultiMeshInstance3D>();
-
 	public static void ClearMesherCache()
 	{
 		vertsCache = new List<Vector3>();
@@ -1634,9 +1633,18 @@ public static class Mesher
 		if (MultiMeshes.ContainsKey(multiMesh))
 		{
 			List<Node3D> multiMeshList = MultiMeshes[multiMesh];
-			for (int i = 0 ; i < multiMeshList.Count; i++)
-				multiMesh.SetInstanceTransform(i, multiMeshList[i].GlobalTransform);
 			multiMesh.VisibleInstanceCount = multiMeshList.Count;
+			for (int i = 0; i < multiMeshList.Count; i++)
+			{
+				Node3D node = multiMeshList[i];
+				if (node.IsVisibleInTree())
+					multiMesh.SetInstanceTransform(i, node.GlobalTransform);
+				else
+				{
+					Transform3D min = new Transform3D(node.Basis, MapLoader.mapMinCoord * 2f);
+					multiMesh.SetInstanceTransform(i, min);
+				}
+			}
 		}
 	}
 }

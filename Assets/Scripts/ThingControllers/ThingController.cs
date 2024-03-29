@@ -3,13 +3,15 @@ using System;
 
 public partial class ThingController : Node3D
 {
-	public Vector3 location;
-	public Quaternion angularrotation;
+	public Node3D parent = null;
 
 	[Export]
 	public string respawnSound = "items/respawn1";
 	[Export]
 	public float respawnTime;
+	[Export]
+	public bool initDisabled = false;
+
 	private float remainingTime = 0;
 	private bool _disabled = false;
 	public bool disabled { get { return _disabled; } }
@@ -28,6 +30,18 @@ public partial class ThingController : Node3D
 	[Export]
 	public ThingType thingType = ThingType.Decor;
 
+	[Export]
+	public ItemPickup itemPickup = null;
+
+	public override void _Ready()
+	{
+		if (initDisabled)
+		{
+			DisableThing();
+			//Set first spawn time to 30s
+			remainingTime = 30;
+		}
+	}
 	public override void _Process(double delta)
 	{
 		if (GameManager.Paused)
@@ -47,8 +61,24 @@ public partial class ThingController : Node3D
 			}
 		}
 	}
+
+	public void SetRespawnTime(float waitTime)
+	{
+		respawnTime = waitTime;
+	}
+
 	public void DisableThing()
 	{
+		//No longer respawn
+		if (respawnTime < 0)
+		{
+			if (parent != null)
+				parent.QueueFree();
+			else
+				QueueFree();
+		}
+
+
 		remainingTime = respawnTime;
 		Visible = false;
 		_disabled = true;

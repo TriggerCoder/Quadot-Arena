@@ -163,12 +163,17 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 		if (hitpoints <= 0)
 		{
-//			playerInfo.doomHUD.HUDUpdateMugshot(DoomHUD.MugType.Dead);
 			CollisionLayer = (1 << GameManager.RagdollLayer);
 			if (playerControls.playerWeapon != null)
 				playerControls.playerWeapon.putAway = true;
 
 			playerControls.playerCamera.ChangeThirdPersonCamera(true);
+
+			DropWeaponsAndPowerUps();
+
+			quadTime = 0;
+			playerInfo.playerPostProcessing.playerHUD.RemoveAllPowerUps();
+
 			PlayModelSound("death" + GD.RandRange(1, 3));
 			avatar.Die();
 			playerControls.feetRay.Length = 1.6f;
@@ -218,6 +223,65 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.jumpPadVel.Y = verticalVelocity;
 		playerControls.playerVelocity = Vector3.Zero;
 		playerControls.AnimateLegsOnJump();
+	}
+
+	public void DropWeaponsAndPowerUps()
+	{
+		List<string> itemsToDrop = new List<string>();
+		Dictionary<string, int> itemQuantity = new Dictionary<string, int>();
+
+		if (quadTime > 0)
+		{
+			itemsToDrop.Add("item_quad");
+			itemQuantity.Add("item_quad", Mathf.CeilToInt(quadTime));
+		}
+
+		switch (playerControls.CurrentWeapon)
+		{
+			default:
+				break;
+			case 2:
+				itemsToDrop.Add("weapon_shotgun");
+				break;
+			case 4:
+				itemsToDrop.Add("weapon_rocketlauncher");
+				break;
+			case 7:
+				itemsToDrop.Add("weapon_plasmagun");
+				break;
+		}
+
+		for (int i = 0; i < itemsToDrop.Count; i++)
+		{
+			string currentItem = itemsToDrop[i];
+			RigidBody3D dropItem = (RigidBody3D)ThingsManager.thingsPrefabs[ThingsManager.ItemDrop].Instantiate();
+			if (dropItem != null)
+			{
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(dropItem);
+				dropItem.GlobalPosition = ThingsManager.ItemLocationDropToFloor(GlobalPosition + Vector3.Up);
+				Vector3 velocity = new Vector3((float)GD.RandRange(-20f, 20f), (float)GD.RandRange(5f, 10f), (float)GD.RandRange(-20f, 20f));
+				dropItem.LinearVelocity = velocity;
+			}
+
+			ThingController thingObject = (ThingController)ThingsManager.thingsPrefabs[currentItem].Instantiate();
+			if (thingObject != null)
+			{
+				if (dropItem != null)
+				{
+					thingObject.parent = dropItem;
+					dropItem.AddChild(thingObject);
+				}
+				else
+				{
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
+					thingObject.GlobalPosition = ThingsManager.ItemLocationDropToFloor(GlobalPosition + Vector3.Up);
+				}
+				thingObject.SetRespawnTime(-1);
+				int ammount;
+				if (itemQuantity.TryGetValue(currentItem, out ammount))
+					thingObject.itemPickup.amount = ammount;
+			}
+		}
 	}
 
 	public override void _Process(double delta)

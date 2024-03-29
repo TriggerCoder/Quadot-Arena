@@ -85,11 +85,11 @@ public partial class PlayerInfo : Node3D
 		quadDamage = false;
 
 		playerPostProcessing.ResetEffects();
-//		playerHUD.pickupFlashTime = 0f;
-//		playerHUD.painFlashTime = 0f;
+
 		playerThing.waterLever = 0;
 		playerThing.hitpoints = 100;
 		playerThing.armor = 0;
+		playerThing.painTime = 0;
 
 		playerControls.impulseVector = Vector3.Zero;
 		playerControls.CurrentWeapon = -1;

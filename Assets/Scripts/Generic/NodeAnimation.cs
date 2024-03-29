@@ -62,12 +62,12 @@ public partial class NodeAnimation : Node3D
 
 		timer += deltaTime * posFPS;
 		float offSet = posAmplitude * Mathf.Sin(timer) + height;
-		parent.GlobalPosition = new Vector3(parent.GlobalPosition.X, offSet, parent.GlobalPosition.Z);
+		parent.Position = new Vector3(parent.Position.X, offSet, parent.Position.Z);
 	}
 
 	public void Start()
 	{
-		height = parent.GlobalPosition.Y;
+		height = parent.Position.Y;
 		currentState = GameManager.FuncState.Start;
 	}
 

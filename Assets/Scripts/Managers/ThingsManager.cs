@@ -46,6 +46,7 @@ public partial class ThingsManager : Node
 	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group", "info_null" };
 	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_position", "info_notnull", "misc_teleporter_dest" };
 	public static List<Portal> portalsOnMap = new List<Portal>();
+	public static readonly string ItemDrop = "ItemDrop";
 	public override void _Ready()
 	{
 		foreach (var thing in _fxPrefabs)
@@ -407,7 +408,37 @@ public partial class ThingsManager : Node
 			switch (entity.name)
 			{
 				default:
-					thingObject.GlobalPosition = entity.origin;
+				{
+					float wait;
+					if (entity.entityData.TryGetValue("spawnflags", out strWord))
+					{
+						int spawnflags = int.Parse(strWord);
+						//Suspended
+						if ((spawnflags & 1) != 0)
+							thingObject.GlobalPosition = entity.origin;
+						else
+							thingObject.GlobalPosition = ItemLocationDropToFloor(entity.origin);
+					}
+					else
+						thingObject.GlobalPosition = ItemLocationDropToFloor(entity.origin);
+
+/*					if (entity.name.Contains("item_health_mega"))
+						foreach (var data in entity.entityData)
+							GameManager.Print("Key: " + data.Key + " Value: " + data.Value);
+*/
+					if (entity.entityData.TryGetNumValue("wait", out wait))
+						thingObject.SetRespawnTime(wait);
+
+					if (thingObject.thingType != ThingController.ThingType.Item)
+						break;
+
+					ItemPickup itemPickup = thingObject.itemPickup;
+					if (itemPickup == null)
+						break;
+
+					if (entity.entityData.TryGetNumValue("count", out wait))
+						itemPickup.amount =(int)wait;
+				}
 				break;
 				// Solid Model
 				case "func_static":
@@ -893,6 +924,19 @@ public partial class ThingsManager : Node
 				break;
 			}
 		}
+	}
+
+	public static Vector3 ItemLocationDropToFloor(Vector3 Origin)
+	{
+		float maxRange = 400f;
+		Vector3 collision = Origin;
+		Vector3 End = Origin + Vector3.Down * maxRange;
+		var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | (1 << GameManager.InvisibleBlockerLayer)));
+		var SpaceState = GameManager.Instance.Root.GetWorld3D().DirectSpaceState;
+		var hit = SpaceState.IntersectRay(RayCast);
+		if (hit.Count > 0)
+			collision = (Vector3)hit["position"] + Vector3.Up * .6f;
+		return collision;
 	}
 	public static void AddPortalsToMap()
 	{
