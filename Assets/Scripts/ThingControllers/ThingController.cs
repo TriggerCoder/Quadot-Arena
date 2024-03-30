@@ -33,7 +33,7 @@ public partial class ThingController : Node3D
 	[Export]
 	public ItemPickup itemPickup = null;
 
-	public override void _Ready()
+	public void SpawnCheck()
 	{
 		if (initDisabled)
 		{

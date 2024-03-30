@@ -25,6 +25,8 @@ public partial class PlayerHUD : MeshInstance3D
 	[Export]
 	public Label3D armorLabel;
 	[Export]
+	public Label3D weaponLabel;
+	[Export]
 	public Label3D ammoLabel;
 	[Export]
 	public Sprite3D[] weaponIcon;
@@ -69,6 +71,7 @@ public partial class PlayerHUD : MeshInstance3D
 
 	private Sprite3D[] noAmmoIcon;
 	private Sprite3D selectIcon;
+	private static readonly string[] weaponNames = { "Gauntlet", "Machinegun", "Shotgun", "Grenade Launcher", "Rocket Launcher", "Lightning Gun", "Railgun", "Plasma Gun", "BFG 10K", "Grapple Hook" };
 	private static readonly string[] weaponSprites = { "ICONS/ICONW_GAUNTLET", "ICONS/ICONW_MACHINEGUN", "ICONS/ICONW_SHOTGUN", "ICONS/ICONW_GRENADE", "ICONS/ICONW_ROCKET", "ICONS/ICONW_LIGHTNING", "ICONS/ICONW_RAILGUN", "ICONS/ICONW_PLASMA", "ICONS/ICONW_BFG", "ICONS/ICONW_GRAPPLE" };
 	private static readonly string[] ammoModels = { "machinegunam", "shotgunam", "grenadeam", "rocketam", "lightningam", "railgunam", "plasmaam", "bfgam" };
 	public enum NumColor
@@ -156,6 +159,8 @@ public partial class PlayerHUD : MeshInstance3D
 		crossHair.Layers = Layers;
 		pickUpIcon.Layers = Layers;
 		pickUpText.Layers = Layers;
+		weaponLabel.Layers = Layers;
+
 		for (int i = 0; i < powerUpIcon.Length; i++)
 			powerUpIcon[i].Layers = Layers;
 		for (int i = 0; i < powerUpText.Length; i++)
@@ -317,6 +322,7 @@ public partial class PlayerHUD : MeshInstance3D
 		for (int i = 0; i < weaponIcon.Length; i++)
 			weaponIcon[i].Hide();
 		WeaponContainer.Hide();
+		weaponLabel.Hide();
 	}
 
 
@@ -395,6 +401,9 @@ public partial class PlayerHUD : MeshInstance3D
 		if (WeaponContainer.Visible == false)
 			WeaponContainer.Show();
 
+		if (weaponLabel.Visible == false)
+			weaponLabel.Show();
+
 		WeaponContainer.Position = new Vector3(currentWeapons.Count * -0.175f, WeaponContainer.Position.Y, 0); 
 		currentWeapons.Add(weapon);
 		currentWeapons.Sort((a, b) => a.CompareTo(b));
@@ -406,7 +415,10 @@ public partial class PlayerHUD : MeshInstance3D
 			noAmmoIcon[i].Visible = !HasAmmo(currentWeapons[i]);
 
 			if (currentWeapons[i] == weapon)
+			{
 				selectIcon.Position = weaponIcon[i].Position;
+				weaponLabel.Text = weaponNames[weapon];
+			}
 			weaponIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(weaponSprites[currentWeapons[i]], false);
 		}
 		//In order to get near the screen
@@ -421,11 +433,17 @@ public partial class PlayerHUD : MeshInstance3D
 		if (WeaponContainer.Visible == false)
 			WeaponContainer.Show();
 
+		if (weaponLabel.Visible == false)
+			weaponLabel.Show();
+
 		for (int i = 0; i < currentWeapons.Count; i++)
 		{
 			noAmmoIcon[i].Visible = !HasAmmo(currentWeapons[i]);
 			if (currentWeapons[i] == weapon)
+			{
+				weaponLabel.Text = weaponNames[weapon];
 				selectIcon.Position = weaponIcon[i].Position;
+			}
 		}
 		//In order to get near the screen
 		selectIcon.Position += Vector3.Back * .001f;
@@ -496,6 +514,7 @@ public partial class PlayerHUD : MeshInstance3D
 		{
 			weaponTime = 0;
 			WeaponContainer.Hide();
+			weaponLabel.Hide();
 		}
 	}
 

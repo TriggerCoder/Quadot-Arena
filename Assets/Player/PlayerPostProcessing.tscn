@@ -135,7 +135,7 @@ far = 300.0
 transform = Transform3D(-3.58063e-08, -2.50718e-08, 1, -0.573576, 0.819152, 0, -0.819152, -0.573576, -4.37114e-08, 0, -1, -1.5)
 
 [node name="ViewHead" type="Node3D" parent="ViewPortCamera/ViewHeadContainer"]
-transform = Transform3D(0.999976, 0.00690997, 2.97994e-08, -0.00690997, 0.999976, -1.02958e-10, -2.97994e-08, -1.02958e-10, 1, 0, 0, 0)
+transform = Transform3D(0.999915, -0.0130273, 2.9799e-08, 0.0130273, 0.999915, 1.94108e-10, -2.9799e-08, 1.94109e-10, 1, 0, 0, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="ViewPortCamera/ViewHeadContainer"]
 deterministic = true
@@ -172,7 +172,7 @@ script = ExtResource("2_2cprp")
 rotEnable = true
 rotFPS = 40.0
 
-[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "ArmorContainer", "AmmoContainer", "WeaponContainer", "viewHead", "headAnimation", "healthLabel", "armorLabel", "ammoLabel", "weaponIcon", "crossHair", "pickUpIcon", "pickUpText", "powerUpIcon", "powerUpText")]
+[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "ArmorContainer", "AmmoContainer", "WeaponContainer", "viewHead", "headAnimation", "healthLabel", "armorLabel", "weaponLabel", "ammoLabel", "weaponIcon", "crossHair", "pickUpIcon", "pickUpText", "powerUpIcon", "powerUpText")]
 layers = 0
 extra_cull_margin = 0.1
 mesh = SubResource("QuadMesh_0iqvi")
@@ -188,6 +188,7 @@ viewHead = NodePath("../ViewHeadContainer/ViewHead")
 headAnimation = NodePath("../ViewHeadContainer/AnimationTree")
 healthLabel = NodePath("Health")
 armorLabel = NodePath("Armor")
+weaponLabel = NodePath("Weapon")
 ammoLabel = NodePath("Ammo")
 weaponIcon = [NodePath("WeaponsContainer/WeaponIcon_1"), NodePath("WeaponsContainer/WeaponIcon_2"), NodePath("WeaponsContainer/WeaponIcon_3"), NodePath("WeaponsContainer/WeaponIcon_4"), NodePath("WeaponsContainer/WeaponIcon_5"), NodePath("WeaponsContainer/WeaponIcon_6"), NodePath("WeaponsContainer/WeaponIcon_7"), NodePath("WeaponsContainer/WeaponIcon_8"), NodePath("WeaponsContainer/WeaponIcon_9"), NodePath("WeaponsContainer/WeaponIcon_10")]
 crossHair = NodePath("CrossHair")
@@ -439,6 +440,19 @@ font = ExtResource("7_4bgd3")
 font_size = 120
 outline_size = 0
 horizontal_alignment = 2
+
+[node name="Weapon" type="Label3D" parent="ViewPortCamera/PlayerHUD"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+layers = 0
+transparency = 0.4
+offset = Vector2(0, -140)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.988235, 1, 1, 1)
+font = ExtResource("7_4bgd3")
+font_size = 50
+outline_size = 10
 
 [node name="Ammo" type="Label3D" parent="ViewPortCamera/PlayerHUD"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)

@@ -402,6 +402,8 @@ public partial class ThingsManager : Node
 			ThingController thingObject = (ThingController)thingsPrefabs[entity.name].Instantiate();
 			if (thingObject == null)
 				continue;
+				
+			thingObject.SpawnCheck();
 
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
 			thingObject.Name = entity.name;

@@ -200,6 +200,7 @@ public partial class ItemPickup : Area3D
 				break;
 			}
 
+			bool showItemPickUp = true;
 			if (givesWeapon != -1)
 			{
 				if (givesWeapon >= 0 && givesWeapon < player.playerInfo.Weapon.Length)
@@ -209,6 +210,7 @@ public partial class ItemPickup : Area3D
 						player.playerInfo.Weapon[givesWeapon] = true;
 						player.playerInfo.playerPostProcessing.playerHUD.AddWeapon(givesWeapon);
 						player.playerControls.TrySwapWeapon(givesWeapon);
+						showItemPickUp = false;
 						disable = true;
 					}
 				}
@@ -221,7 +223,8 @@ public partial class ItemPickup : Area3D
 				if (!string.IsNullOrEmpty(PickupSound))
 					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(PickupSound));
 				if (!string.IsNullOrEmpty(PickupText))
-					player.playerInfo.playerPostProcessing.playerHUD.ItemPickUp(PickupIcon, PickupText);
+					if (showItemPickUp)
+						player.playerInfo.playerPostProcessing.playerHUD.ItemPickUp(PickupIcon, PickupText);
 //					player.playerInfo.playerHUD.HUDUpdateAmmoNum();
 //					player.playerInfo.playerHUD.HUDUpdateHealthNum();
 //					player.playerInfo.playerHUD.HUDUpdateArmorNum();
