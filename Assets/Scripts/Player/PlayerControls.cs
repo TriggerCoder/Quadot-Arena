@@ -320,6 +320,7 @@ public partial class PlayerControls : InterpolatedNode3D
 				CurrentWeapon = SwapWeapon;
 				playerWeapon = (PlayerWeapon)playerInfo.WeaponPrefabs[CurrentWeapon].Instantiate();
 				playerWeapon.Init(playerInfo);
+				playerInfo.playerPostProcessing.playerHUD.ChangeWeapon(CurrentWeapon);
 				SwapWeapon = -1;
 			}
 		}

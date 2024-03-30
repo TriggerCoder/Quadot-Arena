@@ -172,7 +172,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			DropWeaponsAndPowerUps();
 
 			quadTime = 0;
-			playerInfo.playerPostProcessing.playerHUD.RemoveAllPowerUps();
+			playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
 
 			PlayModelSound("death" + GD.RandRange(1, 3));
 			avatar.Die();

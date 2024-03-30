@@ -15,6 +15,8 @@ public partial class PlayerHUD : MeshInstance3D
 	[Export]
 	public Node3D AmmoContainer;
 	[Export]
+	public Node3D WeaponContainer;
+	[Export]
 	public Node3D viewHead;
 	[Export]
 	public AnimationTree headAnimation;
@@ -24,6 +26,8 @@ public partial class PlayerHUD : MeshInstance3D
 	public Label3D armorLabel;
 	[Export]
 	public Label3D ammoLabel;
+	[Export]
+	public Sprite3D[] weaponIcon;
 	[Export]
 	public Sprite3D crossHair;
 	[Export]
@@ -52,6 +56,7 @@ public partial class PlayerHUD : MeshInstance3D
 	private float spawnColorTime = 0;
 	private float lookTime = 0;
 	private float pickUpTime = 0;
+	private float weaponTime = 0;
 
 	private List<MeshInstance3D> fxMeshes;
 	private List<Node3D> ammoContainers = new List<Node3D>();
@@ -59,8 +64,12 @@ public partial class PlayerHUD : MeshInstance3D
 
 	private static string ammoModelPath = "powerups/ammo/";
 	private static string armorModel = "powerups/armor/shard";
-	private static string weaponIconPath = "icons/";
-	private static readonly string[] weaponIcons = { "iconw_gauntlet", "iconw_machinegun", "iconw_shotgun", "iconw_grenade", "iconw_rocket", "iconw_lightning", "iconw_railgun", "iconw_plasma", "iconw_bfg", "iconw_grapple" };
+	private static string selectSprite = "GFX/2D/SELECT";
+	private static string noAmmoSprite = "ICONS/NOAMMO";
+
+	private Sprite3D[] noAmmoIcon;
+	private Sprite3D selectIcon;
+	private static readonly string[] weaponSprites = { "ICONS/ICONW_GAUNTLET", "ICONS/ICONW_MACHINEGUN", "ICONS/ICONW_SHOTGUN", "ICONS/ICONW_GRENADE", "ICONS/ICONW_ROCKET", "ICONS/ICONW_LIGHTNING", "ICONS/ICONW_RAILGUN", "ICONS/ICONW_PLASMA", "ICONS/ICONW_BFG", "ICONS/ICONW_GRAPPLE" };
 	private static readonly string[] ammoModels = { "machinegunam", "shotgunam", "grenadeam", "rocketam", "lightningam", "railgunam", "plasmaam", "bfgam" };
 	public enum NumColor
 	{
@@ -100,6 +109,8 @@ public partial class PlayerHUD : MeshInstance3D
 	}
 
 	private List<PowerUpInfo> currentPowerUps = new List<PowerUpInfo>();
+	private List<int> currentWeapons = new List<int>();
+
 	private static readonly string[] powerUpsIcons = { "ICONS/QUAD", "ICONS/HASTE", "ICONS/INVIS", "ICONS/REGEN", "ICONS/ENVIROSUIT", "ICONS/FLIGHT" };
 	public void Init(PlayerInfo p)
 	{
@@ -149,6 +160,28 @@ public partial class PlayerHUD : MeshInstance3D
 			powerUpIcon[i].Layers = Layers;
 		for (int i = 0; i < powerUpText.Length; i++)
 			powerUpText[i].Layers = Layers;
+
+		selectIcon = new Sprite3D();
+		WeaponContainer.AddChild(selectIcon);
+		selectIcon.DoubleSided = false;
+		selectIcon.NoDepthTest = true;
+		selectIcon.Layers = Layers;
+		selectIcon.Texture = TextureLoader.GetTextureOrAddTexture(selectSprite, false);
+		selectIcon.Hide();
+
+		noAmmoIcon = new Sprite3D[weaponIcon.Length];
+		for (int i = 0; i < weaponIcon.Length; i++)
+		{
+			weaponIcon[i].Layers = Layers;
+			noAmmoIcon[i] = new Sprite3D();
+			weaponIcon[i].AddChild(noAmmoIcon[i]);
+			noAmmoIcon[i].Position += Vector3.Back * .001f;
+			noAmmoIcon[i].DoubleSided = false;
+			noAmmoIcon[i].NoDepthTest = true;
+			noAmmoIcon[i].Layers = Layers;
+			noAmmoIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(noAmmoSprite, false);
+			noAmmoIcon[i].Hide();
+		}
 	}
 
 	public void InitHUD(MD3 headModel, Dictionary<string, string> meshToSkin)
@@ -273,13 +306,17 @@ public partial class PlayerHUD : MeshInstance3D
 		faceAttack = true;
 	}
 
-	public void RemoveAllPowerUps()
+	public void RemoveAllItems()
 	{
 		currentPowerUps = new List<PowerUpInfo>();
+		currentWeapons = new List<int>();
 		for (int i = 0; i < powerUpIcon.Length; i++)
 			powerUpIcon[i].Hide();
 		for (int i = 0; i < powerUpText.Length; i++)
 			powerUpText[i].Hide();
+		for (int i = 0; i < weaponIcon.Length; i++)
+			weaponIcon[i].Hide();
+		WeaponContainer.Hide();
 	}
 
 
@@ -313,8 +350,6 @@ public partial class PlayerHUD : MeshInstance3D
 		}
 
 	}
-
-
 	public void UpdatePowerUpTime(PowerUpType type, int time)
 	{
 		int i;
@@ -349,6 +384,118 @@ public partial class PlayerHUD : MeshInstance3D
 			if (!found)
 				powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsIcons[(int)currentPowerUps[i].type], false);
 			powerUpText[i].Text = "" + currentPowerUps[i].displayTime;
+		}
+	}
+
+	public void AddWeapon(int weapon)
+	{
+		if (currentWeapons.Contains(weapon))
+			return;
+
+		if (WeaponContainer.Visible == false)
+			WeaponContainer.Show();
+
+		WeaponContainer.Position = new Vector3(currentWeapons.Count * -0.175f, WeaponContainer.Position.Y, 0); 
+		currentWeapons.Add(weapon);
+		currentWeapons.Sort((a, b) => a.CompareTo(b));
+		for (int i = 0; i < currentWeapons.Count; i++)
+		{
+			if (weaponIcon[i].Visible == false)
+				weaponIcon[i].Show();
+
+			noAmmoIcon[i].Visible = !HasAmmo(currentWeapons[i]);
+
+			if (currentWeapons[i] == weapon)
+				selectIcon.Position = weaponIcon[i].Position;
+			weaponIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(weaponSprites[currentWeapons[i]], false);
+		}
+		//In order to get near the screen
+		selectIcon.Position += Vector3.Back * .001f;
+		if (selectIcon.Visible == false)
+			selectIcon.Show();
+		weaponTime = 3f;
+	}
+
+	public void ChangeWeapon(int weapon)
+	{
+		if (WeaponContainer.Visible == false)
+			WeaponContainer.Show();
+
+		for (int i = 0; i < currentWeapons.Count; i++)
+		{
+			noAmmoIcon[i].Visible = !HasAmmo(currentWeapons[i]);
+			if (currentWeapons[i] == weapon)
+				selectIcon.Position = weaponIcon[i].Position;
+		}
+		//In order to get near the screen
+		selectIcon.Position += Vector3.Back * .001f;
+		if (selectIcon.Visible == false)
+			selectIcon.Show();
+		weaponTime = 3f;
+	}
+
+	public bool HasAmmo(int weapon)
+	{
+		switch (weapon)
+		{
+			default:
+				return false;
+
+			case PlayerInfo.Gauntlet:
+				break;
+
+			case PlayerInfo.MachineGun:
+				if (playerInfo.Ammo[PlayerInfo.bulletsAmmo] <= 0)
+					return false;
+				break;
+
+			case PlayerInfo.Shotgun:
+				if (playerInfo.Ammo[PlayerInfo.shellsAmmo] <= 0)
+					return false;
+				break;
+
+			case PlayerInfo.GrenadeLauncher:
+				if (playerInfo.Ammo[PlayerInfo.grenadesAmmo] <= 0)
+					return false;
+				break;
+
+			case PlayerInfo.RocketLauncher:
+				if (playerInfo.Ammo[PlayerInfo.rocketsAmmo] <= 0)
+					return false;
+				break;
+
+			case PlayerInfo.LightningGun:
+				if (playerInfo.Ammo[PlayerInfo.lightningAmmo] <= 0)
+					return false;
+				break;
+
+			case PlayerInfo.Railgun:
+				if (playerInfo.Ammo[PlayerInfo.slugAmmo] <= 0)
+					return false;
+				break;
+
+			case PlayerInfo.PlasmaGun:
+				if (playerInfo.Ammo[PlayerInfo.cellsAmmo] <= 0)
+					return false;
+				break;
+
+			case PlayerInfo.BFG10K:
+				if (playerInfo.Ammo[PlayerInfo.bfgAmmo] <= 0)
+					return false;
+				break;
+		}
+		return true;
+	}
+
+	public void CheckWeapon(float deltaTime)
+	{
+		if (weaponTime > 0)
+			weaponTime -= deltaTime;
+
+		if (weaponTime < 0)
+		{
+			weaponTime = 0;
+			WeaponContainer.Hide();
 		}
 	}
 
@@ -448,6 +595,14 @@ public partial class PlayerHUD : MeshInstance3D
 		pickUpTime = 1.5f;
 		pickUpIcon.Show();
 		pickUpText.Show();
+
+
+		//Small Check in case we picked Up Ammo
+		if (weaponTime > 0)
+		{
+			for (int i = 0; i < currentWeapons.Count; i++)
+				noAmmoIcon[i].Visible = !HasAmmo(currentWeapons[i]);
+		}
 	}
 
 	public void HideAmmo()
@@ -552,6 +707,7 @@ public partial class PlayerHUD : MeshInstance3D
 
 		CheckNextHeadAnimation(deltaTime);
 		CheckPickUp(deltaTime);
+		CheckWeapon(deltaTime);
 	}
 	public class ViewMaterial
 	{

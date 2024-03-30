@@ -207,6 +207,7 @@ public partial class ItemPickup : Area3D
 					if (!player.playerInfo.Weapon[givesWeapon])
 					{
 						player.playerInfo.Weapon[givesWeapon] = true;
+						player.playerInfo.playerPostProcessing.playerHUD.AddWeapon(givesWeapon);
 						player.playerControls.TrySwapWeapon(givesWeapon);
 						disable = true;
 					}

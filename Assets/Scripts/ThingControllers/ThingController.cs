@@ -78,7 +78,6 @@ public partial class ThingController : Node3D
 				QueueFree();
 		}
 
-
 		remainingTime = respawnTime;
 		Visible = false;
 		_disabled = true;

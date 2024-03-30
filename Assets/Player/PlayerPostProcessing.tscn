@@ -135,7 +135,7 @@ far = 300.0
 transform = Transform3D(-3.58063e-08, -2.50718e-08, 1, -0.573576, 0.819152, 0, -0.819152, -0.573576, -4.37114e-08, 0, -1, -1.5)
 
 [node name="ViewHead" type="Node3D" parent="ViewPortCamera/ViewHeadContainer"]
-transform = Transform3D(0.999983, -0.0059055, 2.97993e-08, 0.0059055, 0.999983, 1.46193e-10, -2.97996e-08, 2.9789e-11, 1, 0, 0, 0)
+transform = Transform3D(0.999976, 0.00690997, 2.97994e-08, -0.00690997, 0.999976, -1.02958e-10, -2.97994e-08, -1.02958e-10, 1, 0, 0, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="ViewPortCamera/ViewHeadContainer"]
 deterministic = true
@@ -172,7 +172,7 @@ script = ExtResource("2_2cprp")
 rotEnable = true
 rotFPS = 40.0
 
-[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "ArmorContainer", "AmmoContainer", "viewHead", "headAnimation", "healthLabel", "armorLabel", "ammoLabel", "crossHair", "pickUpIcon", "pickUpText", "powerUpIcon", "powerUpText")]
+[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "ArmorContainer", "AmmoContainer", "WeaponContainer", "viewHead", "headAnimation", "healthLabel", "armorLabel", "ammoLabel", "weaponIcon", "crossHair", "pickUpIcon", "pickUpText", "powerUpIcon", "powerUpText")]
 layers = 0
 extra_cull_margin = 0.1
 mesh = SubResource("QuadMesh_0iqvi")
@@ -183,16 +183,91 @@ pickupEffect = ExtResource("4_txoxd")
 viewHeadContainer = NodePath("../ViewHeadContainer")
 ArmorContainer = NodePath("../ArmorContainer")
 AmmoContainer = NodePath("../AmmoContainer")
+WeaponContainer = NodePath("WeaponsContainer")
 viewHead = NodePath("../ViewHeadContainer/ViewHead")
 headAnimation = NodePath("../ViewHeadContainer/AnimationTree")
 healthLabel = NodePath("Health")
 armorLabel = NodePath("Armor")
 ammoLabel = NodePath("Ammo")
+weaponIcon = [NodePath("WeaponsContainer/WeaponIcon_1"), NodePath("WeaponsContainer/WeaponIcon_2"), NodePath("WeaponsContainer/WeaponIcon_3"), NodePath("WeaponsContainer/WeaponIcon_4"), NodePath("WeaponsContainer/WeaponIcon_5"), NodePath("WeaponsContainer/WeaponIcon_6"), NodePath("WeaponsContainer/WeaponIcon_7"), NodePath("WeaponsContainer/WeaponIcon_8"), NodePath("WeaponsContainer/WeaponIcon_9"), NodePath("WeaponsContainer/WeaponIcon_10")]
 crossHair = NodePath("CrossHair")
 pickUpIcon = NodePath("PickUpIcon")
 pickUpText = NodePath("PickUpText")
 powerUpIcon = [NodePath("PowerUpsContainer/PowerUpIcon_1"), NodePath("PowerUpsContainer/PowerUpIcon_2"), NodePath("PowerUpsContainer/PowerUpIcon_3"), NodePath("PowerUpsContainer/PowerUpIcon_4"), NodePath("PowerUpsContainer/PowerUpIcon_5"), NodePath("PowerUpsContainer/PowerUpIcon_6")]
 powerUpText = [NodePath("PowerUpsContainer/PowerUpText_1"), NodePath("PowerUpsContainer/PowerUpText_2"), NodePath("PowerUpsContainer/PowerUpText_3"), NodePath("PowerUpsContainer/PowerUpText_4"), NodePath("PowerUpsContainer/PowerUpText_5"), NodePath("PowerUpsContainer/PowerUpText_6")]
+
+[node name="WeaponsContainer" type="Node3D" parent="ViewPortCamera/PlayerHUD"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.7, 0)
+
+[node name="WeaponIcon_1" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_2" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_3" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_4" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.05, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_5" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_6" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.75, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_7" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_8" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.45, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_9" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_10" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.15, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
 
 [node name="PowerUpsContainer" type="Node3D" parent="ViewPortCamera/PlayerHUD"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3, 0.6, 0)

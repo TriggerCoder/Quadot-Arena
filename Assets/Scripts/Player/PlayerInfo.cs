@@ -73,6 +73,11 @@ public partial class PlayerInfo : Node3D
 		playerCamera.playerPostProcessing.ViewMask = (uint)viewLayer;
 		playerCamera.playerPostProcessing.UIMask = uiLayer;
 		playerCamera.playerPostProcessing.InitPost(this);
+		for (int i = 0; i < Weapon.Length; i++)
+		{
+			if (Weapon[i])
+				playerPostProcessing.playerHUD.AddWeapon(i);
+		}
 	}
 
 	public void Reset()
@@ -94,10 +99,16 @@ public partial class PlayerInfo : Node3D
 		playerControls.impulseVector = Vector3.Zero;
 		playerControls.CurrentWeapon = -1;
 		playerControls.SwapWeapon = -1;
-//		playerControls.SwapToBestWeapon();
 
-//		playerHUD.HUDUpdateHealthNum();
-//		playerHUD.HUDUpdateArmorNum();
+		for (int i = 0; i < Weapon.Length; i++)
+		{
+			if (Weapon[i])
+				playerPostProcessing.playerHUD.AddWeapon(i);
+		}
+		//		playerControls.SwapToBestWeapon();
+
+		//		playerHUD.HUDUpdateHealthNum();
+		//		playerHUD.HUDUpdateArmorNum();
 	}
 	public override void _Process(double delta)
 	{
