@@ -275,17 +275,25 @@ public partial class PlayerControls : InterpolatedNode3D
 			}
 		}
 
+		bool doGoundChecks = false;
 		//Movement Checks
 		if (playerThing.waterLever > 0)
 		{
-			if (controllerIsGrounded)
-				playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed, deltaTime);
+			if (playerThing.waterLever < 2)
+				doGoundChecks = true;
 			else
-				playerThing.avatar.Swim();
-			if (playerThing.waterLever > 1)
+			{
+				if (controllerIsGrounded)
+					playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed, deltaTime);
+				else
+					playerThing.avatar.Swim();
 				wishJump = Input.IsActionPressed(playerInput.Action_Jump);
+			}
 		}
 		else
+			doGoundChecks = true;
+
+		if (doGoundChecks)
 		{
 			if (currentMoveType != MoveType.Crouch)
 				QueueJump();
@@ -299,6 +307,7 @@ public partial class PlayerControls : InterpolatedNode3D
 			else
 				playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed, deltaTime);
 		}
+
 		if ((GlobalPosition - lastGlobalPosition).LengthSquared() > .0001f)
 			bobActive = true;
 		else
@@ -354,18 +363,25 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (!playerThing.ready)
 			return;
 
+		bool doGoundChecks = false;
 		//Movement Checks
 		if (playerThing.waterLever > 0)
 		{
 			if (playerThing.waterLever > 1)
 				WaterMove(deltaTime);
 			else
+				doGoundChecks = true;
+		}
+		else
+			doGoundChecks = true;
+
+        if (doGoundChecks)
+        {
+			if (controllerIsGrounded)
+				GroundMove(deltaTime);
+			else
 				AirMove(deltaTime);
 		}
-		else if (controllerIsGrounded)
-			GroundMove(deltaTime);
-		else
-			AirMove(deltaTime);
 
 		//apply move
 		ApplyMove(deltaTime);
@@ -474,7 +490,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		Vector3 wishdir;
 		float curreAcel;
 
-		playerVelocity.Y *= ApplyFriction(1.0f, deltaTime);
+		playerVelocity.Y *= ApplyFriction(0.6f, deltaTime);
 
 		SetMovementDir();
 
@@ -501,12 +517,15 @@ public partial class PlayerControls : InterpolatedNode3D
 	private void GroundMove(float deltaTime)
 	{
 		Vector3 wishdir;
+		float friction = 0;
 
 		// Do not apply friction if the player is queueing up the next jump
 		if (!wishJump)
-			ApplyFriction(1.0f, deltaTime);
-		else
-			ApplyFriction(0, deltaTime);
+			friction = 1.0f;
+		if (playerThing.waterLever > 0)
+			friction = 0.75f;
+
+		ApplyFriction(friction, deltaTime);
 
 		SetMovementDir();
 
@@ -523,7 +542,10 @@ public partial class PlayerControls : InterpolatedNode3D
 
 		if ((controllerIsGrounded) && (wishJump))
 		{
-			playerVelocity.Y = jumpSpeed;
+			float currentJumpSpeed = jumpSpeed;
+			if (playerThing.waterLever > 0)
+				currentJumpSpeed *= friction;
+			playerVelocity.Y = currentJumpSpeed;
 			wishJump = false;
 		}
 	}

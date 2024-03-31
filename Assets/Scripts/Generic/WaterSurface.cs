@@ -35,13 +35,19 @@ public partial class WaterSurface : Area3D
 
 			for (int j = 0; j < Boxes.Count; j++) 
 			{
+				//Player already deep, no need to check again
+				if (currentPlayer.waterLever > 1)
+					break;
 				if (Boxes[j].HasPoint(currentPlayer.GlobalPosition))
 				{
 					float deep = Boxes[j].GetEndpoint(2).Y - currentPlayer.GlobalPosition.Y;
 					if (deep > GameManager.Instance.playerHeight)
+					{
+						currentPlayer.playerInfo.playerPostProcessing.SetWaterEffect();
 						currentPlayer.waterLever = 2;
-					break;
-				}
+						break;
+					}
+									}
 			}
 		}
 	}
@@ -112,7 +118,7 @@ public partial class WaterSurface : Area3D
 		if (!currentPlayers.Contains(playerThing))
 		{
 			playerThing.waterLever = 1;
-			playerThing.playerInfo.playerPostProcessing.SetWaterEffect();
+//			playerThing.playerInfo.playerPostProcessing.SetWaterEffect();
 			SoundManager.Create3DSound(playerThing.GlobalPosition, inSound);
 			currentPlayers.Add(playerThing);
 //			GameManager.Print(playerThing.Name + " Jump into the Water " + Name);

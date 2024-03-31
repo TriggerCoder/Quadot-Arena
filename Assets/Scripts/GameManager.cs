@@ -101,8 +101,8 @@ public partial class GameManager : Node
 	private float timeMs = 0.0f;
 	public static float CurrentTimeMsec { get { return Instance.timeMs; } }
 	public float gravity = 25f;					//default 800 * sizeDividor
-	public float friction = 6;
-	public float waterFriction = 6;
+	public float friction = 6f;
+	public float waterFriction = 12f;
 	public float waterDeadFall = 4.5f;
 	public float terminalVelocity = 100f;
 	public float barrierVelocity = 1024f;
