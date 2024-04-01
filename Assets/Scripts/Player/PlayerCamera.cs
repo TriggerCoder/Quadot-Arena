@@ -27,9 +27,12 @@ public partial class PlayerCamera : Node3D
 		playerPostProcessing.SetLocalViewPortToCamera(ViewCamera);
 	}
 
-	public override void _PhysicsProcess(double delta)
+	public override void _Process(double delta)
 	{
 		if (GameManager.Paused)
+			return;
+
+		if (playerControls.playerThing.Dead)
 			return;
 
 		float deltaTime = (float)delta;

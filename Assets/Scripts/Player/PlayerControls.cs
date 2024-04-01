@@ -181,7 +181,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	{
 		if (GameManager.Paused)
 			return;
-		
+
 		float deltaTime = (float)delta;
 
 		if (playerThing.Dead)
@@ -210,6 +210,9 @@ public partial class PlayerControls : InterpolatedNode3D
 			}
 			return;
 		}
+
+		rotAngle.Y = viewDirection.Y;
+		playerInfo.RotationDegrees = rotAngle;
 
 		if (!playerThing.ready)
 			return;
@@ -345,8 +348,6 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (GameManager.Paused)
 			return;
 
-		rotAngle.Y = viewDirection.Y;
-		playerInfo.RotationDegrees = rotAngle;
 		float deltaTime = (float)delta;
 
 		if (playerThing.Dead)
