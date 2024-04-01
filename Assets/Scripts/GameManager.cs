@@ -172,6 +172,9 @@ public partial class GameManager : Node
 	private static int printLine = 0;
 	public override void _Ready()
 	{
+		//Disable Physics Jitter Fix
+		Engine.PhysicsJitterFix = 0;
+
 		GD.Randomize();
 		//Used in order to parse float with "." as decimal separator
 		CultureInfo CurrentCultureInfo = new CultureInfo("en", false);

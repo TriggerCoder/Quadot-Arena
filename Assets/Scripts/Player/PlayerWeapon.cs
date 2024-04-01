@@ -63,6 +63,8 @@ public partial class PlayerWeapon : Node3D
 
 	[Export]
 	public float _fireRate = .4f;
+	public float _hasteFireRate = .28f;
+
 	public float fireTime = 0f;
 	public float faceTime = 1.5f;
 	[Export]
@@ -96,7 +98,8 @@ public partial class PlayerWeapon : Node3D
 		PointIntersect.CollideWithAreas = true;
 		PointIntersect.CollideWithBodies = false;
 		PointIntersect.CollisionMask = (1 << GameManager.FogLayer);
-
+		//Get Haste FireRate
+		_hasteFireRate = _fireRate * .7f;
 		Hide();
 	}
 

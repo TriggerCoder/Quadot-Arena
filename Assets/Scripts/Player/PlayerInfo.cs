@@ -45,6 +45,7 @@ public partial class PlayerInfo : Node3D
 	//PowerUps
 	public bool godMode = false;
 	public bool quadDamage = false;
+	public bool haste = false;
 
 	public int MaxHealth = 100;
 	public int MaxBonusHealth = 200;
@@ -88,6 +89,7 @@ public partial class PlayerInfo : Node3D
 
 		godMode = false;
 		quadDamage = false;
+		haste = false;
 
 		playerPostProcessing.ResetEffects();
 

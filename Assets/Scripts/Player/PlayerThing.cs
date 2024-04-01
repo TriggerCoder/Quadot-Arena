@@ -18,6 +18,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public string modelName = "crash";
 	public string skinName = "default";
 
+	public static string wearOffSound = "items/wearoff";
+
 	[Export]
 	public Node3D player;
 	public PlayerModel avatar;
@@ -171,7 +173,6 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 			DropWeaponsAndPowerUps();
 
-			quadTime = 0;
 			playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
 
 			PlayModelSound("death" + GD.RandRange(1, 3));
@@ -235,6 +236,14 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			itemsToDrop.Add("item_quad");
 			itemQuantity.Add("item_quad", Mathf.CeilToInt(quadTime));
 		}
+		quadTime = 0;
+
+		if (hasteTime > 0)
+		{
+			itemsToDrop.Add("item_haste");
+			itemQuantity.Add("item_haste", Mathf.CeilToInt(hasteTime));
+		}
+		hasteTime = 0;
 
 		switch (playerControls.CurrentWeapon)
 		{
@@ -296,7 +305,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 		if (quadTime > 0f)
 		{
-			quadTime -= deltaTime;
+			if (PlayWearOffSound(ref quadTime, deltaTime))
+				SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
 			playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Quad,Mathf.CeilToInt(quadTime));
 		}
 		else if (quadTime < 0f) 
@@ -306,6 +316,33 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Quad);
 		}
 
+		if (hasteTime > 0f)
+		{
+			if (PlayWearOffSound(ref hasteTime, deltaTime))
+				SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
+			playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Haste, Mathf.CeilToInt(hasteTime));
+		}
+		else if (hasteTime < 0f)
+		{
+			hasteTime = 0;
+			playerInfo.haste = false;
+			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Haste);
+		}
 	}
 
+	public bool PlayWearOffSound(ref float Time, float deltaTime)
+	{
+		float check = 0;
+		if (Time > 1f)
+			check = 1;
+		if (Time > 2f)
+			check = 2;
+		if (Time > 3f)
+			check = 3;
+
+		Time -= deltaTime;
+		if (Time < check)
+			return true;
+		return false;
+	}
 }

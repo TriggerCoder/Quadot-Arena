@@ -508,6 +508,10 @@ public partial class PlayerControls : InterpolatedNode3D
 		wishdir = wishdir.GetLenghtAndNormalize(out wishspeed);
 		wishspeed *= moveSpeed;
 
+		//Check if Haste
+		if (playerInfo.haste)
+			wishspeed *= 1.5f;
+
 		curreAcel = Accelerate(wishdir, wishspeed, waterAcceleration, deltaTime);
 		playerVelocity.Y += curreAcel * wishdir.Y;
 		if (wishJump)
@@ -535,6 +539,10 @@ public partial class PlayerControls : InterpolatedNode3D
 		float wishspeed;
 		wishdir = wishdir.GetLenghtAndNormalize(out wishspeed);
 		wishspeed *= moveSpeed;
+
+		//Check if Haste
+		if (playerInfo.haste)
+			wishspeed *= 1.5f;
 
 		Accelerate(wishdir, wishspeed, runAcceleration, deltaTime, runSpeed);
 
@@ -615,6 +623,10 @@ public partial class PlayerControls : InterpolatedNode3D
 		float wishspeed;
 		wishdir = wishdir.GetLenghtAndNormalize(out wishspeed);
 		wishspeed *= moveSpeed;
+
+		//Check if Haste
+		if (playerInfo.haste)
+			wishspeed *= 1.5f;
 
 		//Aircontrol
 		float wishspeed2 = wishspeed;

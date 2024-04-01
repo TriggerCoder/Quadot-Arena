@@ -67,7 +67,10 @@ public partial class ShotgunWeapon : PlayerWeapon
 			}
 		}
 		//maximum fire rate 20/s, unless you use negative number (please don't)
-		fireTime = _fireRate + .05f;
+		float currentFireRate = _fireRate;
+		if (playerInfo.haste)
+			currentFireRate = _hasteFireRate;
+		fireTime = currentFireRate + .05f;
 		coolTimer = 0f;
 		playerInfo.playerPostProcessing.playerHUD.SetAmmoCoolDown(true);
 

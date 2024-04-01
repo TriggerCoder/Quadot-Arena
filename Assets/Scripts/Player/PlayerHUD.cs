@@ -40,6 +40,8 @@ public partial class PlayerHUD : MeshInstance3D
 	public Sprite3D[] powerUpIcon;
 	[Export]
 	public Label3D[] powerUpText;
+	[Export]
+	public Label3D fpsText;
 
 	public PlayerInfo playerInfo;
 	public ShaderMaterial baseCamera;
@@ -124,7 +126,7 @@ public partial class PlayerHUD : MeshInstance3D
 		baseCamera.SetShaderParameter(MaterialManager.pickUpTexture, pickupEffect);
 		currentMaterial = baseCamera;
 		playerInfo = p;
-
+		headAnimation.Active = true;
 		//Load HUD Models
 		MD3 model = ModelsManager.GetModel(armorModel, false);
 		if (model != null)
@@ -160,6 +162,7 @@ public partial class PlayerHUD : MeshInstance3D
 		pickUpIcon.Layers = Layers;
 		pickUpText.Layers = Layers;
 		weaponLabel.Layers = Layers;
+		fpsText.Layers = Layers;
 
 		for (int i = 0; i < powerUpIcon.Length; i++)
 			powerUpIcon[i].Layers = Layers;
@@ -693,8 +696,16 @@ public partial class PlayerHUD : MeshInstance3D
 			}
 		}
 	}
+
+	public void UpdateFPS()
+	{
+		fpsText.Text = "FPS: " + Engine.GetFramesPerSecond();
+	}
+
 	public override void _Process(double delta)
 	{
+		UpdateFPS();
+
 		if (GameManager.Paused)
 			return;
 

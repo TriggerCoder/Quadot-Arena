@@ -13,7 +13,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 	public float maxRange = 400f;
 
 	public float barrelSpeed = 10;
-
+	public float hastebarrelSpeed = 11;
 	private float currentRotSpeed = 0;
 
 	protected override void OnUpdate()
@@ -69,7 +69,10 @@ public partial class MachineGunWeapon : PlayerWeapon
 			}
 		}
 		//maximum fire rate 20/s, unless you use negative number (please don't)
-		fireTime = _fireRate + .05f;
+		float currentFireRate = _fireRate;
+		if (playerInfo.haste)
+			currentFireRate = _hasteFireRate;
+		fireTime = currentFireRate + .05f;
 		coolTimer = 0f;
 
 		if (Sounds.Length > 0)
@@ -134,7 +137,10 @@ public partial class MachineGunWeapon : PlayerWeapon
 	{
 		if (fireTime > 0f)
 		{
-			currentRotSpeed += barrelSpeed * deltaTime;
+			float currenBarrelSpeed = barrelSpeed;
+			if (playerInfo.haste)
+				currenBarrelSpeed = hastebarrelSpeed;
+			currentRotSpeed += currenBarrelSpeed * deltaTime;
 			if (currentRotSpeed >= 360)
 				currentRotSpeed -= 360;
 		}

@@ -15,7 +15,8 @@ public partial class ItemPickup : Area3D
 		Slugs,
 		Cells,
 		Bfgammo,
-		Quad
+		Quad,
+		Haste
 	}
 	[Export]
 	public ThingController thingController;
@@ -196,6 +197,12 @@ public partial class ItemPickup : Area3D
 				case ItemType.Quad:
 					player.playerInfo.quadDamage = true;
 					player.quadTime += amount;
+					disable = true;
+				break;
+
+				case ItemType.Haste:
+					player.playerInfo.haste = true;
+					player.hasteTime += amount;
 					disable = true;
 				break;
 			}
