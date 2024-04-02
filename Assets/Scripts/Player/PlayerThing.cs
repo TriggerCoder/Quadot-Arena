@@ -46,14 +46,13 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public bool invul = false;
 	public bool ready = false;
 
-	private float syncTime = 1;
-	private enum LookType
+	public enum HoldableItem
 	{
-		Left = 0,
-		Center = 1,
-		Right = 2
+		None = 0,
+		Teleporter = 1,
+		Medkit = 2
 	}
-	private LookType whereToLook = LookType.Center;
+	public HoldableItem holdableItem = HoldableItem.None;
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -81,10 +80,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		interpolatedTransform.AddChild(avatar);
 		avatar.LoadPlayer(ref modelName, ref skinName, (GameManager.AllPlayerViewMask & ~((uint)(playerInfo.viewLayer))), playerControls);
 
-		Vector3 destination = SpawnerManager.FindSpawnLocation();
-		TeleporterThing.TelefragEverything(destination, this);
-		Position = destination;
-		playerControls.InvoqueSetTransformReset();
+		SpawnerManager.SpawnToLocation(this);
 		playerControls.ChangeHeight(true);
 		playerControls.feetRay.Length = .8f;
 
@@ -308,9 +304,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			return;
 
 		float deltaTime = (float)delta;
-
-		//The Update times are sync every 1 second (aprox 60 frames)
-		bool syncTime = CheckIfSyncTime(deltaTime);//(Engine.GetFramesDrawn() % 60) == 1;
+		bool newTick = GameManager.NewTickSeconds;
 
 		//Pain
 		if (painTime > 0f)
@@ -321,10 +315,10 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		{
 			if (quadTime < 4f)
 			{
-				if (syncTime)
+				if (newTick)
 					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
 			}
-			if (syncTime)
+			if (newTick)
 				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Quad,Mathf.FloorToInt(quadTime));
 			quadTime -= deltaTime;
 		}
@@ -340,10 +334,10 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		{
 			if (hasteTime < 4f)
 			{
-				if (syncTime)
+				if (newTick)
 					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
 			}
-			if (syncTime)
+			if (newTick)
 				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Haste, Mathf.FloorToInt(hasteTime));
 			hasteTime -= deltaTime;
 		}
@@ -359,10 +353,10 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		{
 			if (regenTime < 4f)
 			{
-				if (syncTime)
+				if (newTick)
 					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
 			}
-			if (syncTime)
+			if (newTick)
 			{
 				if (hitpoints < playerInfo.MaxBonusHealth)
 				{
@@ -383,16 +377,5 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Regen);
 		}
 		
-	}
-
-	public bool CheckIfSyncTime(float deltaTime)
-	{
-		syncTime -= deltaTime;
-		if (syncTime < 0)
-		{
-			syncTime += 1;
-			return true;
-		}
-		return false;
 	}
 }

@@ -3,20 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 public static class SpawnerManager
 {
-	public static List<Node3D> deathMatchSpawner = new List<Node3D>();
+	public static List<Target> deathMatchSpawner = new List<Target>();
 
 	public static string respawnSound = "world/telein";
 
-	public static void AddToList(Node3D node)
+	public static void AddToList(Target target)
 	{
-		deathMatchSpawner.Add(node);
+		deathMatchSpawner.Add(target);
 	}
 
-	public static Vector3 FindSpawnLocation()
+	public static void SpawnToLocation(PlayerThing player)
 	{
-		int index = GD.RandRange(0, deathMatchSpawner.Count - 1);
-		Vector3 destination = deathMatchSpawner[index].GlobalPosition;
-		SoundManager.Create3DSound(destination, SoundManager.LoadSound(respawnSound));
-		return destination;
+		Target target = deathMatchSpawner[GD.RandRange(0, deathMatchSpawner.Count - 1)];
+		ClusterPVSManager.CheckPVS(player.playerInfo.viewLayer, target.destination);
+		TeleporterThing.TelefragEverything(target.destination, player);
+		player.Position = target.destination;
+		player.playerControls.InvoqueSetTransformReset();
+
+		SoundManager.Create3DSound(target.destination, SoundManager.LoadSound(respawnSound));
+		player.playerControls.viewDirection.Y = target.angle;
+		player.playerControls.impulseVector = Vector3.Zero;
+		player.playerControls.playerVelocity = Vector3.Zero;
+		player.playerControls.jumpPadVel = Vector3.Zero;
+		player.Impulse(Quaternion.FromEuler(new Vector3(0, Mathf.DegToRad(target.angle), 0)) * Vector3.Forward, 1500);
+
 	}
 }

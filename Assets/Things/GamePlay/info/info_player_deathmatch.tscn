@@ -1,12 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://dcd4jomshlogt"]
+[gd_scene load_steps=2 format=3 uid="uid://dcd4jomshlogt"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_subns"]
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/SpawnPosition.cs" id="2_3gift"]
 
 [node name="info_player_deathmatch" type="Node3D"]
-script = ExtResource("1_subns")
+script = ExtResource("2_3gift")
 respawnSound = ""
 thingType = 3
-
-[node name="SpawnPosition" type="Node3D" parent="."]
-script = ExtResource("2_3gift")

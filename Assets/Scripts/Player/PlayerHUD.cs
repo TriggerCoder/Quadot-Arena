@@ -42,6 +42,8 @@ public partial class PlayerHUD : MeshInstance3D
 	public Label3D[] powerUpText;
 	[Export]
 	public Label3D fpsText;
+	[Export]
+	public Sprite3D holdableItemIcon;
 
 	public PlayerInfo playerInfo;
 	public ShaderMaterial baseCamera;
@@ -76,6 +78,9 @@ public partial class PlayerHUD : MeshInstance3D
 	private static readonly string[] weaponNames = { "Gauntlet", "Machinegun", "Shotgun", "Grenade Launcher", "Rocket Launcher", "Lightning Gun", "Railgun", "Plasma Gun", "BFG 10K", "Grapple Hook" };
 	private static readonly string[] weaponSprites = { "ICONS/ICONW_GAUNTLET", "ICONS/ICONW_MACHINEGUN", "ICONS/ICONW_SHOTGUN", "ICONS/ICONW_GRENADE", "ICONS/ICONW_ROCKET", "ICONS/ICONW_LIGHTNING", "ICONS/ICONW_RAILGUN", "ICONS/ICONW_PLASMA", "ICONS/ICONW_BFG", "ICONS/ICONW_GRAPPLE" };
 	private static readonly string[] ammoModels = { "machinegunam", "shotgunam", "grenadeam", "rocketam", "lightningam", "railgunam", "plasmaam", "bfgam" };
+	private static readonly string[] powerUpsSprites = { "ICONS/QUAD", "ICONS/HASTE", "ICONS/INVIS", "ICONS/REGEN", "ICONS/ENVIROSUIT", "ICONS/FLIGHT" };
+	private static readonly string[] holdableItemsSprites = { "ICONS/TELEPORTER", "ICONS/MEDKIT" };
+
 	public enum NumColor
 	{
 		Yellow,
@@ -107,6 +112,12 @@ public partial class PlayerHUD : MeshInstance3D
 		Flight = 5
 	}
 
+	public enum HoldableItemType : int
+	{
+		Teleporter = 0,
+		Medkit = 1
+	}
+
 	private class PowerUpInfo
 	{
 		public PowerUpType type;
@@ -115,8 +126,6 @@ public partial class PlayerHUD : MeshInstance3D
 
 	private List<PowerUpInfo> currentPowerUps = new List<PowerUpInfo>();
 	private List<int> currentWeapons = new List<int>();
-
-	private static readonly string[] powerUpsIcons = { "ICONS/QUAD", "ICONS/HASTE", "ICONS/INVIS", "ICONS/REGEN", "ICONS/ENVIROSUIT", "ICONS/FLIGHT" };
 	public void Init(PlayerInfo p)
 	{
 		baseCamera = (ShaderMaterial)MaterialManager.Instance.baseCameraMaterial.Duplicate(true);
@@ -162,6 +171,7 @@ public partial class PlayerHUD : MeshInstance3D
 		pickUpIcon.Layers = Layers;
 		pickUpText.Layers = Layers;
 		weaponLabel.Layers = Layers;
+		holdableItemIcon.Layers = Layers;
 		fpsText.Layers = Layers;
 
 		for (int i = 0; i < powerUpIcon.Length; i++)
@@ -326,6 +336,7 @@ public partial class PlayerHUD : MeshInstance3D
 			weaponIcon[i].Hide();
 		WeaponContainer.Hide();
 		weaponLabel.Hide();
+		holdableItemIcon.Hide();
 	}
 
 
@@ -348,7 +359,7 @@ public partial class PlayerHUD : MeshInstance3D
 
 		for (i = 0; i < currentPowerUps.Count; i++)
 		{
-			powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsIcons[(int)currentPowerUps[i].type], false);
+			powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsSprites[(int)currentPowerUps[i].type], false);
 			powerUpText[i].Text = "" + currentPowerUps[i].displayTime;
 		}
 
@@ -391,9 +402,29 @@ public partial class PlayerHUD : MeshInstance3D
 			if (powerUpText[i].Visible == false)
 				powerUpText[i].Show();
 			if (!found)
-				powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsIcons[(int)currentPowerUps[i].type], false);
+				powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsSprites[(int)currentPowerUps[i].type], false);
 			powerUpText[i].Text = "" + currentPowerUps[i].displayTime;
 		}
+	}
+
+	public void AddHoldableItem(PlayerThing.HoldableItem item)
+	{
+
+		switch (item)
+		{
+			default:
+				return;
+			break;
+			case PlayerThing.HoldableItem.Teleporter:
+				holdableItemIcon.Texture = TextureLoader.GetTextureOrAddTexture(holdableItemsSprites[(int)HoldableItemType.Teleporter], false);
+			break;
+		}
+		holdableItemIcon.Show();
+	}
+
+	public void RemoveHoldableItem()
+	{
+		holdableItemIcon.Hide();
 	}
 
 	public void AddWeapon(int weapon)

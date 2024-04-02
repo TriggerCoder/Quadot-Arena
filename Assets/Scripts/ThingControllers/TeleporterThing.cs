@@ -98,6 +98,7 @@ public partial class TeleporterThing : Area3D
 			playerThing.playerControls.viewDirection.Y = target.angle;
 			playerThing.playerControls.impulseVector = Vector3.Zero;
 			playerThing.playerControls.playerVelocity = Vector3.Zero;
+			playerThing.playerControls.jumpPadVel = Vector3.Zero;
 			playerThing.Impulse(Quaternion.FromEuler(new Vector3(0, Mathf.DegToRad(target.angle), 0)) * Vector3.Forward, 1500);
 		}
 		toTeleport = new List<PlayerThing>();

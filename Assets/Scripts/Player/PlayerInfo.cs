@@ -97,6 +97,7 @@ public partial class PlayerInfo : Node3D
 		playerThing.hitpoints = 100;
 		playerThing.armor = 0;
 		playerThing.painTime = 0;
+		playerThing.holdableItem = PlayerThing.HoldableItem.None;
 
 		playerControls.impulseVector = Vector3.Zero;
 		playerControls.CurrentWeapon = -1;

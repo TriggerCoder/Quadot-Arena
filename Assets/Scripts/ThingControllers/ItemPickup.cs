@@ -17,7 +17,11 @@ public partial class ItemPickup : Area3D
 		Bfgammo,
 		Quad,
 		Haste,
-		Regen
+		Regen,
+		Invis,
+		Enviro,
+		Flight,
+		Teleporter
 	}
 	[Export]
 	public ThingController thingController;
@@ -212,6 +216,14 @@ public partial class ItemPickup : Area3D
 				case ItemType.Regen:
 					player.regenTime += amount;
 					player.playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Regen, Mathf.CeilToInt(player.regenTime));
+					disable = true;
+				break;
+
+				case ItemType.Teleporter:
+					if (player.holdableItem != PlayerThing.HoldableItem.None)
+						break;
+					player.holdableItem = PlayerThing.HoldableItem.Teleporter;
+					player.playerInfo.playerPostProcessing.playerHUD.AddHoldableItem(PlayerThing.HoldableItem.Teleporter);
 					disable = true;
 				break;
 			}

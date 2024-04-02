@@ -95,11 +95,15 @@ public partial class GameManager : Node
 	//SplitScreen Players
 	public const int MaxLocalPlayers = 8;
 
-	public bool paused = true;
+	private bool paused = true;
 	public static bool Paused { get { return Instance.paused; } }
 
 	private float timeMs = 0.0f;
 	public static float CurrentTimeMsec { get { return Instance.timeMs; } }
+
+	private bool timeToSync = false;
+	public static bool NewTickSeconds { get { return Instance.timeToSync; } }
+
 	public float gravity = 25f;					//default 800 * sizeDividor
 	public float friction = 6f;
 	public float waterFriction = 12f;
@@ -111,6 +115,7 @@ public partial class GameManager : Node
 	public float PlayerDamageReceive = 1f;
 	public int PlayerAmmoReceive = 1;
 	private Godot.Environment environment;
+	private float syncTime = 1;
 
 	public int skipFrames = 5;
 	public Node3D TemporaryObjectsHolder;
@@ -241,7 +246,9 @@ public partial class GameManager : Node
 	{
 		if (!paused)
 		{
-			timeMs += (float)delta;
+			float deltaTime = (float)delta;
+			timeMs += deltaTime;
+			timeToSync = CheckIfSyncTime(deltaTime);
 			RenderingServer.GlobalShaderParameterSet("MsTime", CurrentTimeMsec);
 		}
 
@@ -339,5 +346,15 @@ public partial class GameManager : Node
 			GD.Print(printLine + ": " + Message);
 			printLine++;
 		}
+	}
+	private bool CheckIfSyncTime(float deltaTime)
+	{
+		syncTime -= deltaTime;
+		if (syncTime < 0)
+		{
+			syncTime += 1;
+			return true;
+		}
+		return false;
 	}
 }

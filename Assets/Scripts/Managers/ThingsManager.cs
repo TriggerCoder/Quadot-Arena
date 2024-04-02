@@ -407,6 +407,7 @@ public partial class ThingsManager : Node
 
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
 			thingObject.Name = entity.name;
+
 			switch (entity.name)
 			{
 				default:
@@ -442,6 +443,24 @@ public partial class ThingsManager : Node
 						itemPickup.amount =(int)wait;
 				}
 				break;
+
+				//Teleporter
+				case "info_player_deathmatch":
+				{
+					thingObject.GlobalPosition = entity.origin;
+
+					if (entity.entityData.ContainsKey("nohumans"))
+						continue;
+
+					int angle = 0;
+					if (entity.entityData.TryGetValue("angle", out strWord))
+						angle = int.Parse(strWord);
+
+					SpawnPosition spawnPosition = (SpawnPosition)thingObject;
+					spawnPosition.Init(angle);
+				}
+				break;
+
 				// Solid Model
 				case "func_static":
 				{

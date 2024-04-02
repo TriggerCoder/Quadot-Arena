@@ -173,7 +173,7 @@ script = ExtResource("2_2cprp")
 rotEnable = true
 rotFPS = 40.0
 
-[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "ArmorContainer", "AmmoContainer", "WeaponContainer", "viewHead", "headAnimation", "healthLabel", "armorLabel", "weaponLabel", "ammoLabel", "weaponIcon", "crossHair", "pickUpIcon", "pickUpText", "powerUpIcon", "powerUpText", "fpsText")]
+[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "ArmorContainer", "AmmoContainer", "WeaponContainer", "viewHead", "headAnimation", "healthLabel", "armorLabel", "weaponLabel", "ammoLabel", "weaponIcon", "crossHair", "pickUpIcon", "pickUpText", "powerUpIcon", "powerUpText", "fpsText", "holdableItemIcon")]
 layers = 0
 extra_cull_margin = 0.1
 mesh = SubResource("QuadMesh_0iqvi")
@@ -198,6 +198,7 @@ pickUpText = NodePath("PickUpText")
 powerUpIcon = [NodePath("PowerUpsContainer/PowerUpIcon_1"), NodePath("PowerUpsContainer/PowerUpIcon_2"), NodePath("PowerUpsContainer/PowerUpIcon_3"), NodePath("PowerUpsContainer/PowerUpIcon_4"), NodePath("PowerUpsContainer/PowerUpIcon_5"), NodePath("PowerUpsContainer/PowerUpIcon_6")]
 powerUpText = [NodePath("PowerUpsContainer/PowerUpText_1"), NodePath("PowerUpsContainer/PowerUpText_2"), NodePath("PowerUpsContainer/PowerUpText_3"), NodePath("PowerUpsContainer/PowerUpText_4"), NodePath("PowerUpsContainer/PowerUpText_5"), NodePath("PowerUpsContainer/PowerUpText_6")]
 fpsText = NodePath("FPS")
+holdableItemIcon = NodePath("HoldableItemIcon")
 
 [node name="WeaponsContainer" type="Node3D" parent="ViewPortCamera/PlayerHUD"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.7, 0)
@@ -492,6 +493,13 @@ font = ExtResource("7_4bgd3")
 font_size = 50
 outline_size = 10
 horizontal_alignment = 0
+
+[node name="HoldableItemIcon" type="Sprite3D" parent="ViewPortCamera/PlayerHUD"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, -1.8, -3)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
 
 [node name="FPS" type="Label3D" parent="ViewPortCamera/PlayerHUD"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)

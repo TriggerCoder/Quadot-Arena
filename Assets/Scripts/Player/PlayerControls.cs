@@ -53,6 +53,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	public Vector3 playerVelocity = Vector3.Zero;
 	private bool wishJump = false;
 	private bool wishFire = false;
+	private bool wishActivate = false;
 	private bool controllerIsGrounded = true;
 
 	private float deathTime = 0;
@@ -107,6 +108,8 @@ public partial class PlayerControls : InterpolatedNode3D
 		public string Action_Crouch { get { return _Action_Crouch; } }
 		private readonly string _Action_Run;
 		public string Action_Run { get { return _Action_Run; } }
+		private readonly string _Action_Item;
+		public string Action_Item { get { return _Action_Item; } }
 		private readonly string _Action_CameraSwitch;
 		public string Action_CameraSwitch { get { return _Action_CameraSwitch; } }
 		private readonly string _Action_WeaponSwitch_Up;
@@ -124,6 +127,7 @@ public partial class PlayerControls : InterpolatedNode3D
 			_Action_Jump = "Action_Jump_" + num;
 			_Action_Crouch = "Action_Crouch_" + num;
 			_Action_Run = "Action_Run_" + num;
+			_Action_Item = "Action_Item_" + num;
 			_Action_CameraSwitch = "Action_CameraSwitch_" + num;
 			_Action_WeaponSwitch_Up = "Action_WeaponSwitch_Up_" + num;
 			_Action_WeaponSwitch_Down = "Action_WeaponSwitch_Down_" + num;
@@ -321,6 +325,9 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (Input.IsActionPressed(playerInput.Action_Fire))
 			wishFire = true;
 
+		if (Input.IsActionPressed(playerInput.Action_Item))
+			wishActivate = true;
+
 		//swap weapon
 		if (playerWeapon == null)
 		{
@@ -407,6 +414,22 @@ public partial class PlayerControls : InterpolatedNode3D
 			if (playerWeapon.Fire())
 			{
 				playerThing.avatar.Attack();
+			}
+		}
+
+		if (wishActivate)
+		{
+			wishActivate = false;
+			switch (playerThing.holdableItem)
+			{
+				default:
+				case PlayerThing.HoldableItem.None:
+				break;
+				case PlayerThing.HoldableItem.Teleporter:
+					playerThing.holdableItem = PlayerThing.HoldableItem.None;
+					playerInfo.playerPostProcessing.playerHUD.RemoveHoldableItem();
+					SpawnerManager.SpawnToLocation(playerThing);
+				break;
 			}
 		}
 	}
