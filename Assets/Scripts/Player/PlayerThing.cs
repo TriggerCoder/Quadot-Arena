@@ -19,6 +19,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public string skinName = "default";
 
 	public static string wearOffSound = "items/wearoff";
+	public static string regenSound = "items/regen";
 
 	[Export]
 	public Node3D player;
@@ -45,6 +46,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public bool invul = false;
 	public bool ready = false;
 
+	private float syncTime = 1;
 	private enum LookType
 	{
 		Left = 0,
@@ -245,6 +247,13 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		}
 		hasteTime = 0;
 
+		if (regenTime > 0)
+		{
+			itemsToDrop.Add("item_regen");
+			itemQuantity.Add("item_regen", Mathf.CeilToInt(regenTime));
+		}
+		regenTime = 0;
+
 		switch (playerControls.CurrentWeapon)
 		{
 			default:
@@ -300,14 +309,24 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 		float deltaTime = (float)delta;
 
+		//The Update times are sync every 1 second (aprox 60 frames)
+		bool syncTime = CheckIfSyncTime(deltaTime);//(Engine.GetFramesDrawn() % 60) == 1;
+
+		//Pain
 		if (painTime > 0f)
 			painTime -= deltaTime;
 
+		//Quad
 		if (quadTime > 0f)
 		{
-			if (PlayWearOffSound(ref quadTime, deltaTime))
-				SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
-			playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Quad,Mathf.CeilToInt(quadTime));
+			if (quadTime < 4f)
+			{
+				if (syncTime)
+					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
+			}
+			if (syncTime)
+				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Quad,Mathf.FloorToInt(quadTime));
+			quadTime -= deltaTime;
 		}
 		else if (quadTime < 0f) 
 		{
@@ -316,11 +335,17 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Quad);
 		}
 
+		//Haste
 		if (hasteTime > 0f)
 		{
-			if (PlayWearOffSound(ref hasteTime, deltaTime))
-				SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
-			playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Haste, Mathf.CeilToInt(hasteTime));
+			if (hasteTime < 4f)
+			{
+				if (syncTime)
+					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
+			}
+			if (syncTime)
+				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Haste, Mathf.FloorToInt(hasteTime));
+			hasteTime -= deltaTime;
 		}
 		else if (hasteTime < 0f)
 		{
@@ -328,21 +353,46 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			playerInfo.haste = false;
 			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Haste);
 		}
+
+		//Regen
+		if (regenTime > 0f)
+		{
+			if (regenTime < 4f)
+			{
+				if (syncTime)
+					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
+			}
+			if (syncTime)
+			{
+				if (hitpoints < playerInfo.MaxBonusHealth)
+				{
+					hitpoints += 5;
+					if (hitpoints > playerInfo.MaxBonusHealth)
+						hitpoints = playerInfo.MaxBonusHealth;
+					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(regenSound));
+				}
+				playerInfo.playerPostProcessing.playerHUD.UpdateHealth(hitpoints);
+				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Regen, Mathf.FloorToInt(regenTime));
+			}
+			regenTime -= deltaTime;
+		}
+		else if (regenTime < 0f)
+		{
+			regenTime = 0;
+			playerInfo.haste = false;
+			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Regen);
+		}
+		
 	}
 
-	public bool PlayWearOffSound(ref float Time, float deltaTime)
+	public bool CheckIfSyncTime(float deltaTime)
 	{
-		float check = 0;
-		if (Time > 1f)
-			check = 1;
-		if (Time > 2f)
-			check = 2;
-		if (Time > 3f)
-			check = 3;
-
-		Time -= deltaTime;
-		if (Time < check)
+		syncTime -= deltaTime;
+		if (syncTime < 0)
+		{
+			syncTime += 1;
 			return true;
+		}
 		return false;
 	}
 }

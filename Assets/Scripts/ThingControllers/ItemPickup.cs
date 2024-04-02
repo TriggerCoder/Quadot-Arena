@@ -16,7 +16,8 @@ public partial class ItemPickup : Area3D
 		Cells,
 		Bfgammo,
 		Quad,
-		Haste
+		Haste,
+		Regen
 	}
 	[Export]
 	public ThingController thingController;
@@ -197,12 +198,20 @@ public partial class ItemPickup : Area3D
 				case ItemType.Quad:
 					player.playerInfo.quadDamage = true;
 					player.quadTime += amount;
+					player.playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Quad, Mathf.CeilToInt(player.quadTime));
 					disable = true;
 				break;
 
 				case ItemType.Haste:
 					player.playerInfo.haste = true;
 					player.hasteTime += amount;
+					player.playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Haste, Mathf.CeilToInt(player.hasteTime));
+					disable = true;
+				break;
+
+				case ItemType.Regen:
+					player.regenTime += amount;
+					player.playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Regen, Mathf.CeilToInt(player.regenTime));
 					disable = true;
 				break;
 			}

@@ -1,0 +1,79 @@
+[gd_scene load_steps=10 format=3 uid="uid://sdf2rj3p3tbh"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_1eh5j"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_pnwgr"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_5vf11"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="4_ixora"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_wgpje"]
+
+[sub_resource type="Resource" id="Resource_h1upd"]
+script = ExtResource("3_5vf11")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_6cloq"]
+script = ExtResource("3_5vf11")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_sejmd"]
+script = ExtResource("3_5vf11")
+fps = 0.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+
+[node name="item_regen" type="Node3D" node_paths=PackedStringArray("itemPickup")]
+script = ExtResource("1_1eh5j")
+respawnSound = "items/poweruprespawn"
+respawnTime = 120.0
+initDisabled = true
+thingType = 2
+itemPickup = NodePath("Item")
+
+[node name="Rings" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+script = ExtResource("2_pnwgr")
+modelName = "powerups/instant/regen_ring"
+receiveShadows = true
+castShadows = true
+modelAnimation = SubResource("Resource_h1upd")
+textureAnimation = SubResource("Resource_6cloq")
+
+[node name="NodeAnimation" type="Node3D" parent="Rings"]
+script = ExtResource("4_ixora")
+rotEnable = true
+rotFPS = 100.0
+rotClockwise = false
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Regen" type="Node3D" parent="."]
+script = ExtResource("2_pnwgr")
+modelName = "powerups/instant/regen"
+receiveShadows = true
+castShadows = true
+modelAnimation = SubResource("Resource_h1upd")
+textureAnimation = SubResource("Resource_sejmd")
+
+[node name="NodeAnimation" type="Node3D" parent="Regen"]
+script = ExtResource("4_ixora")
+rotEnable = true
+rotFPS = 100.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("5_wgpje")
+thingController = NodePath("..")
+itemType = 13
+amount = 30
+bonus = true
+PickupSound = "items/regeneration"
+PickupIcon = "icons/regen"
+PickupText = "Regeneration"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")
