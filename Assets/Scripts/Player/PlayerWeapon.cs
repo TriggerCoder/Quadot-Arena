@@ -235,7 +235,7 @@ public partial class PlayerWeapon : Node3D
 
 		Position = oldPosition.Lerp(new Vector3(KickOffSet * KickAmount, LowerOffset * LowerAmount + Bob.Y * .1f, Bob.X * .05f), Mathf.Clamp(10 * deltaTime, 0, 1));
 		oldPosition = Position;
-		OnUpdate();
+		OnUpdate(deltaTime);
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -311,7 +311,7 @@ public partial class PlayerWeapon : Node3D
 	{
 		return Quaternion.Identity;
 	}
-	protected virtual void OnUpdate() { }
+	protected virtual void OnUpdate(float deltaTime) { }
 	protected virtual void OnInit() { }
 	public virtual bool Fire()
 	{

@@ -1,0 +1,55 @@
+[gd_scene load_steps=9 format=3 uid="uid://bobtudkcmis3u"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_4chch"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_pf36h"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_si205"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="4_1i2w8"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_ey28j"]
+
+[sub_resource type="Resource" id="Resource_h1upd"]
+script = ExtResource("4_1i2w8")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_sejmd"]
+script = ExtResource("4_1i2w8")
+fps = 0.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+radius = 0.7
+
+[node name="weapon_lightning" type="Node3D"]
+script = ExtResource("1_4chch")
+respawnTime = 30.0
+thingType = 2
+
+[node name="NodeAnimation" type="Node3D" parent="."]
+script = ExtResource("2_pf36h")
+rotEnable = true
+rotFPS = 40.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="LightningGun" type="Node3D" parent="."]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0.25, 0, 0)
+script = ExtResource("3_si205")
+modelName = "weapons2/lightning/lightning"
+castShadows = true
+modelAnimation = SubResource("Resource_h1upd")
+textureAnimation = SubResource("Resource_sejmd")
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("5_ey28j")
+thingController = NodePath("..")
+itemType = 7
+amount = 100
+givesWeapon = 5
+PickupSound = "misc/w_pkup"
+PickupIcon = "icons/iconw_lightning"
+PickupText = "Lightning Gun"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

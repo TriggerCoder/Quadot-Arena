@@ -1,0 +1,53 @@
+[gd_scene load_steps=9 format=3 uid="uid://bdbbkp6cfx1m2"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_hiut1"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_injsr"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_7reh4"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="4_erjd3"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_hso4v"]
+
+[sub_resource type="Resource" id="Resource_h1upd"]
+script = ExtResource("4_erjd3")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_sejmd"]
+script = ExtResource("4_erjd3")
+fps = 0.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+radius = 0.7
+
+[node name="ammo_lightning" type="Node3D"]
+script = ExtResource("1_hiut1")
+respawnTime = 30.0
+thingType = 2
+
+[node name="NodeAnimation" type="Node3D" parent="."]
+script = ExtResource("2_injsr")
+rotEnable = true
+rotFPS = 40.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Lightning" type="Node3D" parent="."]
+script = ExtResource("3_7reh4")
+modelName = "powerups/ammo/lightningam"
+castShadows = true
+modelAnimation = SubResource("Resource_h1upd")
+textureAnimation = SubResource("Resource_sejmd")
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("5_hso4v")
+thingController = NodePath("..")
+itemType = 7
+amount = 60
+PickupSound = "misc/am_pkup"
+PickupIcon = "icons/icona_lightning"
+PickupText = "Lightning"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

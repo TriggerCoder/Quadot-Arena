@@ -9,7 +9,7 @@ public partial class RocketLauncherWeapon : PlayerWeapon
 	[Export]
 	public string AttackProjectileName;
 	public Vector3 spawnPos;
-	protected override void OnUpdate()
+	protected override void OnUpdate(float deltaTime)
 	{
 		if (playerInfo.Ammo[PlayerInfo.rocketsAmmo] <= 0 && fireTime < .1f)
 		{

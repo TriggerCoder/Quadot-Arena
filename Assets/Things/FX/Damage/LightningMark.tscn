@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=3 uid="uid://cwxdv8qsopm5"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="1_ff1t2"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="2_isxdb"]
+
+[sub_resource type="Resource" id="Resource_7hy85"]
+script = ExtResource("2_isxdb")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_ae2ql"]
+script = ExtResource("2_isxdb")
+fps = 0.0
+
+[node name="LightningMark" type="Node3D"]
+transform = Transform3D(0.15, 0, 0, 0, 0.15, 0, 0, 0, 0.15, 0, 0, 0)
+script = ExtResource("1_ff1t2")
+modelName = "weaphits/boom01"
+shaderName = "GFX/DAMAGE/HOLE_LG_MRK"
+useLowCountMultiMesh = false
+alphaFade = true
+modelAnimation = SubResource("Resource_7hy85")
+textureAnimation = SubResource("Resource_ae2ql")
+destroyType = 1
+destroyTimer = 200.0

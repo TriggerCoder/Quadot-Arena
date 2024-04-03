@@ -14,7 +14,7 @@ public partial class ShotgunWeapon : PlayerWeapon
 	public float vDispersion = .7f;
 	public float maxRange = 400f;
 	public float pushForce = 350;
-	protected override void OnUpdate()
+	protected override void OnUpdate(float deltaTime)
 	{
 		if (playerInfo.Ammo[PlayerInfo.shellsAmmo] <= 0 && fireTime < .1f)
 		{

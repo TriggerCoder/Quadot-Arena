@@ -1354,6 +1354,45 @@ public static class Mesher
 
 		return true;
 	}
+
+	public static ArrayMesh GenerateQuadMesh(float width, float height, float pivotX, float pivotY)
+	{
+		Vector3[] vertices = new Vector3[4];
+		Vector2[] uvs = new Vector2[4];
+		int[] indices = new int[6];
+		var surfaceArray = new Godot.Collections.Array();
+		surfaceArray.Resize((int)Mesh.ArrayType.Max);
+
+		float x0 = -width * pivotX;
+		float x1 = width * (1 - pivotX);
+		float y0 = -height * pivotY;
+		float y1 = height * (1 - pivotY);
+
+		vertices[0] = new Vector3(x0, y0, 0);
+		vertices[1] = new Vector3(x1, y0, 0);
+		vertices[2] = new Vector3(x0, y1, 0);
+		vertices[3] = new Vector3(x1, y1, 0);
+
+		indices[0] = 2;
+		indices[1] = 1;
+		indices[2] = 0;
+		indices[3] = 3;
+		indices[4] = 1;
+		indices[5] = 2;
+
+		uvs[0] = new Vector2(0, 0);
+		uvs[1] = new Vector2(1, 0);
+		uvs[2] = new Vector2(0, 1);
+		uvs[3] = new Vector2(1, 1);
+
+		surfaceArray[VertexInd] = vertices.ToArray();
+		surfaceArray[TexUVInd] = uvs.ToArray();
+		surfaceArray[TriIndex] = indices.ToArray();
+
+		ArrayMesh arrMesh = new ArrayMesh();
+		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+		return arrMesh;
+	}
 	public static void GenerateWaterFog(string Name, Node3D holder, Aabb box)
 	{
 		FogVolume Fog = new FogVolume();

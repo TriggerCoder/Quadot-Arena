@@ -1,0 +1,20 @@
+[gd_resource type="ShaderMaterial" load_steps=5 format=3 uid="uid://eju5e7v2q85q"]
+
+[ext_resource type="Shader" path="res://Assets/Shaders/electricArc.gdshader" id="1_psu5b"]
+[ext_resource type="Texture2D" uid="uid://cqbqt5hjo6dpv" path="res://Assets/Textures/lightning_arc.png" id="2_oid5i"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_lgidv"]
+noise_type = 0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_bk0am"]
+width = 256
+height = 256
+generate_mipmaps = false
+normalize = false
+noise = SubResource("FastNoiseLite_lgidv")
+
+[resource]
+render_priority = 1
+shader = ExtResource("1_psu5b")
+shader_parameter/lightning = ExtResource("2_oid5i")
+shader_parameter/noise = SubResource("NoiseTexture2D_bk0am")

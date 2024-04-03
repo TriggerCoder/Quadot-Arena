@@ -16,7 +16,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 	public float hastebarrelSpeed = 11;
 	private float currentRotSpeed = 0;
 
-	protected override void OnUpdate()
+	protected override void OnUpdate(float deltaTime)
 	{
 		if (playerInfo.Ammo[PlayerInfo.bulletsAmmo] <= 0 && fireTime < .1f)
 		{

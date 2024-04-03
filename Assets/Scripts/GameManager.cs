@@ -312,6 +312,9 @@ public partial class GameManager : Node
 		{
 			if (child is MeshInstance3D mesh)
 			{
+				if (mesh.Mesh == null)
+					continue;
+
 				MeshInstance3D fxMesh = new MeshInstance3D();
 				fxMesh.Mesh = mesh.Mesh;
 				fxMesh.Layers = mesh.Layers;
