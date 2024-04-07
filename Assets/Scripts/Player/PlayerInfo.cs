@@ -94,6 +94,7 @@ public partial class PlayerInfo : Node3D
 		playerPostProcessing.ResetEffects();
 
 		playerThing.waterLever = 0;
+		playerThing.inLava = false;
 		playerThing.hitpoints = 100;
 		playerThing.armor = 0;
 		playerThing.painTime = 0;

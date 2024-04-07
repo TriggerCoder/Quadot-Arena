@@ -10,15 +10,18 @@ public partial class WaterSurface : Area3D
 	private Dictionary<Node3D, int> CurrentColliders = new Dictionary<Node3D, int>();
 	public string waterIn = "player/watr_in";
 	public string waterOut = "player/watr_out";
+	public string waterUnder = "player/watr_un";
 	private AudioStreamWav inSound;
 	private AudioStreamWav outSound;
-
+	private AudioStreamWav underSound;
+	public bool isLava = false;
 	public override void _Ready()
 	{
 		BodyEntered += OnBodyEntered;
 		BodyExited += OnBodyExit;
 		inSound = SoundManager.LoadSound(waterIn);
 		outSound = SoundManager.LoadSound(waterOut);
+		underSound = SoundManager.LoadSound(waterUnder);
 	}
 
 	public override void _Process(double delta)
@@ -43,6 +46,7 @@ public partial class WaterSurface : Area3D
 					float deep = Boxes[j].GetEndpoint(2).Y - currentPlayer.GlobalPosition.Y;
 					if (deep > GameManager.Instance.playerHeight)
 					{
+						SoundManager.Create3DSound(currentPlayer.GlobalPosition, underSound);
 						currentPlayer.playerInfo.playerPostProcessing.SetWaterEffect();
 						currentPlayer.waterLever = 2;
 						break;
@@ -103,8 +107,13 @@ public partial class WaterSurface : Area3D
 		{
 			if (currentPlayers.Contains(playerThing))
 			{
+				if (playerThing.waterLever > 1)
+				{
+					playerThing.playerInfo.playerPostProcessing.ResetEffects();
+					playerThing.PlayModelSound("gasp");
+				}
 				playerThing.waterLever = 0;
-				playerThing.playerInfo.playerPostProcessing.ResetEffects();
+				playerThing.inLava = false;
 				playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.Jump;
 				SoundManager.Create3DSound(playerThing.GlobalPosition, outSound);
 				currentPlayers.Remove(playerThing);
@@ -118,6 +127,7 @@ public partial class WaterSurface : Area3D
 		if (!currentPlayers.Contains(playerThing))
 		{
 			playerThing.waterLever = 1;
+			playerThing.inLava = isLava;
 //			playerThing.playerInfo.playerPostProcessing.SetWaterEffect();
 			SoundManager.Create3DSound(playerThing.GlobalPosition, inSound);
 			currentPlayers.Add(playerThing);

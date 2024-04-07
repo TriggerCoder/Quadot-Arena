@@ -364,6 +364,8 @@ public static class QShaderManager
 		code += "global uniform vec4 AmbientColor: source_color;\n";
 		code += "global uniform float mixBrightness;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
+		if (MaterialManager.HasBillBoard.Contains(qShader.Name))
+			code += "instance uniform int isXLarger = 0;\n";
 		if (multiPassList == null)
 		{
 			code += "instance uniform float ShadowIntensity : hint_range(0, 1) = 0.0;\n";
@@ -488,8 +490,8 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-		if (shaderName.Contains("QUADWEAPON"))
-			GameManager.Print(code);
+//		if (shaderName.Contains("QUAD"))
+//			GameManager.Print(code);
 
 		Shader shader = new Shader();
 		shader.Code = code;
@@ -612,9 +614,9 @@ public static class QShaderManager
 				default:
 					Vertex = "\tVERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
 				break;
-				case BaseMaterial3D.BillboardModeEnum.FixedY:
+				case QShaderGlobal.SpriteType.Longest:
 					Vertex = "\tivec2 tex_size = textureSize(Tex_0, 0);\n";
-					Vertex += "\tint isXLarger = int((tex_size.x - tex_size.y) > 0);\n";
+//					Vertex += "\tint isXLarger = int((tex_size.x - tex_size.y) > 0);\n";
 					Vertex += "\ttex_size = ivec2(1,0) * (1 - isXLarger) + ivec2(0,1) * isXLarger;\n";
 					Vertex += "\tvec3 local_up = MODEL_MATRIX[tex_size.x].xyz;\n";
 					Vertex += "\tvec4 ax = vec4(normalize(cross(local_up, INV_VIEW_MATRIX[2].xyz)), 0.0);\n";
@@ -1209,7 +1211,7 @@ public static class QShaderManager
 								}
 								else
 									QShaders.Add(qShaderData.Name, qShaderData);
-								if (qShaderData.qShaderGlobal.billboard != BaseMaterial3D.BillboardModeEnum.Disabled)
+								if (qShaderData.qShaderGlobal.billboard != QShaderGlobal.SpriteType.Disabled)
 									MaterialManager.AddBillBoard(qShaderData.Name);
 							}
 							qShaderData = null;
@@ -1374,7 +1376,7 @@ public class QShaderGlobal
 	public List<string> q3map_LightSubdivide = null;
 	public string editorImage = "";
 	public CullType cullType = CullType.Back;
-	public BaseMaterial3D.BillboardModeEnum billboard = BaseMaterial3D.BillboardModeEnum.Disabled;
+	public SpriteType billboard = SpriteType.Disabled;
 	public bool isSky = false;
 	public bool isFog = false;
 	public bool unShaded = false;
@@ -1386,6 +1388,12 @@ public class QShaderGlobal
 	public bool noMipMap = false;
 	public bool polygonOffset = false;
 
+	public enum SpriteType
+	{
+		Disabled,
+		Longest,
+		Enabled
+	}
 	public enum CullType
 	{
 		Back,
@@ -1455,9 +1463,9 @@ public class QShaderGlobal
 				if (Value.Contains("AUTOSPRITE"))
 				{
 					if (Value.Contains('2'))
-						billboard = BaseMaterial3D.BillboardModeEnum.FixedY;
+						billboard = SpriteType.Longest;
 					else
-						billboard = BaseMaterial3D.BillboardModeEnum.Enabled;
+						billboard = SpriteType.Enabled;
 				}
 				else
 				{

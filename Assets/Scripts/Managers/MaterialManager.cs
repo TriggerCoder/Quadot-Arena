@@ -32,6 +32,7 @@ public partial class MaterialManager : Node
 	public static ShaderMaterial quadWeaponFxMaterial;
 	public static string quadWeaponFxShader = "powerups/quadWeapon";
 	public static FogMaterial waterFogMaterial;
+	public static FogMaterial lavaFogMaterial;
 
 	[Export]
 	public bool applyLightmaps = true;
@@ -69,6 +70,11 @@ public partial class MaterialManager : Node
 		waterFogMaterial.Density = .25f;
 		waterFogMaterial.Albedo = new Color(.16f, .46f, .52f);
 		waterFogMaterial.Emission = new Color(.3f, .3f, .35f);
+
+		lavaFogMaterial = new FogMaterial();
+		lavaFogMaterial.Density = .3f;
+		lavaFogMaterial.Albedo = new Color(.91f, .18f, .18f);
+		lavaFogMaterial.Emission = new Color(.75f, .38f, .0f);
 	}
 
 	public static void SetAmbient()
@@ -94,6 +100,8 @@ public partial class MaterialManager : Node
 
 	public static void AddBillBoard(string shaderName)
 	{
+//		if (shaderName.Contains("TEXTURES/BASE_TRIM/WIRES01"))
+//			return;
 		if (HasBillBoard.Contains(shaderName))
 			return;
 		HasBillBoard.Add(shaderName);

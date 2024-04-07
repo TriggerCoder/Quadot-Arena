@@ -42,6 +42,9 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public float enviroSuitTime = 0f;
 	public float flightTime = 0f;
 
+	public float environmentDamageTime = 0f;
+
+	public bool inLava = false;
 	public bool finished = false;
 	public bool invul = false;
 	public bool ready = false;
@@ -376,6 +379,22 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			playerInfo.haste = false;
 			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Regen);
 		}
-		
+
+		if (inLava)
+		{
+			environmentDamageTime -= deltaTime;
+			if (environmentDamageTime < 0f)
+			{
+				Damage(30, DamageType.Environment);
+				environmentDamageTime = 1;
+			}
+		}
+		//Lava CoolDown
+		else if (environmentDamageTime > 0)
+		{
+			environmentDamageTime -= deltaTime;
+			if (environmentDamageTime < 0f)
+				environmentDamageTime = 0;
+		}
 	}
 }

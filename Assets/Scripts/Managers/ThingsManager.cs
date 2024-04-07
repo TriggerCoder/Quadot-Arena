@@ -13,7 +13,7 @@ public partial class ThingsManager : Node
 	[Export]
 	public PackedScene[] _decalsPrefabs;
 	[Export]
-	public PackedScene[] _itemsPrefabs;
+	public PackedScene[] _ammoPrefabs;
 	[Export]
 	public PackedScene[] _debrisPrefabs;
 	[Export]
@@ -70,7 +70,7 @@ public partial class ThingsManager : Node
 			GameManager.Print("Decal Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
-		foreach (var thing in _itemsPrefabs)
+		foreach (var thing in _ammoPrefabs)
 		{
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);

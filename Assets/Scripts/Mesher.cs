@@ -424,51 +424,7 @@ public static class Mesher
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 	}
 
-	public static void GenerateBillBoardObject(string textureName, int lmIndex, Node3D holder, QSurface surface, bool addPVS = true)
-	{
-		if (surface == null)
-		{
-			GameManager.Print("Failed to create polygon object because there are no surfaces", GameManager.PrintType.Warning);
-			return;
-		}
-
-		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex);
-		for (int offset = 0, n = 0; offset < surface.numOfIndices; offset += 6, n++)
-		{
-			if (offset > 0)
-				addPVS = false;
-
-			MeshInstance3D mesh = new MeshInstance3D();
-			ArrayMesh arrMesh = new ArrayMesh();
-			string Name = "Mesh_Surfaces_" + surface.surfaceId;
-
-			Vector3 center = GenerateBillBoardMesh(surface, lmIndex, n);
-
-			Node3D billBoard = new Node3D();
-			holder.AddChild(billBoard);
-			billBoard.GlobalPosition = center;
-
-			FinalizePolygonMesh(arrMesh);
-			arrMesh.SurfaceSetMaterial(0, material);
-			billBoard.AddChild(mesh);
-			if (addPVS)
-				mesh.Layers = GameManager.InvisibleMask;
-			else //As dynamic surface don't have bsp data, assign it to the always visible layer 
-				mesh.Layers = GameManager.AllPlayerViewMask;
-			mesh.Name = Name;
-			mesh.Mesh = arrMesh;
-
-			//		if (MaterialManager.IsSkyTexture(textureName))
-			mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
-			//		else
-			//			mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.DoubleSided;
-			//PVS only add on Static Geometry, as it has BSP Nodes
-			if (addPVS)
-				ClusterPVSManager.Instance.RegisterClusterAndSurface(mesh, surface);
-
-		}
-	}
-	public static Vector3 GenerateBillBoardMesh(QSurface surface, int lm_index, int offset)
+	public static (Vector3 , Quaternion) GenerateBillBoardMesh(List<Vector3I> Quad, QSurface surface, int lm_index, ref bool Xlarger)
 	{
 		Vector3 center = Vector3.Zero;
 		Vector3 normal = Vector3.Zero;
@@ -481,24 +437,48 @@ public static class Mesher
 		indiciesCache.Clear();
 		vertsColor.Clear();
 
+		List<int> localIndex = new List<int>();
+		List<int> isRoot = new List<int>();
 		int vstep = surface.startVertIndex;
-		int mstep = surface.startIndex + (offset * 6);
-		for (int n = 0; n < 6; n++)
+
+		for (int i = 0; i < Quad.Count; i++)
 		{
-			int index = MapLoader.vertIndices[mstep];
-			if (!indiciesCache.Contains(index))
-				indiciesCache.Add(index);
-			mstep++;
+			int index = Quad[i].X;
+			if (!localIndex.Contains(index))
+			{
+				localIndex.Add(index);
+				isRoot.Add(index);
+			}
+			else
+				isRoot.Remove(index);
+
+			index = Quad[i].Y;
+			if (!localIndex.Contains(index))
+			{
+				localIndex.Add(index);
+				isRoot.Add(index);
+			}
+			else
+				isRoot.Remove(index);
+
+			index = Quad[i].Z;
+			if (!localIndex.Contains(index))
+			{
+				localIndex.Add(index);
+				isRoot.Add(index);
+			}
+			else
+				isRoot.Remove(index);
+
 		}
 
-		indiciesCache.Sort();
+		localIndex.Sort();
 
-		for (int n = 0; n < indiciesCache.Count; n++)
+		for (int n = 0; n < localIndex.Count; n++)
 		{
-			Vector3 pos = MapLoader.verts[vstep + indiciesCache[n]].position;
+			Vector3 pos = MapLoader.verts[vstep + localIndex[n]].position;
 			vertsCache.Add(pos);
 			center += pos;
-			mstep++;
 		}
 
 		center /= vertsCache.Count;
@@ -509,34 +489,209 @@ public static class Mesher
 		else
 			changeRotation = Transform3D.Identity.LookingAt(normal, Vector3.Forward).Basis.GetRotationQuaternion();
 
-		vertsCache.Clear();
-
-		for (int n = 0; n < indiciesCache.Count; n++)
+		float zRotationAngle = 0;
+		float largestEdge = float.MinValue;
+		//Need to make sure we don't take diagonals
+		for (int i = 0; i < isRoot.Count; i++)
 		{
-			Vector3 pos = changeRotation * (MapLoader.verts[vstep + indiciesCache[n]].position - center);
+			vertsCache.Clear();
+			int indexA, indexB, indexC;
+			indexA = isRoot[i];
+			if (indexA == Quad[i].X)
+			{
+				indexB = Quad[i].Y;
+				indexC = Quad[i].Z;
+			}
+			else if (indexA == Quad[i].Y)
+			{
+				indexB = Quad[i].X;
+				indexC = Quad[i].Z;
+			}
+			else
+			{
+				indexB = Quad[i].X;
+				indexC = Quad[i].Y;
+			}
+			Vector3 pos = changeRotation * (MapLoader.verts[vstep + indexA].position - center);
+			pos.Z = 0;
 			vertsCache.Add(pos);
-			uvCache.Add(MapLoader.verts[vstep + indiciesCache[n]].textureCoord);
-			uv2Cache.Add(MapLoader.verts[vstep + indiciesCache[n]].lightmapCoord);
-			normalsCache.Add(MapLoader.verts[vstep + indiciesCache[n]].normal);
+
+			pos = changeRotation * (MapLoader.verts[vstep + indexB].position - center);
+			pos.Z = 0;
+			vertsCache.Add(pos);
+
+			pos = changeRotation * (MapLoader.verts[vstep + indexC].position - center);
+			pos.Z = 0;
+			vertsCache.Add(pos);
+
+			for (int j = 1; j < vertsCache.Count; j++)
+			{
+				Vector3 edge = vertsCache[j] - vertsCache[0];
+				float edgeLenght = edge.Length();
+
+				if (edgeLenght > largestEdge)
+				{
+					largestEdge = edgeLenght;
+					zRotationAngle = (float)Math.Atan2(edge.X, edge.Y);
+				}
+			}
+		}
+		Quaternion quat = Quaternion.FromEuler(new Vector3(0, 0, zRotationAngle));
+		changeRotation = quat * changeRotation;
+
+		float minX = float.MaxValue, minY = float.MaxValue;
+		float maxX = float.MinValue, maxY = float.MinValue;
+		vertsCache.Clear();
+		for (int n = 0; n < localIndex.Count; n++)
+		{
+			Vector3 pos = changeRotation * (MapLoader.verts[vstep + localIndex[n]].position - center);
+			pos.Z = 0;
+			vertsCache.Add(pos);
+			uvCache.Add(MapLoader.verts[vstep + localIndex[n]].textureCoord);
+			uv2Cache.Add(MapLoader.verts[vstep + localIndex[n]].lightmapCoord);
+//			Because it's Z aligned, the normal will always be Back
+//			normalsCache.Add(changeRotation * MapLoader.verts[vstep + localIndex[n]].normal);
+			normalsCache.Add(Vector3.Back);
 
 			//Need to compensate for Color lightning as lightmapped textures will change
 			if (lm_index >= 0)
-				vertsColor.Add(MapLoader.verts[vstep + indiciesCache[n]].color);
+				vertsColor.Add(MapLoader.verts[vstep + localIndex[n]].color);
 			else
-				vertsColor.Add(TextureLoader.ChangeColorLighting(MapLoader.verts[vstep + indiciesCache[n]].color));
-		}
+				vertsColor.Add(TextureLoader.ChangeColorLighting(MapLoader.verts[vstep + localIndex[n]].color));
 
-		indiciesCache.Clear();
+			if (pos.X < minX)
+				minX = pos.X;
+			if (pos.X > maxX)
+				maxX = pos.X;
+			if (pos.Y < minY)
+				minY = pos.Y;
+			if (pos.Y > maxY)
+				maxY = pos.Y;
+		}
+		float lenght = maxX - minX;
+		float width = maxY - minY;
+		if (lenght > width)
+			Xlarger = true;
+
 		// Rip meshverts / triangles
-		int triOffset = 4 * offset;
-		mstep = surface.startIndex + (offset * 6);
-		for (int n = 0; n < 6; n++)
+		for (int i = 0; i < Quad.Count; i++)
 		{
-			int index = MapLoader.vertIndices[mstep + n] - triOffset;
-			indiciesCache.Add(index);
+			indiciesCache.Add(localIndex.IndexOf(Quad[i].X));
+			indiciesCache.Add(localIndex.IndexOf(Quad[i].Y));
+			indiciesCache.Add(localIndex.IndexOf(Quad[i].Z));
 		}
 
-		return center;
+		return (center, changeRotation.Inverse());
+	}
+	public static void GenerateBillBoardObject(string textureName, int lmIndex, Node3D holder, QSurface surface, bool addPVS = true)
+	{
+		if (surface == null)
+		{
+			GameManager.Print("Failed to create polygon object because there are no surfaces", GameManager.PrintType.Warning);
+			return;
+		}
+
+		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex);
+
+		//Get All Triangles in a List
+		List<Vector3I> Tris = new List<Vector3I>();
+		Vector3I triangle = Vector3I.Zero;
+		for (int i = 0, vertex = 0; i < surface.numOfIndices; i++, vertex++)
+		{
+			int index = MapLoader.vertIndices[surface.startIndex + i];
+			if (vertex > 2)
+				vertex = 0;
+			switch (vertex)
+			{
+				default:
+				case 0:
+					triangle = new Vector3I(index, 0, 0);
+				break;
+				case 1:
+					triangle.Y = index;
+				break;
+				case 2:
+					triangle.Z = index;
+					Tris.Add(triangle);
+				break;
+			}
+		}
+
+		//Now Find the Quads
+		List<List<Vector3I>> Quads = new List<List<Vector3I>>();
+		for (int i = 1, j = 0; j < Tris.Count; i++)
+		{
+			if (i == Tris.Count)
+			{
+				j++;
+				i = j + 1;
+				if (j == (Tris.Count - 1))
+					break;
+			}
+
+			if (i == j)
+				continue;
+			if ((Tris[j].X == Tris[i].X) || (Tris[j].X == Tris[i].Y) || (Tris[j].X == Tris[i].Z))
+			{
+				if (((Tris[j].Y == Tris[i].X) || (Tris[j].Y == Tris[i].Y) || (Tris[j].Y == Tris[i].Z))
+					|| ((Tris[j].Z == Tris[i].X) || (Tris[j].Z == Tris[i].Y) || (Tris[j].Z == Tris[i].Z)))
+				{
+					List<Vector3I> Quad = new List<Vector3I>
+					{
+						Tris[j],
+						Tris[i]
+					};
+					Quads.Add(Quad);
+				}
+			}
+			else if ((Tris[j].Y == Tris[i].X) || (Tris[j].Y == Tris[i].Y) || (Tris[j].Y == Tris[i].Z))
+			{
+				if ((Tris[j].Z == Tris[i].X) || (Tris[j].Z == Tris[i].Y) || (Tris[j].Z == Tris[i].Z))
+				{
+					List<Vector3I> Quad = new List<Vector3I>
+					{
+						Tris[j],
+						Tris[i]
+					};
+					Quads.Add(Quad);
+				}
+			}
+		}
+
+		addPVS = false;
+		for (int i = 0; i < Quads.Count; i++)
+		{
+			MeshInstance3D mesh = new MeshInstance3D();
+			ArrayMesh arrMesh = new ArrayMesh();
+			string Name = "BillBoard_Surfaces_" + surface.surfaceId;
+			Vector3 center;
+			Quaternion rotation;
+			bool isXLarger = false;
+			(center, rotation) = GenerateBillBoardMesh(Quads[i], surface, lmIndex, ref isXLarger);
+
+			Node3D billBoard = new Node3D();
+			holder.AddChild(billBoard);
+			billBoard.GlobalPosition = center;
+			billBoard.Quaternion = rotation;
+			FinalizePolygonMesh(arrMesh);
+			arrMesh.SurfaceSetMaterial(0, material);
+			billBoard.AddChild(mesh);
+			if (addPVS)
+				mesh.Layers = GameManager.InvisibleMask;
+			else //As dynamic surface don't have bsp data, assign it to the always visible layer 
+				mesh.Layers = GameManager.AllPlayerViewMask;
+			mesh.Name = Name;
+			mesh.Mesh = arrMesh;
+			if (isXLarger)
+				mesh.SetInstanceShaderParameter("isXLarger", 1);
+//			if (MaterialManager.IsSkyTexture(textureName))
+				mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+//			else
+//				mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.DoubleSided;
+			//PVS only add on Static Geometry, as it has BSP Nodes
+			if (addPVS)
+				ClusterPVSManager.Instance.RegisterClusterAndSurface(mesh, surface);
+		}
 	}
 
 	public static void GenerateBillBoardSprites(string textureName, int lmIndex, Node3D holder, QSurface[] surfaces, bool addPVS = true)
@@ -1118,16 +1273,16 @@ public static class Mesher
 			return 0;
 		}
 
-		/*		if ((stype & SurfaceFlags.NonSolid) != 0)
-				{
-					GameManager.Print("brushes: " + indexId + " Is not solid, Surface Type is: " + stype);
-					return 0;
-				}
-		*/
+/*		if ((stype & SurfaceFlags.NonSolid) != 0)
+		{
+			GameManager.Print("brushes: " + indexId + " Is not solid, Surface Type is: " + stype);
+			return 0;
+		}
+*/
 
 		type |= extraContentFlag;
 
-		if ((type & ContentFlags.Water) != 0)
+		if (((type & ContentFlags.Water) != 0) || ((type & ContentFlags.Lava) != 0))
 			isWater = true;
 		else if ((type & MaskPlayerSolid) == 0)
 			return 0;
@@ -1140,6 +1295,8 @@ public static class Mesher
 			if (isWater)
 			{
 				waterSurface = new WaterSurface();
+				if ((type & ContentFlags.Lava) != 0)
+					waterSurface.isLava = true;
 				objCollider = waterSurface;
 			}
 			else
@@ -1160,7 +1317,7 @@ public static class Mesher
 			{
 				Aabb box = convexHull.GetDebugMesh().GetAabb();
 				waterSurface.Boxes.Add(box);
-				GenerateWaterFog(indexId + "_" + i, holder, box);
+				GenerateWaterFog(indexId + "_" + i, holder, box, waterSurface.isLava);
 			}
 		}
 		
@@ -1393,7 +1550,7 @@ public static class Mesher
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 		return arrMesh;
 	}
-	public static void GenerateWaterFog(string Name, Node3D holder, Aabb box)
+	public static void GenerateWaterFog(string Name, Node3D holder, Aabb box, bool isLava)
 	{
 		FogVolume Fog = new FogVolume();
 		Fog.Name = "FogVolume_" + Name;
@@ -1403,7 +1560,10 @@ public static class Mesher
 		Fog.GlobalPosition = box.GetCenter();
 		Fog.Shape = RenderingServer.FogVolumeShape.Box;
 		Fog.Size = box.Size;
-		Fog.Material = MaterialManager.waterFogMaterial;
+		if (isLava)
+			Fog.Material = MaterialManager.lavaFogMaterial;
+		else
+			Fog.Material = MaterialManager.waterFogMaterial;
 	}
 	public static void GenerateVolumetricFog(int index, QBrush brush, Node3D holder, string textureName)
 	{

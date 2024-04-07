@@ -495,32 +495,50 @@ public static void LerpColorOnRepeatedVertex()
 		for (int i = 0; i < models[num].numSurfaces; i++)
 			staticGeometry.Add(surfaces[models[num].firstSurface + i]);
 
-		// Each surface group is its own gameobject
+		// Each surface group is its own object
 		var groups = staticGeometry.GroupBy(x => new { x.type, x.shaderId, x.lightMapID });
 		int groupId = 0;
-		foreach (var group in groups)
+		foreach (var bigGroup in groups)
 		{
-			QSurface[] groupSurfaces = group.ToArray();
-			if (groupSurfaces.Length == 0)
-				continue;
-
-			groupId++;
-
-			switch (group.Key.type)
+			bool billBoard = false;
+			int ChunkSize = MAX_MESH_SURFACES;
+			string shaderName = mapTextures[bigGroup.ElementAt(0).shaderId].name;
+			if (MaterialManager.HasBillBoard.Contains(shaderName))
 			{
-				case QSurfaceType.Patch:
-					Mesher.GenerateBezObject(groupSurfaces[0].shaderId, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces, false);
-					break;
-				case QSurfaceType.Polygon:
-				case QSurfaceType.Mesh:
-					Mesher.GeneratePolygonObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, holder, groupSurfaces, false);
-					break;
-				case QSurfaceType.Billboard:
-//					Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, modelObject, groupSurfaces);
-					break;
-				default:
-					GameManager.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + group.Key.type + ").", GameManager.PrintType.Info);
-					break;
+				billBoard = true;
+				if (bigGroup.Key.type != QSurfaceType.Billboard)
+					ChunkSize = 1;
+				GameManager.Print("AUTOSPRITE NUM" + num + " NAME: "+ shaderName);
+			}
+
+			var limitedGroup = bigGroup.Chunk(ChunkSize);
+			foreach (var group in limitedGroup)
+			{
+				QSurface[] groupSurfaces = group.ToArray();
+				if (groupSurfaces.Length == 0)
+					continue;
+
+				groupId++;
+
+				switch (bigGroup.Key.type)
+				{
+					case QSurfaceType.Patch:
+						Mesher.GenerateBezObject(groupSurfaces[0].shaderId, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces, false);
+						break;
+					case QSurfaceType.Polygon:
+					case QSurfaceType.Mesh:
+						if (billBoard)
+							Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, holder, groupSurfaces[0]);
+						else
+							Mesher.GeneratePolygonObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, holder, groupSurfaces, false);
+						break;
+					case QSurfaceType.Billboard:
+						//					Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, modelObject, groupSurfaces);
+						break;
+					default:
+						GameManager.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + bigGroup.Key.type + ").", GameManager.PrintType.Info);
+						break;
+				}
 			}
 		}
 	}
