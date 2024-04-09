@@ -1,0 +1,48 @@
+[gd_scene load_steps=5 format=3 uid="uid://bdjag6sywuono"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Projectile.cs" id="1_ak2u7"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_50ltg"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="3_03le7"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="4_ge3es"]
+
+[node name="BFGProjectile" type="Node3D" node_paths=PackedStringArray("audioStream")]
+script = ExtResource("1_ak2u7")
+projectileName = "BFGProjectile"
+_lifeTime = 3.0
+speed = 30.0
+rotateSpeed = 720
+damageMin = 14
+damageMax = 20
+blastDamage = 14
+explosionRadius = 0.2
+damageType = 5
+OnDeathSpawn = "BFGExplosion"
+decalMark = "BFGMark"
+_onFlySound = "weapons/rocket/rockfly"
+_onDeathSound = "weapons/rocket/rocklx1a"
+audioStream = NodePath("MultiAudioStream")
+
+[node name="SourceBFG" type="Node3D" parent="."]
+
+[node name="MultiAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_50ltg")
+
+[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source", "interpolationReset")]
+script = ExtResource("3_03le7")
+Source = NodePath("../SourceBFG")
+interpolationReset = NodePath("..")
+
+[node name="BFGBall" type="Sprite3D" parent="InterpolatedTransform"]
+layers = 255
+cast_shadow = 0
+billboard = 1
+script = ExtResource("4_ge3es")
+spriteName = "models/weaphits/bfg01"
+spriteRadius = 10
+
+[node name="OmniLight3D" type="OmniLight3D" parent="InterpolatedTransform"]
+layers = 255
+light_color = Color(0.423529, 0.8, 0.239216, 1)
+light_energy = 5.0
+light_bake_mode = 0
+omni_shadow_mode = 0

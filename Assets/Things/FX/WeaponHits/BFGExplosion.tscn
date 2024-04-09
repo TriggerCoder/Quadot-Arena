@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://dmh4ni5reuxgo"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="1_pipmf"]
+
+[node name="BFGExplosion" type="Sprite3D"]
+layers = 255
+sorting_offset = -3000.0
+cast_shadow = 0
+billboard = 1
+texture_filter = 1
+script = ExtResource("1_pipmf")
+spriteName = "bfgExplosion"
+spriteRadius = 8
+destroyTimer = 0.45

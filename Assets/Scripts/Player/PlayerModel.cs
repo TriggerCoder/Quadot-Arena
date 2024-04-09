@@ -649,7 +649,13 @@ public partial class PlayerModel : Node3D
 		}
 		lowerNode.Quaternion = lowerNode.Quaternion.Slerp(rotate, lowerRotationFPS * deltaTime);
 	}
+	public void MuzzleFlashSetScale(Vector3 scale)
+	{
+		if (muzzleFlash == null)
+			return;
 
+		muzzleFlash.Scale = scale;
+	}
 	public void MuzzleFlashSetActive(bool active)
 	{
 		if (muzzleFlash == null)

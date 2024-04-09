@@ -1,0 +1,34 @@
+[gd_scene load_steps=6 format=3 uid="uid://4xiwipor4bi8"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="1_piwg0"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="2_bhuju"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/LightFade.cs" id="3_er0r3"]
+
+[sub_resource type="Resource" id="Resource_7hy85"]
+script = ExtResource("2_bhuju")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_ae2ql"]
+script = ExtResource("2_bhuju")
+fps = 0.0
+
+[node name="BFGMark" type="Node3D"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
+script = ExtResource("1_piwg0")
+modelName = "weaphits/boom01"
+shaderName = "GFX/DAMAGE/BURN_MED_MRK"
+useLowCountMultiMesh = false
+alphaFade = true
+modelAnimation = SubResource("Resource_7hy85")
+textureAnimation = SubResource("Resource_ae2ql")
+destroyType = 1
+destroyTimer = 200.0
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+layers = 255
+light_color = Color(0.270588, 0.513726, 0.156863, 1)
+light_energy = 5.0
+light_bake_mode = 0
+omni_shadow_mode = 0
+script = ExtResource("3_er0r3")
+destroyTimer = 3.0

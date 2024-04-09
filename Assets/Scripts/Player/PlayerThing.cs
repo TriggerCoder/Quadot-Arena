@@ -18,6 +18,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public string modelName = "crash";
 	public string skinName = "default";
 
+	public static string drowningSound = "player/gurp";
 	public static string wearOffSound = "items/wearoff";
 	public static string regenSound = "items/regen";
 
@@ -45,6 +46,9 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public float flightTime = 0f;
 
 	public float environmentDamageTime = 0f;
+	public float drownTime = 0f;
+
+	public int drownDamage = 0;
 
 	public bool inLava = false;
 	public bool finished = false;
@@ -178,12 +182,17 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 			playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
 
-			PlayModelSound("death" + GD.RandRange(1, 3));
+			if (damageType == DamageType.Drown)
+				PlayModelSound("drown");
+			else
+				PlayModelSound("death" + GD.RandRange(1, 3));
 			avatar.Die();
 			playerControls.feetRay.Length = 1.6f;
 			ready = false;
 //			GameManager.Instance.AddDeathCount();
 		}
+		else if (damageType == DamageType.Drown)
+			SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(drowningSound + GD.RandRange(1, 2)));
 		else if (painTime <= 0f)
 		{
 			if (hitpoints > 75)
@@ -401,5 +410,24 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			if (environmentDamageTime < 0f)
 				environmentDamageTime = 0;
 		}
+
+		if (waterLever > 1)
+		{
+			if (drownTime > 0)
+				drownTime -= deltaTime;
+			if (drownTime < 0f)
+			{
+				drownDamage += 2;
+				Damage(drownDamage, DamageType.Drown);
+				drownTime = 1;
+			}
+
+		}
+		else if (drownTime != 0)
+		{
+			drownTime = 0;
+			drownDamage = 0;
+		}
+
 	}
 }

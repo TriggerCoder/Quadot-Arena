@@ -1,0 +1,9 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://d2qwccitnqm8c"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SoundData.cs" id="1_10dem"]
+[ext_resource type="AudioStream" uid="uid://bn1dyxhk3ad4y" path="res://Assets/Sounds/weapons/BFG10K.wav" id="2_lvyux"]
+
+[resource]
+script = ExtResource("1_10dem")
+name = "weapons/bfg/bfg_charge"
+sound = ExtResource("2_lvyux")

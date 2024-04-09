@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://xi3ybp7mrio2"]
+[gd_scene load_steps=16 format=3 uid="uid://xi3ybp7mrio2"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerThing.cs" id="1_da8o2"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerControls.cs" id="1_g37r6"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://dpl55sl78gnh4" path="res://Assets/Player/Weapons/PlasmagunWeapon.tscn" id="6_yhj32"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="7_qljl7"]
 [ext_resource type="PackedScene" uid="uid://c5cu5briye1ry" path="res://Assets/Player/Weapons/LightningGunWeapon.tscn" id="7_vw7rq"]
+[ext_resource type="PackedScene" uid="uid://cuxddhbt7p0lt" path="res://Assets/Player/Weapons/BFG10KWeapon.tscn" id="9_sanay"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="10_h25w0"]
 [ext_resource type="PackedScene" uid="uid://qov23ls4iuhu" path="res://Assets/Player/PlayerPostProcessing.tscn" id="11_uirmt"]
 
@@ -60,7 +61,7 @@ audioStream = NodePath("../PlayerVoiceAudioStream")
 playerThing = NodePath("..")
 playerPostProcessing = NodePath("InterpolatedTransform/PostProcessing")
 WeaponHand = NodePath("InterpolatedTransform/ViewCamera/WeaponHand")
-WeaponPrefabs = [null, ExtResource("4_4obu3"), ExtResource("5_mrmdb"), null, ExtResource("5_jwttf"), ExtResource("7_vw7rq"), null, ExtResource("6_yhj32"), null]
+WeaponPrefabs = [null, ExtResource("4_4obu3"), ExtResource("5_mrmdb"), null, ExtResource("5_jwttf"), ExtResource("7_vw7rq"), null, ExtResource("6_yhj32"), ExtResource("9_sanay")]
 
 [node name="MainCameras" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("playerControls", "ThirdPerson", "ViewCamera", "playerPostProcessing")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)

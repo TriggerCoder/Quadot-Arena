@@ -534,7 +534,7 @@ public partial class PlayerHUD : MeshInstance3D
 				break;
 
 			case PlayerInfo.BFG10K:
-				if (playerInfo.Ammo[PlayerInfo.bfgAmmo] <= 0)
+				if (playerInfo.Ammo[PlayerInfo.bfgAmmo] < 40)
 					return false;
 				break;
 		}

@@ -1,0 +1,53 @@
+[gd_scene load_steps=9 format=3 uid="uid://dlx7d5gxe6lnj"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_skil8"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_nqje6"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_bp4yu"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="4_w41yi"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_nrndr"]
+
+[sub_resource type="Resource" id="Resource_h1upd"]
+script = ExtResource("4_w41yi")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_sejmd"]
+script = ExtResource("4_w41yi")
+fps = 0.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+radius = 0.7
+
+[node name="ammo_bfg" type="Node3D"]
+script = ExtResource("1_skil8")
+respawnTime = 30.0
+thingType = 2
+
+[node name="NodeAnimation" type="Node3D" parent="."]
+script = ExtResource("2_nqje6")
+rotEnable = true
+rotFPS = 40.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="BFGAmmo" type="Node3D" parent="."]
+script = ExtResource("3_bp4yu")
+modelName = "powerups/ammo/bfgam"
+castShadows = true
+modelAnimation = SubResource("Resource_h1upd")
+textureAnimation = SubResource("Resource_sejmd")
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("5_nrndr")
+thingController = NodePath("..")
+itemType = 10
+amount = 100
+PickupSound = "misc/am_pkup"
+PickupIcon = "icons/icona_bfg"
+PickupText = "BFG Ammo"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

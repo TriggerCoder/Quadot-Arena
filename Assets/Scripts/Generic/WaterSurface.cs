@@ -52,6 +52,7 @@ public partial class WaterSurface : Area3D
 						SoundManager.Create3DSound(currentPlayer.GlobalPosition, underSound);
 						currentPlayer.playerInfo.playerPostProcessing.SetWaterEffect();
 						currentPlayer.waterLever = 2;
+						currentPlayer.drownTime = 12;
 						break;
 					}
 									}
@@ -93,6 +94,9 @@ public partial class WaterSurface : Area3D
 	public void ElectroShockDischarge(PlayerThing player)
 	{
 		int damage = player.playerInfo.Ammo[PlayerInfo.lightningAmmo];
+		if (player.playerInfo.quadDamage)
+			damage *= 4;
+
 		int ammo = damage - player.hitpoints;
 		player.playerInfo.Ammo[PlayerInfo.lightningAmmo] = ammo >= 0 ? ammo : 0;
 		player.Damage(damage, DamageType.Electric, player);

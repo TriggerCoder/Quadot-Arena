@@ -5,6 +5,16 @@ using System.Collections.Generic;
 public static class SoundManager
 {
 	public static Dictionary<string, AudioStreamWav> Sounds = new Dictionary<string, AudioStreamWav>();
+
+	public static void AddSounds(SoundData[] sounds)
+	{
+		if (sounds.Length == 0)
+			return;
+
+		foreach (var sound in sounds)
+			Sounds.Add(sound.name, sound.sound);
+	}
+
 	public static AudioStreamWav LoadSound(string soundName, bool loop = false, bool music = false)
 	{
 		AudioStreamWav clip;

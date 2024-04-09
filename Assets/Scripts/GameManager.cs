@@ -126,6 +126,8 @@ public partial class GameManager : Node
 	public MusicType musicType = MusicType.None;
 	[Export]
 	public GameType gameType = GameType.FreeForAll;
+	[Export]
+	public SoundData[] OverrideSounds;
 
 	public List<PlayerThing> Players = new List<PlayerThing>();
 	public enum FuncState
@@ -192,6 +194,9 @@ public partial class GameManager : Node
 		environment = worldEnvironment.Environment;
 		ambientLightColor = environment.AmbientLightColor;
 		Instance = this;
+
+		//Load Sounds
+		SoundManager.AddSounds(OverrideSounds);
 
 		TemporaryObjectsHolder = new Node3D();
 		TemporaryObjectsHolder.Name = "TemporaryObjectsHolder";

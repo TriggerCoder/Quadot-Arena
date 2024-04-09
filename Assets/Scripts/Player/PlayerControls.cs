@@ -36,6 +36,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	public float crouchSpeed = 3.0f;                // Crouch speed
 	public float walkSpeed = 5.0f;                  // Walk speed
 	public float runSpeed = 7.0f;                   // Run speed
+	public float swimSpeed = 7.0f;                  // Swim speed
 	private float oldSpeed = 0;                     // Previous move speed
 
 	public float moveSpeed;                         // Ground move speed
@@ -52,6 +53,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 	public Vector3 playerVelocity = Vector3.Zero;
 	private bool wishJump = false;
+	private bool wishSink = false;
 	private bool wishFire = false;
 	private bool wishActivate = false;
 	private bool controllerIsGrounded = true;
@@ -295,6 +297,11 @@ public partial class PlayerControls : InterpolatedNode3D
 				else
 					playerThing.avatar.Swim();
 				wishJump = Input.IsActionPressed(playerInput.Action_Jump);
+
+				if (wishJump)
+					wishSink = false;
+				else
+					wishSink = Input.IsActionPressed(playerInput.Action_Crouch);
 			}
 		}
 		else
@@ -529,7 +536,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		wishdir = playerInfo.Transform.Basis * wishdir;
 		float wishspeed;
 		wishdir = wishdir.GetLenghtAndNormalize(out wishspeed);
-		wishspeed *= moveSpeed;
+		wishspeed *= swimSpeed;
 
 		//Check if Haste
 		if (playerInfo.haste)
@@ -539,7 +546,8 @@ public partial class PlayerControls : InterpolatedNode3D
 		playerVelocity.Y += curreAcel * wishdir.Y;
 		if (wishJump)
 			playerVelocity.Y += 1f;
-
+		else if (wishSink)
+			playerVelocity.Y -= 1f;
 	}
 
 	private void GroundMove(float deltaTime)
@@ -773,7 +781,7 @@ public partial class PlayerControls : InterpolatedNode3D
 				break;
 
 			case PlayerInfo.BFG10K:
-				if (playerInfo.Ammo[PlayerInfo.bfgAmmo] <= 0)
+				if (playerInfo.Ammo[PlayerInfo.bfgAmmo] < 40)
 					return false;
 				break;
 		}
