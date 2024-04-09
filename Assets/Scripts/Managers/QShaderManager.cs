@@ -18,9 +18,9 @@ public static class QShaderManager
 	{
 		foreach (string shaderFile in QShadersFiles)
 		{
-			if (PakManager.ZipFiles.ContainsKey(shaderFile))
+			string FileName;
+			if (PakManager.ZipFiles.TryGetValue(shaderFile, out FileName))
 			{
-				string FileName = PakManager.ZipFiles[shaderFile];
 				var reader = new ZipReader();
 				reader.Open(FileName);
 				byte[] rawShader = reader.ReadFile(shaderFile, false);
@@ -38,14 +38,14 @@ public static class QShaderManager
 
 		ShaderMaterial fogMaterial = (ShaderMaterial)MaterialManager.Instance.fogMaterial.Duplicate(true);
 
-		if (!FogShaders.ContainsKey(shaderName))
+		QShaderData Fog;
+		if (!FogShaders.TryGetValue(shaderName, out Fog))
 		{
 			fogMaterial.Set(Density, .15f);
 			fogMaterial.Set(Emission, Colors.Black);
 			return fogMaterial;
 		}
 
-		QShaderData Fog = FogShaders[shaderName];
 		float R = TryToParseFloat(Fog.qShaderGlobal.fogParms[1]);
 		float G = TryToParseFloat(Fog.qShaderGlobal.fogParms[2]);
 		float B = TryToParseFloat(Fog.qShaderGlobal.fogParms[3]);
@@ -91,10 +91,10 @@ public static class QShaderManager
 		List<string> textures = new List<string>();
 		Dictionary<string, int> TexIndex = new Dictionary<string, int>();
 
-		if (!QShaders.ContainsKey(shaderName))
+		QShaderData qShader;
+		if (!QShaders.TryGetValue(shaderName, out qShader))
 			return null;
 
-		QShaderData qShader = QShaders[shaderName];
 		GameManager.Print("Shader found: " + shaderName);
 
 		GetSunData(qShader);
@@ -301,9 +301,9 @@ public static class QShaderManager
 
 		if (qShader.qShaderGlobal.editorImage.Length != 0)
 		{
-			if (QShaders.ContainsKey(qShader.qShaderGlobal.editorImage))
+			QShaderData qeditorShader;
+			if (QShaders.TryGetValue(qShader.qShaderGlobal.editorImage, out qeditorShader))
 			{
-				QShaderData qeditorShader = QShaders[qShader.qShaderGlobal.editorImage];
 				if (qeditorShader.qShaderGlobal.trans)
 				{
 					alphaIsTransparent = true;
@@ -364,8 +364,6 @@ public static class QShaderManager
 		code += "global uniform vec4 AmbientColor: source_color;\n";
 		code += "global uniform float mixBrightness;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
-		if (MaterialManager.HasBillBoard.Contains(qShader.Name))
-			code += "instance uniform int isXLarger = 0;\n";
 		if (multiPassList == null)
 		{
 			code += "instance uniform float ShadowIntensity : hint_range(0, 1) = 0.0;\n";
@@ -559,9 +557,9 @@ public static class QShaderManager
 	}
 	public static ShaderMaterial MirrorShader(string shaderName)
 	{
-		QShaderData qShader = null;
-		if (QShaders.ContainsKey(shaderName))
-			qShader = QShaders[shaderName];
+		QShaderData qShader;
+		if (!QShaders.TryGetValue(shaderName, out qShader))
+			qShader = null;
 
 		string code = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, depth_draw_opaque, blend_mix, cull_back;\n\n";
 		code += "uniform sampler2D Tex_0 : repeat_enable;\n";
@@ -607,26 +605,24 @@ public static class QShaderManager
 	{
 		string Vertex = "";
 
-		if (MaterialManager.HasBillBoard.Contains(qShader.Name))
+		switch (qShader.qShaderGlobal.billboard)
 		{
-			switch (qShader.qShaderGlobal.billboard)
-			{
-				default:
-					Vertex = "\tVERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
-				break;
-				case QShaderGlobal.SpriteType.Longest:
-					Vertex = "\tivec2 tex_size = textureSize(Tex_0, 0);\n";
-//					Vertex += "\tint isXLarger = int((tex_size.x - tex_size.y) > 0);\n";
-					Vertex += "\ttex_size = ivec2(1,0) * (1 - isXLarger) + ivec2(0,1) * isXLarger;\n";
-					Vertex += "\tvec3 local_up = MODEL_MATRIX[tex_size.x].xyz;\n";
-					Vertex += "\tvec4 ax = vec4(normalize(cross(local_up, INV_VIEW_MATRIX[2].xyz)), 0.0);\n";
-					Vertex += "\tvec4 ay = vec4(local_up.xyz, 0.0);\n";
-					Vertex += "\tvec4 az = vec4(normalize(cross(INV_VIEW_MATRIX[tex_size.y].xyz, local_up)), 0.0);\n";
-					Vertex += "\tMODELVIEW_MATRIX = VIEW_MATRIX * mat4(ax, ay, az, MODEL_MATRIX[3]);\n";
-					Vertex += "\tMODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);\n";
-				break;
-			}
+			default:
+			break;
+			case QShaderGlobal.SpriteType.FixedY:
+				Vertex = "\tivec2 alignment = ivec2(1,0);\n";
+				Vertex += "\tvec3 local_up = MODEL_MATRIX[alignment.x].xyz;\n";
+				Vertex += "\tvec4 ax = vec4(normalize(cross(local_up, INV_VIEW_MATRIX[2].xyz)), 0.0);\n";
+				Vertex += "\tvec4 ay = vec4(local_up.xyz, 0.0);\n";
+				Vertex += "\tvec4 az = vec4(normalize(cross(INV_VIEW_MATRIX[alignment.y].xyz, local_up)), 0.0);\n";
+				Vertex += "\tMODELVIEW_MATRIX = VIEW_MATRIX * mat4(ax, ay, az, MODEL_MATRIX[3]);\n";
+				Vertex += "\tMODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);\n";
+			break;
+			case QShaderGlobal.SpriteType.Enabled:
+				Vertex = "\tVERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
+			break;
 		}
+
 		if (qShader.qShaderGlobal.deformVertexes == null)
 		{
 			if (useView)
@@ -1391,7 +1387,7 @@ public class QShaderGlobal
 	public enum SpriteType
 	{
 		Disabled,
-		Longest,
+		FixedY,
 		Enabled
 	}
 	public enum CullType
@@ -1463,7 +1459,7 @@ public class QShaderGlobal
 				if (Value.Contains("AUTOSPRITE"))
 				{
 					if (Value.Contains('2'))
-						billboard = SpriteType.Longest;
+						billboard = SpriteType.FixedY;
 					else
 						billboard = SpriteType.Enabled;
 				}

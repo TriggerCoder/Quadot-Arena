@@ -53,13 +53,12 @@ public class MD3
 	{
 		BinaryReader Md3ModelFile;
 		string[] name;
-
+		string FileName;
 		string path = Directory.GetCurrentDirectory() + "/StreamingAssets/models/" + modelName + ".md3";
 		if (File.Exists(path))
 			Md3ModelFile = new BinaryReader(File.Open(path, FileMode.Open));
-		else if (PakManager.ZipFiles.ContainsKey(path = ("models/" + modelName + ".md3").ToUpper()))
+		else if (PakManager.ZipFiles.TryGetValue(path = ("models/" + modelName + ".md3").ToUpper(), out FileName))
 		{
-			string FileName = PakManager.ZipFiles[path];
 			var reader = new ZipReader();
 			reader.Open(FileName);
 			MemoryStream ms = new MemoryStream(reader.ReadFile(path, false));

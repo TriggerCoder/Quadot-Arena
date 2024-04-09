@@ -176,16 +176,16 @@ public partial class ThingsManager : Node
 					entityData.Add(keyValue[1].Trim('"'), keyValue[3].Trim('"'));
 					strWord = stream.ReadLine();
 				}
-
-				if (!entityData.ContainsKey("classname"))
+				string ClassName;
+				if (!entityData.TryGetValue("classname",out ClassName))
 					continue;
 
-				if (ignoreThings.Any(s => s == entityData["classname"]))
+				if (ignoreThings.Any(s => s == ClassName))
 					continue;
 
-				if (!thingsPrefabs.ContainsKey(entityData["classname"]))
+				if (!thingsPrefabs.ContainsKey(ClassName))
 				{
-					GameManager.Print(entityData["classname"] + " not found", GameManager.PrintType.Warning);
+					GameManager.Print(ClassName + " not found", GameManager.PrintType.Warning);
 					continue;
 				}
 
@@ -224,12 +224,12 @@ public partial class ThingsManager : Node
 					origin *= GameManager.sizeDividor;
 				}
 
-				if (targetThings.Any(s => s == entityData["classname"]))
+				if (targetThings.Any(s => s == ClassName))
 				{
 					if (!entityData.TryGetValue("targetname", out strWord))
 						strWord = entityData["target"];
 					string target = strWord;
-					switch (entityData["classname"])
+					switch (ClassName)
 					{
 						default:
 							List<Target> targetList = null;
@@ -253,7 +253,7 @@ public partial class ThingsManager : Node
 					}
 				}
 				else
-					entitiesOnMap.Add(new Entity(entityData["classname"], origin, entityData));
+					entitiesOnMap.Add(new Entity(ClassName, origin, entityData));
 			}
 		}
 
@@ -751,29 +751,31 @@ public partial class ThingsManager : Node
 				}
 				break;
 				//Remove PowerUps
-				/*				case "target_remove_powerups":
-								{
-									if (entity.entityData.TryGetValue("targetname", out strWord))
-									{
-										string target = strWord;
+/*
+				case "target_remove_powerups":
+					{
+						if (entity.entityData.TryGetValue("targetname", out strWord))
+						{
+							string target = strWord;
 
-										TriggerController tc;
-										if (!triggerToActivate.TryGetValue(target, out tc))
-										{
-											tc = thingObject.AddComponent<TriggerController>();
-											triggerToActivate.Add(target, tc);
-										}
-										else
-											Destroy(thingObject);
-										tc.Repeatable = true;
-										tc.SetController(target, (p) =>
-										{
-											p.RemovePowerUps();
-										});
-									}
-								}
-								break;
-				*/                //JumpPad
+							TriggerController tc;
+							if (!triggerToActivate.TryGetValue(target, out tc))
+							{
+								tc = thingObject.AddComponent<TriggerController>();
+								triggerToActivate.Add(target, tc);
+							}
+							else
+								Destroy(thingObject);
+							tc.Repeatable = true;
+							tc.SetController(target, (p) =>
+							{
+								p.RemovePowerUps();
+							});
+						}
+					}
+					break;
+*/
+				//JumpPad
 				case "trigger_push":
 				{
 					thingObject.GlobalPosition = entity.origin;

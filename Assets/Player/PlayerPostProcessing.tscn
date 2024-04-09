@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://qov23ls4iuhu"]
+[gd_scene load_steps=30 format=3 uid="uid://qov23ls4iuhu"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerPostProcessing.cs" id="1_maglr"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerHUD.cs" id="1_ubqha"]
@@ -51,13 +51,28 @@ tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 1, 1, 0, 0.301, 0, 0.954)
 
+[sub_resource type="Animation" id="Animation_lwhr0"]
+resource_name = "pain"
+length = 0.5
+tracks/0/type = "scale_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 1, 1, 1, 0.25, 1, 1.3, 1.3, 1.3, 0.5, 1, 1, 1, 1)
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_pxr8j"]
 _data = {
 "dead": SubResource("Animation_ic6nf"),
 "idle": SubResource("Animation_7pvft"),
 "look_left": SubResource("Animation_q4lfx"),
-"look_right": SubResource("Animation_4dj4l")
+"look_right": SubResource("Animation_4dj4l"),
+"pain": SubResource("Animation_lwhr0")
 }
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_lpxt0"]
+animation = &"pain"
 
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_t4d4d"]
 
@@ -79,12 +94,17 @@ blend_point_0/pos = -1.0
 blend_point_1/node = SubResource("AnimationNodeAnimation_hfyu3")
 blend_point_1/pos = 1.0
 
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_rf8w4"]
+mix_mode = 1
+
 [sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_r0fmo"]
 
 [sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_xbgmm"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_x0rcd"]
-graph_offset = Vector2(-46.0001, -85.6198)
+graph_offset = Vector2(424.388, -6.72728)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_lpxt0")
+nodes/Animation/position = Vector2(780, 340)
 nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_t4d4d")
 nodes/TimeScale/position = Vector2(420, -40)
 nodes/dead_angle/node = SubResource("AnimationNodeAnimation_e4qut")
@@ -93,12 +113,14 @@ nodes/idle_look/node = SubResource("AnimationNodeAnimation_yh43a")
 nodes/idle_look/position = Vector2(260, -20)
 nodes/left_right/node = SubResource("AnimationNodeBlendSpace1D_r8imu")
 nodes/left_right/position = Vector2(540, 220)
-nodes/output/position = Vector2(1020, 160)
+nodes/output/position = Vector2(1260, 180)
+nodes/pain_shot/node = SubResource("AnimationNodeOneShot_rf8w4")
+nodes/pain_shot/position = Vector2(980, 200)
 nodes/side_limit/node = SubResource("AnimationNodeAdd2_r0fmo")
 nodes/side_limit/position = Vector2(760, 120)
 nodes/up_limit/node = SubResource("AnimationNodeAdd2_xbgmm")
 nodes/up_limit/position = Vector2(600, -40)
-node_connections = [&"TimeScale", 0, &"idle_look", &"output", 0, &"side_limit", &"side_limit", 0, &"up_limit", &"side_limit", 1, &"left_right", &"up_limit", 0, &"TimeScale", &"up_limit", 1, &"dead_angle"]
+node_connections = [&"TimeScale", 0, &"idle_look", &"output", 0, &"pain_shot", &"pain_shot", 0, &"side_limit", &"pain_shot", 1, &"Animation", &"side_limit", 0, &"up_limit", &"side_limit", 1, &"left_right", &"up_limit", 0, &"TimeScale", &"up_limit", 1, &"dead_angle"]
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_h6a68"]
 advance_mode = 2
@@ -135,7 +157,7 @@ far = 300.0
 transform = Transform3D(-3.58063e-08, -2.50718e-08, 1, -0.573576, 0.819152, 0, -0.819152, -0.573576, -4.37114e-08, 0, -1, -1.5)
 
 [node name="ViewHead" type="Node3D" parent="ViewPortCamera/ViewHeadContainer"]
-transform = Transform3D(0.999781, 0.0209424, 0, -0.0209424, 0.999781, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(0.86587, -0.500269, 0, 0.500269, 0.86587, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="ViewPortCamera/ViewHeadContainer"]
 deterministic = true
@@ -154,6 +176,9 @@ tree_root = SubResource("AnimationNodeStateMachine_3c74r")
 anim_player = NodePath("../AnimationPlayer")
 parameters/Look/TimeScale/scale = 1.0
 parameters/Look/left_right/blend_position = 0
+parameters/Look/pain_shot/active = false
+parameters/Look/pain_shot/internal_active = false
+parameters/Look/pain_shot/request = 0
 parameters/Look/side_limit/add_amount = 1.0
 parameters/Look/up_limit/add_amount = 0.0
 

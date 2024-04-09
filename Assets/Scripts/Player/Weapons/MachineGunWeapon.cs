@@ -93,7 +93,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 			d = d.Normalized();
 			Vector3 Origin = playerInfo.playerCamera.GlobalPosition;
 			Vector3 End = Origin - d * maxRange;
-			var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | ~((playerInfo.playerLayer) | (1 << GameManager.InvisibleBlockerLayer) | (1 << GameManager.RagdollLayer))));
+			var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | GameManager.TakeDamageMask & ~((playerInfo.playerLayer) | (1 << GameManager.InvisibleBlockerLayer) | (1 << GameManager.RagdollLayer))));
 			var SpaceState = GetWorld3D().DirectSpaceState;
 			var hit = SpaceState.IntersectRay(RayCast);
 			if (hit.Count > 0)

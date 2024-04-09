@@ -424,7 +424,7 @@ public static class Mesher
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 	}
 
-	public static (Vector3 , Quaternion) GenerateBillBoardMesh(List<Vector3I> Quad, QSurface surface, int lm_index, ref bool Xlarger)
+	public static (Vector3 , Quaternion) GenerateBillBoardMesh(List<Vector3I> Quad, QSurface surface, int lm_index)
 	{
 		Vector3 center = Vector3.Zero;
 		Vector3 normal = Vector3.Zero;
@@ -527,7 +527,7 @@ public static class Mesher
 			for (int j = 1; j < vertsCache.Count; j++)
 			{
 				Vector3 edge = vertsCache[j] - vertsCache[0];
-				float edgeLenght = edge.Length();
+				float edgeLenght = edge.LengthSquared();
 
 				if (edgeLenght > largestEdge)
 				{
@@ -539,8 +539,6 @@ public static class Mesher
 		Quaternion quat = Quaternion.FromEuler(new Vector3(0, 0, zRotationAngle));
 		changeRotation = quat * changeRotation;
 
-		float minX = float.MaxValue, minY = float.MaxValue;
-		float maxX = float.MinValue, maxY = float.MinValue;
 		vertsCache.Clear();
 		for (int n = 0; n < localIndex.Count; n++)
 		{
@@ -558,20 +556,7 @@ public static class Mesher
 				vertsColor.Add(MapLoader.verts[vstep + localIndex[n]].color);
 			else
 				vertsColor.Add(TextureLoader.ChangeColorLighting(MapLoader.verts[vstep + localIndex[n]].color));
-
-			if (pos.X < minX)
-				minX = pos.X;
-			if (pos.X > maxX)
-				maxX = pos.X;
-			if (pos.Y < minY)
-				minY = pos.Y;
-			if (pos.Y > maxY)
-				maxY = pos.Y;
 		}
-		float lenght = maxX - minX;
-		float width = maxY - minY;
-		if (lenght > width)
-			Xlarger = true;
 
 		// Rip meshverts / triangles
 		for (int i = 0; i < Quad.Count; i++)
@@ -666,8 +651,7 @@ public static class Mesher
 			string Name = "BillBoard_Surfaces_" + surface.surfaceId;
 			Vector3 center;
 			Quaternion rotation;
-			bool isXLarger = false;
-			(center, rotation) = GenerateBillBoardMesh(Quads[i], surface, lmIndex, ref isXLarger);
+			(center, rotation) = GenerateBillBoardMesh(Quads[i], surface, lmIndex);
 
 			Node3D billBoard = new Node3D();
 			holder.AddChild(billBoard);
@@ -682,8 +666,6 @@ public static class Mesher
 				mesh.Layers = GameManager.AllPlayerViewMask;
 			mesh.Name = Name;
 			mesh.Mesh = arrMesh;
-			if (isXLarger)
-				mesh.SetInstanceShaderParameter("isXLarger", 1);
 //			if (MaterialManager.IsSkyTexture(textureName))
 				mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 //			else
@@ -1302,7 +1284,11 @@ public static class Mesher
 			else
 				objCollider = new StaticBody3D();
 
-			objCollider.Name = "Polygon_" + indexId + "_collider";
+			if (isWater)
+				objCollider.Name = "Water_" + indexId + "_collider";
+			else
+				objCollider.Name = "Polygon_" + indexId + "_collider";
+
 			holder.AddChild(objCollider);
 		}
 		MapLoader.mapContentTypes.Add(objCollider, contentType);
@@ -1330,15 +1316,18 @@ public static class Mesher
 			objCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
 
 		if (isWater)
-			objCollider.CollisionLayer |= (1 << GameManager.FogLayer);
-
+		{
+			objCollider.CollisionLayer |= ((1 << GameManager.FogLayer) | (1 << GameManager.WaterLayer));
+			MapLoader.waterSurfaces.Add(waterSurface);
+			MapLoader.noMarks.Add(objCollider);
+		}
 		//If noMarks add it to the table
-		if ((surfaceType.value & NoMarks) != 0)
+		else if ((surfaceType.value & NoMarks) != 0)
 			MapLoader.noMarks.Add(objCollider);
 
 		objCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
 
-
+		
 		MapLoader.mapSurfaceTypes.Add(objCollider, surfaceType);
 
 		return OwnerShapeId;
@@ -1728,11 +1717,10 @@ public static class Mesher
 
 	public static void AddNodeToMultiMeshes(MultiMesh multiMesh, Node3D owner)
 	{
+		List<Node3D> multiMeshList;
 		int instanceNum;
-		if (MultiMeshes.ContainsKey(multiMesh))
+		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshList))
 		{
-			List<Node3D> multiMeshList = MultiMeshes[multiMesh];
-
 			if (multiMeshList.Contains(owner))
 				return;
 
@@ -1792,9 +1780,9 @@ public static class Mesher
 	}
 	public static void UpdateInstanceMultiMesh(MultiMesh multiMesh, Node3D owner)
 	{
-		if (MultiMeshes.ContainsKey(multiMesh))
+		List<Node3D> multiMeshList;
+		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshList))
 		{
-			List<Node3D> multiMeshList = MultiMeshes[multiMesh];
 			if (!multiMeshList.Contains(owner))
 				return;
 
@@ -1810,9 +1798,9 @@ public static class Mesher
 	}
 	public static void UpdateInstanceMultiMesh(MultiMesh multiMesh, Node3D owner, Color color)
 	{
-		if (MultiMeshes.ContainsKey(multiMesh))
+		List<Node3D> multiMeshList;
+		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshList))
 		{
-			List<Node3D> multiMeshList = MultiMeshes[multiMesh];
 			if (!multiMeshList.Contains(owner))
 				return;
 
@@ -1829,9 +1817,9 @@ public static class Mesher
 	}
 	public static void MultiMeshUpdateInstances(MultiMesh multiMesh)
 	{
-		if (MultiMeshes.ContainsKey(multiMesh))
+		List<Node3D> multiMeshList;
+		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshList))
 		{
-			List<Node3D> multiMeshList = MultiMeshes[multiMesh];
 			multiMesh.VisibleInstanceCount = multiMeshList.Count;
 			for (int i = 0; i < multiMeshList.Count; i++)
 			{

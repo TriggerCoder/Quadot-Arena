@@ -18,10 +18,11 @@ public static class ModelsManager
 	}
 	public static MD3 GetModel(string modelName, bool forceSkinAlpha = false)
 	{
-		if (Models.ContainsKey(modelName))
-			return Models[modelName];
+		MD3 model;
+		if (Models.TryGetValue(modelName, out model))
+			return model;
 
-		MD3 model = MD3.ImportModel(modelName, forceSkinAlpha);
+		model = MD3.ImportModel(modelName, forceSkinAlpha);
 		if (model == null)
 			return null;
 

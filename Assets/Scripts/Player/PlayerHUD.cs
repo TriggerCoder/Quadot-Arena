@@ -220,6 +220,7 @@ public partial class PlayerHUD : MeshInstance3D
 		}
 		fxMeshes = GameManager.CreateFXMeshInstance3D(viewHeadContainer);
 		NodeList = GameManager.GetAllChildrens(viewHead);
+		headAnimation.Set("parameters/Look/pain_shot/active", true);
 	}
 
 	public void SetCameraReplacementeMaterial(ShaderMaterial shaderMaterial)
@@ -272,6 +273,7 @@ public partial class PlayerHUD : MeshInstance3D
 	{
 		currentMaterial.SetShaderParameter("pain_duration", time);
 		currentMaterial.SetShaderParameter("pain_start_time", GameManager.CurrentTimeMsec);
+		headAnimation.Set("parameters/Look/pain_shot/request", (int)AnimationNodeOneShot.OneShotRequest.Fire);
 	}
 
 	public void pickupFlashTime(float time)

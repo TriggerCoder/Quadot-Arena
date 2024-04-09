@@ -11,9 +11,11 @@ public partial class WaterSurface : Area3D
 	public string waterIn = "player/watr_in";
 	public string waterOut = "player/watr_out";
 	public string waterUnder = "player/watr_un";
+	public string zap = "world/button_zap";
 	private AudioStreamWav inSound;
 	private AudioStreamWav outSound;
 	private AudioStreamWav underSound;
+	private AudioStreamWav zapSound;
 	public bool isLava = false;
 	public override void _Ready()
 	{
@@ -22,6 +24,7 @@ public partial class WaterSurface : Area3D
 		inSound = SoundManager.LoadSound(waterIn);
 		outSound = SoundManager.LoadSound(waterOut);
 		underSound = SoundManager.LoadSound(waterUnder);
+		zapSound = SoundManager.LoadSound(zap);
 	}
 
 	public override void _Process(double delta)
@@ -86,6 +89,47 @@ public partial class WaterSurface : Area3D
 			}
 		}
 	}
+
+	public void ElectroShockDischarge(PlayerThing player)
+	{
+		int damage = player.playerInfo.Ammo[PlayerInfo.lightningAmmo];
+		int ammo = damage - player.hitpoints;
+		player.playerInfo.Ammo[PlayerInfo.lightningAmmo] = ammo >= 0 ? ammo : 0;
+		player.Damage(damage, DamageType.Electric, player);
+		SoundManager.Create3DSound(player.GlobalPosition, zapSound);
+		if (ammo <= 0)
+			return;
+
+		var CurrentBodies = GetOverlappingBodies();
+		int totalEnemies = 0;
+		for (int i = 0; i < CurrentBodies.Count; i++)
+		{
+			Node3D CurrentBody = CurrentBodies[i];
+			if (CurrentBody is PlayerThing)
+			{
+				PlayerThing enemy = (PlayerThing)CurrentBody;
+				if (enemy == player)
+					continue;
+				totalEnemies++;
+			}
+		}
+		if (totalEnemies == 0)
+			return;
+
+		damage = ammo / totalEnemies;
+		for (int i = 0; i < CurrentBodies.Count; i++)
+		{
+			Node3D CurrentBody = CurrentBodies[i];
+			if (CurrentBody is PlayerThing)
+			{
+				PlayerThing enemy = (PlayerThing)CurrentBody;
+				if (enemy == player)
+					continue;
+				enemy.Damage(damage, DamageType.Electric, player);
+			}
+		}
+	}
+
 	void OnBodyEntered(Node3D other)
 	{
 		if (GameManager.Paused)
@@ -113,6 +157,7 @@ public partial class WaterSurface : Area3D
 					playerThing.PlayModelSound("gasp");
 				}
 				playerThing.waterLever = 0;
+				playerThing.currentWaterSurface = null;
 				playerThing.inLava = false;
 				playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.Jump;
 				SoundManager.Create3DSound(playerThing.GlobalPosition, outSound);
@@ -127,6 +172,7 @@ public partial class WaterSurface : Area3D
 		if (!currentPlayers.Contains(playerThing))
 		{
 			playerThing.waterLever = 1;
+			playerThing.currentWaterSurface = this;
 			playerThing.inLava = isLava;
 //			playerThing.playerInfo.playerPostProcessing.SetWaterEffect();
 			SoundManager.Create3DSound(playerThing.GlobalPosition, inSound);

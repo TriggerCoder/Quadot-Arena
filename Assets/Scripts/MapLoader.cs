@@ -35,6 +35,7 @@ public static class MapLoader
 	public static Node3D MapFlares;
 	public static Node3D ColliderGroup;
 	public static List<Node3D> Locations;
+	public static List<WaterSurface> waterSurfaces;
 
 	public static int MAX_MESH_SURFACES = 256;
 	public enum LightMapSize
@@ -63,13 +64,12 @@ public static class MapLoader
 	public static ImageTexture3D LightVolDirectonal;
 	public static bool Load(string mapName)
 	{
-
+		string FileName;
 		string path = Directory.GetCurrentDirectory() + "/StreamingAssets/maps/" + mapName + ".bsp";
 		if (File.Exists(path))
 			BSPMap = new BinaryReader(File.Open(path, FileMode.Open));
-		else if (PakManager.ZipFiles.ContainsKey(path = ("maps/" + mapName + ".bsp").ToUpper()))
+		else if (PakManager.ZipFiles.TryGetValue(path = ("maps/" + mapName + ".bsp").ToUpper(), out FileName))
 		{
-			string FileName = PakManager.ZipFiles[path];
 			var reader = new ZipReader();
 			reader.Open(FileName);
 			MemoryStream ms = new MemoryStream(reader.ReadFile(path, false));
@@ -80,6 +80,9 @@ public static class MapLoader
 
 		//Clear noMarks
 		noMarks = new HashSet<CollisionObject3D>();
+
+		//clear waterSurfaces
+		waterSurfaces = new List<WaterSurface>();
 
 		//Clear SurfaceType
 		mapSurfaceTypes = new Dictionary<CollisionObject3D, SurfaceType>();

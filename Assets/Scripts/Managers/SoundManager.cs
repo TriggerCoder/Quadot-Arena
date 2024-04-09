@@ -7,8 +7,11 @@ public static class SoundManager
 	public static Dictionary<string, AudioStreamWav> Sounds = new Dictionary<string, AudioStreamWav>();
 	public static AudioStreamWav LoadSound(string soundName, bool loop = false, bool music = false)
 	{
-		if (Sounds.ContainsKey(soundName))
-			return Sounds[soundName];
+		AudioStreamWav clip;
+		if (Sounds.TryGetValue(soundName, out clip))
+			return clip;
+
+		string FileName;
 		string dir = "sound/";
 		if (music)
 			dir = "";
@@ -17,9 +20,8 @@ public static class SoundManager
 		string path = Directory.GetCurrentDirectory() + "/StreamingAssets/"+ dir + soundName + ".wav";
 		if (File.Exists(path))
 			WavSoudFile = File.ReadAllBytes(path);
-		else if (PakManager.ZipFiles.ContainsKey(path = (dir + soundName + ".wav").ToUpper()))
+		else if (PakManager.ZipFiles.TryGetValue(path = (dir + soundName + ".wav").ToUpper(), out FileName))
 		{
-			string FileName = PakManager.ZipFiles[path];
 			var reader = new ZipReader();
 			reader.Open(FileName);
 			WavSoudFile = reader.ReadFile(path, false);
@@ -31,7 +33,7 @@ public static class SoundManager
 		}
 
 		string[] soundFileName = path.Split('/');
-		AudioStreamWav clip = ToAudioStream(WavSoudFile, 0, soundFileName[soundFileName.Length - 1], loop);
+		clip = ToAudioStream(WavSoudFile, 0, soundFileName[soundFileName.Length - 1], loop);
 
 		if (clip == null)
 			return null;

@@ -44,13 +44,14 @@ public static class TextureLoader
 	}
 	public static ImageTexture GetTextureOrAddTexture(string textureName, bool forceAlpha)
 	{
+		ImageTexture texture;
 		if (forceAlpha)
 		{
-			if (TransparentTextures.ContainsKey(textureName))
-				return TransparentTextures[textureName];
+			if (TransparentTextures.TryGetValue(textureName, out texture))
+				return texture;
 		}
-		else if (Textures.ContainsKey(textureName))
-			return Textures[textureName];
+		else if (Textures.TryGetValue(textureName, out texture))
+			return texture;
 
 		GameManager.Print("GetTextureOrAddTexture: No texture \"" + textureName + "\"");
 		AddNewTexture(textureName, forceAlpha);
@@ -68,13 +69,14 @@ public static class TextureLoader
 	}
 	public static ImageTexture GetTexture(string textureName, bool forceAlpha = false)
 	{
+		ImageTexture texture;
 		if (forceAlpha)
 		{
-			if (TransparentTextures.ContainsKey(textureName))
-				return TransparentTextures[textureName];
+			if (TransparentTextures.TryGetValue(textureName, out texture))
+				return texture;
 		}
-		else if (Textures.ContainsKey(textureName))
-			return Textures[textureName];
+		else if (Textures.TryGetValue(textureName, out texture))
+			return texture;
 
 		GameManager.Print("GetTexture: Texture not found \"" + textureName + "\"");
 		return illegal;
@@ -84,6 +86,7 @@ public static class TextureLoader
 		foreach (QShader tex in mapTextures)
 		{
 			string path = tex.name;
+			string FileName;
 
 			if (ignoreShaders)
 				if (QShaderManager.QShaders.ContainsKey(tex.name))
@@ -94,9 +97,8 @@ public static class TextureLoader
 			else
 				path += ".JPG";
 
-			if (PakManager.ZipFiles.ContainsKey(path))
+			if (PakManager.ZipFiles.TryGetValue(path, out FileName))
 			{
-				string FileName = PakManager.ZipFiles[path];
 				var reader = new ZipReader();
 				reader.Open(FileName);
 				byte[] imageBytes = reader.ReadFile(path, false);

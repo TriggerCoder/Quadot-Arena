@@ -47,7 +47,7 @@ public partial class MaterialManager : Node
 
 	public static List<string> Decals = new List<string>();
 	public static List<string> FogShaders = new List<string>();
-	public static List<string> HasBillBoard = new List<string>() { "FLARESHADER" };
+	public static HashSet<string> HasBillBoard = new HashSet<string>() { "FLARESHADER" };
 	public static List<string> PortalMaterials = new List<string>();
 	public static List<ShaderMaterial> AllMaterials = new List<ShaderMaterial>();
 	public static Dictionary<string, ShaderMaterial> Materials = new Dictionary<string, ShaderMaterial>();
@@ -100,8 +100,6 @@ public partial class MaterialManager : Node
 
 	public static void AddBillBoard(string shaderName)
 	{
-//		if (shaderName.Contains("TEXTURES/BASE_TRIM/WIRES01"))
-//			return;
 		if (HasBillBoard.Contains(shaderName))
 			return;
 		HasBillBoard.Add(shaderName);
@@ -166,11 +164,12 @@ public partial class MaterialManager : Node
 		if (lm_index >= 0 && Instance.applyLightmaps)
 			lmap = MapLoader.lightMaps[lm_index];
 
-		if (Materials.ContainsKey(textureName))
+		ShaderMaterial sourceMat;
+		if (Materials.TryGetValue(textureName, out sourceMat))
 		{
 			if (hasPortal = IsPortalMaterial(textureName))
 			{
-				mat = (ShaderMaterial)Materials[textureName].Duplicate(true);
+				mat = (ShaderMaterial)sourceMat.Duplicate(true);
 				if (lm_index >= 0 && Instance.applyLightmaps)
 					mat.Set(lightMapProperty, lmap);
 				return mat;
@@ -178,11 +177,11 @@ public partial class MaterialManager : Node
 
 			if (lm_index >= 0 && Instance.applyLightmaps)
 			{
-				mat = (ShaderMaterial)Materials[textureName].Duplicate(true);
+				mat = (ShaderMaterial)sourceMat.Duplicate(true);
 				mat.Set(lightMapProperty, lmap);
 			}
 			else
-				mat = Materials[textureName];
+				mat = sourceMat;
 
 			return mat;
 		}
@@ -241,10 +240,11 @@ public partial class MaterialManager : Node
 	}
 	public static ShaderMaterial GetMirrorMaterial(string shaderName)
 	{
-		if (MirrorMaterials.ContainsKey(shaderName))
-			return MirrorMaterials[shaderName];
+		ShaderMaterial mat;
+		if (MirrorMaterials.TryGetValue(shaderName, out mat))
+			return mat;
 
-		ShaderMaterial mat = QShaderManager.MirrorShader(shaderName);
+		mat = QShaderManager.MirrorShader(shaderName);
 		MirrorMaterials.Add(shaderName, mat);
 		return mat;
 	}

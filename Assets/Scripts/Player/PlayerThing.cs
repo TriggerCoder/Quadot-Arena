@@ -34,6 +34,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public int armor = 0;
 	public int waterLever = 0;
 
+	public WaterSurface currentWaterSurface = null;
+
 	public float painTime = 0f;
 	public float quadTime = 0f;
 	public float hasteTime = 0f;
@@ -257,15 +259,18 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		{
 			default:
 				break;
-			case 2:
+			case PlayerInfo.Shotgun:
 				itemsToDrop.Add("weapon_shotgun");
-				break;
-			case 4:
+			break;
+			case PlayerInfo.RocketLauncher:
 				itemsToDrop.Add("weapon_rocketlauncher");
-				break;
-			case 7:
+			break;
+			case PlayerInfo.LightningGun:
+				itemsToDrop.Add("weapon_lightning");
+			break;
+			case PlayerInfo.PlasmaGun:
 				itemsToDrop.Add("weapon_plasmagun");
-				break;
+			break;
 		}
 
 		for (int i = 0; i < itemsToDrop.Count; i++)

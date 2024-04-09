@@ -271,9 +271,9 @@ public partial class ModelController : Node3D
 		for (int i = 0; i < multiMeshDataList.Count; i++)
 		{
 			MultiMesh multiMesh = multiMeshDataList[i].multiMesh;
-			if (Mesher.MultiMeshes.ContainsKey(multiMesh))
+			List<Node3D> multiMeshList;
+			if (Mesher.MultiMeshes.TryGetValue(multiMesh, out multiMeshList))
 			{
-				List<Node3D> multiMeshList = Mesher.MultiMeshes[multiMesh];
 				if (multiMeshList.Contains(multiMeshDataList[i].owner))
 					multiMeshList.Remove(multiMeshDataList[i].owner);
 			}

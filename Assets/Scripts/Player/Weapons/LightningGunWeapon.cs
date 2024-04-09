@@ -94,6 +94,16 @@ public partial class LightningGunWeapon : PlayerWeapon
 	}
 	public override bool Fire()
 	{
+		if (playerInfo.playerThing.waterLever > 1)
+		{
+			if (playerInfo.playerThing.currentWaterSurface != null)
+			{
+				playerInfo.playerThing.currentWaterSurface.ElectroShockDischarge(playerInfo.playerThing);
+				lightningBolt.Hide();
+				return false;
+			}
+		}
+
 		if (LowerAmount > .2f)
 			return false;
 
@@ -154,7 +164,9 @@ public partial class LightningGunWeapon : PlayerWeapon
 			d = d.Normalized();
 			Vector3 Origin = playerInfo.playerCamera.GlobalPosition;
 			Vector3 End = Origin - d * maxRange;
-			var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | ~((playerInfo.playerLayer) | (1 << GameManager.InvisibleBlockerLayer) | (1 << GameManager.RagdollLayer))));
+			var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | (1 << GameManager.WaterLayer) | GameManager.TakeDamageMask & ~((playerInfo.playerLayer) | (1 << GameManager.InvisibleBlockerLayer) | (1 << GameManager.RagdollLayer))));
+			if (MapLoader.waterSurfaces.Count > 0)
+				RayCast.CollideWithAreas = true;
 			var SpaceState = GetWorld3D().DirectSpaceState;
 			var hit = SpaceState.IntersectRay(RayCast);
 			if (hit.Count > 0)

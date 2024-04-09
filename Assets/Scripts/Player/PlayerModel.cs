@@ -964,16 +964,15 @@ public partial class PlayerModel : Node3D
 		}
 	}
 
-	private bool LoadAnimations(string fileName, List<ModelAnimation> upper, List<ModelAnimation> lower)
+	private bool LoadAnimations(string file, List<ModelAnimation> upper, List<ModelAnimation> lower)
 	{
 		StreamReader animFile;
-
-		string path = Directory.GetCurrentDirectory() + "/StreamingAssets/models/" + fileName + ".cfg";
+		string FileName;
+		string path = Directory.GetCurrentDirectory() + "/StreamingAssets/models/" + file + ".cfg";
 		if (File.Exists(path))
 			animFile = new StreamReader(File.Open(path, FileMode.Open));
-		else if (PakManager.ZipFiles.ContainsKey(path = ("models/" + fileName + ".cfg").ToUpper()))
+		else if (PakManager.ZipFiles.TryGetValue(path = ("models/" + file + ".cfg").ToUpper(), out FileName))
 		{
-			string FileName = PakManager.ZipFiles[path];
 			var reader = new ZipReader();
 			reader.Open(FileName);
 			MemoryStream ms = new MemoryStream(reader.ReadFile(path, false));
@@ -981,7 +980,7 @@ public partial class PlayerModel : Node3D
 		}
 		else
 		{
-			GameManager.Print("Unable to load animation file: " + fileName, GameManager.PrintType.Warning);
+			GameManager.Print("Unable to load animation file: " + file, GameManager.PrintType.Warning);
 			return false;
 		}
 
@@ -1109,13 +1108,12 @@ public partial class PlayerModel : Node3D
 	public bool LoadSkin(MD3 model, string skinName)
 	{
 		StreamReader SkinFile;
-
+		string FileName;
 		string path = Directory.GetCurrentDirectory() + "/StreamingAssets/models/" + skinName + ".skin";
 		if (File.Exists(path))
 			SkinFile = new StreamReader(File.Open(path, FileMode.Open));
-		else if (PakManager.ZipFiles.ContainsKey(path = ("models/" + skinName + ".skin").ToUpper()))
+		else if (PakManager.ZipFiles.TryGetValue(path = ("models/" + skinName + ".skin").ToUpper(), out FileName))
 		{
-			string FileName = PakManager.ZipFiles[path];
 			var reader = new ZipReader();
 			reader.Open(FileName);
 			MemoryStream ms = new MemoryStream(reader.ReadFile(path, false));
