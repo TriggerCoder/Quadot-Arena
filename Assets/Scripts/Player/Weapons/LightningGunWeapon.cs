@@ -12,22 +12,18 @@ public partial class LightningGunWeapon : PlayerWeapon
 	public float maxRange = 24f;
 	public Vector3 spawnPos;
 	[Export]
-	public Node3D lightningBolt;
+	public Node3D boltOrigin;
 	[Export]
-	public MeshInstance3D[] Arcs;
-	[Export]
-	public ShaderMaterial boltMaterial;
+	public LightningBolt lightningBolt;
 	[Export]
 	public MultiAudioStream humStream;
 	[Export]
 	public string[] _humSounds;
 	public AudioStreamWav[] humSounds;
-
-	private float BoltLenght = 24f;
-	private float BoltWidht = 2f;
 	private Quaternion baseRotation;
-	private ArrayMesh mesh;
-	private MeshDataTool meshDataTool = new MeshDataTool();
+
+	private Node3D avatarboltOrigin;
+	private LightningBolt avatarLightningBolt;
 	public enum CurrentHum
 	{
 		None,
@@ -56,9 +52,16 @@ public partial class LightningGunWeapon : PlayerWeapon
 				humStream.Play();
 				currentHum = CurrentHum.Idle;
 			}
-			lightningBolt.Hide();
-			BoltLenght = 24f;
-			lightningBolt.Quaternion = baseRotation;
+
+			if (boltOrigin.Visible)
+				boltOrigin.Hide();
+
+			if (!putAway)
+				if (avatarboltOrigin.Visible)
+				{
+					avatarboltOrigin.Hide();
+					boltOrigin.Quaternion = baseRotation;
+				}
 		}
 	}
 	protected override void OnInit()
@@ -75,22 +78,21 @@ public partial class LightningGunWeapon : PlayerWeapon
 
 		playerInfo.playerPostProcessing.playerHUD.UpdateAmmoType(PlayerInfo.lightningAmmo);
 		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.lightningAmmo]);
-		mesh = Mesher.GenerateQuadMesh(BoltWidht, BoltLenght, 0.5f, 0f);
-		mesh.SurfaceSetMaterial(0, boltMaterial);
-		meshDataTool.CreateFromSurface(mesh, 0);
-
-		for (int i = 0; i < Arcs.Length; i++)
-		{
-			Arcs[i].Mesh = mesh;
-			Arcs[i].Layers = GameManager.AllPlayerViewMask;
-		}
+		lightningBolt.SetArcsLayers(playerInfo.uiLayer);
 
 		humStream.Stream = humSounds[0];
 		humStream.Play();
 		currentHum = CurrentHum.Idle;
-		lightningBolt.Position = MuzzleOffset;
+
+		boltOrigin.Position = MuzzleOffset;
 //		lightningBolt.Reparent(muzzleObject, false);
-		baseRotation = lightningBolt.Quaternion;
+		baseRotation = boltOrigin.Quaternion;
+
+		avatarboltOrigin = new Node3D();
+		avatarboltOrigin.Name = "BoltOrigin";
+		avatarLightningBolt = (LightningBolt)ThingsManager.thingsPrefabs["LightningBolt"].Instantiate();
+		avatarboltOrigin.AddChild(avatarLightningBolt);
+		playerInfo.playerThing.avatar.AddLightningBolt(avatarboltOrigin);
 	}
 	public override bool Fire()
 	{
@@ -99,12 +101,16 @@ public partial class LightningGunWeapon : PlayerWeapon
 			if (playerInfo.playerThing.currentWaterSurface != null)
 			{
 				playerInfo.playerThing.currentWaterSurface.ElectroShockDischarge(playerInfo.playerThing);
-				lightningBolt.Hide();
+				boltOrigin.Hide();
+				avatarboltOrigin.Hide();
 				return false;
 			}
 		}
 
 		if (LowerAmount > .2f)
+			return false;
+
+		if (putAway)
 			return false;
 
 		//small offset to allow continous fire animation
@@ -148,8 +154,8 @@ public partial class LightningGunWeapon : PlayerWeapon
 				humStream.Play();
 				currentHum = CurrentHum.Fire;
 			}
-
-			lightningBolt.Show();
+			boltOrigin.Show();
+			avatarboltOrigin.Show();
 		}
 		//maximum fire rate 20/s, unless you use negative number (please don't)
 		fireTime = _fireRate + .05f;
@@ -175,7 +181,10 @@ public partial class LightningGunWeapon : PlayerWeapon
 				Vector3 collision = (Vector3)hit["position"];
 				Vector3 normal = (Vector3)hit["normal"];
 
-				lightningBolt.LookAt(collision);
+				boltOrigin.LookAt(collision);
+				lightningBolt.SetBoltMesh(boltOrigin.GlobalPosition, collision);
+				avatarboltOrigin.LookAt(collision);
+				avatarLightningBolt.SetBoltMesh(avatarboltOrigin.GlobalPosition, collision);
 
 				Node3D LightningExplosion = (Node3D)ThingsManager.thingsPrefabs[onDeathSpawn].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(LightningExplosion);
@@ -183,18 +192,9 @@ public partial class LightningGunWeapon : PlayerWeapon
 				LightningExplosion.SetForward(normal);
 				LightningExplosion.Rotate(LightningExplosion.UpVector(), -Mathf.Pi * .5f);
 				LightningExplosion.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+
 				if (Sounds.Length > 3)
 					SoundManager.Create3DSound(collision, Sounds[GD.RandRange(3, Sounds.Length - 1)]);
-
-				Vector3 direction = (lightningBolt.GlobalPosition - collision);
-				BoltLenght = direction.Length();
-				meshDataTool.SetVertex(2, new Vector3(-.5f * BoltWidht, BoltLenght, 0));
-				meshDataTool.SetVertex(3, new Vector3(.5f * BoltWidht, BoltLenght, 0));
-				meshDataTool.SetVertexUV(2, new Vector2(0, BoltLenght / 2f));
-				meshDataTool.SetVertexUV(3, new Vector2(1, BoltLenght / 2f));
-				mesh.ClearSurfaces();
-				meshDataTool.CommitToSurface(mesh);
-
 				if (CheckIfCanMark(SpaceState, collider, collision))
 				{
 					Node3D BulletMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
@@ -206,7 +206,12 @@ public partial class LightningGunWeapon : PlayerWeapon
 				}
 			}
 			else
-				lightningBolt.Quaternion = baseRotation;
+			{
+				boltOrigin.Quaternion = baseRotation;
+				lightningBolt.SetBoltLenght(maxRange);
+				avatarboltOrigin.LookAt(End);
+				avatarLightningBolt.SetBoltLenght(maxRange);
+			}
 		}
 		return true;
 	}

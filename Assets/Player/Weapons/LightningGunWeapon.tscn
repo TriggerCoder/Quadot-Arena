@@ -2,13 +2,12 @@
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/LightningGunWeapon.cs" id="1_tf0jp"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_vn27h"]
-[ext_resource type="Material" uid="uid://eju5e7v2q85q" path="res://Assets/Materials/lightningArc.tres" id="3_3oqv5"]
+[ext_resource type="PackedScene" uid="uid://cawscbtf8jvhy" path="res://Assets/Things/Projectiles/LightningBolt.tscn" id="3_tcc8f"]
 
-[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("lightningBolt", "Arcs", "humStream", "audioStream", "muzzleLight")]
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("boltOrigin", "lightningBolt", "humStream", "audioStream", "muzzleLight")]
 script = ExtResource("1_tf0jp")
-lightningBolt = NodePath("BoltOrigin")
-Arcs = [NodePath("BoltOrigin/LightningArc/Arc_0"), NodePath("BoltOrigin/LightningArc/Arc_1")]
-boltMaterial = ExtResource("3_3oqv5")
+boltOrigin = NodePath("BoltOrigin")
+lightningBolt = NodePath("BoltOrigin/LightningBolt")
 humStream = NodePath("HumAudioStream")
 _humSounds = PackedStringArray("weapons/melee/fsthum", "weapons/lightning/lg_hum")
 Offset = Vector3(0.2, -0.35, 0)
@@ -38,15 +37,4 @@ Bus = "FXBus"
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
 visible = false
 
-[node name="LightningArc" type="Node3D" parent="BoltOrigin"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
-
-[node name="Arc_0" type="MeshInstance3D" parent="BoltOrigin/LightningArc"]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.2, 0, 0)
-layers = 0
-skeleton = NodePath("../../..")
-
-[node name="Arc_1" type="MeshInstance3D" parent="BoltOrigin/LightningArc"]
-transform = Transform3D(-4.37114e-08, -1, 0, -4.37114e-08, 1.91069e-15, -1, 1, -4.37114e-08, -4.37114e-08, 0.2, 0, 0)
-layers = 0
-skeleton = NodePath("../../..")
+[node name="LightningBolt" parent="BoltOrigin" instance=ExtResource("3_tcc8f")]

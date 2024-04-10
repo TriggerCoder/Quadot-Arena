@@ -778,6 +778,14 @@ public partial class PlayerModel : Node3D
 		destroyWeapon = true;
 		upperAnimation = UpperAnimation.Drop;
 	}
+	public void AddLightningBolt(Node3D lightningBolt)
+	{
+		lightningBolt.Hide();
+		weaponModel.node.AddChild(lightningBolt);
+		lightningBolt.Position = muzzleFlash.Position;
+		AddAllMeshInstance3D(lightningBolt, false);
+		ChangeLayer(currentLayer);
+	}
 
 	public void DestroyWeapon()
 	{

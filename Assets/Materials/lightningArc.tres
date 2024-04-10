@@ -16,5 +16,6 @@ noise = SubResource("FastNoiseLite_lgidv")
 [resource]
 render_priority = 1
 shader = ExtResource("1_psu5b")
+shader_parameter/lightning_color = Color(0.6, 0.8, 1, 1)
 shader_parameter/lightning = ExtResource("2_oid5i")
 shader_parameter/noise = SubResource("NoiseTexture2D_bk0am")

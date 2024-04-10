@@ -44,6 +44,7 @@ public partial class WaterSurface : Area3D
 				//Player already deep, no need to check again
 				if (currentPlayer.waterLever > 1)
 					break;
+
 				if (Boxes[j].HasPoint(currentPlayer.GlobalPosition))
 				{
 					float deep = Boxes[j].GetEndpoint(2).Y - currentPlayer.GlobalPosition.Y;
@@ -55,7 +56,7 @@ public partial class WaterSurface : Area3D
 						currentPlayer.drownTime = 12;
 						break;
 					}
-									}
+				}
 			}
 		}
 	}

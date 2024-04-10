@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://cawscbtf8jvhy"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/LightningBolt.cs" id="1_b1k7f"]
+[ext_resource type="Material" uid="uid://eju5e7v2q85q" path="res://Assets/Materials/lightningArc.tres" id="2_prcxk"]
+
+[node name="LightningBolt" type="Node3D" node_paths=PackedStringArray("Arcs")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+script = ExtResource("1_b1k7f")
+Arcs = [NodePath("Arc_0"), NodePath("Arc_1")]
+boltMaterial = ExtResource("2_prcxk")
+
+[node name="Arc_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.2, 0, 0)
+layers = 0
+skeleton = NodePath("../../..")
+
+[node name="Arc_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 0, -4.37114e-08, 1.91069e-15, -1, 1, -4.37114e-08, -4.37114e-08, 0.2, 0, 0)
+layers = 0
+skeleton = NodePath("../../..")
