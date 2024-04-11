@@ -1,0 +1,37 @@
+[gd_scene load_steps=3 format=3 uid="uid://bblybo8kkck16"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/RailgunWeapon.cs" id="1_r5wvs"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_02w7n"]
+
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("humStream", "audioStream", "muzzleLight")]
+script = ExtResource("1_r5wvs")
+modulate = Color(0.313726, 0.631373, 0.803922, 1)
+humStream = NodePath("HumAudioStream")
+_humSound = "weapons/railgun/rg_hum"
+Offset = Vector3(0.25, -0.3, -0.1)
+MuzzleOffset = Vector3(-0.6, 0.1, -0.06)
+audioStream = NodePath("WeaponAudioStream")
+_sounds = PackedStringArray("weapons/railgun/railgf1a", "weapons/noammo", "weapons/change")
+UIModelName = "weapons2/railgun/railgun"
+MuzzleModelName = "weapons2/railgun/railgun_flash"
+fullAuto = false
+DamageMin = 80
+DamageMax = 100
+kickSpeed = 30.0
+_fireRate = 1.5
+_muzzleTime = 0.13
+muzzleLight = NodePath("OmniLight3D")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+layers = 255
+light_color = Color(0.313726, 0.631373, 0.803922, 1)
+light_bake_mode = 0
+omni_shadow_mode = 0
+
+[node name="WeaponAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_02w7n")
+Bus = "FXBus"
+
+[node name="HumAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_02w7n")
+Bus = "FXBus"

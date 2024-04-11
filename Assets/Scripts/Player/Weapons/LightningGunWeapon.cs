@@ -24,6 +24,7 @@ public partial class LightningGunWeapon : PlayerWeapon
 
 	private Node3D avatarboltOrigin;
 	private LightningBolt avatarLightningBolt;
+	private Vector3 destination = Vector3.Zero;
 	public enum CurrentHum
 	{
 		None,
@@ -63,6 +64,9 @@ public partial class LightningGunWeapon : PlayerWeapon
 					boltOrigin.Quaternion = baseRotation;
 				}
 		}
+		else if (!putAway)
+			avatarboltOrigin.LookAt(destination);
+
 	}
 	protected override void OnInit()
 	{
@@ -185,6 +189,7 @@ public partial class LightningGunWeapon : PlayerWeapon
 				lightningBolt.SetBoltMesh(boltOrigin.GlobalPosition, collision);
 				avatarboltOrigin.LookAt(collision);
 				avatarLightningBolt.SetBoltMesh(avatarboltOrigin.GlobalPosition, collision);
+				destination = collision;
 
 				Node3D LightningExplosion = (Node3D)ThingsManager.thingsPrefabs[onDeathSpawn].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(LightningExplosion);
@@ -211,6 +216,7 @@ public partial class LightningGunWeapon : PlayerWeapon
 				lightningBolt.SetBoltLenght(maxRange);
 				avatarboltOrigin.LookAt(End);
 				avatarLightningBolt.SetBoltLenght(maxRange);
+				destination = End;
 			}
 		}
 		return true;

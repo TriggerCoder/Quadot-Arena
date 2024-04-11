@@ -1,0 +1,53 @@
+[gd_scene load_steps=9 format=3 uid="uid://dym5swdk61pvo"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_yvhp0"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_jsbn6"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_ah3ww"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="4_c2v7w"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_bi8qf"]
+
+[sub_resource type="Resource" id="Resource_h1upd"]
+script = ExtResource("4_c2v7w")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_sejmd"]
+script = ExtResource("4_c2v7w")
+fps = 0.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+radius = 0.7
+
+[node name="ammo_slugs" type="Node3D"]
+script = ExtResource("1_yvhp0")
+respawnTime = 30.0
+thingType = 2
+
+[node name="NodeAnimation" type="Node3D" parent="."]
+script = ExtResource("2_jsbn6")
+rotEnable = true
+rotFPS = 40.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Slugs" type="Node3D" parent="."]
+script = ExtResource("3_ah3ww")
+modelName = "powerups/ammo/railgunam"
+castShadows = true
+modelAnimation = SubResource("Resource_h1upd")
+textureAnimation = SubResource("Resource_sejmd")
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("5_bi8qf")
+thingController = NodePath("..")
+itemType = 8
+amount = 10
+PickupSound = "misc/am_pkup"
+PickupIcon = "icons/icona_railgun"
+PickupText = "Slugs"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

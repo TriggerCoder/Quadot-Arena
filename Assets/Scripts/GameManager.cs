@@ -310,6 +310,40 @@ public partial class GameManager : Node
 		return list;
 	}
 
+	public static List<MeshInstance3D> GetModulateMeshes(Node parent, List<MeshInstance3D> ignoreList = null)
+	{
+		var Childrens = GetAllChildrens(parent);
+		List<MeshInstance3D> currentMeshes = new List<MeshInstance3D>();
+		if (ignoreList == null)
+			ignoreList = new List<MeshInstance3D>();
+		foreach (var child in Childrens)
+		{
+			if (child is MeshInstance3D mesh)
+			{
+				if (mesh.Mesh == null)
+					continue;
+
+				if (ignoreList.Contains(mesh))
+					continue;
+				ShaderMaterial shaderMaterial = (ShaderMaterial)mesh.GetActiveMaterial(0);
+				var Results = RenderingServer.GetShaderParameterList(shaderMaterial.Shader.GetRid());
+				foreach (var result in Results)
+				{
+					Variant nameVar;
+					if (result.TryGetValue("name", out nameVar))
+					{
+						string name = (string)nameVar;
+						if (name.Contains("UseModulation"))
+						{
+							currentMeshes.Add(mesh);
+							break;
+						}
+					}
+				}
+			}
+		}
+		return currentMeshes;
+	}
 	public static List<MeshInstance3D> CreateFXMeshInstance3D(Node parent)
 	{
 		var Childrens = GetAllChildrens(parent);

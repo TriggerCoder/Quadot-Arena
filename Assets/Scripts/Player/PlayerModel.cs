@@ -787,6 +787,15 @@ public partial class PlayerModel : Node3D
 		ChangeLayer(currentLayer);
 	}
 
+	public List<MeshInstance3D> GetWeaponModulateMeshes(bool fromMuzzle = false)
+	{
+		Node parent = weaponModel.node;
+		if (fromMuzzle)
+			parent = muzzleFlash;
+		return GameManager.GetModulateMeshes(parent, fxMeshes);
+	}
+
+
 	public void DestroyWeapon()
 	{
 		if (weapon == null)

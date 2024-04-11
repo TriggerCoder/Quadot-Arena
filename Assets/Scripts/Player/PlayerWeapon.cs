@@ -80,7 +80,7 @@ public partial class PlayerWeapon : Node3D
 	private PhysicsPointQueryParameters3D PointIntersect;
 
 	public string quadSound = "items/damage3";
-	private List<MeshInstance3D> fxMeshes;
+	public List<MeshInstance3D> fxMeshes;
 	public bool hasQuad = false;
 	public override void _Ready()
 	{

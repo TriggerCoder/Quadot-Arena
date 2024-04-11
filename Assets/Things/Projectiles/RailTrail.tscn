@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://c1t32gv5y7icn"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/RailTrail.cs" id="1_ud3a4"]
+[ext_resource type="Material" uid="uid://i52admo0ifut" path="res://Assets/Materials/railTrace.tres" id="2_xq1uv"]
+
+[node name="RailTrail" type="Node3D" node_paths=PackedStringArray("trailMesh")]
+script = ExtResource("1_ud3a4")
+baseMaterial = ExtResource("2_xq1uv")
+trailMesh = NodePath("Rail")
+
+[node name="Rail" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.91069e-15, 4.37114e-08, 1, 1, -4.37114e-08, 0, 4.37114e-08, 1, -4.37114e-08, 0, 0, 0)
+layers = 0

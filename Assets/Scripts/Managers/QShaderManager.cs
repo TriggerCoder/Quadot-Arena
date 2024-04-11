@@ -103,6 +103,7 @@ public static class QShaderManager
 		bool helperRotate = false;
 		bool animStages = false;
 		bool depthWrite = false;
+		bool entityColor = false;
 
 		//Needed for Mutipass
 		int needMultiPass = 0;
@@ -191,8 +192,8 @@ public static class QShaderManager
 			GSFragmentUvs += GetTcGen(qShader, currentStage, ref lightmapStage);
 			GSFragmentTcMod += GetTcMod(qShader, currentStage, ref helperRotate);
 			
-			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.RGB);
-			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.Alpha);
+			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.RGB, ref entityColor);
+			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.Alpha, ref entityColor);
 			GSFragmentBlends += GetAlphaFunc(qShader, currentStage);
 			GSFragmentBlends += GetBlend(qShader, currentStage, i, ref needMultiPass, ref alphaIsTransparent);
 			if (qShaderStage.depthWrite)
@@ -364,6 +365,12 @@ public static class QShaderManager
 		code += "global uniform vec4 AmbientColor: source_color;\n";
 		code += "global uniform float mixBrightness;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
+		if (entityColor)
+		{
+			code += "uniform bool UseModulation = true;\n";
+			code += "instance uniform vec4 modulate: source_color = vec4(1.0, 1.0, 1.0, 1.0);\n";
+
+		}
 		if (multiPassList == null)
 		{
 			code += "instance uniform float ShadowIntensity : hint_range(0, 1) = 0.0;\n";
@@ -488,7 +495,7 @@ public static class QShaderManager
 //			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
-//		if (shaderName.Contains("QUAD"))
+//		if (shaderName.Contains("RAILGUN"))
 //			GameManager.Print(code);
 
 		Shader shader = new Shader();
@@ -874,7 +881,7 @@ public static class QShaderManager
 		return TcMod;
 	}
 
-	public static string GetGenFunc(QShaderData qShader, int currentStage, GenFuncType type)
+	public static string GetGenFunc(QShaderData qShader, int currentStage, GenFuncType type, ref bool entityColor)
 	{
 		string GenType = ".rgb";
 		string[] GenFunc = qShader.qShaderStages[currentStage].rgbGen;
@@ -925,6 +932,11 @@ public static class QShaderManager
 			string Func = GenFunc[0];
 			if (Func.Contains("VERTEX"))
 				StageGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * vertx_color.rgb ; \n";
+			else if (Func.Contains("ENTITY"))
+			{
+				StageGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * modulate.rgb ; \n";
+				entityColor = true;
+			}
 		}
 		return StageGen;
 	}

@@ -13,6 +13,7 @@ MuzzleModelName = "weapons2/shotgun/shotgun_flash"
 fullAuto = false
 DamageMin = 8
 DamageMax = 11
+kickSpeed = 30.0
 _fireRate = 0.95
 muzzleLight = NodePath("OmniLight3D")
 
