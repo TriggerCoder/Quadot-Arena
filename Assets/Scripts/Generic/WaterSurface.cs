@@ -19,6 +19,13 @@ public partial class WaterSurface : Area3D
 	public bool isLava = false;
 	public override void _Ready()
 	{
+		Gravity /= 2;
+		GravitySpaceOverride = SpaceOverride.Replace;
+		AngularDamp = 3;
+		AngularDampSpaceOverride = SpaceOverride.Replace;
+		LinearDamp = 3;
+		LinearDampSpaceOverride = SpaceOverride.Replace;
+
 		BodyEntered += OnBodyEntered;
 		BodyExited += OnBodyExit;
 		inSound = SoundManager.LoadSound(waterIn);
@@ -140,6 +147,10 @@ public partial class WaterSurface : Area3D
 		if (GameManager.Paused)
 			return;
 
+		//Hide grenade smoke in water
+		if (other is Grenade grenade)
+			grenade.ChangeWater(true, underSound);
+
 		if (other is PlayerThing)
 		{
 			if (!CurrentColliders.ContainsKey(other))
@@ -151,6 +162,10 @@ public partial class WaterSurface : Area3D
 	{
 		if (GameManager.Paused)
 			return;
+
+		//Show grenade smoke outside water
+		if (other is Grenade grenade)
+			grenade.ChangeWater(false, inSound);
 
 		if (other is PlayerThing playerThing)
 		{

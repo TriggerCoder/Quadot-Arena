@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://xi3ybp7mrio2"]
+[gd_scene load_steps=18 format=3 uid="uid://xi3ybp7mrio2"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerThing.cs" id="1_da8o2"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerControls.cs" id="1_g37r6"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://cc4ta84dtl6ve" path="res://Assets/Player/Weapons/MachineGunWeapon.tscn" id="4_4obu3"]
 [ext_resource type="PackedScene" uid="uid://cipo2kf330daf" path="res://Assets/Player/Weapons/RocketLauncherWeapon.tscn" id="5_jwttf"]
 [ext_resource type="PackedScene" uid="uid://impqrfmfsvha" path="res://Assets/Player/Weapons/ShotgunWeapon.tscn" id="5_mrmdb"]
+[ext_resource type="PackedScene" uid="uid://h6jkwahjjxfk" path="res://Assets/Player/Weapons/GrenadeLauncherWeapon.tscn" id="6_mcduy"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/VirtualAudioListener.cs" id="6_ve4m7"]
 [ext_resource type="PackedScene" uid="uid://dpl55sl78gnh4" path="res://Assets/Player/Weapons/PlasmagunWeapon.tscn" id="6_yhj32"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="7_qljl7"]
@@ -19,7 +20,7 @@
 [sub_resource type="SphereShape3D" id="SphereShape3D_xhpms"]
 radius = 0.1
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Torso", "Feets", "playerInfo", "playerControls", "audioStream", "player") groups=["Player"]]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Torso", "Feet", "playerInfo", "playerControls", "audioStream", "player") groups=["Player"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 collision_layer = 64
 collision_mask = 125
@@ -27,7 +28,7 @@ axis_lock_angular_x = true
 axis_lock_angular_z = true
 script = ExtResource("1_da8o2")
 Torso = NodePath("Torso")
-Feets = [NodePath("Feets Right"), NodePath("Feets Front"), NodePath("Feets Left")]
+Feet = NodePath("Feet")
 playerInfo = NodePath("PlayerInfo")
 playerControls = NodePath("PlayerControls")
 audioStream = NodePath("PlayerVoiceAudioStream")
@@ -36,14 +37,8 @@ player = NodePath("PlayerControls/PlayerModel")
 [node name="Torso" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 
-[node name="Feets Right" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.345, 0, 0.2)
-
-[node name="Feets Front" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.4)
-
-[node name="Feets Left" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, -0.345, 0, 0.2)
+[node name="Feet" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 
 [node name="PlayerControls" type="Node3D" parent="." node_paths=PackedStringArray("playerInfo", "playerThing", "playerCamera")]
 script = ExtResource("1_g37r6")
@@ -62,7 +57,7 @@ audioStream = NodePath("../PlayerVoiceAudioStream")
 playerThing = NodePath("..")
 playerPostProcessing = NodePath("InterpolatedTransform/PostProcessing")
 WeaponHand = NodePath("InterpolatedTransform/ViewCamera/WeaponHand")
-WeaponPrefabs = [null, ExtResource("4_4obu3"), ExtResource("5_mrmdb"), null, ExtResource("5_jwttf"), ExtResource("7_vw7rq"), ExtResource("8_cbubn"), ExtResource("6_yhj32"), ExtResource("9_sanay")]
+WeaponPrefabs = [null, ExtResource("4_4obu3"), ExtResource("5_mrmdb"), ExtResource("6_mcduy"), ExtResource("5_jwttf"), ExtResource("7_vw7rq"), ExtResource("8_cbubn"), ExtResource("6_yhj32"), ExtResource("9_sanay")]
 
 [node name="MainCameras" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("playerControls", "ThirdPerson", "ViewCamera", "playerPostProcessing")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)

@@ -12,6 +12,7 @@ script = ExtResource("2_rc8md")
 fps = 0.0
 
 [node name="RailExplosion" type="Node3D"]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, 0, 0)
 script = ExtResource("1_bpgxf")
 modelName = "weaphits/boom01"
 shaderName = "railExplosion"

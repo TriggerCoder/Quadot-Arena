@@ -612,22 +612,24 @@ public static class QShaderManager
 	{
 		string Vertex = "";
 
-		switch (qShader.qShaderGlobal.billboard)
+		//This is important as we added Billboard outside the shaders
+		if (MaterialManager.HasBillBoard.Contains(qShader.Name))
 		{
-			default:
-			break;
-			case QShaderGlobal.SpriteType.FixedY:
-				Vertex = "\tivec2 alignment = ivec2(1,0);\n";
-				Vertex += "\tvec3 local_up = MODEL_MATRIX[alignment.x].xyz;\n";
-				Vertex += "\tvec4 ax = vec4(normalize(cross(local_up, INV_VIEW_MATRIX[2].xyz)), 0.0);\n";
-				Vertex += "\tvec4 ay = vec4(local_up.xyz, 0.0);\n";
-				Vertex += "\tvec4 az = vec4(normalize(cross(INV_VIEW_MATRIX[alignment.y].xyz, local_up)), 0.0);\n";
-				Vertex += "\tMODELVIEW_MATRIX = VIEW_MATRIX * mat4(ax, ay, az, MODEL_MATRIX[3]);\n";
-				Vertex += "\tMODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);\n";
-			break;
-			case QShaderGlobal.SpriteType.Enabled:
-				Vertex = "\tVERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
-			break;
+			switch (qShader.qShaderGlobal.billboard)
+			{
+				default:
+					Vertex = "\tVERTEX = (vec4(VERTEX, 1.0) * MODELVIEW_MATRIX).xyz;\n";
+				break;
+				case QShaderGlobal.SpriteType.FixedY:
+					Vertex = "\tivec2 alignment = ivec2(1,0);\n";
+					Vertex += "\tvec3 local_up = MODEL_MATRIX[alignment.x].xyz;\n";
+					Vertex += "\tvec4 ax = vec4(normalize(cross(local_up, INV_VIEW_MATRIX[2].xyz)), 0.0);\n";
+					Vertex += "\tvec4 ay = vec4(local_up.xyz, 0.0);\n";
+					Vertex += "\tvec4 az = vec4(normalize(cross(INV_VIEW_MATRIX[alignment.y].xyz, local_up)), 0.0);\n";
+					Vertex += "\tMODELVIEW_MATRIX = VIEW_MATRIX * mat4(ax, ay, az, MODEL_MATRIX[3]);\n";
+					Vertex += "\tMODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);\n";
+				break;
+			}
 		}
 
 		if (qShader.qShaderGlobal.deformVertexes == null)

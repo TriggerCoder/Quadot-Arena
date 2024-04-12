@@ -1,0 +1,73 @@
+[gd_scene load_steps=11 format=3 uid="uid://bllvvxjn12njn"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="1_1sd60"]
+[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Grenade.cs" id="1_tgjsi"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_nlt40"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_r7ds8"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_67yvq"]
+[ext_resource type="PackedScene" uid="uid://dbqx4olek5uvj" path="res://Assets/Things/FX/Particles/Smoke.tscn" id="4_jcmei"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_x6url"]
+bounce = 0.65
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_edf4w"]
+radius = 0.15
+height = 0.5
+
+[sub_resource type="Resource" id="Resource_quwqy"]
+script = ExtResource("3_67yvq")
+fps = 0.0
+
+[sub_resource type="Resource" id="Resource_rf31w"]
+script = ExtResource("3_67yvq")
+fps = 0.0
+
+[node name="GrenadeProjectile" type="RigidBody3D" node_paths=PackedStringArray("fx", "audioStream")]
+collision_layer = 2
+collision_mask = 4
+mass = 2.5
+physics_material_override = SubResource("PhysicsMaterial_x6url")
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0, 0.2)
+continuous_cd = true
+max_contacts_reported = 1
+contact_monitor = true
+script = ExtResource("1_tgjsi")
+fx = NodePath("InterpolatedTransform/SmokeParticles")
+audioStream = NodePath("MultiAudioStream")
+_sounds = PackedStringArray("weapons/grenade/hgrenb1a", "weapons/grenade/hgrenb2a")
+damageMin = 84
+damageMax = 100
+blastDamage = 100
+projectileRadius = 0.5
+explosionRadius = 4.0
+damageType = 2
+pushForce = 1900.0
+OnDeathSpawn = "GrenadeExplosion"
+decalMark = "BurnMark"
+_onDeathSound = "weapons/rocket/rocklx1a"
+
+[node name="BounceShape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.25)
+shape = SubResource("CapsuleShape3D_edf4w")
+
+[node name="SourceGrenade" type="Node3D" parent="."]
+
+[node name="MultiAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_nlt40")
+
+[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source")]
+script = ExtResource("1_1sd60")
+Source = NodePath("../SourceGrenade")
+
+[node name="Grenade" type="Node3D" parent="InterpolatedTransform"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+script = ExtResource("2_r7ds8")
+modelName = "ammo/grenade1"
+modelAnimation = SubResource("Resource_quwqy")
+textureAnimation = SubResource("Resource_rf31w")
+
+[node name="SmokeParticles" parent="InterpolatedTransform" instance=ExtResource("4_jcmei")]
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0, 0)
+amount = 25
+amount_ratio = 0.5

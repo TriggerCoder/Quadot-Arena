@@ -34,6 +34,9 @@ public partial class RailgunWeapon : PlayerWeapon
 
 		}
 
+		if (putAway)
+			return;
+
 		if (fireTime >= 0)
 		{
 			Color color = modulate.Lerp(white, fireTime);

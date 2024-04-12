@@ -1326,8 +1326,9 @@ public static class Mesher
 			MapLoader.noMarks.Add(objCollider);
 
 		objCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+		if (isWater)
+			objCollider.CollisionMask |= (1 << GameManager.NoCollisionLayer);
 
-		
 		MapLoader.mapSurfaceTypes.Add(objCollider, surfaceType);
 
 		return OwnerShapeId;

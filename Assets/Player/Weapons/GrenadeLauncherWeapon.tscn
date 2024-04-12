@@ -1,0 +1,92 @@
+[gd_scene load_steps=10 format=3 uid="uid://h6jkwahjjxfk"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/GrenadeLauncherWeapon.cs" id="1_c2ugi"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_dhid1"]
+
+[sub_resource type="Animation" id="Animation_pi8jm"]
+resource_name = "fire"
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.25, 1, 0, 0, -0.131, 0.991, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="Animation" id="Animation_jenqq"]
+resource_name = "idle"
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_1s830"]
+_data = {
+"fire": SubResource("Animation_pi8jm"),
+"idle": SubResource("Animation_jenqq")
+}
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_j54x4"]
+animation = &"fire"
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_jrkcu"]
+mix_mode = 1
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_cij11"]
+animation = &"idle"
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_ul8cb"]
+graph_offset = Vector2(-464.651, 3.43291)
+nodes/atacck/node = SubResource("AnimationNodeAnimation_j54x4")
+nodes/atacck/position = Vector2(-160, 220)
+nodes/fire_shot/node = SubResource("AnimationNodeOneShot_jrkcu")
+nodes/fire_shot/position = Vector2(60, 100)
+nodes/idle/node = SubResource("AnimationNodeAnimation_cij11")
+nodes/idle/position = Vector2(-318.976, 109.718)
+node_connections = [&"fire_shot", 0, &"idle", &"fire_shot", 1, &"atacck", &"output", 0, &"fire_shot"]
+
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("weaponAnimation", "animation", "audioStream", "muzzleLight")]
+transform = Transform3D(0.984856, 0.173376, 0, -0.173376, 0.984856, 0, 0, 0, 1, 0, 0, 0)
+script = ExtResource("1_c2ugi")
+AttackProjectileName = "GrenadeProjectile"
+weaponAnimation = NodePath("AnimationTree")
+animation = NodePath("AnimationPlayer")
+Offset = Vector3(0.2, -0.3, 0)
+audioStream = NodePath("WeaponAudioStream")
+_sounds = PackedStringArray("weapons/grenade/grenlf1a", "weapons/noammo", "weapons/change")
+UIModelName = "weapons2/grenadel/grenadel"
+MuzzleModelName = "weapons2/grenadel/grenadel_flash"
+fullAuto = false
+_fireRate = 0.8
+_muzzleTime = 0.8
+muzzleLight = NodePath("OmniLight3D")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+layers = 255
+light_color = Color(1, 0.686275, 0, 1)
+light_bake_mode = 0
+omni_shadow_mode = 0
+
+[node name="WeaponAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_dhid1")
+Bus = "FXBus"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+deterministic = true
+libraries = {
+"": SubResource("AnimationLibrary_1s830")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+active = false
+libraries = {
+"": SubResource("AnimationLibrary_1s830")
+}
+tree_root = SubResource("AnimationNodeBlendTree_ul8cb")
+anim_player = NodePath("../AnimationPlayer")
+parameters/fire_shot/active = false
+parameters/fire_shot/internal_active = false
+parameters/fire_shot/request = 0
