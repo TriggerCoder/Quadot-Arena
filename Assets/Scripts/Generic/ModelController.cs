@@ -132,6 +132,9 @@ public partial class ModelController : Node3D
 	}
 	void AnimateModel(float deltaTime)
 	{
+		if (modelAnimation.fps == 0)
+			return;
+
 		int currentFrame = modelCurrentFrame;
 		int nextFrame = currentFrame + 1;
 		
@@ -171,6 +174,9 @@ public partial class ModelController : Node3D
 	}
 	void AnimateTexture(float deltaTime)
 	{
+		if (textureAnimation.fps == 0)
+			return;
+
 		TextureLerpTime = textureAnimation.fps * deltaTime;
 		TextureCurrentLerpTime += TextureLerpTime;
 

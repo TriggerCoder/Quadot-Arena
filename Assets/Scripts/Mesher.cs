@@ -774,7 +774,13 @@ public static class Mesher
 				else
 					multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
 
-				if (!model.materialsIdbySkinName.ContainsKey(skinName))
+				int index;
+				if (model.materialsIdbySkinName.TryGetValue(skinName, out index))
+				{
+					SkinMaterialData skinMaterial = model.readyMaterials[index];
+					model.readyMaterials.Add(skinMaterial);
+				}
+				else
 				{
 					SkinMaterialData skinMaterial = new SkinMaterialData();
 					skinMaterial.skinName = skinName;
@@ -907,7 +913,13 @@ public static class Mesher
 					else
 						multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
 
-					if (!model.materialsIdbySkinName.ContainsKey(meshes[0].skins[0].name))
+					int index;
+					if (model.materialsIdbySkinName.TryGetValue(meshes[0].skins[0].name, out index))
+					{
+						SkinMaterialData skinMaterial = model.readyMaterials[index];
+						model.readyMaterials.Add(skinMaterial);
+					}
+					else
 					{
 						SkinMaterialData skinMaterial = new SkinMaterialData();
 						skinMaterial.skinName = meshes[0].skins[0].name;
