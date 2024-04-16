@@ -1,10 +1,11 @@
-[gd_scene load_steps=18 format=3 uid="uid://xi3ybp7mrio2"]
+[gd_scene load_steps=19 format=3 uid="uid://xi3ybp7mrio2"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerThing.cs" id="1_da8o2"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerControls.cs" id="1_g37r6"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerInfo.cs" id="2_jjym4"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerCamera.cs" id="3_bs0x2"]
 [ext_resource type="PackedScene" uid="uid://cc4ta84dtl6ve" path="res://Assets/Player/Weapons/MachineGunWeapon.tscn" id="4_4obu3"]
+[ext_resource type="PackedScene" uid="uid://c6u64843g6wjy" path="res://Assets/Player/Weapons/GauntletWeapon.tscn" id="4_o2814"]
 [ext_resource type="PackedScene" uid="uid://cipo2kf330daf" path="res://Assets/Player/Weapons/RocketLauncherWeapon.tscn" id="5_jwttf"]
 [ext_resource type="PackedScene" uid="uid://impqrfmfsvha" path="res://Assets/Player/Weapons/ShotgunWeapon.tscn" id="5_mrmdb"]
 [ext_resource type="PackedScene" uid="uid://h6jkwahjjxfk" path="res://Assets/Player/Weapons/GrenadeLauncherWeapon.tscn" id="6_mcduy"]
@@ -57,7 +58,7 @@ audioStream = NodePath("../PlayerVoiceAudioStream")
 playerThing = NodePath("..")
 playerPostProcessing = NodePath("InterpolatedTransform/PostProcessing")
 WeaponHand = NodePath("InterpolatedTransform/ViewCamera/WeaponHand")
-WeaponPrefabs = [null, ExtResource("4_4obu3"), ExtResource("5_mrmdb"), ExtResource("6_mcduy"), ExtResource("5_jwttf"), ExtResource("7_vw7rq"), ExtResource("8_cbubn"), ExtResource("6_yhj32"), ExtResource("9_sanay")]
+WeaponPrefabs = [ExtResource("4_o2814"), ExtResource("4_4obu3"), ExtResource("5_mrmdb"), ExtResource("6_mcduy"), ExtResource("5_jwttf"), ExtResource("7_vw7rq"), ExtResource("8_cbubn"), ExtResource("6_yhj32"), ExtResource("9_sanay")]
 
 [node name="MainCameras" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("playerControls", "ThirdPerson", "ViewCamera", "playerPostProcessing")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)

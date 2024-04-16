@@ -1,0 +1,39 @@
+[gd_scene load_steps=3 format=3 uid="uid://c6u64843g6wjy"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/GauntletWeapon.cs" id="1_h6h2o"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_kaxh2"]
+
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("humStream", "Weapon", "audioStream", "muzzleLight")]
+script = ExtResource("1_h6h2o")
+humStream = NodePath("HumAudioStream")
+_humSound = "weapons/melee/fstrun"
+Weapon = NodePath("Gauntlet")
+Offset = Vector3(0.25, -0.35, -0.35)
+audioStream = NodePath("WeaponAudioStream")
+_sounds = PackedStringArray("weapons/melee/fstatck", "weapons/noammo", "weapons/change")
+ModelName = "weapons2/gauntlet/gauntlet"
+BarrelModelName = "weapons2/gauntlet/gauntlet_barrel"
+MuzzleModelName = "weapons2/gauntlet/gauntlet_flash"
+isMelee = true
+DamageMin = 40
+DamageMax = 60
+kickSpeed = 30.0
+_fireRate = 4.0
+muzzleLight = NodePath("OmniLight3D")
+
+[node name="Gauntlet" type="Node3D" parent="."]
+transform = Transform3D(0.906308, 0.422618, -1.84732e-08, 0, -4.37114e-08, -1, -0.422618, 0.906308, -3.9616e-08, 0, 0, 0)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+layers = 255
+light_color = Color(0.313726, 0.631373, 0.803922, 1)
+light_bake_mode = 0
+omni_shadow_mode = 0
+
+[node name="WeaponAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_kaxh2")
+Bus = "FXBus"
+
+[node name="HumAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_kaxh2")
+Bus = "FXBus"

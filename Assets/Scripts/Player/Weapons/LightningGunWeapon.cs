@@ -100,6 +100,9 @@ public partial class LightningGunWeapon : PlayerWeapon
 	}
 	public override bool Fire()
 	{
+		if (putAway)
+			return false;
+
 		if (playerInfo.playerThing.waterLever > 1)
 		{
 			if (playerInfo.playerThing.currentWaterSurface != null)
@@ -112,9 +115,6 @@ public partial class LightningGunWeapon : PlayerWeapon
 		}
 
 		if (LowerAmount > .2f)
-			return false;
-
-		if (putAway)
 			return false;
 
 		//small offset to allow continous fire animation
@@ -182,6 +182,9 @@ public partial class LightningGunWeapon : PlayerWeapon
 			if (hit.Count > 0)
 			{
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
+				if (collider is Damageable damageable)
+					damageable.Damage(GD.RandRange(DamageMin, DamageMax), DamageType.Lightning, playerInfo.playerThing);
+
 				Vector3 collision = (Vector3)hit["position"];
 				Vector3 normal = (Vector3)hit["normal"];
 

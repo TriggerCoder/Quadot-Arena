@@ -660,12 +660,12 @@ public partial class PlayerHUD : MeshInstance3D
 		}
 	}
 
-	public void HideAmmo()
+	public void HideAmmo(bool hideNum = false)
 	{
 		for (int i = 0; i < ammoContainers.Count; i++)
 			ammoContainers[i].Hide();
 
-		if (playerInfo.playerThing.Dead)
+		if ((hideNum) || (playerInfo.playerThing.Dead))
 			ammoLabel.Hide();
 
 		currentAmmoType = -1;

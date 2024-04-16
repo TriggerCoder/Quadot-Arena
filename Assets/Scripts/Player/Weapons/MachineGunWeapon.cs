@@ -99,6 +99,9 @@ public partial class MachineGunWeapon : PlayerWeapon
 			if (hit.Count > 0)
 			{
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
+				if (collider is Damageable damageable)
+					damageable.Damage(GD.RandRange(DamageMin, DamageMax), DamageType.Bullet, playerInfo.playerThing);
+
 				Vector3 collision = (Vector3)hit["position"];
 				Vector3 normal = (Vector3)hit["normal"];
 				Node3D BulletHit = (Node3D)ThingsManager.thingsPrefabs[onDeathSpawn].Instantiate();
@@ -133,7 +136,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 		}
 		return true;
 	}
-	protected override Quaternion GetRotate(float deltaTime)
+	protected override Quaternion RotateBarrel(float deltaTime)
 	{
 		if (fireTime > 0f)
 		{

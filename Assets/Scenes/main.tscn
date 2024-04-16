@@ -104,7 +104,6 @@ script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
 Sun = NodePath("../SunLight")
 Root = NodePath("..")
-autoloadMap = "q3dm8"
 tessellations = 10
 playerViewPort = NodePath("SplitScreen/PlayerViewPort")
 playerPrefab = ExtResource("7_rdgk2")

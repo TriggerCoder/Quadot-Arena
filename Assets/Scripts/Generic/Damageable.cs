@@ -13,7 +13,11 @@ public enum DamageType
 	Crusher,
 	Telefrag,
 	Electric,
-	Drown
+	Drown,
+	Bullet,
+	Pellet,
+	Melee,
+	Rail
 }
 
 public enum BloodType

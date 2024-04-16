@@ -54,6 +54,7 @@ public partial class PlayerModel : Node3D
 	private bool ownerDead = false;
 	private bool destroyWeapon = false;
 	private bool deadWater = false;
+	private bool isMeleeWeapon = false;
 	public class ModelAnimation
 	{
 		public int index;
@@ -244,9 +245,14 @@ public partial class PlayerModel : Node3D
 							nextFrameUpper = nextUpper.startFrame;
 							ChangeToRagDoll();
 							return;
+						case UpperAnimation.Melee:
 						case UpperAnimation.Attack:
 						case UpperAnimation.Raise:
-							upperAnimation = UpperAnimation.Stand;
+							if (isMeleeWeapon)
+								upperAnimation = UpperAnimation.Stand2;
+							else
+								upperAnimation = UpperAnimation.Stand;
+
 							nextUpper = upperAnim[upperAnimation];
 							nextFrameUpper = nextUpper.startFrame;
 							break;
@@ -451,10 +457,12 @@ public partial class PlayerModel : Node3D
 	{
 		if (ownerDead)
 			return;
-
-		upperAnimation = UpperAnimation.Attack;
+		if (isMeleeWeapon)
+			upperAnimation = UpperAnimation.Melee;
+		else
+			upperAnimation = UpperAnimation.Attack;
 	}
-	
+
 	private void ChangeToRagDoll()
 	{
 		StaticBody3D modelCollider = new StaticBody3D();
@@ -671,25 +679,27 @@ public partial class PlayerModel : Node3D
 		barrel.Quaternion = barrel.Quaternion.Slerp(rotation, speed);
 	}
 
-	public void LoadWeapon(MD3 newWeapon, string completeModelName, string muzzleModelName, uint layer)
+	public void LoadWeapon(MD3 newWeapon, string barrelModelName, string muzzleModelName, bool isMelee)
 	{
 		if (ownerDead)
 			return;
 		if (destroyWeapon)
 			DestroyWeapon();
 
-		bool addBarrel = false;
+		MD3 barrelModel = null;
+		MD3 weaponModelTags;
+		Node3D barrelTag = null;
+		Quaternion Rotation = Quaternion.Identity;
+		int tagId;
 
-		if (!string.IsNullOrEmpty(completeModelName))
+		if (!string.IsNullOrEmpty(barrelModelName))
 		{
-			weapon = ModelsManager.GetModel(completeModelName);
-			if (weapon == null)
+			barrelModel = ModelsManager.GetModel(barrelModelName);
+			if (barrelModel == null)
 				return;
-			addBarrel = true;
 		}
-		else
-			weapon = newWeapon;
 
+		weapon = newWeapon;
 		if (weapon.readySurfaceArray.Count == 0)
 			weaponModel = Mesher.GenerateModelFromMeshes(weapon, currentLayer, true, true, null, false, false);
 		else
@@ -697,22 +707,42 @@ public partial class PlayerModel : Node3D
 		weaponModel.node.Name = "weapon";
 		weaponNode.AddChild(weaponModel.node);
 
-		if (addBarrel)
+		if (barrelModel != null)
 		{
 			Vector3 OffSet = Vector3.Zero;
 			barrel = new Node3D();
 			barrel.Name = "barrel_weapon";
-			if (newWeapon.readySurfaceArray.Count == 0)
-				Mesher.GenerateModelFromMeshes(newWeapon, currentLayer, true, true, barrel, false, false);
+			if (isMelee)
+			{
+				barrelTag = new Node3D();
+				barrelTag.Name = "Barrel_Tag";
+			}
 			else
-				Mesher.FillModelFromProcessedData(newWeapon, currentLayer, true, true, barrel, false);
-			weaponModel.node.AddChild(barrel);
+				barrelTag = barrel;
 
-			if (weapon.tagsIdbyName.TryGetValue("tag_barrel", out int tagId))
+
+			if (barrelModel.readySurfaceArray.Count == 0)
+				Mesher.GenerateModelFromMeshes(barrelModel, currentLayer, true, true, barrel, false, false);
+			else
+				Mesher.FillModelFromProcessedData(barrelModel, currentLayer, true, true, barrel, false);
+			weaponModel.node.AddChild(barrelTag);
+			if (isMelee)
+				barrelTag.AddChild(barrel);
+
+			if (weapon.tagsIdbyName.TryGetValue("tag_barrel", out tagId))
+			{
 				OffSet = weapon.tagsbyId[tagId][0].origin;
-			barrel.Position = OffSet;
-		}
+				Rotation = weapon.tagsbyId[tagId][0].rotation;
+			}
+			barrelTag.Quaternion = Rotation;
+			barrelTag.Position = OffSet;
 
+			weaponModelTags = barrelModel;
+		}
+		else
+			weaponModelTags = weapon;
+
+		isMeleeWeapon = isMelee;
 		upperAnimation = UpperAnimation.Raise;
 
 		AddAllMeshInstance3D(weaponNode);
@@ -720,7 +750,6 @@ public partial class PlayerModel : Node3D
 		if (!string.IsNullOrEmpty(muzzleModelName))
 		{
 			Vector3 OffSet = Vector3.Zero;
-			MD3 weaponModelTags;
 			muzzleFlash = new Node3D();
 			muzzleFlash.Name = "muzzle_flash";
 			MD3 muzzle = ModelsManager.GetModel(muzzleModelName, true);
@@ -733,21 +762,18 @@ public partial class PlayerModel : Node3D
 			else
 				Mesher.FillModelFromProcessedData(muzzle, currentLayer, false, false, muzzleFlash, false);
 
-			//Such Vanity
 			if (barrel == null)
-			{
 				weaponModel.node.AddChild(muzzleFlash);
-				weaponModelTags = weapon;
-			}
 			else
-			{
-				barrel.AddChild(muzzleFlash);
-				weaponModelTags = newWeapon;
-			}
+				barrelTag.AddChild(muzzleFlash);
 
-			if (weaponModelTags.tagsIdbyName.TryGetValue("tag_flash", out int tagId))
+			if (weaponModelTags.tagsIdbyName.TryGetValue("tag_flash", out tagId))
+			{
 				OffSet = weaponModelTags.tagsbyId[tagId][0].origin;
+				Rotation = weaponModelTags.tagsbyId[tagId][0].rotation;
+			}
 			muzzleFlash.Position = OffSet;
+			muzzleFlash.Quaternion = Rotation;
 			muzzleFlash.Visible = false;
 		}
 		AddAllMeshInstance3D(weaponNode, false);

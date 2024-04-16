@@ -136,6 +136,9 @@ public partial class RailgunWeapon : PlayerWeapon
 			if (hit.Count > 0)
 			{
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
+				if (collider is Damageable damageable)
+					damageable.Damage(GD.RandRange(DamageMin, DamageMax), DamageType.Rail, playerInfo.playerThing);
+
 				Vector3 collision = (Vector3)hit["position"];
 				Vector3 normal = (Vector3)hit["normal"];
 				RailTrail railTrail = (RailTrail)ThingsManager.thingsPrefabs[onDeathSpawn].Instantiate();
