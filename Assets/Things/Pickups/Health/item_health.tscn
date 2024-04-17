@@ -1,22 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://1aju6wu5vmtu"]
+[gd_scene load_steps=6 format=3 uid="uid://1aju6wu5vmtu"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_f4lh1"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_7ehlc"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_64n7k"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="4_g62si"]
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_gm74f"]
-
-[sub_resource type="Resource" id="Resource_h1upd"]
-script = ExtResource("4_g62si")
-fps = 0.0
-
-[sub_resource type="Resource" id="Resource_6cloq"]
-script = ExtResource("4_g62si")
-fps = 0.0
-
-[sub_resource type="Resource" id="Resource_sejmd"]
-script = ExtResource("4_g62si")
-fps = 0.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
 
@@ -31,12 +18,10 @@ script = ExtResource("2_7ehlc")
 modelName = "powerups/health/medium_sphere"
 isTransparent = true
 castShadows = true
-modelAnimation = SubResource("Resource_h1upd")
-textureAnimation = SubResource("Resource_6cloq")
 
 [node name="NodeAnimation" type="Node3D" parent="Sphere"]
 script = ExtResource("2_64n7k")
-rotClockwise = false
+rotAxis = 1
 posEnable = true
 posAmplitude = 0.1
 posFPS = 5.0
@@ -44,8 +29,6 @@ posFPS = 5.0
 [node name="Cross" type="Node3D" parent="."]
 script = ExtResource("2_7ehlc")
 modelName = "powerups/health/medium_cross"
-modelAnimation = SubResource("Resource_h1upd")
-textureAnimation = SubResource("Resource_sejmd")
 
 [node name="NodeAnimation" type="Node3D" parent="Cross"]
 script = ExtResource("2_64n7k")

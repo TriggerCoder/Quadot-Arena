@@ -1,18 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://bll72amm2jjvr"]
+[gd_scene load_steps=6 format=3 uid="uid://bll72amm2jjvr"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_tdkgm"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_npw1n"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_qwfjr"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="4_vt7qi"]
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_csovl"]
-
-[sub_resource type="Resource" id="Resource_h1upd"]
-script = ExtResource("4_vt7qi")
-fps = 0.0
-
-[sub_resource type="Resource" id="Resource_sejmd"]
-script = ExtResource("4_vt7qi")
-fps = 0.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
 radius = 0.7
@@ -36,8 +27,6 @@ script = ExtResource("3_qwfjr")
 modelName = "weapons2/rocketl/rocketl"
 receiveShadows = true
 castShadows = true
-modelAnimation = SubResource("Resource_h1upd")
-textureAnimation = SubResource("Resource_sejmd")
 
 [node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
 collision_layer = 32

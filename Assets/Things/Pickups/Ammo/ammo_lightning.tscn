@@ -1,18 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://bdbbkp6cfx1m2"]
+[gd_scene load_steps=6 format=3 uid="uid://bdbbkp6cfx1m2"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_hiut1"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_injsr"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_7reh4"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="4_erjd3"]
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_hso4v"]
-
-[sub_resource type="Resource" id="Resource_h1upd"]
-script = ExtResource("4_erjd3")
-fps = 0.0
-
-[sub_resource type="Resource" id="Resource_sejmd"]
-script = ExtResource("4_erjd3")
-fps = 0.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
 radius = 0.7
@@ -34,8 +25,6 @@ posFPS = 5.0
 script = ExtResource("3_7reh4")
 modelName = "powerups/ammo/lightningam"
 castShadows = true
-modelAnimation = SubResource("Resource_h1upd")
-textureAnimation = SubResource("Resource_sejmd")
 
 [node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
 collision_layer = 32

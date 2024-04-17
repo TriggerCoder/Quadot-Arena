@@ -42,9 +42,10 @@ public partial class ThingsManager : Node
 	public static Dictionary<string, Camera3D> portalCameras = new Dictionary<string, Camera3D>();
 	public static Dictionary<string, TriggerController> triggerToActivate = new Dictionary<string, TriggerController>();
 	public static Dictionary<string, Dictionary<string, string>> timersOnMap = new Dictionary<string, Dictionary<string, string>>();
-	public static Dictionary<string, Dictionary<string, string>> triggersOnMap = new Dictionary<string, Dictionary<string, string>>();
+	public static Dictionary<string, List<Dictionary<string, string>>> triggersOnMap = new Dictionary<string, List<Dictionary<string, string>>>();
 	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group", "info_null" };
-	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_position", "info_notnull", "misc_teleporter_dest" };
+	public static readonly string[] triggerThings = { "func_timer", "trigger_always", "trigger_multiple", "target_relay" , "target_delay" };
+	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_relay", "target_delay", "target_position", "info_notnull", "misc_teleporter_dest" };
 	public static List<Portal> portalsOnMap = new List<Portal>();
 	public static readonly string ItemDrop = "ItemDrop";
 	public override void _Ready()
@@ -171,9 +172,8 @@ public partial class ThingsManager : Node
 				Dictionary<string, string> entityData = new Dictionary<string, string>();
 				while (strWord[0] != '}')
 				{
-
 					string[] keyValue = strWord.Split('"');
-					entityData.Add(keyValue[1].Trim('"'), keyValue[3].Trim('"'));
+					entityData[keyValue[1].Trim('"')] = keyValue[3].Trim('"');
 					strWord = stream.ReadLine();
 				}
 				string ClassName;
@@ -224,35 +224,57 @@ public partial class ThingsManager : Node
 					origin *= GameManager.sizeDividor;
 				}
 
+				bool found = false;
 				if (targetThings.Any(s => s == ClassName))
 				{
-					if (!entityData.TryGetValue("targetname", out strWord))
-						strWord = entityData["target"];
-					string target = strWord;
-					switch (ClassName)
+					found = true;
+					string target;
+					if (entityData.TryGetValue("targetname", out target))
 					{
-						default:
-							List<Target> targetList = null;
-							if (targetsOnMap.TryGetValue(target, out targetList))
-								targetList.Add(new Target(origin, angle));
-							else
+						List<Target> targetList = null;
+						if (targetsOnMap.TryGetValue(target, out targetList))
+							targetList.Add(new Target(origin, angle));
+						else
+						{
+							targetList = new List<Target>
 							{
-								targetList = new List<Target>
-								{
-									new Target(origin, angle)
-								};
-								targetsOnMap.Add(target, targetList);
-							}
-						break;
-						case "func_timer": //Timers
-							timersOnMap.Add(target, entityData);
-							break;
-						case "trigger_multiple": //Triggers
-							triggersOnMap.Add(target, entityData);
-							break;
+								new Target(origin, angle)
+							};
+							targetsOnMap.Add(target, targetList);
+						}
 					}
 				}
-				else
+
+				if (triggerThings.Any(s => s == ClassName))
+				{
+					found = true;
+					string target;
+					if (entityData.TryGetValue("target", out target))
+					{
+						switch (ClassName)
+						{
+							default:
+								List<Dictionary<string, string>> triggersList = null;
+								if (triggersOnMap.TryGetValue(target, out triggersList))
+									triggersList.Add(entityData);
+								else
+								{
+									triggersList = new List<Dictionary<string, string>>
+								{
+									entityData
+								};
+									triggersOnMap.Add(target, triggersList);
+								}
+								break;
+							case "func_timer": //Timers
+								timersOnMap.Add(target, entityData);
+								break;
+						}
+					}
+
+				}
+
+				if (!found)
 					entitiesOnMap.Add(new Entity(ClassName, origin, entityData));
 			}
 		}
@@ -279,63 +301,66 @@ public partial class ThingsManager : Node
 
 	public static void AddTriggersOnMap()
 	{
-		foreach (KeyValuePair<string, Dictionary<string, string>> trigger in triggersOnMap)
+		foreach (KeyValuePair<string, List<Dictionary<string, string>>> trigger in triggersOnMap)
 		{
 			string target = trigger.Key;
-			Dictionary<string, string> entityData = trigger.Value;
+			List <Dictionary<string, string>> entityDataList = trigger.Value;
 
-			switch(GameManager.Instance.gameType)
-			{
-				default:
-				break;
-				case GameManager.GameType.FreeForAll:
-				case GameManager.GameType.Tournament:
-				case GameManager.GameType.OneFlagCTF:
-				{
-					if (entityData.ContainsKey("notfree"))
-						continue;
-				}
-				break;
-				case GameManager.GameType.TeamDeathmatch:
-				case GameManager.GameType.CaptureTheFlag:
-				case GameManager.GameType.Overload:
-				case GameManager.GameType.Harvester:
-				{
-					if (entityData.ContainsKey("notteam"))
-						continue;
-				}
-				break;
-				case GameManager.GameType.SinglePlayer:
-				{
-					if (entityData.ContainsKey("notsingle"))
-						continue;
-				}
-				break;
-			}
-
-			ThingController thingObject = (ThingController)thingsPrefabs[entityData["classname"]].Instantiate();
-			if (thingObject == null)
-				continue;
-
+			Node3D thingObject = new Node3D();
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
 			thingObject.Name = "Trigger " + target;
 			TriggerController tc = new TriggerController();
 			thingObject.AddChild(tc);
 
-			string strWord = entityData["model"];
-			int model = int.Parse(strWord.Trim('*'));
-			float wait;
-
-			if (entityData.TryGetNumValue("wait", out wait))
+			foreach (Dictionary<string, string> entityData in entityDataList)
 			{
-				tc.AutoReturn = true;
-				tc.AutoReturnTime = wait;
+				switch (GameManager.Instance.gameType)
+				{
+					default:
+						break;
+					case GameManager.GameType.FreeForAll:
+					case GameManager.GameType.Tournament:
+					case GameManager.GameType.OneFlagCTF:
+						{
+							if (entityData.ContainsKey("notfree"))
+								continue;
+						}
+						break;
+					case GameManager.GameType.TeamDeathmatch:
+					case GameManager.GameType.CaptureTheFlag:
+					case GameManager.GameType.Overload:
+					case GameManager.GameType.Harvester:
+						{
+							if (entityData.ContainsKey("notteam"))
+								continue;
+						}
+						break;
+					case GameManager.GameType.SinglePlayer:
+						{
+							if (entityData.ContainsKey("notsingle"))
+								continue;
+						}
+						break;
+				}
+
+				float wait;
+				if (entityData.TryGetNumValue("wait", out wait))
+				{
+					tc.AutoReturn = true;
+					tc.AutoReturnTime = wait;
+				}
+
+				string strWord;
+				if (entityData.TryGetValue("model", out strWord))
+				{
+					int model = int.Parse(strWord.Trim('*'));
+					Area3D objCollider = new Area3D();
+					thingObject.AddChild(objCollider);
+					MapLoader.GenerateGeometricCollider(thingObject, objCollider, model, ContentFlags.Trigger);
+					objCollider.BodyEntered += tc.OnBodyEntered;
+					tc.Areas.Add(objCollider);
+				}
 			}
-			Area3D objCollider = new Area3D();
-			thingObject.AddChild(objCollider);
-			MapLoader.GenerateGeometricCollider(thingObject, objCollider, model, ContentFlags.Trigger);
-			objCollider.BodyEntered += tc.OnBodyEntered;
-			tc.Area = objCollider;
 			triggerToActivate.Add(target, tc);
 		}
 	}
@@ -476,8 +501,6 @@ public partial class ThingsManager : Node
 						ModelController modelController = new ModelController();
 						thingObject.AddChild(modelController);
 						modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
-						modelController.modelAnimation = new AnimData();
-						modelController.textureAnimation = new AnimData();
 						modelController.Init();
 					}
 				}
@@ -538,7 +561,7 @@ public partial class ThingsManager : Node
 						mc.Shape = sphere;
 						triggerCollider.GlobalPosition = BigBox.GetCenter();
 						triggerCollider.BodyEntered += sw.internalSwitch.OnBodyEntered;
-						sw.internalSwitch.Area = triggerCollider;
+						sw.internalSwitch.Areas.Add(triggerCollider);
 					}
 
 					if (entity.entityData.TryGetValue("target", out strWord))
@@ -657,7 +680,7 @@ public partial class ThingsManager : Node
 
 							triggerCollider.GlobalPosition = BigBox.GetCenter();
 							triggerCollider.BodyEntered += tc.OnBodyEntered;
-							tc.Area = triggerCollider;
+							tc.Areas.Add(triggerCollider);
 						}
 					}
 				}
@@ -679,8 +702,6 @@ public partial class ThingsManager : Node
 						ModelController modelController = new ModelController();
 						thingObject.AddChild(modelController);
 						modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
-						modelController.modelAnimation = new AnimData();
-						modelController.textureAnimation = new AnimData();
 						modelController.Init();
 					}
 					nodeAnim.Init();
@@ -701,7 +722,7 @@ public partial class ThingsManager : Node
 					thingObject.AddChild(objCollider);
 					MapLoader.GenerateGeometricCollider(thingObject, objCollider, model, ContentFlags.Trigger);
 					objCollider.BodyEntered += tc.OnBodyEntered;
-					tc.Area = objCollider;
+					tc.Areas.Add(objCollider);
 
 					tc.Repeatable = true;
 					tc.SetController("trigger_hurt", (p) =>
@@ -719,12 +740,15 @@ public partial class ThingsManager : Node
 					Vector3 lookAt = Vector3.Forward;
 //					if (entity.entityData.TryGetValue("angle", out strWord))
 //						GameManager.Print("Angle " + strWord);
+
 					if (entity.entityData.TryGetValue("target", out strWord))
-					{
-						lookAt = targetsOnMap[strWord][0].destination;
-						thingObject.LookAt(lookAt, Vector3.Up);
-						angle = targetsOnMap[strWord][0].angle;
-					}
+						if (targetsOnMap.ContainsKey(strWord))
+						{
+							lookAt = targetsOnMap[strWord][0].destination;
+							thingObject.LookAt(lookAt, Vector3.Up);
+							angle = targetsOnMap[strWord][0].angle;
+						}
+
 					if (entity.entityData.TryGetValue("targetname", out strWord))
 					{
 						Camera3D camera = new Camera3D();
@@ -778,13 +802,19 @@ public partial class ThingsManager : Node
 				//JumpPad
 				case "trigger_push":
 				{
+					string target;
+					List<Target> dest;
+					if (!entity.entityData.TryGetValue("target", out target))
+						continue;
+					if (!targetsOnMap.TryGetValue(target, out dest))
+						continue;
+
 					thingObject.GlobalPosition = entity.origin;
 					JumpPadThing jumpPad = new JumpPadThing();
 					thingObject.AddChild(jumpPad);
 					strWord = entity.entityData["model"];
 					int model = int.Parse(strWord.Trim('*'));
-					string target = entity.entityData["target"];
-					Vector3 destination = targetsOnMap[target][0].destination;
+					Vector3 destination = dest[0].destination;
 					Vector3 center = MapLoader.GenerateJumpPadCollider(jumpPad, model);
 					jumpPad.Init(destination, center);
 				}
@@ -792,13 +822,20 @@ public partial class ThingsManager : Node
 				//Teleporter
 				case "trigger_teleport":
 				{
+					string target;
+					List<Target> dest;
+					if (!entity.entityData.TryGetValue("target", out target))
+						continue;
+					if (!targetsOnMap.TryGetValue(target, out dest))
+						continue;
+					if (!entity.entityData.TryGetValue("model", out strWord))
+						continue;
+
 					TeleporterThing teleporter = new  TeleporterThing();
 					thingObject.AddChild(teleporter);
-					strWord = entity.entityData["model"];
 					int model = int.Parse(strWord.Trim('*'));
-					string target = entity.entityData["target"];
 					MapLoader.GenerateGeometricCollider(thingObject, teleporter, model, ContentFlags.Teleporter);
-					teleporter.Init(targetsOnMap[target]);
+					teleporter.Init(dest);
 				}
 				break;
 				//Location

@@ -1,21 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://0ys87si5lkyg"]
+[gd_scene load_steps=2 format=3 uid="uid://0ys87si5lkyg"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="1_0oine"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="2_0djq0"]
-
-[sub_resource type="Resource" id="Resource_trrf8"]
-script = ExtResource("2_0djq0")
-fps = 12.0
-
-[sub_resource type="Resource" id="Resource_7d5sb"]
-script = ExtResource("2_0djq0")
-fps = 6.0
 
 [node name="BulletHit" type="Node3D"]
 script = ExtResource("1_0oine")
 modelName = "weaphits/bullet"
 shaderName = "bulletExplosion"
 isTransparent = true
-modelAnimation = SubResource("Resource_trrf8")
-textureAnimation = SubResource("Resource_7d5sb")
+modelAnimationFPS = 12.0
 destroyType = 2

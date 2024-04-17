@@ -1,4 +1,4 @@
-[gd_scene load_steps=86 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=89 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Resource" uid="uid://d2qwccitnqm8c" path="res://Assets/Data Resources/SoundData.tres" id="3_0fxsa"]
@@ -84,6 +84,9 @@
 [ext_resource type="PackedScene" uid="uid://dlo5rcwan3lx" path="res://Assets/Things/GamePlay/target/target_location.tscn" id="49_mb0ac"]
 [ext_resource type="PackedScene" uid="uid://bimr3d2dbk00j" path="res://Assets/Things/Pickups/Weapons/weapon_grenadelauncher.tscn" id="53_qje8m"]
 [ext_resource type="PackedScene" uid="uid://byqxrs4xryit5" path="res://Assets/Things/Debris/ItemDrop.tscn" id="59_rmbdm"]
+[ext_resource type="PackedScene" uid="uid://cwmpgottit0na" path="res://Assets/Things/GamePlay/target/target_relay.tscn" id="79_dvn2g"]
+[ext_resource type="PackedScene" uid="uid://bkiqdp4glmct1" path="res://Assets/Things/GamePlay/target/target_delay.tscn" id="80_bwsan"]
+[ext_resource type="PackedScene" uid="uid://k6bvnispnql3" path="res://Assets/Things/GamePlay/trigger/trigger_always.tscn" id="83_a6fcd"]
 
 [sub_resource type="Environment" id="Environment_rcj1l"]
 background_mode = 2
@@ -140,8 +143,8 @@ _powerUpsPrefabs = Array[PackedScene]([ExtResource("37_60yxr"), ExtResource("42_
 _funcPrefabs = Array[PackedScene]([ExtResource("39_63dug"), ExtResource("38_2vxeb"), ExtResource("47_g2dqw"), ExtResource("40_xap66"), ExtResource("34_nkc1v")])
 _infoPrefabs = Array[PackedScene]([ExtResource("46_6njgx"), ExtResource("33_epjyi"), ExtResource("44_er3mv")])
 _miscPrefabs = Array[PackedScene]([ExtResource("48_uv6co"), ExtResource("49_gicjp"), ExtResource("37_kkxgn")])
-_targetPrefabs = Array[PackedScene]([ExtResource("32_b20ey"), ExtResource("31_tr8jk"), ExtResource("49_mb0ac")])
-_triggerPrefabs = Array[PackedScene]([ExtResource("45_ge4jt"), ExtResource("40_yfkkd"), ExtResource("35_1ytnq"), ExtResource("36_7m5u6")])
+_targetPrefabs = Array[PackedScene]([ExtResource("32_b20ey"), ExtResource("31_tr8jk"), ExtResource("49_mb0ac"), ExtResource("79_dvn2g"), ExtResource("80_bwsan")])
+_triggerPrefabs = Array[PackedScene]([ExtResource("45_ge4jt"), ExtResource("40_yfkkd"), ExtResource("35_1ytnq"), ExtResource("36_7m5u6"), ExtResource("83_a6fcd")])
 
 [node name="MultiAudioListener" type="AudioListener3D" parent="Quadot Arena"]
 current = true

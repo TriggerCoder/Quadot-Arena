@@ -1,6 +1,5 @@
 using Godot;
 using System;
-using System.Threading;
 
 public partial class NodeAnimation : Node3D
 {
@@ -9,7 +8,7 @@ public partial class NodeAnimation : Node3D
 	[Export]
 	public float rotFPS = 0;
 	[Export]
-	public bool rotClockwise = true;
+	public Axis rotAxis = Axis.Up;
 
 	[Export]
 	public bool posEnable = false;
@@ -24,6 +23,16 @@ public partial class NodeAnimation : Node3D
 	private float timer = 0;
 
 	private GameManager.FuncState currentState = GameManager.FuncState.None;
+	public enum Axis
+	{
+		Up,
+		Down,
+		Right,
+		Left,
+		Back,
+		Forward
+	}
+
 	public override void _Ready()
 	{
 		Init();
@@ -40,10 +49,28 @@ public partial class NodeAnimation : Node3D
 
 		if (rotEnable)
 		{
-			if (rotClockwise)
-				rotateAxis = Vector3.Up;
-			else
-				rotateAxis = Vector3.Down;
+			switch (rotAxis)
+			{
+				default:
+				case Axis.Up:
+					rotateAxis = Vector3.Up;
+				break;
+				case Axis.Down:
+					rotateAxis = Vector3.Down;
+					break;
+				case Axis.Right:
+					rotateAxis = Vector3.Right;
+					break;
+				case Axis.Left:
+					rotateAxis = Vector3.Left;
+					break;
+				case Axis.Back:
+					rotateAxis = Vector3.Back;
+					break;
+				case Axis.Forward:
+					rotateAxis = Vector3.Forward;
+				break;
+			}
 		}
 		currentState = GameManager.FuncState.Ready;
 	}

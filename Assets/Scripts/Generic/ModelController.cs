@@ -23,9 +23,9 @@ public partial class ModelController : Node3D
 
 	private MD3GodotConverted model;
 	[Export]
-	public AnimData modelAnimation;
+	public float modelAnimationFPS = 0;
 	[Export]
-	public AnimData textureAnimation;
+	public float textureAnimationFPS = 0;
 	[Export]
 	public DestroyType destroyType;
 	[Export]
@@ -92,9 +92,9 @@ public partial class ModelController : Node3D
 		}
 
 		if (md3Model.readySurfaceArray.Count == 0)
-			model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, receiveShadows, castShadows, currentObject, isTransparent, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, useLowCountMultiMesh, alphaFade);
+			model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, receiveShadows, castShadows, currentObject, isTransparent, ((modelAnimationFPS == 0) && !isTransparent), meshToSkin, useLowCountMultiMesh, alphaFade);
 		else
-			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, receiveShadows, castShadows, currentObject, ((modelAnimation.fps == 0) && !isTransparent), meshToSkin, isTransparent, useLowCountMultiMesh, alphaFade);
+			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, receiveShadows, castShadows, currentObject, ((modelAnimationFPS == 0) && !isTransparent), meshToSkin, isTransparent, useLowCountMultiMesh, alphaFade);
 
 		for (int i = 0; i < md3Model.meshes.Count; i++)
 		{
@@ -132,7 +132,7 @@ public partial class ModelController : Node3D
 	}
 	void AnimateModel(float deltaTime)
 	{
-		if (modelAnimation.fps == 0)
+		if (modelAnimationFPS == 0)
 			return;
 
 		int currentFrame = modelCurrentFrame;
@@ -163,7 +163,7 @@ public partial class ModelController : Node3D
 			model.data[i].meshDataTool.CommitToSurface(model.data[i].arrMesh);
 		}
 
-		ModelLerpTime = modelAnimation.fps * deltaTime;
+		ModelLerpTime = modelAnimationFPS * deltaTime;
 		ModelCurrentLerpTime += ModelLerpTime;
 
 		if (ModelCurrentLerpTime >= 1.0f)
@@ -174,10 +174,10 @@ public partial class ModelController : Node3D
 	}
 	void AnimateTexture(float deltaTime)
 	{
-		if (textureAnimation.fps == 0)
+		if (textureAnimationFPS == 0)
 			return;
 
-		TextureLerpTime = textureAnimation.fps * deltaTime;
+		TextureLerpTime = textureAnimationFPS * deltaTime;
 		TextureCurrentLerpTime += TextureLerpTime;
 
 		for (int i = 0; i < textureAnim.Count; i++)
@@ -224,7 +224,7 @@ public partial class ModelController : Node3D
 			return;
 		}
 
-		if (modelAnimation.fps == 0)
+		if (modelAnimationFPS == 0)
 		{
 			for (int i = 0; i < model.data.Length; i++)
 			{

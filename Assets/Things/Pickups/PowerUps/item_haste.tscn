@@ -1,22 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://3kdaobbeqoxp"]
+[gd_scene load_steps=6 format=3 uid="uid://3kdaobbeqoxp"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_6ca34"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_gb2ha"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_otdwl"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="4_pbwuh"]
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_054vi"]
-
-[sub_resource type="Resource" id="Resource_h1upd"]
-script = ExtResource("3_otdwl")
-fps = 0.0
-
-[sub_resource type="Resource" id="Resource_6cloq"]
-script = ExtResource("3_otdwl")
-fps = 0.0
-
-[sub_resource type="Resource" id="Resource_sejmd"]
-script = ExtResource("3_otdwl")
-fps = 0.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
 
@@ -34,14 +21,12 @@ script = ExtResource("2_gb2ha")
 modelName = "powerups/instant/haste_ring"
 receiveShadows = true
 castShadows = true
-modelAnimation = SubResource("Resource_h1upd")
-textureAnimation = SubResource("Resource_6cloq")
 
 [node name="NodeAnimation" type="Node3D" parent="Rings"]
 script = ExtResource("4_pbwuh")
 rotEnable = true
 rotFPS = 100.0
-rotClockwise = false
+rotAxis = 1
 posEnable = true
 posAmplitude = 0.1
 posFPS = 5.0
@@ -51,8 +36,6 @@ script = ExtResource("2_gb2ha")
 modelName = "powerups/instant/haste"
 receiveShadows = true
 castShadows = true
-modelAnimation = SubResource("Resource_h1upd")
-textureAnimation = SubResource("Resource_sejmd")
 
 [node name="NodeAnimation" type="Node3D" parent="Haste"]
 script = ExtResource("4_pbwuh")

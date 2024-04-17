@@ -1,19 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://dw2it7pnea5rd"]
+[gd_scene load_steps=7 format=3 uid="uid://dw2it7pnea5rd"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Projectile.cs" id="1_vfo3e"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_741w6"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_t21kj"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="3_ttljs"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_v34hp"]
 [ext_resource type="PackedScene" uid="uid://dbqx4olek5uvj" path="res://Assets/Things/FX/Particles/Smoke.tscn" id="4_8oprf"]
-
-[sub_resource type="Resource" id="Resource_drxc8"]
-script = ExtResource("3_v34hp")
-fps = 20.0
-
-[sub_resource type="Resource" id="Resource_ry408"]
-script = ExtResource("3_v34hp")
-fps = 20.0
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="5_rcwvo"]
 
 [node name="RocketProjectile" type="Node3D" node_paths=PackedStringArray("fx", "audioStream")]
 script = ExtResource("1_vfo3e")
@@ -48,8 +40,12 @@ transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 
 script = ExtResource("2_t21kj")
 modelName = "ammo/rocket/rocket"
 castShadows = true
-modelAnimation = SubResource("Resource_drxc8")
-textureAnimation = SubResource("Resource_ry408")
+
+[node name="NodeAnimation" type="Node3D" parent="InterpolatedTransform/Rocket"]
+script = ExtResource("5_rcwvo")
+rotEnable = true
+rotFPS = 1080.0
+rotAxis = 3
 
 [node name="SpotLight3D" type="SpotLight3D" parent="InterpolatedTransform"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0.2)

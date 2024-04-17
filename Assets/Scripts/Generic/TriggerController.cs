@@ -5,10 +5,10 @@ using System.Collections.Generic;
 
 public partial class TriggerController : Node3D
 {
-	public Area3D Area = null;
+	public List<Area3D> Areas = new List<Area3D>();
 	public string triggerName = "";
 	public bool activated = false;
-	private Action<PlayerThing> OnActivate = new Action<PlayerThing>((p) => { return; });
+	private List<Action<PlayerThing>> OnActivate = new List<Action<PlayerThing>>();
 	private Dictionary<Node3D,int> CurrentColliders = new Dictionary<Node3D, int> ();
 	public bool Repeatable = false;
 	public bool AutoReturn = false;
@@ -21,7 +21,7 @@ public partial class TriggerController : Node3D
 	public void SetController(string name, Action<PlayerThing> activeAction)
 	{
 		triggerName = name;
-		OnActivate = activeAction;
+		OnActivate.Add(activeAction);
 	}
 	public bool Activate(PlayerThing playerThing)
 	{
@@ -39,7 +39,8 @@ public partial class TriggerController : Node3D
 			time = AutoReturnTime;
 
 		activated = !activated;
-		OnActivate.Invoke(playerThing);
+		for(int i = 0; i < OnActivate.Count; i++)
+			OnActivate[i].Invoke(playerThing);
 
 		return true;
 	}
@@ -83,7 +84,7 @@ public partial class TriggerController : Node3D
 		if (GameManager.Paused)
 			return;
 
-		if (Area == null)
+		if (Areas.Count == 0)
 		{
 			SetPhysicsProcess(false);
 			return;
@@ -92,32 +93,36 @@ public partial class TriggerController : Node3D
 		if (CurrentColliders.Count == 0)
 			return;
 
-		var CurrentBodies = Area.GetOverlappingBodies();
-		int CurrentBodiesNum = CurrentBodies.Count;
-		if (CurrentBodiesNum == 0)
+		for (int n = 0; n < Areas.Count; n++)
 		{
-			CurrentColliders.Clear();
-			return;
-		}
-
-		for (int i = 0; i < CurrentBodiesNum; i++)
-		{
-			Node3D CurrentBody = CurrentBodies[i];
-			if (CurrentColliders.ContainsKey(CurrentBody))
+			Area3D Area = Areas[n];
+			var CurrentBodies = Area.GetOverlappingBodies();
+			int CurrentBodiesNum = CurrentBodies.Count;
+			if (CurrentBodiesNum == 0)
 			{
-				PlayerThing playerThing = CurrentBody as PlayerThing;
-				if ((!playerThing.ready) || (playerThing.Dead))
-				{
-					CurrentColliders.Remove(CurrentBody);
-					continue;
-				}
+				CurrentColliders.Clear();
+				return;
+			}
 
-				int value = CurrentColliders[CurrentBody]++;
-				if (value > 1)
+			for (int i = 0; i < CurrentBodiesNum; i++)
+			{
+				Node3D CurrentBody = CurrentBodies[i];
+				if (CurrentColliders.ContainsKey(CurrentBody))
 				{
-					GameManager.Print("Someone " + CurrentBody.Name + " activated this " + Name);
-					Activate(playerThing);
-					CurrentColliders.Remove(CurrentBody);
+					PlayerThing playerThing = CurrentBody as PlayerThing;
+					if ((!playerThing.ready) || (playerThing.Dead))
+					{
+						CurrentColliders.Remove(CurrentBody);
+						continue;
+					}
+
+					int value = CurrentColliders[CurrentBody]++;
+					if (value > 1)
+					{
+						GameManager.Print("Someone " + CurrentBody.Name + " activated this " + Name);
+						Activate(playerThing);
+						CurrentColliders.Remove(CurrentBody);
+					}
 				}
 			}
 		}

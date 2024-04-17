@@ -1,10 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://bllvvxjn12njn"]
+[gd_scene load_steps=8 format=3 uid="uid://bllvvxjn12njn"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="1_1sd60"]
 [ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Grenade.cs" id="1_tgjsi"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_nlt40"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_r7ds8"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="3_67yvq"]
 [ext_resource type="PackedScene" uid="uid://dbqx4olek5uvj" path="res://Assets/Things/FX/Particles/Smoke.tscn" id="4_jcmei"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_x6url"]
@@ -13,14 +12,6 @@ bounce = 0.65
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_edf4w"]
 radius = 0.15
 height = 0.5
-
-[sub_resource type="Resource" id="Resource_quwqy"]
-script = ExtResource("3_67yvq")
-fps = 0.0
-
-[sub_resource type="Resource" id="Resource_rf31w"]
-script = ExtResource("3_67yvq")
-fps = 0.0
 
 [node name="GrenadeProjectile" type="RigidBody3D" node_paths=PackedStringArray("fx", "audioStream")]
 collision_layer = 2
@@ -64,8 +55,6 @@ Source = NodePath("../SourceGrenade")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 script = ExtResource("2_r7ds8")
 modelName = "ammo/grenade1"
-modelAnimation = SubResource("Resource_quwqy")
-textureAnimation = SubResource("Resource_rf31w")
 
 [node name="SmokeParticles" parent="InterpolatedTransform" instance=ExtResource("4_jcmei")]
 transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0, 0)

@@ -1,18 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://bimr3d2dbk00j"]
+[gd_scene load_steps=6 format=3 uid="uid://bimr3d2dbk00j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_rloeh"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_5880f"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_g7iot"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="4_8cefd"]
 [ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="5_4mgvk"]
-
-[sub_resource type="Resource" id="Resource_h1upd"]
-script = ExtResource("4_8cefd")
-fps = 0.0
-
-[sub_resource type="Resource" id="Resource_sejmd"]
-script = ExtResource("4_8cefd")
-fps = 0.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
 radius = 0.7
@@ -36,8 +27,6 @@ script = ExtResource("3_g7iot")
 modelName = "weapons2/grenadel/grenadel"
 receiveShadows = true
 castShadows = true
-modelAnimation = SubResource("Resource_h1upd")
-textureAnimation = SubResource("Resource_sejmd")
 
 [node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
 collision_layer = 32

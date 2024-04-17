@@ -1,16 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://duayunnb324b7"]
+[gd_scene load_steps=3 format=3 uid="uid://duayunnb324b7"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="1_87sbg"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AnimData.cs" id="2_x60oo"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/LightFade.cs" id="3_1gxkv"]
-
-[sub_resource type="Resource" id="Resource_7hy85"]
-script = ExtResource("2_x60oo")
-fps = 0.0
-
-[sub_resource type="Resource" id="Resource_ae2ql"]
-script = ExtResource("2_x60oo")
-fps = 0.0
 
 [node name="RailMark" type="Node3D"]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
@@ -19,8 +10,6 @@ modelName = "weaphits/boom01"
 shaderName = "GFX/DAMAGE/BURN_MED_MRK"
 useLowCountMultiMesh = false
 alphaFade = true
-modelAnimation = SubResource("Resource_7hy85")
-textureAnimation = SubResource("Resource_ae2ql")
 destroyType = 1
 destroyTimer = 200.0
 
