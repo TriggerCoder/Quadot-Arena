@@ -390,7 +390,11 @@ public static class MapLoader
 					ChunkSize = 1;
 				GameManager.Print("AUTOSPRITE " + shaderName);
 			}
-
+			else if (MaterialManager.IsPortalMaterial(shaderName))
+			{
+				ChunkSize = 1;
+				GameManager.Print("PORTAL " + shaderName);
+			}
 			var limitedGroup = bigGroup.Chunk(ChunkSize);
 			foreach (var group in limitedGroup)
 			{
@@ -512,6 +516,11 @@ public static void LerpColorOnRepeatedVertex()
 				if (bigGroup.Key.type != QSurfaceType.Billboard)
 					ChunkSize = 1;
 				GameManager.Print("AUTOSPRITE NUM" + num + " NAME: "+ shaderName);
+			}
+			else if (MaterialManager.IsPortalMaterial(shaderName))
+			{
+				ChunkSize = 1;
+				GameManager.Print("PORTAL " + shaderName);
 			}
 
 			var limitedGroup = bigGroup.Chunk(ChunkSize);

@@ -226,12 +226,6 @@ public partial class MaterialManager : Node
 			ImageTexture tex = TextureLoader.GetTexture(textureName);
 			mat.Set(opaqueTexProperty, tex);
 		}
-		else if (hasPortal)
-		{
-			AddPortalMaterial(textureName);
-			if (lm_index >= 0 && Instance.applyLightmaps)
-				mat.Set(lightMapProperty, lmap);
-		}
 		else if (lm_index >= 0 && Instance.applyLightmaps)
 			mat.Set(lightMapProperty, lmap);
 
@@ -242,7 +236,7 @@ public partial class MaterialManager : Node
 	{
 		ShaderMaterial mat;
 		if (MirrorMaterials.TryGetValue(shaderName, out mat))
-			return mat;
+			return (ShaderMaterial)mat.Duplicate(true);
 
 		mat = QShaderManager.MirrorShader(shaderName);
 		MirrorMaterials.Add(shaderName, mat);

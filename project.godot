@@ -220,6 +220,10 @@ limits/debugger/max_chars_per_second=65535
 common/physics_ticks_per_second=40
 3d/physics_engine="JoltPhysics3D"
 
+[rendering]
+
+environment/volumetric_fog/use_filter=0
+
 [shader_globals]
 
 MsTime={

@@ -65,10 +65,7 @@ public partial class PortalSurface : Area3D
 				float distanceSquared = (GlobalPosition - playerCamera.GlobalPosition).LengthSquared();
 				float lenght = Mathf.Clamp(1.3f - (distanceSquared / radiusSquared), 0f, 1f);
 				destPortal.material.SetShaderParameter("Transparency", lenght);
-/*				Vector3 position = destCamera.GlobalPosition;
-				destCamera.GlobalTransform = playerCamera.GlobalTransform;
-				destCamera.GlobalPosition = position;
-*/				destCamera.Basis = globalBasis;
+				destCamera.Basis = globalBasis;
 			}
 		}
 	}
@@ -77,7 +74,7 @@ public partial class PortalSurface : Area3D
 	{
 		destCamera = camera;
 		destPortal = portal;
-		Node3D parent = camera.GetParentNode3D();
+		Node3D parent = destCamera.GetParentNode3D();
 
 		mirror = isMirror;
 		if (mirror)
@@ -120,10 +117,10 @@ public partial class PortalSurface : Area3D
 		else
 			viewport.Size = new Vector2I(1280,720);
 
-		viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.WhenParentVisible;
+		viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
 		viewport.HandleInputLocally = false;
 
-		var CamRID = camera.GetCameraRid();
+		var CamRID = destCamera.GetCameraRid();
 		var viewPortRID = viewport.GetViewportRid();
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 
@@ -213,22 +210,21 @@ public partial class PortalSurface : Area3D
 			switch (axis)
 			{
 				case Axis.X:
-//					GameManager.Print("MIRROR Axis.X");
 					uv2 = new Vector2(GetUV2RangeValue(vertex.Y, min.Y, max.Y), GetUV2RangeValue(vertex.Z, min.Z, max.Z));
 					if (i == 0)
 						size = new Vector2(max.Y - min.Y, max.Z - min.Z);
 				break;
 				case Axis.Y:
-//					GameManager.Print("MIRROR Axis.Y");
 					uv2 = new Vector2(GetUV2RangeValue(vertex.X, min.X, max.X), GetUV2RangeValue(vertex.Z, min.Z, max.Z));
 					if (i == 0)
 					{
-						destPortal.material.SetShaderParameter("Invert", 0);
+						if (destPortal.normal.Y < 0)
+							destPortal.material.SetShaderParameter("InvertX", 0);
+						destPortal.material.SetShaderParameter("InvertY", 0);
 						size = new Vector2(max.X - min.X, max.Z - min.Z);
 					}
 				break;
 				case Axis.Z:
-//					GameManager.Print("MIRROR Axis.Z");
 					uv2 = new Vector2(GetUV2RangeValue(vertex.X, min.X, max.X), GetUV2RangeValue(vertex.Y, min.Y, max.Y));
 					if (i == 0)
 						size = new Vector2(max.X - min.X, max.Y - min.Y);;
@@ -256,7 +252,7 @@ public partial class PortalSurface : Area3D
 			if (!currentPlayers.Contains(playerThing))
 			{
 				currentPlayers.Add(playerThing);
-				GameManager.Print("Why does " + other.Name + " DARES to enter my dominion " + Name);
+//				GameManager.Print("Why does " + other.Name + " DARES to enter my dominion " + Name);
 			}
 		}
 	}
@@ -270,7 +266,7 @@ public partial class PortalSurface : Area3D
 			if (currentPlayers.Contains(playerThing))
 			{
 				currentPlayers.Remove(playerThing);
-				GameManager.Print("Finally " + other.Name + " got scared of my dominion " + Name);
+//				GameManager.Print("Finally " + other.Name + " got scared of my dominion " + Name);
 			}
 		}
 	}

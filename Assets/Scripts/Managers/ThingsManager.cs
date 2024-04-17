@@ -1000,8 +1000,9 @@ public partial class ThingsManager : Node
 	}
 	public static void AddPortalsToMap()
 	{
-		foreach (PortalSurface portalSurface in portalSurfaces)
+		for (int n = 0; n < portalSurfaces.Count; n++)
 		{
+			PortalSurface portalSurface = portalSurfaces[n];
 			Portal portal = null;
 			float closestPortal = 0;
 			Camera3D camera;
@@ -1027,7 +1028,10 @@ public partial class ThingsManager : Node
 				if (portal != null)
 					portalSurface.SetUpPortal(camera, portal, true);
 				else
+				{
 					portalSurface.QueueFree();
+					portalSurfaces.Remove(portalSurface);
+				}
 			}
 			else if (portalCameras.TryGetValue(portalSurface.targetName, out camera))
 			{
@@ -1044,10 +1048,16 @@ public partial class ThingsManager : Node
 				if (portal != null)
 					portalSurface.SetUpPortal(camera, portal);
 				else
+				{
 					portalSurface.QueueFree();
+					portalSurfaces.Remove(portalSurface);
+				}
 			}
 			else
+			{
 				portalSurface.QueueFree();
+				portalSurfaces.Remove(portalSurface);
+			}
 		}
 	}
 	public static void AddRandomTimeToSound(Node3D node, Dictionary<string, string> entityData, AudioStreamPlayer audioStream2D, MultiAudioStream audioStream, bool isAudio3d)

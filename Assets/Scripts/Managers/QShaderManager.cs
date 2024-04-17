@@ -570,14 +570,16 @@ public static class QShaderManager
 
 		string code = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, depth_draw_opaque, blend_mix, cull_back;\n\n";
 		code += "uniform sampler2D Tex_0 : repeat_enable;\n";
-		code += "uniform float Invert : hint_range(0, 1) = 1.0;\n";
+		code += "uniform float InvertX : hint_range(0, 1) = 1.0;\n";
+		code += "uniform float InvertY : hint_range(0, 1) = 1.0;\n";
 		code += "global uniform float MsTime;\n";
 		code += "global uniform vec4 AmbientColor: source_color;\n";
 		code += "global uniform float mixBrightness;\n";
 		code += "instance uniform float OffSetTime = 0.0;\n";
 		code += "const bool ViewModel = false;\n";
 		code += "void vertex()\n{\n";
-		code += "\tUV2 = mix(UV2, 1.0 - UV2, Invert);\n";
+		code += "\tUV2.x = mix(UV2.x, 1.0 - UV2.x, InvertX);\n";
+		code += "\tUV2.y = mix(UV2.y, 1.0 - UV2.y, InvertY);\n";
 		if (qShader != null)
 			code += GetVertex(qShader, false, false);
 		code += "}\nvoid fragment()\n{\n\tvec2 uv_0 = UV2;\n\tvec4 Stage_0 = texture(Tex_0, uv_0);\n";
@@ -1223,6 +1225,8 @@ public static class QShaderManager
 									QShaders.Add(qShaderData.Name, qShaderData);
 								if (qShaderData.qShaderGlobal.billboard != QShaderGlobal.SpriteType.Disabled)
 									MaterialManager.AddBillBoard(qShaderData.Name);
+								if (qShaderData.qShaderGlobal.portal)
+									MaterialManager.AddPortalMaterial(qShaderData.Name);
 							}
 							qShaderData = null;
 							stage = 0;

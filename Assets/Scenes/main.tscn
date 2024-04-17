@@ -93,7 +93,6 @@ background_mode = 2
 ambient_light_source = 2
 ambient_light_color = Color(0.376471, 0.376471, 0.376471, 1)
 tonemap_mode = 2
-glow_enabled = true
 volumetric_fog_enabled = true
 volumetric_fog_density = 0.0
 
