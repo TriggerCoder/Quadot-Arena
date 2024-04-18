@@ -50,6 +50,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 	public int drownDamage = 0;
 
+	public bool underWater = false;
 	public bool inLava = false;
 	public bool finished = false;
 	public bool invul = false;

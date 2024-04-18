@@ -48,21 +48,33 @@ public partial class WaterSurface : Area3D
 
 			for (int j = 0; j < Boxes.Count; j++) 
 			{
-				//Player already deep, no need to check again
-				if (currentPlayer.waterLever > 1)
-					break;
-
 				if (Boxes[j].HasPoint(currentPlayer.GlobalPosition))
 				{
 					float deep = Boxes[j].GetEndpoint(2).Y - currentPlayer.GlobalPosition.Y;
-					if (deep > GameManager.Instance.playerHeight)
+					if (!currentPlayer.underWater)
 					{
-						SoundManager.Create3DSound(currentPlayer.GlobalPosition, underSound);
-						currentPlayer.playerInfo.playerPostProcessing.SetWaterEffect();
-						currentPlayer.waterLever = 2;
-						currentPlayer.drownTime = 12;
-						break;
+						if (deep > GameManager.Instance.playerHeight)
+						{
+							SoundManager.Create3DSound(currentPlayer.GlobalPosition, underSound);
+							currentPlayer.playerInfo.playerPostProcessing.SetWaterEffect();
+							currentPlayer.waterLever = 2;
+							currentPlayer.drownTime = 12;
+							currentPlayer.underWater = true;
+						}
+						else if (deep < 1)
+							currentPlayer.drownTime = 12;
 					}
+					else if (currentPlayer.waterLever > 1)
+					{
+						if (deep < 1)
+						{
+							currentPlayer.playerInfo.playerPostProcessing.ResetEffects();
+							currentPlayer.PlayModelSound("gasp");
+							currentPlayer.underWater = false;
+							currentPlayer.drownTime = 12;
+						}
+					}
+					break;
 				}
 			}
 		}
@@ -171,11 +183,12 @@ public partial class WaterSurface : Area3D
 		{
 			if (currentPlayers.Contains(playerThing))
 			{
-				if (playerThing.waterLever > 1)
+				if (playerThing.underWater)
 				{
 					playerThing.playerInfo.playerPostProcessing.ResetEffects();
 					playerThing.PlayModelSound("gasp");
 				}
+				playerThing.underWater = false;
 				playerThing.waterLever = 0;
 				playerThing.currentWaterSurface = null;
 				playerThing.inLava = false;

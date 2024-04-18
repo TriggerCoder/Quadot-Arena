@@ -94,6 +94,7 @@ public partial class PlayerInfo : Node3D
 		playerPostProcessing.ResetEffects();
 
 		playerThing.currentWaterSurface = null;
+		playerThing.underWater = false;
 		playerThing.waterLever = 0;
 		playerThing.inLava = false;
 		playerThing.hitpoints = 100;
