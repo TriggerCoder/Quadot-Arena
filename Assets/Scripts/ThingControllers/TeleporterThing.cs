@@ -63,10 +63,6 @@ public partial class TeleporterThing : Area3D
 			if (!playerThing.ready)
 				return;
 
-			//Dead player don't use teleporters
-			if (playerThing.Dead)
-				return;
-
 			if (!toTeleport.Contains(playerThing))
 				toTeleport.Add(playerThing);
 		}

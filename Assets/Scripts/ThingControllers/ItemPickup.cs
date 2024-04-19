@@ -55,10 +55,6 @@ public partial class ItemPickup : Area3D
 			if (!player.ready)
 				return;
 
-			//Dead player don't pick up stuff
-			if (player.Dead)
-				return;
-
 			bool disable = false;
 			switch (itemType)
 			{

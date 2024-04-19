@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 using ExtensionMethods;
+
 public partial class PlayerThing : CharacterBody3D, Damageable
 {
 	[Export]
@@ -54,7 +55,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public bool inLava = false;
 	public bool finished = false;
 	public bool invul = false;
-	public bool ready = false;
+	public bool ready { get { return currentState == GameManager.FuncState.Start; } }
 
 	public enum HoldableItem
 	{
@@ -64,6 +65,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	}
 	public HoldableItem holdableItem = HoldableItem.None;
 
+	private int skipFrames = 3;
+	public GameManager.FuncState currentState = GameManager.FuncState.None;
 	public override void _Ready()
 	{
 		playerControls.feetRay = new SeparationRayShape3D();
@@ -74,6 +77,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.collider.Radius = .5f;
 		playerControls.collider.Height = 1.6f;
 		Torso.Shape = playerControls.collider;
+		currentState = GameManager.FuncState.Ready;
 	}
 	public void InitPlayer()
 	{
@@ -99,7 +103,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerInfo.playerPostProcessing.playerHUD.UpdateHealth(hitpoints);
 		playerInfo.playerPostProcessing.playerHUD.UpdateArmor(armor);
 		playerControls.playerCamera.ChangeThirdPersonCamera(false);
-		ready = true;
+		currentState = GameManager.FuncState.Ready;
 	}
 	public void PlayModelSound(string soundName)
 	{
@@ -188,7 +192,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 				PlayModelSound("death" + GD.RandRange(1, 3));
 			avatar.Die();
 			playerControls.feetRay.Length = 1.6f;
-			ready = false;
+			currentState = GameManager.FuncState.None;
 //			GameManager.Instance.AddDeathCount();
 		}
 		else if (damageType == DamageType.Drown)
@@ -429,5 +433,25 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			drownDamage = 0;
 		}
 
+	}
+
+	public override void _PhysicsProcess(double delta)
+	{
+		if (GameManager.Paused)
+			return;
+
+		//skip frames are used to easen up collision detection after respawn
+		if (currentState == GameManager.FuncState.Ready)
+		{
+			if (skipFrames > 0)
+			{
+				skipFrames--;
+				if (skipFrames == 0)
+				{
+					currentState = GameManager.FuncState.Start;
+					skipFrames = 3;
+				}
+			}
+		}
 	}
 }

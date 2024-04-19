@@ -9,7 +9,7 @@ public partial class TriggerController : Node3D
 	public string triggerName = "";
 	public bool activated = false;
 	private List<Action<PlayerThing>> OnActivate = new List<Action<PlayerThing>>();
-	private Dictionary<Node3D,int> CurrentColliders = new Dictionary<Node3D, int> ();
+	private HashSet<Node3D> CurrentColliders = new HashSet<Node3D>();
 	public bool Repeatable = false;
 	public bool AutoReturn = false;
 	public float AutoReturnTime = 1f;
@@ -64,18 +64,16 @@ public partial class TriggerController : Node3D
 		if (GameManager.Paused)
 			return;
 
-		GameManager.Print("Someone "+ other.Name + " tried to activate this " + Name);
 		if (other is PlayerThing player)
 		{
 			if (!player.ready)
 				return;
 
-			//Dead player don't activate stuff
-			if (player.Dead)
-				return;
+			GameManager.Print("Someone " + other.Name + " tried to activate this " + Name);
 
-			if (!CurrentColliders.ContainsKey(other))
-				CurrentColliders.Add(other, 0);
+			//Will activate everything back on the main thread
+			if (!CurrentColliders.Contains(other))
+				CurrentColliders.Add(other);
 		}
 	}
 
@@ -107,7 +105,7 @@ public partial class TriggerController : Node3D
 			for (int i = 0; i < CurrentBodiesNum; i++)
 			{
 				Node3D CurrentBody = CurrentBodies[i];
-				if (CurrentColliders.ContainsKey(CurrentBody))
+				if (CurrentColliders.Contains(CurrentBody))
 				{
 					PlayerThing playerThing = CurrentBody as PlayerThing;
 					if ((!playerThing.ready) || (playerThing.Dead))
@@ -116,13 +114,9 @@ public partial class TriggerController : Node3D
 						continue;
 					}
 
-					int value = CurrentColliders[CurrentBody]++;
-					if (value > 1)
-					{
-						GameManager.Print("Someone " + CurrentBody.Name + " activated this " + Name);
-						Activate(playerThing);
-						CurrentColliders.Remove(CurrentBody);
-					}
+					GameManager.Print("Someone " + CurrentBody.Name + " activated this " + Name);
+					Activate(playerThing);
+					CurrentColliders.Remove(CurrentBody);
 				}
 			}
 		}

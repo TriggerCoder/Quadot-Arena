@@ -6,8 +6,7 @@ public partial class WaterSurface : Area3D
 {
 	public List<Aabb> Boxes = new List<Aabb>();
 	private List<PlayerThing> currentPlayers = new List<PlayerThing>();
-	//Anti Bounce
-	private Dictionary<Node3D, int> CurrentColliders = new Dictionary<Node3D, int>();
+	private HashSet<Node3D> CurrentColliders = new HashSet<Node3D>();
 	public string waterIn = "player/watr_in";
 	public string waterOut = "player/watr_out";
 	public string waterUnder = "player/watr_un";
@@ -99,14 +98,10 @@ public partial class WaterSurface : Area3D
 		for (int i = 0; i < CurrentBodiesNum; i++)
 		{
 			Node3D CurrentBody = CurrentBodies[i];
-			if (CurrentColliders.ContainsKey(CurrentBody))
+			if (CurrentColliders.Contains(CurrentBody))
 			{
-				int value = CurrentColliders[CurrentBody]++;
-				if (value > 1)
-				{
-					PlayerEnterIntoWater(CurrentBody as PlayerThing);
-					CurrentColliders.Remove(CurrentBody);
-				}
+				PlayerEnterIntoWater(CurrentBody as PlayerThing);
+				CurrentColliders.Remove(CurrentBody);
 			}
 		}
 	}
@@ -159,14 +154,17 @@ public partial class WaterSurface : Area3D
 		if (GameManager.Paused)
 			return;
 
-		//Hide grenade smoke in water
+		//Hide smoke and modify physics of grenade in water
 		if (other is Grenade grenade)
 			grenade.ChangeWater(true, underSound);
 
-		if (other is PlayerThing)
+		if (other is PlayerThing player)
 		{
-			if (!CurrentColliders.ContainsKey(other))
-				CurrentColliders.Add(other, 0);
+			if (player.currentState == GameManager.FuncState.Ready)
+				return;
+
+			if (!CurrentColliders.Contains(other))
+				CurrentColliders.Add(other);
 		}
 	}
 
@@ -175,7 +173,7 @@ public partial class WaterSurface : Area3D
 		if (GameManager.Paused)
 			return;
 
-		//Show grenade smoke outside water
+		//Restore smoke and physics of grenade outside water
 		if (other is Grenade grenade)
 			grenade.ChangeWater(false, inSound);
 
