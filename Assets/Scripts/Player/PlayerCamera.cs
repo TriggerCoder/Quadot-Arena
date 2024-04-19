@@ -24,7 +24,6 @@ public partial class PlayerCamera : Node3D
 	public override void _Ready()
 	{
 		CurrentCamera = ViewCamera;
-		playerPostProcessing.SetLocalViewPortToCamera(ViewCamera);
 	}
 
 	public override void _Process(double delta)

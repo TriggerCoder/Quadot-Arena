@@ -93,6 +93,8 @@ public partial class GrenadeLauncherWeapon : PlayerWeapon
 			Grenade grenade = (Grenade)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(grenade);
 			grenade.owner = playerInfo.playerThing;
+			if (hasQuad)
+				grenade.EnableQuad();
 			if (muzzleObject != null)
 				grenade.GlobalPosition = muzzleObject.GlobalPosition + d;
 			else

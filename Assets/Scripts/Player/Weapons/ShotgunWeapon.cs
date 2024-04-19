@@ -101,7 +101,12 @@ public partial class ShotgunWeapon : PlayerWeapon
 			{
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
 				if (collider is Damageable damageable)
-					damageable.Damage(GD.RandRange(DamageMin, DamageMax), DamageType.Pellet, playerInfo.playerThing);
+				{
+					if (hasQuad)
+						damageable.Damage(GD.RandRange(DamageMin * GameManager.Instance.QuadMul, DamageMax * GameManager.Instance.QuadMul), DamageType.Pellet, playerInfo.playerThing);
+					else
+						damageable.Damage(GD.RandRange(DamageMin, DamageMax), DamageType.Pellet, playerInfo.playerThing);
+				}
 
 				Vector3 collision = (Vector3)hit["position"];
 				Vector3 normal = (Vector3)hit["normal"];

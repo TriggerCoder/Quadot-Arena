@@ -410,6 +410,9 @@ public partial class PlayerWeapon : Node3D
 
 	public bool CheckIfCanMark(PhysicsDirectSpaceState3D SpaceState, CollisionObject3D collider, Vector3 collision)
 	{
+		if (collider is Damageable)
+			return false;
+
 		//Check if mapcollider are noMarks
 		if (MapLoader.noMarks.Contains(collider))
 			return false;

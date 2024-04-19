@@ -75,6 +75,13 @@ public partial class Projectile : InterpolatedNode3D
 		PointIntersect.CollideWithBodies = false;
 		PointIntersect.CollisionMask = (1 << GameManager.FogLayer);
 	}
+	public void EnableQuad()
+	{
+		damageMin *= GameManager.Instance.QuadMul;
+		damageMax *= GameManager.Instance.QuadMul;
+		blastDamage *= GameManager.Instance.QuadMul;
+		pushForce *= GameManager.Instance.QuadMul;
+	}
 	public override void _PhysicsProcess(double delta)
 	{
 		if (GameManager.Paused)
@@ -317,6 +324,9 @@ public partial class Projectile : InterpolatedNode3D
 	}
 	public bool CheckIfCanMark(PhysicsDirectSpaceState3D SpaceState, CollisionObject3D collider, Vector3 collision)
 	{
+		if (collider is Damageable)
+			return false;
+
 		//Check if mapcollider are noMarks
 		if (MapLoader.noMarks.Contains(collider))
 			return false;

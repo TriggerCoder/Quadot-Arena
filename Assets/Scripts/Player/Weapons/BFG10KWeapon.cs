@@ -74,19 +74,21 @@ public partial class BFG10KWeapon : PlayerWeapon
 				Transform3D global = playerInfo.playerCamera.GlobalTransform;
 				Vector3 d = global.ForwardVector();
 
-				Projectile plasma = (Projectile)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
-				GameManager.Instance.TemporaryObjectsHolder.AddChild(plasma);
-				plasma.owner = playerInfo.playerThing;
+				Projectile bfgBall = (Projectile)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(bfgBall);
+				bfgBall.owner = playerInfo.playerThing;
+				if (hasQuad)
+					bfgBall.EnableQuad();
 				if (muzzleObject != null)
-					plasma.GlobalPosition = muzzleObject.GlobalPosition + d;
+					bfgBall.GlobalPosition = muzzleObject.GlobalPosition + d;
 				else
-					plasma.GlobalPosition = global.Origin;
-				plasma.ignoreSelfLayer = playerInfo.playerLayer;
+					bfgBall.GlobalPosition = global.Origin;
+				bfgBall.ignoreSelfLayer = playerInfo.playerLayer;
 				Vector2 r = GetDispersion();
 				d += global.RightVector() * r.X + global.UpVector() * r.Y;
 				d = d.Normalized();
-				plasma.SetForward(-d);
-				plasma.InvoqueSetTransformReset();
+				bfgBall.SetForward(-d);
+				bfgBall.InvoqueSetTransformReset();
 			}
 		}
 

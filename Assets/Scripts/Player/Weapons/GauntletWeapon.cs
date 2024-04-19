@@ -100,7 +100,10 @@ public partial class GauntletWeapon : PlayerWeapon
 				if (collider is Damageable damageable)
 				{
 					lastHit = (int)currentFireRate;
-					damageable.Damage(GD.RandRange(DamageMin, DamageMax), DamageType.Melee, playerInfo.playerThing);
+					if (hasQuad)
+						damageable.Damage(GD.RandRange(DamageMin * GameManager.Instance.QuadMul, DamageMax * GameManager.Instance.QuadMul), DamageType.Melee, playerInfo.playerThing);
+					else
+						damageable.Damage(GD.RandRange(DamageMin, DamageMax), DamageType.Melee, playerInfo.playerThing);
 					if (Sounds.Length > 0)
 					{
 						audioStream.Stream = Sounds[0];

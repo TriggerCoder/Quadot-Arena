@@ -10,6 +10,8 @@ public partial class ThingController : Node3D
 	[Export]
 	public float respawnTime;
 	[Export]
+	public float randomTime = 0;
+	[Export]
 	public bool initDisabled = false;
 
 	private float remainingTime = 0;
@@ -62,6 +64,10 @@ public partial class ThingController : Node3D
 		}
 	}
 
+	public void SetRandomTime(float waitTime)
+	{
+		randomTime = waitTime;
+	}
 	public void SetRespawnTime(float waitTime)
 	{
 		respawnTime = waitTime;
@@ -78,7 +84,7 @@ public partial class ThingController : Node3D
 				QueueFree();
 		}
 
-		remainingTime = respawnTime;
+		remainingTime = (float)GD.RandRange(respawnTime - randomTime, respawnTime + randomTime);
 		Visible = false;
 		_disabled = true;
 	}

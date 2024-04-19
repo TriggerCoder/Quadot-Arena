@@ -14,6 +14,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public PlayerControls playerControls;
 	[Export]
 	public MultiAudioStream audioStream;
+	
+	public PlayerViewPort playerViewPort;
 
 	public InterpolatedTransform interpolatedTransform;
 	public string modelName = "crash";

@@ -83,6 +83,8 @@ public partial class PlasmagunWeapon : PlayerWeapon
 			Projectile plasma = (Projectile)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(plasma);
 			plasma.owner = playerInfo.playerThing;
+			if (hasQuad)
+				plasma.EnableQuad();
 			if (muzzleObject != null)
 				plasma.GlobalPosition = muzzleObject.GlobalPosition + d;
 			else

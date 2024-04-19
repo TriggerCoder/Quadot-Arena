@@ -55,7 +55,13 @@ public partial class Grenade : RigidBody3D
 	{
 		CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.InvisibleBlockerLayer) | (1 << GameManager.WaterLayer) | GameManager.TakeDamageMask & ~(ignoreSelfLayer));
 	}
-
+	public void EnableQuad()
+	{
+		damageMin *= GameManager.Instance.QuadMul;
+		damageMax *= GameManager.Instance.QuadMul;
+		blastDamage *= GameManager.Instance.QuadMul;
+		pushForce *= GameManager.Instance.QuadMul;
+	}
 	void OnBodyEntered(Node other)
 	{
 		if (!inWater)
@@ -173,6 +179,9 @@ public partial class Grenade : RigidBody3D
 	}
 	public bool CheckIfCanMark(PhysicsDirectSpaceState3D SpaceState, CollisionObject3D collider, Vector3 collision)
 	{
+		if (collider is Damageable)
+			return false;
+
 		//Check if mapcollider are noMarks
 		if (MapLoader.noMarks.Contains(collider))
 			return false;

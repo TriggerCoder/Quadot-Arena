@@ -101,13 +101,14 @@ volumetric_fog_density = 0.0
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_rcj1l")
 
-[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "Sun", "Root", "playerViewPort")]
+[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "Sun", "Root", "SplitScreen")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
 Sun = NodePath("../SunLight")
 Root = NodePath("..")
 tessellations = 10
-playerViewPort = NodePath("SplitScreen/PlayerViewPort")
+SplitScreen = NodePath("SplitScreenContainer")
+viewPortPrefab = ExtResource("13_tu0mj")
 playerPrefab = ExtResource("7_rdgk2")
 musicType = 1
 OverrideSounds = Array[Resource]([ExtResource("3_0fxsa")])
@@ -149,15 +150,12 @@ _triggerPrefabs = Array[PackedScene]([ExtResource("45_ge4jt"), ExtResource("40_y
 current = true
 script = ExtResource("12_8hqnu")
 
-[node name="SplitScreen" type="GridContainer" parent="Quadot Arena"]
+[node name="SplitScreenContainer" type="VBoxContainer" parent="Quadot Arena"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="PlayerViewPort" parent="Quadot Arena/SplitScreen" instance=ExtResource("13_tu0mj")]
-layout_mode = 2
 
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)

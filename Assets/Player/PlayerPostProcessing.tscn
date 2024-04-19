@@ -102,7 +102,7 @@ mix_mode = 1
 [sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_xbgmm"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_x0rcd"]
-graph_offset = Vector2(424.388, -6.72728)
+graph_offset = Vector2(109.989, 57.3235)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_lpxt0")
 nodes/Animation/position = Vector2(780, 340)
 nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_t4d4d")
@@ -169,9 +169,6 @@ libraries = {
 [node name="AnimationTree" type="AnimationTree" parent="ViewPortCamera/ViewHeadContainer"]
 active = false
 root_node = NodePath("../ViewHead")
-libraries = {
-"": SubResource("AnimationLibrary_pxr8j")
-}
 tree_root = SubResource("AnimationNodeStateMachine_3c74r")
 anim_player = NodePath("../AnimationPlayer")
 parameters/Look/TimeScale/scale = 1.0
@@ -528,6 +525,7 @@ no_depth_test = true
 
 [node name="FPS" type="Label3D" parent="ViewPortCamera/PlayerHUD"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+visible = false
 layers = 0
 transparency = 0.4
 offset = Vector2(-530, 280)

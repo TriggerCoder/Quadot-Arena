@@ -183,7 +183,12 @@ public partial class LightningGunWeapon : PlayerWeapon
 			{
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
 				if (collider is Damageable damageable)
-					damageable.Damage(GD.RandRange(DamageMin, DamageMax), DamageType.Lightning, playerInfo.playerThing);
+				{
+					if (hasQuad)
+						damageable.Damage(GD.RandRange(DamageMin * GameManager.Instance.QuadMul, DamageMax * GameManager.Instance.QuadMul), DamageType.Lightning, playerInfo.playerThing);
+					else
+						damageable.Damage(GD.RandRange(DamageMin, DamageMax), DamageType.Lightning, playerInfo.playerThing);
+				}
 
 				Vector3 collision = (Vector3)hit["position"];
 				Vector3 normal = (Vector3)hit["normal"];
@@ -203,6 +208,7 @@ public partial class LightningGunWeapon : PlayerWeapon
 
 				if (Sounds.Length > 3)
 					SoundManager.Create3DSound(collision, Sounds[GD.RandRange(3, Sounds.Length - 1)]);
+
 				if (CheckIfCanMark(SpaceState, collider, collision))
 				{
 					Node3D BulletMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();

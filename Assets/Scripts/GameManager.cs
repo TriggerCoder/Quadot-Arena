@@ -21,7 +21,9 @@ public partial class GameManager : Node
 	[Export]
 	public float shadowIntensity = 1f;
 	[Export]
-	public PlayerViewPort playerViewPort;
+	public Container SplitScreen;
+	[Export]
+	public PackedScene viewPortPrefab;
 
 	public static GameManager Instance;
 
@@ -129,7 +131,10 @@ public partial class GameManager : Node
 	[Export]
 	public SoundData[] OverrideSounds;
 
-	public List<PlayerThing> Players = new List<PlayerThing>();
+	private Dictionary<int, PlayerThing> Players = new Dictionary<int, PlayerThing>();
+	public List<int> controllerWantToJoin = new List<int>();
+	public Vector2I viewPortSize = new Vector2I(1280 , 720);
+	public int QuadMul = 3;
 	public enum FuncState
 	{
 		None,
@@ -220,6 +225,15 @@ public partial class GameManager : Node
 
 	public override void _Input(InputEvent @event)
 	{
+		if (@event is InputEventJoypadButton)
+		{
+			if (Input.IsActionJustPressed("Start_1"))
+			{
+				Print("New Player Wants to Join");
+				controllerWantToJoin.Add(1);
+			}
+		}
+
 		if (@event is InputEventKey)
 		{
 			if (Input.IsActionJustPressed("Escape"))
@@ -270,27 +284,60 @@ public partial class GameManager : Node
 					if (skipFrames == 0)
 					{
 						if (Players.Count == 0)
-						{
-							PlayerThing player = (PlayerThing)playerPrefab.Instantiate();
-							player.Name = "Player 0";
-							AddChild(player);
-							player.playerInfo.SetPlayer(Players.Count);
-							player.playerControls.Init(Players.Count);
-							player.InitPlayer();
-							Players.Add(player);
-						}
+							SetupNewPlayer(Players.Count, ControllerType.MouseKeyboard);
 						paused = false;
 						currentState = FuncState.Start;
 					}
 				}
-				break;
+			break;
+			case FuncState.Start:
+				for(int i = 0;  i < controllerWantToJoin.Count; i++) 
+				{
+					int controller = controllerWantToJoin[i];
+					if (Players.ContainsKey(controller))
+						continue;
+					SetupNewPlayer(Players.Count, controller);
+					controllerWantToJoin.Remove(controller);
+				}
+			break;
 		}
 	}
 
-	public void SetViewPortToCamera(Camera3D camera)
+	public void SetupNewPlayer(int playerNum, int controllerNum)
+	{
+		PlayerThing player = (PlayerThing)playerPrefab.Instantiate();
+		player.Name = "Player "+ playerNum;
+		player.playerViewPort = (PlayerViewPort)viewPortPrefab.Instantiate();
+		AddChild(player);
+		SplitScreen.AddChild(player.playerViewPort);
+		player.playerInfo.SetPlayer(playerNum);
+		player.playerControls.Init(controllerNum);
+		player.InitPlayer();
+		Players.Add(controllerNum, player);
+		ArrangeSplitScreen();
+	}
+
+	public void ArrangeSplitScreen()
+	{
+
+		Vector2I Size = DisplayServer.WindowGetSize();
+		foreach (var dic in Players) 
+		{
+			PlayerThing player = dic.Value;
+			Vector2I size = Size;//player.playerViewPort.viewPort.Size;
+			size.Y /= Players.Count;
+			player.playerViewPort.viewPort.Size = size;
+			player.playerInfo.playerPostProcessing.ViewPort.Size = size;
+//			SetViewPortToCamera(player.playerInfo.playerCamera.ViewCamera, player.playerViewPort.viewPort);
+			SetViewPortToCamera(player.playerInfo.playerPostProcessing.ViewPortCamera, player.playerViewPort.viewPort);
+		}
+	}
+
+
+	public void SetViewPortToCamera(Camera3D camera, SubViewport viewPort)
 	{
 		var CamRID = camera.GetCameraRid();
-		var viewPortRID = playerViewPort.viewPort.GetViewportRid();
+		var viewPortRID = viewPort.GetViewportRid();
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 	}
 

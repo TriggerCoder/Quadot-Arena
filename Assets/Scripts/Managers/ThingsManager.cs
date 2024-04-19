@@ -437,7 +437,7 @@ public partial class ThingsManager : Node
 			{
 				default:
 				{
-					float wait;
+					float num;
 					if (entity.entityData.TryGetValue("spawnflags", out strWord))
 					{
 						int spawnflags = int.Parse(strWord);
@@ -454,8 +454,11 @@ public partial class ThingsManager : Node
 						foreach (var data in entity.entityData)
 							GameManager.Print("Key: " + data.Key + " Value: " + data.Value);
 */
-					if (entity.entityData.TryGetNumValue("wait", out wait))
-						thingObject.SetRespawnTime(wait);
+					if (entity.entityData.TryGetNumValue("wait", out num))
+						thingObject.SetRespawnTime(num);
+
+					if (entity.entityData.TryGetNumValue("random", out num))
+						thingObject.SetRandomTime(num);
 
 					if (thingObject.thingType != ThingController.ThingType.Item)
 						break;
@@ -464,8 +467,8 @@ public partial class ThingsManager : Node
 					if (itemPickup == null)
 						break;
 
-					if (entity.entityData.TryGetNumValue("count", out wait))
-						itemPickup.amount =(int)wait;
+					if (entity.entityData.TryGetNumValue("count", out num))
+						itemPickup.amount =(int)num;
 				}
 				break;
 

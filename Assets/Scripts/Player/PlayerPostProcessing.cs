@@ -17,15 +17,27 @@ public partial class PlayerPostProcessing : Node3D
 	public uint UIMask;
 	public override void _Ready()
 	{
-		ViewPortCamera.Current = true;
-		GameManager.Instance.SetViewPortToCamera(ViewPortCamera);
-	}
+//		ViewPortCamera.Current = true;
+//		GameManager.Instance.SetViewPortToCamera(ViewPortCamera);
+/*		ViewPort = new SubViewport();
+		ViewPort.Name = "PlayerViewport";
+		ViewPort.Size = GameManager.Instance.viewPortSize;
+		ViewPort.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
+		playerHUD.AddChild(ViewPort);
+
+		NormalDepthViewPort = new SubViewport();
+		NormalDepthViewPort.Name = "NormalDepthViewport";
+		NormalDepthViewPort.Size = GameManager.Instance.viewPortSize;
+		NormalDepthViewPort.RenderTargetClearMode = SubViewport.ClearMode.Never;
+		NormalDepthCamera.AddChild(NormalDepthViewPort);
+*/	}
 
 	public void InitPost(PlayerInfo p)
 	{
 		ViewPortCamera.CullMask = UIMask;
 		NormalDepthCamera.CullMask = ViewMask | UIMask | (1 << GameManager.PlayerNormalDepthLayer);
 		SetLocalViewPortToCamera(NormalDepthCamera, NormalDepthViewPort);
+		SetLocalViewPortToCamera(p.playerCamera.ViewCamera);
 		playerHUD.Layers = UIMask;
 		playerHUD.baseViewPortTexture = ViewPort.GetTexture();
 		playerHUD.normalDepthViewPortTexture = NormalDepthViewPort.GetTexture();

@@ -160,27 +160,33 @@ public partial class PlayerControls : InterpolatedNode3D
 			default:
 
 			break;
+			case GameManager.ControllerType.Joy_0:
+				if (@event is InputEventJoypadMotion)
+				{
+					viewDirection.Y -= Input.GetJoyAxis(0, JoyAxis.RightX) * GameOptions.GamePadSensitivity.X;
+					viewDirection.X -= Input.GetJoyAxis(0, JoyAxis.RightY) * GameOptions.GamePadSensitivity.Y;
+				}
+				break;
 			case GameManager.ControllerType.MouseKeyboard:
 				if (@event is InputEventMouseMotion eventMouseMotion)
 				{
 					Look = eventMouseMotion.Relative;
 					viewDirection.Y -= Look.X * GameOptions.MouseSensitivity.X;
 					viewDirection.X -= Look.Y * GameOptions.MouseSensitivity.Y;
-
-					if (viewDirection.Y < -180)
-						viewDirection.Y += 360;
-					if (viewDirection.Y > 180)
-						viewDirection.Y -= 360;
-
-					//restricted up/down looking angle
-					if (viewDirection.X < -85)
-						viewDirection.X = -85;
-					if (viewDirection.X > 85)
-						viewDirection.X = 85;
 				}
 			break;
 		}
 
+		if (viewDirection.Y < -180)
+			viewDirection.Y += 360;
+		if (viewDirection.Y > 180)
+			viewDirection.Y -= 360;
+
+		//restricted up/down looking angle
+		if (viewDirection.X < -85)
+			viewDirection.X = -85;
+		if (viewDirection.X > 85)
+			viewDirection.X = 85;
 	}
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)

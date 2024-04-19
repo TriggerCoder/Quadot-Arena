@@ -67,7 +67,7 @@ public partial class PlayerInfo : Node3D
 	{
 		localPlayerNum = playerNum;
 		viewLayer = (1 << (GameManager.Player1ViewLayer + localPlayerNum));
-		playerLayer = (uint)(1 << (GameManager.Player1Layer + localPlayerNum));
+		playerLayer |= (uint)(1 << (GameManager.Player1Layer + localPlayerNum));
 		uiLayer = (uint)(1 << (GameManager.Player1UIViewLayer + localPlayerNum));
 		playerCamera.ViewCamera.CullMask = (uint)viewLayer | uiLayer;
 		playerCamera.ThirdPerson.CullMask = (uint)viewLayer;

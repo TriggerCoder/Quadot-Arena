@@ -129,7 +129,7 @@ public partial class PlayerHUD : MeshInstance3D
 	public void Init(PlayerInfo p)
 	{
 		baseCamera = (ShaderMaterial)MaterialManager.Instance.baseCameraMaterial.Duplicate(true);
-		Mesh.SurfaceSetMaterial(0, baseCamera);
+		SetSurfaceOverrideMaterial(0, baseCamera);
 		baseCamera.SetShaderParameter(MaterialManager.screenTexure, baseViewPortTexture);
 		baseCamera.SetShaderParameter(MaterialManager.painTexure, painEffect);
 		baseCamera.SetShaderParameter(MaterialManager.pickUpTexture, pickupEffect);
@@ -228,7 +228,7 @@ public partial class PlayerHUD : MeshInstance3D
 		if (shaderMaterial == null) 
 		{
 			NormalDepthCamera.Visible = false;
-			SetSurfaceOverrideMaterial(0, null);
+			SetSurfaceOverrideMaterial(0, baseCamera);
 			currentMaterial = baseCamera;
 			return;
 		}

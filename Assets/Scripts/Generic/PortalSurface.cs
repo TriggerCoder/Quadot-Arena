@@ -115,7 +115,7 @@ public partial class PortalSurface : Area3D
 		if (mirror)
 			viewport.Size = new Vector2I(Mathf.CeilToInt(320 * MirrorSize.X), Mathf.CeilToInt(320 * MirrorSize.Y));
 		else
-			viewport.Size = new Vector2I(1280,720);
+			viewport.Size = GameManager.Instance.viewPortSize;
 
 		viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
 		viewport.HandleInputLocally = false;
