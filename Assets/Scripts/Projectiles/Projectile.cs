@@ -93,11 +93,6 @@ public partial class Projectile : InterpolatedNode3D
 
 		if (time >= _lifeTime)
 		{
-			if (!string.IsNullOrEmpty(OnDeathSpawn))
-			{
-//				GameObject go = PoolManager.GetObjectFromPool(OnDeathSpawn.name);
-//				go.transform.position = cTransform.position - cTransform.forward * .2f;
-			}
 			if (!string.IsNullOrEmpty(_onDeathSound))
 				SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(_onDeathSound));
 			QueueFree();

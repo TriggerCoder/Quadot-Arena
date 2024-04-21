@@ -25,6 +25,7 @@ driver/mix_rate=48000
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/size/mode=4
+window/size/initial_position_type=3
 window/size/resizable=false
 
 [dotnet]

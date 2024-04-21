@@ -58,7 +58,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public bool finished = false;
 	public bool invul = false;
 	public bool ready { get { return currentState == GameManager.FuncState.Start; } }
-
+	private float handicap = 1;
 	public enum HoldableItem
 	{
 		None = 0,
@@ -84,7 +84,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public void InitPlayer()
 	{
 		CollisionLayer = playerInfo.playerLayer;
-		
+		CollisionMask |= GameManager.TakeDamageMask;
 		interpolatedTransform = new InterpolatedTransform();
 		interpolatedTransform.Name = "PlayerInterpolatedTransform";
 		player.AddChild(interpolatedTransform);
@@ -137,7 +137,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			return;
 
 		if ((damageType != DamageType.Environment) || (damageType != DamageType.Crusher))
-			amount = Mathf.RoundToInt(amount * GameManager.Instance.PlayerDamageReceive);
+			amount = Mathf.RoundToInt(amount * handicap * GameManager.Instance.PlayerDamageReceive);
 
 		if (invul)
 			if ((damageType != DamageType.Crusher) && (damageType != DamageType.Telefrag))
@@ -179,6 +179,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		if (hitpoints <= 0)
 		{
 			CollisionLayer = (1 << GameManager.RagdollLayer);
+			CollisionMask &= ~GameManager.TakeDamageMask;
 			if (playerControls.playerWeapon != null)
 				playerControls.playerWeapon.putAway = true;
 
@@ -195,6 +196,14 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			avatar.Die();
 			playerControls.feetRay.Length = 1.6f;
 			currentState = GameManager.FuncState.None;
+			if (attacker != this)
+			{
+				if (attacker is PlayerThing agressor)
+				{
+					handicap = Mathf.Clamp(handicap - .05f, .5f, 2);
+					agressor.handicap = Mathf.Clamp(agressor.handicap + .05f, .5f, 2);
+				}
+			}
 //			GameManager.Instance.AddDeathCount();
 		}
 		else if (damageType == DamageType.Drown)

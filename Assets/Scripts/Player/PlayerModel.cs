@@ -152,6 +152,9 @@ public partial class PlayerModel : Node3D
 	private PlayerControls playerControls;
 	private float impulseDampening = 4f;
 	private Vector3 impulseVector = Vector3.Zero;
+	private Rid Sphere;
+	private PhysicsShapeQueryParameters3D SphereCast;
+	private PhysicsDirectSpaceState3D SpaceState;
 	public int Hitpoints { get { return hitpoints; } }
 	public bool Dead { get { return hitpoints <= 0; } }
 	public bool Bleed { get { return true; } }
@@ -160,7 +163,6 @@ public partial class PlayerModel : Node3D
 	protected OmniLight3D FxLight;
 
 	public bool hasQuad = false;
-	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		FxLight = new OmniLight3D();
@@ -170,20 +172,21 @@ public partial class PlayerModel : Node3D
 		AddChild(FxLight);
 		FxLight.Position = Vector3.Up;
 		FxLight.LightColor = new Color(0.2f, 0.2f, 1);
+
+		Sphere = PhysicsServer3D.SphereShapeCreate();
+		SphereCast = new PhysicsShapeQueryParameters3D();
+		SphereCast.ShapeRid = Sphere;
+		PhysicsServer3D.ShapeSetData(Sphere, .5f);
+		SphereCast.CollisionMask = (1 << GameManager.ColliderLayer);
+		SphereCast.Motion = Vector3.Zero;
+		SpaceState = GetWorld3D().DirectSpaceState;
 	}
 	void ApplySimpleMove(float deltaTime)
 	{
 		float gravityAccumulator;
 		Vector3 currentPosition = Position;
 
-		Rid Sphere = PhysicsServer3D.SphereShapeCreate();
-		PhysicsShapeQueryParameters3D SphereCast = new PhysicsShapeQueryParameters3D();
-		SphereCast.ShapeRid = Sphere;
-		PhysicsServer3D.ShapeSetData(Sphere, .5f);
-		SphereCast.CollisionMask = (1 << GameManager.ColliderLayer);
-		SphereCast.Motion = Vector3.Zero;
 		SphereCast.Transform = new Transform3D(Basis.Identity, upperBody.GlobalPosition);
-		var SpaceState = GetWorld3D().DirectSpaceState;
 		var hit = SpaceState.GetRestInfo(SphereCast);
 		if (hit.Count > 0)
 			gravityAccumulator = 0f;
