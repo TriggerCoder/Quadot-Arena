@@ -137,8 +137,6 @@ public static class Mesher
 			if (mainText != null)
 				if (mainText.HasMeta("luminance"))
 					luminance = (float)mainText.GetMeta("luminance");
-//				if (!string.IsNullOrEmpty(mainText.ResourceName))
-//					luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 			mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 		}
 
@@ -339,8 +337,6 @@ public static class Mesher
 			if (mainText != null)
 				if (mainText.HasMeta("luminance"))
 					luminance = (float)mainText.GetMeta("luminance");
-//				if (!string.IsNullOrEmpty(mainText.ResourceName))
-//					luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 			mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 		}
 
@@ -731,23 +727,24 @@ public static class Mesher
 		md3Model.numMeshes = model.meshes.Count;
 		md3Model.data = new dataMeshes[md3Model.numMeshes];
 
-		int groupId = 0;
+		int n = 0;
 		if ((model.numFrames > 1) || (meshToSkin != null))
 		{
-			foreach (MD3Mesh modelMesh in model.meshes)
+			for(n = 0; n < model.meshes.Count; n++)
 			{
+				MD3Mesh modelMesh = model.meshes[n];
 				dataMeshes data = new dataMeshes();
 				var surfaceArray = GenerateModelMesh(modelMesh);
 				data.arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 
 				Node3D modelObject;
 
-				if (groupId == 0)
+				if (n == 0)
 					modelObject = ownerObject;
 				else
 				{
 					modelObject = new Node3D();
-					modelObject.Name = "Mesh_" + groupId;
+					modelObject.Name = "Mesh_" + n;
 					ownerObject.AddChild(modelObject);
 					modelObject.Position = Vector3.Zero;
 				}
@@ -774,22 +771,14 @@ public static class Mesher
 				else
 					multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
 
-				int index;
-				if (model.materialsIdbySkinName.TryGetValue(skinName, out index))
-				{
-					SkinMaterialData skinMaterial = model.readyMaterials[index];
-					model.readyMaterials.Add(skinMaterial);
-				}
-				else
-				{
-					SkinMaterialData skinMaterial = new SkinMaterialData();
-					skinMaterial.skinName = skinName;
-					skinMaterial.commonMesh = multiMesh;
-					skinMaterial.useTransparent = currentTransparent;
-					skinMaterial.readyMaterials = material;
-					model.materialsIdbySkinName.Add(skinName, model.readyMaterials.Count());
-					model.readyMaterials.Add(skinMaterial);
-				}
+				SurfaceData surfaceData = new SurfaceData();
+				surfaceData.skinName = skinName;
+				surfaceData.commonMesh = multiMesh;
+				surfaceData.useTransparent = currentTransparent;
+				surfaceData.readyMaterials = material;
+				if (!model.surfaceIdbySkinName.ContainsKey(skinName))
+					model.surfaceIdbySkinName.Add(skinName, model.readySurfaces.Count());
+				model.readySurfaces.Add(surfaceData);
 
 				if (!MultiMeshes.ContainsKey(multiMesh))
 				{
@@ -813,8 +802,6 @@ public static class Mesher
 						if (mainText != null)
 							if (mainText.HasMeta("luminance"))
 								luminance = (float)mainText.GetMeta("luminance");
-//							if (!string.IsNullOrEmpty(mainText.ResourceName))
-//								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 					}
 
@@ -842,15 +829,12 @@ public static class Mesher
 						if (mainText != null)
 							if (mainText.HasMeta("luminance"))
 								luminance = (float)mainText.GetMeta("luminance");
-//							if (!string.IsNullOrEmpty(mainText.ResourceName))
-//								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 					}
 
 					modelObject.AddChild(mesh);
 					GameManager.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name);
 				}
-				groupId++;
 			}
 		}
 		else
@@ -884,17 +868,19 @@ public static class Mesher
 					data.arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 
 					Node3D modelObject;
-					if (groupId == 0)
+					if (n == 0)
 						modelObject = ownerObject;
 					else
 					{
 						modelObject = new Node3D();
-						modelObject.Name = "Mesh_" + groupId;
+						modelObject.Name = "Mesh_" + n;
 						ownerObject.AddChild(modelObject);
 						modelObject.Position = Vector3.Zero;
 					}
+
+					string skinName = meshes[0].skins[0].name;
 					bool currentTransparent = forceSkinAlpha;
-					ShaderMaterial material = MaterialManager.GetMaterials(meshes[0].skins[0].name, -1, ref currentTransparent);
+					ShaderMaterial material = MaterialManager.GetMaterials(skinName, -1, ref currentTransparent);
 
 					for (int i = 0; i < meshes.Length; i++)
 						md3Model.data[meshes[i].meshNum] = data;
@@ -913,22 +899,14 @@ public static class Mesher
 					else
 						multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
 
-					int index;
-					if (model.materialsIdbySkinName.TryGetValue(meshes[0].skins[0].name, out index))
-					{
-						SkinMaterialData skinMaterial = model.readyMaterials[index];
-						model.readyMaterials.Add(skinMaterial);
-					}
-					else
-					{
-						SkinMaterialData skinMaterial = new SkinMaterialData();
-						skinMaterial.skinName = meshes[0].skins[0].name;
-						skinMaterial.commonMesh = multiMesh;
-						skinMaterial.useTransparent = currentTransparent;
-						skinMaterial.readyMaterials = material;
-						model.materialsIdbySkinName.Add(meshes[0].skins[0].name, model.readyMaterials.Count());
-						model.readyMaterials.Add(skinMaterial);
-					}
+					SurfaceData surfaceData = new SurfaceData();
+					surfaceData.skinName = skinName;
+					surfaceData.commonMesh = multiMesh;
+					surfaceData.useTransparent = currentTransparent;
+					surfaceData.readyMaterials = material;
+					if (!model.surfaceIdbySkinName.ContainsKey(skinName))
+						model.surfaceIdbySkinName.Add(skinName, model.readySurfaces.Count());
+					model.readySurfaces.Add(surfaceData);
 
 					if (!MultiMeshes.ContainsKey(multiMesh))
 					{
@@ -952,8 +930,6 @@ public static class Mesher
 							if (mainText != null)
 								if (mainText.HasMeta("luminance"))
 									luminance = (float)mainText.GetMeta("luminance");
-//								if (!string.IsNullOrEmpty(mainText.ResourceName))
-//									luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 						}
 
@@ -981,15 +957,13 @@ public static class Mesher
 							if (mainText != null)
 								if (mainText.HasMeta("luminance"))
 									luminance = (float)mainText.GetMeta("luminance");
-//								if (!string.IsNullOrEmpty(mainText.ResourceName))
-//									luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 						}
 
 						modelObject.AddChild(mesh);
 						GameManager.Print("Adding Child: " + mesh.Name + " to: " + modelObject.Name + " skin group name " + meshes[0].skins[0].name);
 					}
-					groupId++;
+					n++;
 				}
 			}
 		}
@@ -1028,48 +1002,46 @@ public static class Mesher
 			}
 
 			md3Model.data[model.meshes[i].meshNum] = new dataMeshes();
-			SkinMaterialData skinMaterial = null;
+			SurfaceData surfaceData = null;
 			int skinIndex = -1;
 			string skinName;
 			if (meshToSkin == null)
 			{
-				skinMaterial = model.readyMaterials[i];
-				skinName = skinMaterial.skinName;
+				surfaceData = model.readySurfaces[i];
+				skinName = surfaceData.skinName;
 			}
 			else
 				skinName = meshToSkin[model.meshes[i].name];
 
 			
-			if (model.materialsIdbySkinName.TryGetValue(skinName, out skinIndex))
+			if (model.surfaceIdbySkinName.TryGetValue(skinName, out skinIndex))
 			{
-				if (skinMaterial == null)
-					skinMaterial = model.readyMaterials[skinIndex];
+				if (surfaceData == null)
+					surfaceData = model.readySurfaces[skinIndex];
 
-				bool useTransparent = skinMaterial.useTransparent;
+				bool useTransparent = surfaceData.useTransparent;
 				md3Model.data[model.meshes[i].meshNum].isTransparent = useTransparent;
 				if (useCommon && !useTransparent)
 				{
-					md3Model.data[model.meshes[i].meshNum].multiMesh = skinMaterial.commonMesh;
-					if (!MultiMeshesInstances.ContainsKey(skinMaterial.commonMesh))
+					md3Model.data[model.meshes[i].meshNum].multiMesh = surfaceData.commonMesh;
+					if (!MultiMeshesInstances.ContainsKey(surfaceData.commonMesh))
 					{
 						MultiMeshInstance3D mesh = new MultiMeshInstance3D();
 						mesh.Name = "MultiMesh_" + model.name;
-						mesh.Multimesh = skinMaterial.commonMesh;
+						mesh.Multimesh = surfaceData.commonMesh;
 						mesh.Layers = layer;
 						if (!castShadows)
 							mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 						GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
-						MultiMeshesInstances.Add(skinMaterial.commonMesh, mesh);
+						MultiMeshesInstances.Add(surfaceData.commonMesh, mesh);
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 						if (receiveShadows)
 						{
-							Texture mainText = (Texture2D)skinMaterial.readyMaterials.Get("shader_parameter/Tex_0");
+							Texture mainText = (Texture2D)surfaceData.readyMaterials.Get("shader_parameter/Tex_0");
 							float luminance = .25f;
 							if (mainText != null)
 								if (mainText.HasMeta("luminance"))
 									luminance = (float)mainText.GetMeta("luminance");
-//								if (!string.IsNullOrEmpty(mainText.ResourceName))
-//									luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 							mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 						}
 					}
@@ -1079,7 +1051,7 @@ public static class Mesher
 					MeshInstance3D mesh = new MeshInstance3D();
 					var surfaceArray = model.readySurfaceArray[i];
 					md3Model.data[model.meshes[i].meshNum].arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
-					md3Model.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, skinMaterial.readyMaterials);
+					md3Model.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, surfaceData.readyMaterials);
 					md3Model.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(md3Model.data[model.meshes[i].meshNum].arrMesh, 0);
 					mesh.Name = "Mesh_" + model.name;
 					mesh.Mesh = md3Model.data[model.meshes[i].meshNum].arrMesh;
@@ -1094,13 +1066,11 @@ public static class Mesher
 						mesh.SetInstanceShaderParameter("UseLightVol", true);
 					if (receiveShadows)
 					{
-						Texture mainText = (Texture2D)skinMaterial.readyMaterials.Get("shader_parameter/Tex_0");
+						Texture mainText = (Texture2D)surfaceData.readyMaterials.Get("shader_parameter/Tex_0");
 						float luminance = .25f;
 						if (mainText != null)
 							if (mainText.HasMeta("luminance"))
 								luminance = (float)mainText.GetMeta("luminance");
-//							if (!string.IsNullOrEmpty(mainText.ResourceName))
-//								luminance = BitConverter.ToSingle(Convert.FromBase64String(mainText.ResourceName));
 						mesh.SetInstanceShaderParameter(MaterialManager.shadowProperty, GameManager.Instance.shadowIntensity * luminance);
 					}
 				}
@@ -1108,8 +1078,8 @@ public static class Mesher
 			else
 			{
 				GameManager.Print("NO SKIN FOUND" + skinName);
-				skinMaterial = new SkinMaterialData();
-				skinMaterial.skinName = skinName;
+				surfaceData = new SurfaceData();
+				surfaceData.skinName = skinName;
 
 				bool useTransparent = forceSkinAlpha;
 				var surfaceArray = model.readySurfaceArray[i];
@@ -1127,11 +1097,11 @@ public static class Mesher
 					multiMesh.InstanceCount = LOW_USE_MULTIMESHES;
 				else
 					multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
-				skinMaterial.commonMesh = multiMesh;
-				skinMaterial.useTransparent = useTransparent;
-				skinMaterial.readyMaterials = material;
-				model.materialsIdbySkinName.Add(skinName, model.readyMaterials.Count());
-				model.readyMaterials.Add(skinMaterial);
+				surfaceData.commonMesh = multiMesh;
+				surfaceData.useTransparent = useTransparent;
+				surfaceData.readyMaterials = material;
+				model.surfaceIdbySkinName.Add(skinName, model.readySurfaces.Count());
+				model.readySurfaces.Add(surfaceData);
 				if (!MultiMeshes.ContainsKey(multiMesh))
 				{
 					List<Node3D> list = new List<Node3D>();
@@ -1141,17 +1111,17 @@ public static class Mesher
 				md3Model.data[model.meshes[i].meshNum].isTransparent = useTransparent;
 				if (useCommon && !useTransparent)
 				{
-					md3Model.data[model.meshes[i].meshNum].multiMesh = skinMaterial.commonMesh;
-					if (!MultiMeshesInstances.ContainsKey(skinMaterial.commonMesh))
+					md3Model.data[model.meshes[i].meshNum].multiMesh = surfaceData.commonMesh;
+					if (!MultiMeshesInstances.ContainsKey(surfaceData.commonMesh))
 					{
 						MultiMeshInstance3D mesh = new MultiMeshInstance3D();
 						mesh.Name = "MultiMesh_" + model.name;
-						mesh.Multimesh = skinMaterial.commonMesh;
+						mesh.Multimesh = surfaceData.commonMesh;
 						mesh.Layers = layer;
 						if (!castShadows)
 							mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 						GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
-						MultiMeshesInstances.Add(skinMaterial.commonMesh, mesh);
+						MultiMeshesInstances.Add(surfaceData.commonMesh, mesh);
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
 					}
 				}
@@ -1159,7 +1129,7 @@ public static class Mesher
 				{
 					MeshInstance3D mesh = new MeshInstance3D();
 					md3Model.data[model.meshes[i].meshNum].arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
-					md3Model.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, skinMaterial.readyMaterials);
+					md3Model.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, surfaceData.readyMaterials);
 					md3Model.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(md3Model.data[model.meshes[i].meshNum].arrMesh, 0);
 					mesh.Mesh = md3Model.data[model.meshes[i].meshNum].arrMesh;
 					mesh.Layers = layer;

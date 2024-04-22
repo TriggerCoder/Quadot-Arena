@@ -23,7 +23,7 @@ public class MultiMeshData
 	public MultiMesh multiMesh;
 }
 
-public class SkinMaterialData
+public class SurfaceData
 {
 	public string skinName;															// This is the materialName;
 	public MultiMesh commonMesh;													// This is the common processed Godot Mesh
@@ -47,8 +47,8 @@ public class MD3
 	public List<MD3Mesh> meshes;													// The list of meshes in the model
 	public List<MD3Skin> skins;                                                     // The list of skins in the model
 	public List<Godot.Collections.Array> readySurfaceArray = new List<Godot.Collections.Array>();           // This is the processed Godot Mesh
-	public List<SkinMaterialData> readyMaterials = new List<SkinMaterialData>();	// This store the material data
-	public Dictionary<string, int> materialsIdbySkinName = new Dictionary<string, int>();    // Get the index of material list by the skin name
+	public List<SurfaceData> readySurfaces = new List<SurfaceData>();				// This store the surface data
+	public Dictionary<string, int> surfaceIdbySkinName = new Dictionary<string, int>();    // Get the index of surface list by the skin name
 	public static MD3 ImportModel(string modelName, bool forceSkinAlpha)
 	{
 		BinaryReader Md3ModelFile;

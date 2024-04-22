@@ -2,7 +2,7 @@ using Godot;
 using System.IO;
 using System.Collections.Generic;
 using ExtensionMethods;
-public partial class PlayerModel : Node3D
+public partial class PlayerModel : StaticBody3D, Damageable
 {
 	public int rotationFPS = 15;
 	public int lowerRotationFPS = 7;
@@ -468,12 +468,7 @@ public partial class PlayerModel : Node3D
 
 	private void ChangeToRagDoll()
 	{
-		StaticBody3D modelCollider = new StaticBody3D();
-
-		modelCollider.Name = "Player_collider";
-		AddChild(modelCollider);
-
-		uint OwnerShapeId = modelCollider.CreateShapeOwner(this);
+		uint OwnerShapeId = CreateShapeOwner(this);
 		for (int i = 0; i < upper.meshes.Count; i++)
 		{
 			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
@@ -485,7 +480,7 @@ public partial class PlayerModel : Node3D
 				faces[j] += upperBody.Position;
 			}
 			modelColliderShape.Data = faces;
-			modelCollider.ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
+			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
 		}
 
 		for (int i = 0; i < head.meshes.Count; i++)
@@ -499,18 +494,18 @@ public partial class PlayerModel : Node3D
 				faces[j] += tagHeadNode.Position + upperBody.Position;
 			}
 			modelColliderShape.Data = faces;
-			modelCollider.ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
+			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
 		}
 
 		for (int i = 0; i < lower.meshes.Count; i++)
 		{
 			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
 			modelColliderShape.Data = lowerModel.data[i].arrMesh.GetFaces();
-			modelCollider.ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
+			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
 		}
 
-		modelCollider.CollisionLayer = (1 << GameManager.RagdollLayer);
-		modelCollider.CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.RagdollLayer));
+		CollisionLayer = (1 << GameManager.RagdollLayer);
+		CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.RagdollLayer));
 		impulseVector = playerControls.impulseVector;
 		playerControls.playerThing.CollisionLayer = (1 << GameManager.NoCollisionLayer);
 		if (playerControls.playerThing.waterLever > 0)
@@ -536,6 +531,16 @@ public partial class PlayerModel : Node3D
 		ownerDead = true;
 	}
 
+	public void Damage(int amount, DamageType damageType = DamageType.Generic, Node3D attacker = null)
+	{
+		if (!ragDoll)
+			return;
+	}
+	public void Impulse(Vector3 direction, float force)
+	{
+		if (!ragDoll)
+			return;
+	}
 	public void TurnLegsOnJump(float sideMove, float deltaTime)
 	{
 		Quaternion rotate = Quaternion.Identity;
