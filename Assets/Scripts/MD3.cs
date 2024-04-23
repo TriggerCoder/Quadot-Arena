@@ -32,23 +32,28 @@ public class SurfaceData
 
 }
 
+public class FrameSurfaces
+{
+	public List<Godot.Collections.Array> readySurfaceArray = new List<Godot.Collections.Array>();		// This is the processed Godot Mesh
+	public List<SurfaceData> readySurfaces = new List<SurfaceData>();									// This store the surface data
+	public Dictionary<string, int> surfaceIdbySkinName = new Dictionary<string, int>();					// Get the index of surface list by the skin name
+}
+
 public class MD3
 {
-	public string name;																// The name of the model
-	public int flags;																// The model flags
-	public int version;																// The version of the model
-	public int numFrames;															// The number of frames in the model
-	public int numTags;																// The number of tags in the model
-	public int numMeshes;															// The number of meshes in the model
-	public int numSkins;															// The number of skins in the model
-	public List<MD3Frame> frames;													// The list of frames in the model
-	public Dictionary<string, int> tagsIdbyName = new Dictionary<string, int>();	// Get the index of tags list in the model by name
-	public List<List<MD3Tag>> tagsbyId = new List<List<MD3Tag>>();					// The list of tags in the model by Id
-	public List<MD3Mesh> meshes;													// The list of meshes in the model
-	public List<MD3Skin> skins;                                                     // The list of skins in the model
-	public List<Godot.Collections.Array> readySurfaceArray = new List<Godot.Collections.Array>();           // This is the processed Godot Mesh
-	public List<SurfaceData> readySurfaces = new List<SurfaceData>();				// This store the surface data
-	public Dictionary<string, int> surfaceIdbySkinName = new Dictionary<string, int>();    // Get the index of surface list by the skin name
+	public string name;																				// The name of the model
+	public int flags;																				// The model flags
+	public int version;																				// The version of the model
+	public int numFrames;																			// The number of frames in the model
+	public int numTags;																				// The number of tags in the model
+	public int numMeshes;																			// The number of meshes in the model
+	public int numSkins;																			// The number of skins in the model
+	public List<MD3Frame> frames;																	// The list of frames in the model
+	public Dictionary<string, int> tagsIdbyName = new Dictionary<string, int>();					// Get the index of tags list in the model by name
+	public List<List<MD3Tag>> tagsbyId = new List<List<MD3Tag>>();									// The list of tags in the model by Id
+	public List<MD3Mesh> meshes;																	// The list of meshes in the model
+	public List<MD3Skin> skins;																		// The list of skins in the model
+	public Dictionary<int , FrameSurfaces> frameSurfaces = new Dictionary<int , FrameSurfaces>();	//This holds the readySurfaces by Frame
 	public static MD3 ImportModel(string modelName, bool forceSkinAlpha)
 	{
 		BinaryReader Md3ModelFile;

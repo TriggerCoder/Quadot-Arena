@@ -2,6 +2,7 @@ using Godot;
 using System.IO;
 using System.Collections.Generic;
 using ExtensionMethods;
+
 public partial class PlayerModel : StaticBody3D, Damageable
 {
 	public int rotationFPS = 15;
@@ -147,6 +148,9 @@ public partial class PlayerModel : StaticBody3D, Damageable
 	private List<MeshInstance3D> modelsMeshes = new List<MeshInstance3D>();
 	private List<MeshInstance3D> fxMeshes = new List<MeshInstance3D>();
 	private int hitpoints = 50;
+	private List<MultiMeshData> multiMeshDataList = new List<MultiMeshData>();
+	private Vector3 lastGlobalPosition = new Vector3(0, 0, 0);
+	private Basis lastGlobalBasis = Basis.Identity;
 
 	//Needed to keep impulse once it turn into ragdoll
 	private PlayerControls playerControls;
@@ -219,6 +223,7 @@ public partial class PlayerModel : StaticBody3D, Damageable
 		if (ragDoll)
 		{
 			ApplySimpleMove(deltaTime);
+			UpdateMultiMesh();
 			return;
 		}
 
@@ -469,19 +474,6 @@ public partial class PlayerModel : StaticBody3D, Damageable
 	private void ChangeToRagDoll()
 	{
 		uint OwnerShapeId = CreateShapeOwner(this);
-		for (int i = 0; i < upper.meshes.Count; i++)
-		{
-			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
-			Vector3[] faces = upperModel.data[i].arrMesh.GetFaces();
-			Quaternion rotation = upperBody.Quaternion;
-			for (int j = 0; j < faces.Length; j++)
-			{
-				faces[j] = rotation * faces[j];
-				faces[j] += upperBody.Position;
-			}
-			modelColliderShape.Data = faces;
-			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
-		}
 
 		for (int i = 0; i < head.meshes.Count; i++)
 		{
@@ -496,6 +488,43 @@ public partial class PlayerModel : StaticBody3D, Damageable
 			modelColliderShape.Data = faces;
 			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
 		}
+		Vector3 headGlobalPos = headBody.GlobalPosition;
+		Vector3 headGlobalRot = headBody.GlobalRotation;
+		headModel.node.QueueFree();
+
+		Quaternion upperTorsoRotation = upper.tagsbyId[upper_tag_torso][currentFrameUpper].rotation;
+		Quaternion lowerTorsoRotation = lower.tagsbyId[lower_tag_torso][currentFrameLower].rotation;
+		Vector3 upperTorsoOrigin = upper.tagsbyId[upper_tag_torso][currentFrameUpper].origin;
+		Vector3 currentOffset = lowerTorsoRotation * upperTorsoOrigin;
+		Quaternion currentRotation = lowerTorsoRotation * upperTorsoRotation;
+
+		for (int i = 0; i < upper.meshes.Count; i++)
+		{
+			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
+			Vector3[] faces = upperModel.data[i].arrMesh.GetFaces();
+			Quaternion rotation = upperBody.Quaternion;
+			for (int j = 0; j < faces.Length; j++)
+			{
+				faces[j] = rotation * faces[j];
+				faces[j] += upperBody.Position;
+			}
+			modelColliderShape.Data = faces;
+			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
+		}
+		upperModel.node.QueueFree();
+		MD3GodotConverted upperRagDoll = Mesher.GenerateModelFromMeshes(upper, meshToSkin, GameManager.AllPlayerViewMask, true, currentFrameUpper);
+		upperRagDoll.node.Name = "upper_body";
+		upperBody.AddChild(upperRagDoll.node);
+		upperBody.Quaternion = currentRotation;
+		upperBody.Position += currentOffset;
+		SetMultiMesh(upperRagDoll, upperBody);
+
+		MD3GodotConverted headRagDoll = Mesher.GenerateModelFromMeshes(head, meshToSkin, GameManager.AllPlayerViewMask, true);
+		headRagDoll.node.Name = "head";
+		headBody.AddChild(headRagDoll.node);
+		headBody.GlobalPosition = headGlobalPos;
+		headBody.GlobalRotation = headGlobalRot;
+		SetMultiMesh(headRagDoll, headBody);
 
 		for (int i = 0; i < lower.meshes.Count; i++)
 		{
@@ -503,6 +532,12 @@ public partial class PlayerModel : StaticBody3D, Damageable
 			modelColliderShape.Data = lowerModel.data[i].arrMesh.GetFaces();
 			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
 		}
+		lowerModel.node.QueueFree();
+		MD3GodotConverted lowerRagDoll = Mesher.GenerateModelFromMeshes(lower, meshToSkin, GameManager.AllPlayerViewMask, true, currentFrameLower);
+		lowerRagDoll.node.Name = "lower_body";
+		lowerNode = lowerRagDoll.node;
+		playerModel.AddChild(lowerRagDoll.node);
+		SetMultiMesh(lowerRagDoll, playerModel);
 
 		CollisionLayer = (1 << GameManager.RagdollLayer);
 		CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.RagdollLayer));
@@ -708,10 +743,7 @@ public partial class PlayerModel : StaticBody3D, Damageable
 		}
 
 		weapon = newWeapon;
-		if (weapon.readySurfaceArray.Count == 0)
-			weaponModel = Mesher.GenerateModelFromMeshes(weapon, currentLayer, true, true, null, false, false);
-		else
-			weaponModel = Mesher.FillModelFromProcessedData(weapon, currentLayer, true, true, null, false);
+		weaponModel = Mesher.GenerateModelFromMeshes(weapon, currentLayer, true, true, null, false, false);
 		weaponModel.node.Name = "weapon";
 		weaponNode.AddChild(weaponModel.node);
 
@@ -728,11 +760,7 @@ public partial class PlayerModel : StaticBody3D, Damageable
 			else
 				barrelTag = barrel;
 
-
-			if (barrelModel.readySurfaceArray.Count == 0)
-				Mesher.GenerateModelFromMeshes(barrelModel, currentLayer, true, true, barrel, false, false);
-			else
-				Mesher.FillModelFromProcessedData(barrelModel, currentLayer, true, true, barrel, false);
+			Mesher.GenerateModelFromMeshes(barrelModel, currentLayer, true, true, barrel, false, false);
 			weaponModel.node.AddChild(barrelTag);
 			if (isMelee)
 				barrelTag.AddChild(barrel);
@@ -765,10 +793,7 @@ public partial class PlayerModel : StaticBody3D, Damageable
 			if (muzzle == null)
 				return;
 
-			if (muzzle.readySurfaceArray.Count == 0)
-				Mesher.GenerateModelFromMeshes(muzzle, currentLayer, false, false, muzzleFlash, true, false);
-			else
-				Mesher.FillModelFromProcessedData(muzzle, currentLayer, false, false, muzzleFlash, false);
+			Mesher.GenerateModelFromMeshes(muzzle, currentLayer, false, false, muzzleFlash, true, false);
 
 			if (barrel == null)
 				weaponModel.node.AddChild(muzzleFlash);
@@ -828,7 +853,6 @@ public partial class PlayerModel : StaticBody3D, Damageable
 			parent = muzzleFlash;
 		return GameManager.GetModulateMeshes(parent, fxMeshes);
 	}
-
 
 	public void DestroyWeapon()
 	{
@@ -926,25 +950,15 @@ public partial class PlayerModel : StaticBody3D, Damageable
 			headBody.Name = "Head";
 			tagHeadNode.AddChild(headBody);
 
-			if (upper.readySurfaceArray.Count == 0)
-				upperModel = Mesher.GenerateModelFromMeshes(upper, meshToSkin, layer);
-			else
-				upperModel = Mesher.FillModelFromProcessedData(upper, meshToSkin, layer);
+			upperModel = Mesher.GenerateModelFromMeshes(upper, meshToSkin, layer);
 			upperModel.node.Name = "upper_body";
 			upperBody.AddChild(upperModel.node);
 
-			if (head.readySurfaceArray.Count == 0)
-				headModel = Mesher.GenerateModelFromMeshes(head, meshToSkin, layer);
-			else
-				headModel = Mesher.FillModelFromProcessedData(head, meshToSkin, layer);
-
+			headModel = Mesher.GenerateModelFromMeshes(head, meshToSkin, layer);
 			headModel.node.Name = "head";
 			headBody.AddChild(headModel.node);
 
-			if (lower.readySurfaceArray.Count == 0)
-				lowerModel = Mesher.GenerateModelFromMeshes(lower, meshToSkin, layer);
-			else
-				lowerModel = Mesher.FillModelFromProcessedData(lower, meshToSkin, layer);
+			lowerModel = Mesher.GenerateModelFromMeshes(lower, meshToSkin, layer);
 			lowerModel.node.Name = "lower_body";
 			lowerNode = lowerModel.node;
 			playerModel.AddChild(lowerModel.node);
@@ -1225,5 +1239,61 @@ public partial class PlayerModel : StaticBody3D, Damageable
 		}
 		SkinFile.Close();
 		return true;
+	}
+
+	public void SetMultiMesh(MD3GodotConverted model, Node3D owner)
+	{
+		for (int i = 0; i < model.data.Length; i++)
+		{
+			if (model.data[i] == null)
+				continue;
+			if (model.data[i].isTransparent)
+				continue;
+
+			if (Mesher.MultiMeshes.ContainsKey(model.data[i].multiMesh))
+			{
+				MultiMeshData multiMeshData = new MultiMeshData();
+				multiMeshData.multiMesh = model.data[i].multiMesh;
+				Mesher.AddNodeToMultiMeshes(model.data[i].multiMesh, owner);
+				multiMeshData.owner = owner;
+				multiMeshDataList.Add(multiMeshData);
+			}
+		}
+	}
+	void UpdateMultiMesh()
+	{
+		if (multiMeshDataList.Count == 0)
+			return;
+
+		if (((GlobalPosition - lastGlobalPosition).LengthSquared() > Mathf.Epsilon) ||
+			((GlobalBasis.X - lastGlobalBasis.X).LengthSquared() > Mathf.Epsilon) ||
+			((GlobalBasis.Y - lastGlobalBasis.Y).LengthSquared() > Mathf.Epsilon) ||
+			((GlobalBasis.Z - lastGlobalBasis.Z).LengthSquared() > Mathf.Epsilon))
+		{
+
+			for (int i = 0; i < multiMeshDataList.Count; i++)
+				Mesher.UpdateInstanceMultiMesh(multiMeshDataList[i].multiMesh, multiMeshDataList[i].owner);
+		}
+
+		lastGlobalPosition = GlobalPosition;
+		lastGlobalBasis = GlobalBasis;
+	}
+	public void ClearPlayerModel()
+	{
+		List<MultiMesh> updateMultiMesh = new List<MultiMesh>();
+		for (int i = 0; i < multiMeshDataList.Count; i++)
+		{
+			MultiMesh multiMesh = multiMeshDataList[i].multiMesh;
+			List<Node3D> multiMeshList;
+			if (Mesher.MultiMeshes.TryGetValue(multiMesh, out multiMeshList))
+			{
+				if (multiMeshList.Contains(multiMeshDataList[i].owner))
+					multiMeshList.Remove(multiMeshDataList[i].owner);
+			}
+			if (!updateMultiMesh.Contains(multiMesh))
+				updateMultiMesh.Add(multiMesh);
+		}
+		foreach (MultiMesh multiMesh in updateMultiMesh)
+			Mesher.MultiMeshUpdateInstances(multiMesh);
 	}
 }

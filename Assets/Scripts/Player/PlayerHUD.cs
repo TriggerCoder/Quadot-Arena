@@ -139,12 +139,7 @@ public partial class PlayerHUD : MeshInstance3D
 		//Load HUD Models
 		MD3 model = ModelsManager.GetModel(armorModel, false);
 		if (model != null)
-		{
-			if (model.readySurfaceArray.Count == 0)
-				Mesher.GenerateModelFromMeshes(model, Layers, false, false, ArmorContainer, false, false, null, true, false, true, false);
-			else
-				Mesher.FillModelFromProcessedData(model, Layers, false, false, ArmorContainer, false, null, false, true, false, true, false);
-		}
+			Mesher.GenerateModelFromMeshes(model, Layers, false, false, ArmorContainer, false, false, null, true, false, true, false);
 
 		for (int i = 0; i < ammoModels.Length; i++)
 		{
@@ -153,12 +148,7 @@ public partial class PlayerHUD : MeshInstance3D
 			AmmoContainer.AddChild(container);
 			model = ModelsManager.GetModel(ammoModelPath + ammoModels[i], false);
 			if (model != null)
-			{
-				if (model.readySurfaceArray.Count == 0)
-					Mesher.GenerateModelFromMeshes(model, Layers, false, false, container, false, false, null, true, false, true, false);
-				else
-					Mesher.FillModelFromProcessedData(model, Layers, false, false, container, false, null, false, true, false, true, false);
-			}
+				Mesher.GenerateModelFromMeshes(model, Layers, false, false, container, false, false, null, true, false, true, false);
 			container.Hide();
 			ammoContainers.Add(container);
 		}
@@ -212,12 +202,8 @@ public partial class PlayerHUD : MeshInstance3D
 		NodeList.Clear();
 
 		if (headModel != null)
-		{
-			if (headModel.readySurfaceArray.Count == 0)
-				Mesher.GenerateModelFromMeshes(headModel, Layers, false, false, viewHead, false, false, meshToSkin, true, false, true, false);
-			else
-				Mesher.FillModelFromProcessedData(headModel, Layers, false, false, viewHead, false, meshToSkin, false, true, false, true, false);
-		}
+			Mesher.GenerateModelFromMeshes(headModel, Layers, false, false, viewHead, false, false, meshToSkin, true, false, true, false);
+
 		fxMeshes = GameManager.CreateFXMeshInstance3D(viewHeadContainer);
 		NodeList = GameManager.GetAllChildrens(viewHead);
 		headAnimation.Set("parameters/Look/pain_shot/active", true);

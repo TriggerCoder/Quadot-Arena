@@ -40,6 +40,7 @@ public static class Mesher
 
 	public static Dictionary<MultiMesh, List<Node3D>> MultiMeshes = new Dictionary<MultiMesh, List<Node3D>>();
 	public static Dictionary<MultiMesh, MultiMeshInstance3D> MultiMeshesInstances = new Dictionary<MultiMesh, MultiMeshInstance3D>();
+	public static Dictionary<string, MultiMesh> RadgDolls = new Dictionary<string, MultiMesh>();
 	public static void ClearMesherCache()
 	{
 		vertsCache = new List<Vector3>();
@@ -703,17 +704,20 @@ public static class Mesher
 		}
 	}
 
-	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask)
+	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask, bool useCommon = false, int frame = 0)
 	{
-		return GenerateModelFromMeshes(model, layer, true, true, null, false, false, meshToSkin);
+		return GenerateModelFromMeshes(model, layer, true, true, null, false, useCommon, meshToSkin, true, false, false, true, frame);
 	}
-	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false, bool useLightVol = true)
+	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false, bool useLightVol = true, int frame = 0)
 	{
 		if (model == null || model.meshes.Count == 0)
 		{
 			GameManager.Print("Failed to create model object because there are no meshes", GameManager.PrintType.Warning);
 			return null;
 		}
+
+		if (model.frameSurfaces.ContainsKey(frame))
+			return FillModelFromProcessedData(model, layer, receiveShadows, castShadows, ownerObject, useCommon, meshToSkin, forceSkinAlpha, useLowMultimeshes, useColorData, isViewModel, useLightVol, frame);
 
 		if (ownerObject == null)
 		{
@@ -722,6 +726,7 @@ public static class Mesher
 			ownerObject.Name = "Model_" + model.name;
 		}
 
+		FrameSurfaces frameSurfaces = new FrameSurfaces();
 		MD3GodotConverted md3Model = new MD3GodotConverted();
 		md3Model.node = ownerObject;
 		md3Model.numMeshes = model.meshes.Count;
@@ -734,7 +739,7 @@ public static class Mesher
 			{
 				MD3Mesh modelMesh = model.meshes[n];
 				dataMeshes data = new dataMeshes();
-				var surfaceArray = GenerateModelMesh(modelMesh);
+				var surfaceArray = GenerateModelMesh(modelMesh, frame);
 				data.arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 
 				Node3D modelObject;
@@ -759,7 +764,7 @@ public static class Mesher
 				data.arrMesh.SurfaceSetMaterial(0, material);
 				data.meshDataTool.CreateFromSurface(data.arrMesh, 0);
 				md3Model.data[modelMesh.meshNum] = data;
-				model.readySurfaceArray.Add(surfaceArray);
+				frameSurfaces.readySurfaceArray.Add(surfaceArray);
 				MultiMesh multiMesh = new MultiMesh();
 				data.multiMesh = multiMesh;
 				multiMesh.Mesh = data.arrMesh;
@@ -776,9 +781,9 @@ public static class Mesher
 				surfaceData.commonMesh = multiMesh;
 				surfaceData.useTransparent = currentTransparent;
 				surfaceData.readyMaterials = material;
-				if (!model.surfaceIdbySkinName.ContainsKey(skinName))
-					model.surfaceIdbySkinName.Add(skinName, model.readySurfaces.Count());
-				model.readySurfaces.Add(surfaceData);
+				if (!frameSurfaces.surfaceIdbySkinName.ContainsKey(skinName))
+					frameSurfaces.surfaceIdbySkinName.Add(skinName, frameSurfaces.readySurfaces.Count());
+				frameSurfaces.readySurfaces.Add(surfaceData);
 
 				if (!MultiMeshes.ContainsKey(multiMesh))
 				{
@@ -857,7 +862,7 @@ public static class Mesher
 					int offset = 0;
 					for (int i = 0; i < meshes.Length; i++)
 					{
-						GenerateModelMesh(meshes[i],ref offset);
+						GenerateModelMesh(meshes[i], frame, ref offset);
 						if (i != 0)
 							Name += "_";
 						Name += meshes[i].name;
@@ -887,7 +892,7 @@ public static class Mesher
 
 					data.arrMesh.SurfaceSetMaterial(0, material);
 					data.meshDataTool.CreateFromSurface(data.arrMesh, 0);
-					model.readySurfaceArray.Add(surfaceArray);
+					frameSurfaces.readySurfaceArray.Add(surfaceArray);
 					MultiMesh multiMesh = new MultiMesh();
 					data.multiMesh = multiMesh;
 					multiMesh.Mesh = data.arrMesh;
@@ -904,9 +909,9 @@ public static class Mesher
 					surfaceData.commonMesh = multiMesh;
 					surfaceData.useTransparent = currentTransparent;
 					surfaceData.readyMaterials = material;
-					if (!model.surfaceIdbySkinName.ContainsKey(skinName))
-						model.surfaceIdbySkinName.Add(skinName, model.readySurfaces.Count());
-					model.readySurfaces.Add(surfaceData);
+					if (!frameSurfaces.surfaceIdbySkinName.ContainsKey(skinName))
+						frameSurfaces.surfaceIdbySkinName.Add(skinName, frameSurfaces.readySurfaces.Count());
+					frameSurfaces.readySurfaces.Add(surfaceData);
 
 					if (!MultiMeshes.ContainsKey(multiMesh))
 					{
@@ -967,15 +972,11 @@ public static class Mesher
 				}
 			}
 		}
+		model.frameSurfaces.Add(frame, frameSurfaces);
 		return md3Model;
 	}
 	
-	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask)
-	{
-		return FillModelFromProcessedData(model, layer, true, true, null, false, meshToSkin);
-	}
-
-	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool forceSkinAlpha = false, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false, bool useLightVol = true)
+	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool forceSkinAlpha = false, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false, bool useLightVol = true, int frame = 0)
 	{
 		if (ownerObject == null)
 		{
@@ -988,7 +989,8 @@ public static class Mesher
 		md3Model.numMeshes = model.meshes.Count;
 		md3Model.data = new dataMeshes[md3Model.numMeshes];
 
-		for (int i = 0; i < model.readySurfaceArray.Count; i++)
+		FrameSurfaces frameSurfaces = model.frameSurfaces[frame];
+		for (int i = 0; i < frameSurfaces.readySurfaceArray.Count; i++)
 		{
 			Node3D modelObject;
 			if (i == 0)
@@ -1007,17 +1009,17 @@ public static class Mesher
 			string skinName;
 			if (meshToSkin == null)
 			{
-				surfaceData = model.readySurfaces[i];
+				surfaceData = frameSurfaces.readySurfaces[i];
 				skinName = surfaceData.skinName;
 			}
 			else
 				skinName = meshToSkin[model.meshes[i].name];
 
 			
-			if (model.surfaceIdbySkinName.TryGetValue(skinName, out skinIndex))
+			if (frameSurfaces.surfaceIdbySkinName.TryGetValue(skinName, out skinIndex))
 			{
 				if (surfaceData == null)
-					surfaceData = model.readySurfaces[skinIndex];
+					surfaceData = frameSurfaces.readySurfaces[skinIndex];
 
 				bool useTransparent = surfaceData.useTransparent;
 				md3Model.data[model.meshes[i].meshNum].isTransparent = useTransparent;
@@ -1049,7 +1051,7 @@ public static class Mesher
 				else
 				{
 					MeshInstance3D mesh = new MeshInstance3D();
-					var surfaceArray = model.readySurfaceArray[i];
+					var surfaceArray = frameSurfaces.readySurfaceArray[i];
 					md3Model.data[model.meshes[i].meshNum].arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 					md3Model.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, surfaceData.readyMaterials);
 					md3Model.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(md3Model.data[model.meshes[i].meshNum].arrMesh, 0);
@@ -1082,7 +1084,7 @@ public static class Mesher
 				surfaceData.skinName = skinName;
 
 				bool useTransparent = forceSkinAlpha;
-				var surfaceArray = model.readySurfaceArray[i];
+				var surfaceArray = frameSurfaces.readySurfaceArray[i];
 
 				ShaderMaterial material = MaterialManager.GetMaterials(skinName, -1, ref useTransparent);
 				ArrayMesh arrMesh = new ArrayMesh();
@@ -1100,8 +1102,8 @@ public static class Mesher
 				surfaceData.commonMesh = multiMesh;
 				surfaceData.useTransparent = useTransparent;
 				surfaceData.readyMaterials = material;
-				model.surfaceIdbySkinName.Add(skinName, model.readySurfaces.Count());
-				model.readySurfaces.Add(surfaceData);
+				frameSurfaces.surfaceIdbySkinName.Add(skinName, frameSurfaces.readySurfaces.Count());
+				frameSurfaces.readySurfaces.Add(surfaceData);
 				if (!MultiMeshes.ContainsKey(multiMesh))
 				{
 					List<Node3D> list = new List<Node3D>();
@@ -1147,7 +1149,7 @@ public static class Mesher
 		return md3Model;
 	}
 
-	public static Godot.Collections.Array GenerateModelMesh(MD3Mesh md3Mesh)
+	public static Godot.Collections.Array GenerateModelMesh(MD3Mesh md3Mesh, int frame)
 	{
 		if (md3Mesh == null)
 		{
@@ -1168,10 +1170,10 @@ public static class Mesher
 		}
 
 		// add the verts
-		surfaceArray[VertexInd] = md3Mesh.verts[0].ToArray();
+		surfaceArray[VertexInd] = md3Mesh.verts[frame].ToArray();
 
 		// add normals
-		surfaceArray[NormalInd] = md3Mesh.normals[0].ToArray();
+		surfaceArray[NormalInd] = md3Mesh.normals[frame].ToArray();
 
 		// Add the texture co-ords (or UVs) to the surface/mesh
 		surfaceArray[TexUVInd] = md3Mesh.texCoords.ToArray();
@@ -1182,7 +1184,7 @@ public static class Mesher
 		return surfaceArray;
 	}
 
-	public static void GenerateModelMesh(MD3Mesh md3Mesh, ref int offset)
+	public static void GenerateModelMesh(MD3Mesh md3Mesh, int frame, ref int offset)
 	{
 		if (offset == 0)
 		{
@@ -1194,8 +1196,8 @@ public static class Mesher
 			vertsColor.Clear();
 		}
 
-		vertsCache.AddRange(md3Mesh.verts[0].ToArray());
-		normalsCache.AddRange(md3Mesh.normals[0].ToArray());
+		vertsCache.AddRange(md3Mesh.verts[frame].ToArray());
+		normalsCache.AddRange(md3Mesh.normals[frame].ToArray());
 		uvCache.AddRange(md3Mesh.texCoords.ToArray());
 
 		// Rip meshverts / triangles
@@ -1205,7 +1207,7 @@ public static class Mesher
 			indiciesCache.Add(md3Mesh.triangles[i].vertex2 + offset);
 			indiciesCache.Add(md3Mesh.triangles[i].vertex3 + offset);
 		}
-		offset += md3Mesh.verts[0].Count;
+		offset += md3Mesh.verts[frame].Count;
 	}
 	public static Godot.Collections.Array FinalizeModelMesh()
 	{
@@ -1223,6 +1225,19 @@ public static class Mesher
 		surfaceArray[TriIndex] = indiciesCache.ToArray();
 
 		return surfaceArray;
+	}
+
+	public static ArrayMesh GenerateRagdollFromMesh(ArrayMesh arrMesh)
+	{
+		SurfaceTool st = new SurfaceTool();
+		ArrayMesh ragdoll = new ArrayMesh();
+		st.CreateFrom(arrMesh, 0);
+		st.GenerateNormals();
+		st.GenerateTangents();
+		var surfaceArray = st.CommitToArrays();
+		ragdoll.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+
+		return ragdoll;
 	}
 
 	public static uint GenerateGroupBrushCollider(int indexId, Node3D holder, QBrush[] brushes, CollisionObject3D objCollider = null, uint extraContentFlag = 0)

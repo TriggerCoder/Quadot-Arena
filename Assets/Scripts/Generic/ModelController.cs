@@ -90,11 +90,8 @@ public partial class ModelController : Node3D
 			if (!TextureLoader.HasTexture(shaderName))
 				TextureLoader.AddNewTexture(shaderName, isTransparent);
 		}
-		//Multiple instances cannot be modifying the same surfaces
-		if ((md3Model.readySurfaceArray.Count == 0) || ((md3Model.numFrames > 1) && (modelAnimationFPS != 0)))
-			model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, receiveShadows, castShadows, currentObject, isTransparent, ((modelAnimationFPS == 0) && !isTransparent), meshToSkin, useLowCountMultiMesh, alphaFade);
-		else
-			model = Mesher.FillModelFromProcessedData(md3Model, GameManager.AllPlayerViewMask, receiveShadows, castShadows, currentObject, ((modelAnimationFPS == 0) && !isTransparent), meshToSkin, isTransparent, useLowCountMultiMesh, alphaFade);
+
+		model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, receiveShadows, castShadows, currentObject, isTransparent, ((modelAnimationFPS == 0) && !isTransparent), meshToSkin, useLowCountMultiMesh, alphaFade);
 
 		for (int i = 0; i < md3Model.meshes.Count; i++)
 		{

@@ -134,11 +134,7 @@ public partial class PlayerWeapon : Node3D
 		MD3 model = ModelsManager.GetModel(ModelName);
 		if (model != null)
 		{
-			if (model.readySurfaceArray.Count == 0)
-				Mesher.GenerateModelFromMeshes(model, p.uiLayer, false, false, Weapon, false, false, null, true, false, true);
-			else
-				Mesher.FillModelFromProcessedData(model, p.uiLayer, false, false, Weapon, false, null, false, true, false, true);
-
+			Mesher.GenerateModelFromMeshes(model, p.uiLayer, false, false, Weapon, false, false, null, true, false, true);
 			if (playerInfo.playerThing.avatar != null)
 				playerInfo.playerThing.avatar.LoadWeapon(model, BarrelModelName, MuzzleModelName, isMelee);
 		}
@@ -157,11 +153,7 @@ public partial class PlayerWeapon : Node3D
 			else
 				barrelTag = barrelObject;
 
-			if (barrelModel.readySurfaceArray.Count == 0)
-				Mesher.GenerateModelFromMeshes(barrelModel, p.uiLayer, false, false, barrelObject, false, false, null, true, false, true);
-			else
-				Mesher.FillModelFromProcessedData(barrelModel, p.uiLayer, false, false, barrelObject, false, null, false, true, false, true);
-
+			Mesher.GenerateModelFromMeshes(barrelModel, p.uiLayer, false, false, barrelObject, false, false, null, true, false, true);
 			Weapon.AddChild(barrelTag);
 			if (isMelee)
 				barrelTag.AddChild(barrelObject);
@@ -199,12 +191,7 @@ public partial class PlayerWeapon : Node3D
 			muzzleObject.Quaternion = Rotation;
 			model = ModelsManager.GetModel(MuzzleModelName, true);
 			if (model != null)
-			{
-				if (model.readySurfaceArray.Count == 0)
-					Mesher.GenerateModelFromMeshes(model, p.uiLayer, false, false, muzzleObject, true, false, null, true, false, true);
-				else
-					Mesher.FillModelFromProcessedData(model, p.uiLayer, false, false, muzzleObject, false, null, false, true, false, true);
-			}
+				Mesher.GenerateModelFromMeshes(model, p.uiLayer, false, false, muzzleObject, true, false, null, true, false, true);
 			muzzleObject.Visible = false;
 			if (muzzleLight != null)
 			{
