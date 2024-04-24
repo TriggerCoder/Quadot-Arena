@@ -156,15 +156,19 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 0
 
 [node name="TopRow" type="HBoxContainer" parent="Quadot Arena/SplitScreenContainer"]
 layout_mode = 2
+theme_override_constants/separation = 0
 
 [node name="MiddleRow" type="HBoxContainer" parent="Quadot Arena/SplitScreenContainer"]
 layout_mode = 2
+theme_override_constants/separation = 0
 
 [node name="BtmRow" type="HBoxContainer" parent="Quadot Arena/SplitScreenContainer"]
 layout_mode = 2
+theme_override_constants/separation = 0
 
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)

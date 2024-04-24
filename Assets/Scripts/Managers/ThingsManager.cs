@@ -1063,6 +1063,16 @@ public partial class ThingsManager : Node
 			}
 		}
 	}
+
+	public static void NewLocalPlayerAdded()
+	{
+		for (int n = 0; n < portalSurfaces.Count; n++)
+		{
+			PortalSurface portalSurface = portalSurfaces[n];
+			portalSurface.NewLocalPlayerAdded();
+		}
+	}
+
 	public static void AddRandomTimeToSound(Node3D node, Dictionary<string, string> entityData, AudioStreamPlayer audioStream2D, MultiAudioStream audioStream, bool isAudio3d)
 	{
 		float random, wait;
@@ -1130,20 +1140,33 @@ public class RespawnItem
 		this.time = time;
 	}
 }
+
+
 public class Portal
 {
 	public string shaderName;
 	public Vector3 position;
 	public Vector3 normal;
-	public ArrayMesh arrMesh;
-
+	public ArrayMesh commonMesh;
+	public List<Surface> surfaces = new List<Surface>();
 	public ShaderMaterial baseMat;
-	public ShaderMaterial material;
+
+	public class Surface
+	{
+		public MeshInstance3D mesh;
+		public ShaderMaterial material;
+
+		public Surface(MeshInstance3D mesh, ShaderMaterial material)
+		{
+			this.mesh = mesh;
+			this.material = (ShaderMaterial)material.NextPass;
+		}
+
+	}
 	public Portal(string shaderName, ShaderMaterial baseMat)
 	{
 		this.shaderName = shaderName;
 		this.baseMat = baseMat;
-		material = (ShaderMaterial)baseMat.NextPass;
 	}
 }
 

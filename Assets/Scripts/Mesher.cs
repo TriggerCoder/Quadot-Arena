@@ -317,7 +317,8 @@ public static class Mesher
 			Name += "_" + surfaces[i].surfaceId;
 		}
 		FinalizePolygonMesh(arrMesh);
-		arrMesh.SurfaceSetMaterial(0, material);
+		if (!hasPortal)
+			arrMesh.SurfaceSetMaterial(0, material);
 		holder.AddChild(mesh);
 		if (addPVS)
 			mesh.Layers = GameManager.InvisibleMask;
@@ -350,10 +351,12 @@ public static class Mesher
 			for (var i = 0; i < normalsCache.Count; i++)
 				normals += normalsCache[i];
 
+			mesh.Layers = (1 << GameManager.Player1ViewLayer);
+			mesh.SetSurfaceOverrideMaterial(0, material);
 			portal.normal = normals.Normalized();
-			portal.arrMesh = arrMesh;
+			portal.commonMesh = arrMesh;
+			portal.surfaces.Add(new Portal.Surface(mesh,material));
 			ThingsManager.AddPortalToMap(portal);
-			mesh.Layers = GameManager.AllPlayerViewMask;
 		}
 
 		//PVS only add on Static Geometry, as it has BSP Nodes

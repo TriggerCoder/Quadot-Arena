@@ -298,6 +298,7 @@ public partial class GameManager : Node
 						continue;
 					SetupNewPlayer(Players.Count, controller);
 					controllerWantToJoin.Remove(controller);
+					ThingsManager.NewLocalPlayerAdded();
 				}
 			break;
 		}
@@ -313,34 +314,29 @@ public partial class GameManager : Node
 		player.playerControls.Init(controllerNum);
 		player.InitPlayer();
 		Players.Add(controllerNum, player);
-		if (Players.Count > 6)
+		switch (Players.Count)
 		{
-
-		}
-		else
-		{
-			switch (Players.Count)
-			{
-				default:
-				case 1:
-					SplitScreen[0].AddChild(player.playerViewPort);
-				break;
-				case 2:
-					SplitScreen[1].AddChild(player.playerViewPort);
-				break;
-				case 3:
-					SplitScreen[1].AddChild(player.playerViewPort);
-				break;
-				case 4:
-					SplitScreen[0].AddChild(player.playerViewPort);
-				break;
-				case 5:
-					SplitScreen[1].AddChild(player.playerViewPort);
-				break;
-				case 6:
-					SplitScreen[0].AddChild(player.playerViewPort);
-				break;
-			}
+			default:
+				SplitScreen[2].AddChild(player.playerViewPort);
+			break;
+			case 1:
+				SplitScreen[0].AddChild(player.playerViewPort);
+			break;
+			case 2:
+				SplitScreen[1].AddChild(player.playerViewPort);
+			break;
+			case 3:
+				SplitScreen[1].AddChild(player.playerViewPort);
+			break;
+			case 4:
+				SplitScreen[0].AddChild(player.playerViewPort);
+			break;
+			case 5:
+				SplitScreen[1].AddChild(player.playerViewPort);
+			break;
+			case 6:
+				SplitScreen[0].AddChild(player.playerViewPort);
+			break;
 		}
 		ArrangeSplitScreen();
 	}
@@ -353,41 +349,45 @@ public partial class GameManager : Node
 		{
 			PlayerThing player = dic.Value;
 			Vector2I size = Size;
-			if (Players.Count > 6)
+			switch (Players.Count)
 			{
-
-			}
-			else
-			{
-				switch (Players.Count)
-				{
-					default:
-					case 1:
-					break;
-					case 2:
-						size.Y /= 2;
-					break;
-					case 3:
-						size.Y /= 2;
-						if (i > 0)
-							size.X /= 2;
-					break;
-					case 4:
-						size.Y /= 2;
+				default:
+				case 1:
+				break;
+				case 2:
+					size.Y /= 2;
+				break;
+				case 3:
+					size.Y /= 2;
+					if (i > 0)
 						size.X /= 2;
-					break;
-					case 5:
-						size.Y /= 2;
-						if ((i == 0) || (i == 3))
-							size.X /= 2;
-						else
-							size.X /= 3;
-					break;
-					case 6:
-						size.Y /= 2;
+				break;
+				case 4:
+					size.Y /= 2;
+					size.X /= 2;
+				break;
+				case 5:
+					size.Y /= 2;
+					if ((i == 0) || (i == 3))
+						size.X /= 2;
+					else
 						size.X /= 3;
-					break;
-				}
+				break;
+				case 6:
+					size.Y /= 2;
+					size.X /= 3;
+				break;
+				case 7:
+					size.Y /= 3;
+					if ((i == 6))
+						size.X /= 2;
+					else
+						size.X /= 3;
+				break;
+				case 8:
+					size.Y /= 3;
+					size.X /= 3;
+				break;
 			}
 			player.playerViewPort.viewPort.Size = size;
 			player.playerInfo.playerPostProcessing.ViewPort.Size = size;

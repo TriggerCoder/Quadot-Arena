@@ -7,7 +7,7 @@ public partial class PortalSurface : Area3D
 {
 	public bool mirror = false;
 	public string targetName;
-	private Camera3D destCamera;
+	private List<Camera3D> destCamera = new List<Camera3D>();
 	private Portal destPortal;
 	private float radius = 256 * GameManager.sizeDividor;
 	private float radiusSquared;
@@ -15,6 +15,10 @@ public partial class PortalSurface : Area3D
 	private Transform3D MirrorTransform;
 	private Vector3 UpVector;
 	private Vector2 MirrorSize;
+
+	private bool InvertX = true;
+	private bool InvertY = true;
+
 	private enum Axis
 	{
 		None,
@@ -44,60 +48,109 @@ public partial class PortalSurface : Area3D
 	{
 		for (int i = 0; i < currentPlayers.Count; i++) 
 		{
+			destPortal.surfaces[i].mesh.Layers = (uint)currentPlayers[i].playerInfo.viewLayer;
 			Camera3D playerCamera = currentPlayers[i].playerInfo.playerCamera.CurrentCamera;
-			ClusterPVSManager.CheckPVS(currentPlayers[i].playerInfo.viewLayer, destCamera.GlobalPosition);
+			ClusterPVSManager.CheckPVS(currentPlayers[i].playerInfo.viewLayer, destCamera[i].GlobalPosition);
 			Basis globalBasis = playerCamera.GlobalTransform.Basis;
 			if (mirror)
 			{
-				destCamera.GlobalTransform = MirrorTransform * playerCamera.GlobalTransform;
-				Vector3 lookVector = destCamera.GlobalPosition / 2 + playerCamera.GlobalPosition / 2;
-				destCamera.GlobalTransform = destCamera.GlobalTransform.LookingAt(lookVector, UpVector);
-				Vector3 offSet = GlobalPosition - destCamera.GlobalPosition;
+				destCamera[i].GlobalTransform = MirrorTransform * playerCamera.GlobalTransform;
+				Vector3 lookVector = destCamera[i].GlobalPosition / 2 + playerCamera.GlobalPosition / 2;
+				destCamera[i].GlobalTransform = destCamera[i].GlobalTransform.LookingAt(lookVector, UpVector);
+				Vector3 offSet = GlobalPosition - destCamera[i].GlobalPosition;
 				float near = Mathf.Abs((offSet).Dot(destPortal.normal));
 				near += 0.15f;
 
-				Vector3 localCam = destCamera.GlobalTransform.Basis.Inverse() * offSet;
+				Vector3 localCam = destCamera[i].GlobalTransform.Basis.Inverse() * offSet;
 				Vector2 frustumOffset = new Vector2(localCam.X, localCam.Y);
-				destCamera.SetFrustum(MirrorSize.X, frustumOffset, near, 4000);
+				destCamera[i].SetFrustum(MirrorSize.X, frustumOffset, near, 4000);
 			}
 			else
 			{
 				float distanceSquared = (GlobalPosition - playerCamera.GlobalPosition).LengthSquared();
 				float lenght = Mathf.Clamp(1.3f - (distanceSquared / radiusSquared), 0f, 1f);
-				destPortal.material.SetShaderParameter("Transparency", lenght);
-				destCamera.Basis = globalBasis;
+				destPortal.surfaces[i].material.SetShaderParameter("Transparency", lenght);
+				destCamera[i].Basis = globalBasis;
 			}
 		}
 	}
 
+	public void NewLocalPlayerAdded()
+	{
+		int index = destCamera.Count;
+		Node3D parent = destCamera[0].GetParentNode3D();
+		Camera3D camera = (Camera3D)destCamera[0].Duplicate();
+		parent.AddChild(camera);
+		destCamera.Add(camera);
+
+		MeshInstance3D mesh = new MeshInstance3D();
+		GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
+		mesh.Mesh = destPortal.commonMesh;
+		ShaderMaterial material = (ShaderMaterial)destPortal.baseMat.Duplicate(true);
+		mesh.SetSurfaceOverrideMaterial(0, material);
+		destPortal.surfaces.Add(new Portal.Surface(mesh, material));
+
+		if (mirror)
+		{
+			destPortal.surfaces[index].material = MaterialManager.GetMirrorMaterial(destPortal.shaderName);
+			material.NextPass = destPortal.surfaces[index].material;
+			if (!InvertX)
+				destPortal.surfaces[index].material.SetShaderParameter("InvertX", 0);
+			if (!InvertY)
+				destPortal.surfaces[index].material.SetShaderParameter("InvertY", 0);
+
+		}
+
+		SubViewport viewport = new SubViewport();
+		AddChild(viewport);
+
+		if (mirror)
+			viewport.Size = new Vector2I(Mathf.CeilToInt(320 * MirrorSize.X), Mathf.CeilToInt(320 * MirrorSize.Y));
+		else
+			viewport.Size = GameManager.Instance.viewPortSize;
+
+		viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
+		viewport.HandleInputLocally = false;
+
+		var CamRID = camera.GetCameraRid();
+		var viewPortRID = viewport.GetViewportRid();
+		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
+
+		destPortal.surfaces[index].material.SetShaderParameter("Tex_0", viewport.GetTexture());
+	}
+
 	public void SetUpPortal(Camera3D camera, Portal portal, bool isMirror = false)
 	{
-		destCamera = camera;
+		destCamera.Add(camera);
 		destPortal = portal;
-		Node3D parent = destCamera.GetParentNode3D();
+		Node3D parent = camera.GetParentNode3D();
 
 		mirror = isMirror;
 		if (mirror)
 		{
 			radius *= 2;
 			GlobalPosition = portal.position;
-			destPortal.material = MaterialManager.GetMirrorMaterial(destPortal.shaderName);
-			destPortal.baseMat.NextPass = destPortal.material;
+			destPortal.surfaces[0].material = MaterialManager.GetMirrorMaterial(destPortal.shaderName);
+			destPortal.baseMat.NextPass = destPortal.surfaces[0].material;
 			MirrorTransform = MirrorTransform3D(destPortal.normal, GlobalPosition);
-			if (Mathf.IsZeroApprox(portal.normal.Dot(Vector3.Forward)))
+			if (Mathf.IsZeroApprox(destPortal.normal.Dot(Vector3.Forward)))
 				UpVector = Vector3.Forward;
 			else
 			{
-				Vector3 normal = portal.normal.Cross(Vector3.Up);
+				Vector3 normal = destPortal.normal.Cross(Vector3.Up);
 				if (normal.LengthSquared() > 0)
 					UpVector = Vector3.Up;
 				else
 					UpVector = Vector3.Forward;
 			}
 			MirrorSize = FillMirrorData();
+			if (!InvertX)
+				destPortal.surfaces[0].material.SetShaderParameter("InvertX", 0);
+			if(!InvertY)
+				destPortal.surfaces[0].material.SetShaderParameter("InvertY", 0);
 		}
 		else
-			parent.Rotation += Transform3D.Identity.LookingAt(-portal.normal, Vector3.Up).Basis.GetEuler();
+			parent.Rotation += Transform3D.Identity.LookingAt(-destPortal.normal, Vector3.Up).Basis.GetEuler();
 
 		CollisionShape3D mc = new CollisionShape3D();
 		mc.Name = "Portal Area";
@@ -120,17 +173,17 @@ public partial class PortalSurface : Area3D
 		viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
 		viewport.HandleInputLocally = false;
 
-		var CamRID = destCamera.GetCameraRid();
+		var CamRID = camera.GetCameraRid();
 		var viewPortRID = viewport.GetViewportRid();
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 
-		destPortal.material.SetShaderParameter("Tex_0", viewport.GetTexture());
+		destPortal.surfaces[0].material.SetShaderParameter("Tex_0", viewport.GetTexture());
 	}
 
 	private Vector2 FillMirrorData()
 	{
 		MeshDataTool meshDataTool = new MeshDataTool();
-		meshDataTool.CreateFromSurface(destPortal.arrMesh, 0);
+		meshDataTool.CreateFromSurface(destPortal.commonMesh, 0);
 		Vector3 min = Vector3.One * float.MaxValue;
 		Vector3 max = Vector3.One * float.MinValue;
 		Vector2 size = Vector2.One;
@@ -219,8 +272,8 @@ public partial class PortalSurface : Area3D
 					if (i == 0)
 					{
 						if (destPortal.normal.Y < 0)
-							destPortal.material.SetShaderParameter("InvertX", 0);
-						destPortal.material.SetShaderParameter("InvertY", 0);
+							InvertX = false;
+						InvertY = false;
 						size = new Vector2(max.X - min.X, max.Z - min.Z);
 					}
 				break;
@@ -232,8 +285,8 @@ public partial class PortalSurface : Area3D
 			}
 			meshDataTool.SetVertexUV2(i, uv2);
 		}
-		destPortal.arrMesh.ClearSurfaces();
-		meshDataTool.CommitToSurface(destPortal.arrMesh);
+		destPortal.commonMesh.ClearSurfaces();
+		meshDataTool.CommitToSurface(destPortal.commonMesh);
 		return size;
 	}
 

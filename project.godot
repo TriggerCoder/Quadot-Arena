@@ -789,6 +789,7 @@ common/physics_ticks_per_second=40
 [rendering]
 
 environment/volumetric_fog/use_filter=0
+limits/cluster_builder/max_clustered_elements=32.0
 
 [shader_globals]
 
