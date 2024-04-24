@@ -781,8 +781,7 @@ public static class Mesher
 				surfaceData.commonMesh = multiMesh;
 				surfaceData.useTransparent = currentTransparent;
 				surfaceData.readyMaterials = material;
-				if (!frameSurfaces.surfaceIdbySkinName.ContainsKey(skinName))
-					frameSurfaces.surfaceIdbySkinName.Add(skinName, frameSurfaces.readySurfaces.Count());
+				frameSurfaces.surfaceIdbySkinName.Add(skinName + "_" + n, frameSurfaces.readySurfaces.Count());
 				frameSurfaces.readySurfaces.Add(surfaceData);
 
 				if (!MultiMeshes.ContainsKey(multiMesh))
@@ -800,6 +799,8 @@ public static class Mesher
 					if (!castShadows)
 						mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 					mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+					if (useLightVol)
+						mesh.SetInstanceShaderParameter("UseLightVol", true);
 					if (!currentTransparent && receiveShadows)
 					{
 						Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
@@ -909,8 +910,7 @@ public static class Mesher
 					surfaceData.commonMesh = multiMesh;
 					surfaceData.useTransparent = currentTransparent;
 					surfaceData.readyMaterials = material;
-					if (!frameSurfaces.surfaceIdbySkinName.ContainsKey(skinName))
-						frameSurfaces.surfaceIdbySkinName.Add(skinName, frameSurfaces.readySurfaces.Count());
+					frameSurfaces.surfaceIdbySkinName.Add(skinName + "_" + n, frameSurfaces.readySurfaces.Count());
 					frameSurfaces.readySurfaces.Add(surfaceData);
 
 					if (!MultiMeshes.ContainsKey(multiMesh))
@@ -928,6 +928,8 @@ public static class Mesher
 						if (!castShadows)
 							mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+						if (useLightVol)
+							mesh.SetInstanceShaderParameter("UseLightVol", true);
 						if (receiveShadows)
 						{
 							Texture mainText = (Texture2D)material.Get("shader_parameter/Tex_0");
@@ -1016,7 +1018,7 @@ public static class Mesher
 				skinName = meshToSkin[model.meshes[i].name];
 
 			
-			if (frameSurfaces.surfaceIdbySkinName.TryGetValue(skinName, out skinIndex))
+			if (frameSurfaces.surfaceIdbySkinName.TryGetValue(skinName + "_" + i, out skinIndex))
 			{
 				if (surfaceData == null)
 					surfaceData = frameSurfaces.readySurfaces[skinIndex];
@@ -1037,6 +1039,8 @@ public static class Mesher
 						GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
 						MultiMeshesInstances.Add(surfaceData.commonMesh, mesh);
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+						if (useLightVol)
+							mesh.SetInstanceShaderParameter("UseLightVol", true);
 						if (receiveShadows)
 						{
 							Texture mainText = (Texture2D)surfaceData.readyMaterials.Get("shader_parameter/Tex_0");
@@ -1102,7 +1106,7 @@ public static class Mesher
 				surfaceData.commonMesh = multiMesh;
 				surfaceData.useTransparent = useTransparent;
 				surfaceData.readyMaterials = material;
-				frameSurfaces.surfaceIdbySkinName.Add(skinName, frameSurfaces.readySurfaces.Count());
+				frameSurfaces.surfaceIdbySkinName.Add(skinName + "_" + i, frameSurfaces.readySurfaces.Count());
 				frameSurfaces.readySurfaces.Add(surfaceData);
 				if (!MultiMeshes.ContainsKey(multiMesh))
 				{
@@ -1125,6 +1129,8 @@ public static class Mesher
 						GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
 						MultiMeshesInstances.Add(surfaceData.commonMesh, mesh);
 						mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+						if (useLightVol)
+							mesh.SetInstanceShaderParameter("UseLightVol", true);
 					}
 				}
 				else

@@ -107,7 +107,7 @@ worldEnvironment = NodePath("../WorldEnvironment")
 Sun = NodePath("../SunLight")
 Root = NodePath("..")
 tessellations = 10
-SplitScreen = NodePath("SplitScreenContainer")
+SplitScreen = [NodePath("SplitScreenContainer/TopRow"), NodePath("SplitScreenContainer/MiddleRow"), NodePath("SplitScreenContainer/BtmRow")]
 viewPortPrefab = ExtResource("13_tu0mj")
 playerPrefab = ExtResource("7_rdgk2")
 musicType = 1
@@ -156,6 +156,15 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="TopRow" type="HBoxContainer" parent="Quadot Arena/SplitScreenContainer"]
+layout_mode = 2
+
+[node name="MiddleRow" type="HBoxContainer" parent="Quadot Arena/SplitScreenContainer"]
+layout_mode = 2
+
+[node name="BtmRow" type="HBoxContainer" parent="Quadot Arena/SplitScreenContainer"]
+layout_mode = 2
 
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)

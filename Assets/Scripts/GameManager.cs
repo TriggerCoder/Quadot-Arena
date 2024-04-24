@@ -21,7 +21,7 @@ public partial class GameManager : Node
 	[Export]
 	public float shadowIntensity = 1f;
 	[Export]
-	public Container SplitScreen;
+	public Container[] SplitScreen;
 	[Export]
 	public PackedScene viewPortPrefab;
 
@@ -227,10 +227,10 @@ public partial class GameManager : Node
 	{
 		if (@event is InputEventJoypadButton)
 		{
-			if (Input.IsActionJustPressed("Start_1"))
+			for (int i = 1; i < 8; i++) 
 			{
-				Print("New Player Wants to Join");
-				controllerWantToJoin.Add(1);
+				if (Input.IsActionJustPressed("Start_"+i))
+					controllerWantToJoin.Add(i);
 			}
 		}
 
@@ -309,27 +309,90 @@ public partial class GameManager : Node
 		player.Name = "Player "+ playerNum;
 		player.playerViewPort = (PlayerViewPort)viewPortPrefab.Instantiate();
 		AddChild(player);
-		SplitScreen.AddChild(player.playerViewPort);
 		player.playerInfo.SetPlayer(playerNum);
 		player.playerControls.Init(controllerNum);
 		player.InitPlayer();
 		Players.Add(controllerNum, player);
+		if (Players.Count > 6)
+		{
+
+		}
+		else
+		{
+			switch (Players.Count)
+			{
+				default:
+				case 1:
+					SplitScreen[0].AddChild(player.playerViewPort);
+				break;
+				case 2:
+					SplitScreen[1].AddChild(player.playerViewPort);
+				break;
+				case 3:
+					SplitScreen[1].AddChild(player.playerViewPort);
+				break;
+				case 4:
+					SplitScreen[0].AddChild(player.playerViewPort);
+				break;
+				case 5:
+					SplitScreen[1].AddChild(player.playerViewPort);
+				break;
+				case 6:
+					SplitScreen[0].AddChild(player.playerViewPort);
+				break;
+			}
+		}
 		ArrangeSplitScreen();
 	}
 
 	public void ArrangeSplitScreen()
 	{
-
 		Vector2I Size = DisplayServer.WindowGetSize();
+		int i = 0;
 		foreach (var dic in Players) 
 		{
 			PlayerThing player = dic.Value;
-			Vector2I size = Size;//player.playerViewPort.viewPort.Size;
-			size.Y /= Players.Count;
+			Vector2I size = Size;
+			if (Players.Count > 6)
+			{
+
+			}
+			else
+			{
+				switch (Players.Count)
+				{
+					default:
+					case 1:
+					break;
+					case 2:
+						size.Y /= 2;
+					break;
+					case 3:
+						size.Y /= 2;
+						if (i > 0)
+							size.X /= 2;
+					break;
+					case 4:
+						size.Y /= 2;
+						size.X /= 2;
+					break;
+					case 5:
+						size.Y /= 2;
+						if ((i == 0) || (i == 3))
+							size.X /= 2;
+						else
+							size.X /= 3;
+					break;
+					case 6:
+						size.Y /= 2;
+						size.X /= 3;
+					break;
+				}
+			}
 			player.playerViewPort.viewPort.Size = size;
 			player.playerInfo.playerPostProcessing.ViewPort.Size = size;
-//			SetViewPortToCamera(player.playerInfo.playerCamera.ViewCamera, player.playerViewPort.viewPort);
 			SetViewPortToCamera(player.playerInfo.playerPostProcessing.ViewPortCamera, player.playerViewPort.viewPort);
+			i++;
 		}
 	}
 

@@ -248,9 +248,6 @@ public partial class PlayerModel : StaticBody3D, Damageable
 						case UpperAnimation.Death1:
 						case UpperAnimation.Death2:
 						case UpperAnimation.Death3:
-							upperAnimation++;
-							nextUpper = upperAnim[upperAnimation];
-							nextFrameUpper = nextUpper.startFrame;
 							ChangeToRagDoll();
 							return;
 						case UpperAnimation.Melee:
@@ -494,6 +491,7 @@ public partial class PlayerModel : StaticBody3D, Damageable
 
 		Quaternion upperTorsoRotation = upper.tagsbyId[upper_tag_torso][currentFrameUpper].rotation;
 		Quaternion lowerTorsoRotation = lower.tagsbyId[lower_tag_torso][currentFrameLower].rotation;
+		Vector3 localOrigin = lower.tagsbyId[lower_tag_torso][currentFrameLower].localOrigin;
 		Vector3 upperTorsoOrigin = upper.tagsbyId[upper_tag_torso][currentFrameUpper].origin;
 		Vector3 currentOffset = lowerTorsoRotation * upperTorsoOrigin;
 		Quaternion currentRotation = lowerTorsoRotation * upperTorsoRotation;
@@ -526,6 +524,8 @@ public partial class PlayerModel : StaticBody3D, Damageable
 		headBody.GlobalRotation = headGlobalRot;
 		SetMultiMesh(headRagDoll, headBody);
 
+		currentOffset = upperTorsoRotation * upperTorsoOrigin;
+		currentRotation = upperTorsoRotation;
 		for (int i = 0; i < lower.meshes.Count; i++)
 		{
 			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
@@ -536,6 +536,8 @@ public partial class PlayerModel : StaticBody3D, Damageable
 		MD3GodotConverted lowerRagDoll = Mesher.GenerateModelFromMeshes(lower, meshToSkin, GameManager.AllPlayerViewMask, true, currentFrameLower);
 		lowerRagDoll.node.Name = "lower_body";
 		lowerNode = lowerRagDoll.node;
+		lowerNode.Position = localOrigin + currentOffset;
+		lowerNode.Quaternion = currentRotation;
 		playerModel.AddChild(lowerRagDoll.node);
 		SetMultiMesh(lowerRagDoll, playerModel);
 
