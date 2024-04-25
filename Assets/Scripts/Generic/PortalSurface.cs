@@ -86,14 +86,14 @@ public partial class PortalSurface : Area3D
 		MeshInstance3D mesh = new MeshInstance3D();
 		GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
 		mesh.Mesh = destPortal.commonMesh;
-		ShaderMaterial material = (ShaderMaterial)destPortal.baseMat.Duplicate(true);
+		ShaderMaterial material = (ShaderMaterial)destPortal.commonMat.Duplicate(true);
 		mesh.SetSurfaceOverrideMaterial(0, material);
 		destPortal.surfaces.Add(new Portal.Surface(mesh, material));
 
 		if (mirror)
 		{
 			destPortal.surfaces[index].material = MaterialManager.GetMirrorMaterial(destPortal.shaderName);
-			material.NextPass = destPortal.surfaces[index].material;
+			destPortal.surfaces[index].baseMat.NextPass = destPortal.surfaces[index].material;
 			if (!InvertX)
 				destPortal.surfaces[index].material.SetShaderParameter("InvertX", 0);
 			if (!InvertY)
@@ -131,7 +131,7 @@ public partial class PortalSurface : Area3D
 			radius *= 2;
 			GlobalPosition = portal.position;
 			destPortal.surfaces[0].material = MaterialManager.GetMirrorMaterial(destPortal.shaderName);
-			destPortal.baseMat.NextPass = destPortal.surfaces[0].material;
+			destPortal.surfaces[0].baseMat.NextPass = destPortal.surfaces[0].material;
 			MirrorTransform = MirrorTransform3D(destPortal.normal, GlobalPosition);
 			if (Mathf.IsZeroApprox(destPortal.normal.Dot(Vector3.Forward)))
 				UpVector = Vector3.Forward;

@@ -40,7 +40,6 @@ public static class Mesher
 
 	public static Dictionary<MultiMesh, List<Node3D>> MultiMeshes = new Dictionary<MultiMesh, List<Node3D>>();
 	public static Dictionary<MultiMesh, MultiMeshInstance3D> MultiMeshesInstances = new Dictionary<MultiMesh, MultiMeshInstance3D>();
-	public static Dictionary<string, MultiMesh> RadgDolls = new Dictionary<string, MultiMesh>();
 	public static void ClearMesherCache()
 	{
 		vertsCache = new List<Vector3>();
@@ -351,11 +350,12 @@ public static class Mesher
 			for (var i = 0; i < normalsCache.Count; i++)
 				normals += normalsCache[i];
 
+			ShaderMaterial mat = (ShaderMaterial)material.Duplicate(true);
 			mesh.Layers = (1 << GameManager.Player1ViewLayer);
-			mesh.SetSurfaceOverrideMaterial(0, material);
+			mesh.SetSurfaceOverrideMaterial(0, mat);
 			portal.normal = normals.Normalized();
 			portal.commonMesh = arrMesh;
-			portal.surfaces.Add(new Portal.Surface(mesh,material));
+			portal.surfaces.Add(new Portal.Surface(mesh, mat));
 			ThingsManager.AddPortalToMap(portal);
 		}
 

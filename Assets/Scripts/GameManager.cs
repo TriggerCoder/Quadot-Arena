@@ -11,7 +11,9 @@ public partial class GameManager : Node
 	[Export]
 	public Node3D Root;
 	[Export]
-	public string autoloadMap = "q3dm1";
+	public string[] mapRotation;
+	[Export]
+	public int mapTime = 5;
 	[Export]
 	public int tessellations = 5;
 	[Export]
@@ -135,6 +137,9 @@ public partial class GameManager : Node
 	public List<int> controllerWantToJoin = new List<int>();
 	public Vector2I viewPortSize = new Vector2I(1280 , 720);
 	public int QuadMul = 3;
+
+	private int mapNum = 0;
+	private float mapLeftTime = 0;
 	public enum FuncState
 	{
 		None,
@@ -210,14 +215,15 @@ public partial class GameManager : Node
 		QShaderManager.ProcessShaders();
 		MaterialManager.LoadFXShaders();
 		MaterialManager.SetAmbient();
-		if (MapLoader.Load(autoloadMap))
+		if (MapLoader.Load(mapRotation[0]))
 		{
-			ClusterPVSManager.Instance.ResetClusterList();
+			ClusterPVSManager.Instance.ResetClusterList(MapLoader.surfaces.Count);
 			MapLoader.GenerateMapCollider();
 			MapLoader.GenerateMapFog();
 			MapLoader.GenerateSurfaces();
 			MapLoader.SetLightVolData();
 			ThingsManager.AddThingsToMap();
+			mapLeftTime = mapTime * 60;
 		}
 		currentState = FuncState.Ready;
 		return;
@@ -264,12 +270,25 @@ public partial class GameManager : Node
 	}
 	public override void _Process(double delta)
 	{
+		float deltaTime = (float)delta;
+
 		if (!paused)
 		{
-			float deltaTime = (float)delta;
 			timeMs += deltaTime;
 			timeToSync = CheckIfSyncTime(deltaTime);
 			RenderingServer.GlobalShaderParameterSet("MsTime", CurrentTimeMsec);
+		}
+
+		if (mapLeftTime > 0)
+			mapLeftTime -= deltaTime;
+		if (mapLeftTime < 0)
+		{
+			mapNum++;
+			if (mapNum >= mapRotation.Length)
+				mapNum = 0; 
+			mapLeftTime = mapTime * 60;
+			paused = true;
+			CallDeferred("ChangeMap");
 		}
 
 		switch(currentState)
@@ -304,6 +323,43 @@ public partial class GameManager : Node
 		}
 	}
 
+	public void ChangeMap()
+	{
+		MapLoader.UnloadMap();
+		TemporaryObjectsHolder = new Node3D();
+		TemporaryObjectsHolder.Name = "TemporaryObjectsHolder";
+		AddChild(TemporaryObjectsHolder);
+		if (MapLoader.Load(mapRotation[mapNum]))
+		{
+			ClusterPVSManager.Instance.ResetClusterList(MapLoader.surfaces.Count);
+			MapLoader.GenerateMapCollider();
+			MapLoader.GenerateMapFog();
+			MapLoader.GenerateSurfaces();
+			MapLoader.SetLightVolData();
+			ThingsManager.AddThingsToMap();
+			foreach (var dic in Players)
+			{
+				PlayerThing player = dic.Value;
+				if (player.playerControls.playerWeapon != null)
+				{
+					player.playerControls.playerWeapon.QueueFree();
+					player.playerControls.playerWeapon = null;
+				}
+				//There is an small fraction of time (death animation) where player is dead, but avatar hasn't detached yet
+				if (IsInstanceValid(player.interpolatedTransform))
+					player.interpolatedTransform.QueueFree();
+				player.playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
+				player.playerInfo.Reset();
+				player.InitPlayer();
+			}
+		}
+		paused = false;
+	}
+
+	public static void SetPause ()
+	{ 
+		Instance.paused = true;
+	}
 	public void SetupNewPlayer(int playerNum, int controllerNum)
 	{
 		PlayerThing player = (PlayerThing)playerPrefab.Instantiate();

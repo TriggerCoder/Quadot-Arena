@@ -8,10 +8,10 @@ public partial class ClusterPVSManager : Node
 	private List<GeometryInstance3D> AllClusters;
 	private GeometryInstance3D[] SurfaceToCluster;
 	public const int RenderFrameMask = (0xFFFF << GameManager.MaxLocalPlayers);
-	public void ResetClusterList()
+	public void ResetClusterList(int count)
 	{
 		AllClusters = new List<GeometryInstance3D>();
-		SurfaceToCluster = new GeometryInstance3D[MapLoader.surfaces.Count];
+		SurfaceToCluster = new GeometryInstance3D[count];
 	}
 	public override void _Ready()
 	{

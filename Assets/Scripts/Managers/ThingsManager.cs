@@ -282,6 +282,19 @@ public partial class ThingsManager : Node
 		stream.Close();
 		return;
 	}
+
+	public static void UnloadThings()
+	{
+		entitiesOnMap = new List<Entity>();
+		portalSurfaces = new List<PortalSurface>();
+		targetsOnMap = new Dictionary<string, List<Target>>();
+		portalCameras = new Dictionary<string, Camera3D>();
+		triggerToActivate = new Dictionary<string, TriggerController>();
+		timersOnMap = new Dictionary<string, Dictionary<string, string>>();
+		triggersOnMap = new Dictionary<string, List<Dictionary<string, string>>>();
+		portalsOnMap = new List<Portal>();
+	}
+
 	public static void AddThingsToMap()
 	{
 		AddTriggersOnMap();
@@ -1149,16 +1162,18 @@ public class Portal
 	public Vector3 normal;
 	public ArrayMesh commonMesh;
 	public List<Surface> surfaces = new List<Surface>();
-	public ShaderMaterial baseMat;
+	public ShaderMaterial commonMat;
 
 	public class Surface
 	{
 		public MeshInstance3D mesh;
+		public ShaderMaterial baseMat;
 		public ShaderMaterial material;
 
 		public Surface(MeshInstance3D mesh, ShaderMaterial material)
 		{
 			this.mesh = mesh;
+			this.baseMat = material;
 			this.material = (ShaderMaterial)material.NextPass;
 		}
 
@@ -1166,7 +1181,7 @@ public class Portal
 	public Portal(string shaderName, ShaderMaterial baseMat)
 	{
 		this.shaderName = shaderName;
-		this.baseMat = baseMat;
+		this.commonMat = baseMat;
 	}
 }
 

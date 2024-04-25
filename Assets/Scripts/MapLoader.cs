@@ -333,6 +333,20 @@ public static class MapLoader
 		return true;
 	}
 
+	public static void UnloadMap()
+	{
+		GameManager.SetPause();
+		SpawnerManager.deathMatchSpawner = new List<Target>();
+		ClusterPVSManager.Instance.ResetClusterList(1);
+		Mesher.MultiMeshesInstances = new Dictionary<MultiMesh, MultiMeshInstance3D>();
+		ThingsManager.UnloadThings();
+		MapMesh.QueueFree();
+		MapFlares.QueueFree();
+		ColliderGroup.QueueFree();
+		GameManager.Instance.TemporaryObjectsHolder.QueueFree();
+		System.GC.Collect(2, System.GCCollectionMode.Forced);
+	}
+
 	public static void GenerateMapCollider()
 	{
 		Node3D MapColliders = new Node3D();
@@ -580,12 +594,6 @@ public static void LerpColorOnRepeatedVertex()
 			Aabb box = boxShape.GetDebugMesh().GetAabb();
 			center += box.GetCenter();
 			numCenters++;
-/*			float max = box.GetLongestAxisSize();
-			SphereShape3D jumpPadCollider = new SphereShape3D();
-			jumpPadCollider.Radius = max * .5f;
-			mc.Shape = jumpPadCollider;
-			jumpPad.GlobalPosition = center;
-*/
 		}
 		center /= numCenters;
 		return center;

@@ -97,6 +97,17 @@ public static class TextureLoader
 			else
 				path += ".JPG";
 
+			if (Textures.ContainsKey(tex.name))
+			{
+				if (tex.addAlpha)
+				{
+					if (TransparentTextures.ContainsKey(tex.name))
+						continue;
+				}
+				else
+					continue;
+			}
+
 			if (PakManager.ZipFiles.TryGetValue(path, out FileName))
 			{
 				var reader = new ZipReader();
