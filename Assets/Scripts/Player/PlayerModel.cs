@@ -3,7 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using ExtensionMethods;
 
-public partial class PlayerModel : StaticBody3D, Damageable
+public partial class PlayerModel : RigidBody3D, Damageable
 {
 	public int rotationFPS = 15;
 	public int lowerRotationFPS = 7;
@@ -156,8 +156,8 @@ public partial class PlayerModel : StaticBody3D, Damageable
 	private PlayerControls playerControls;
 	private float impulseDampening = 4f;
 	private Vector3 impulseVector = Vector3.Zero;
-	private Rid Sphere;
-	private PhysicsShapeQueryParameters3D SphereCast;
+
+	private PhysicsShapeQueryParameters3D BodyCast;
 	private PhysicsDirectSpaceState3D SpaceState;
 	public int Hitpoints { get { return hitpoints; } }
 	public bool Dead { get { return hitpoints <= 0; } }
@@ -177,21 +177,21 @@ public partial class PlayerModel : StaticBody3D, Damageable
 		FxLight.Position = Vector3.Up;
 		FxLight.LightColor = new Color(0.2f, 0.2f, 1);
 
-		Sphere = PhysicsServer3D.SphereShapeCreate();
-		SphereCast = new PhysicsShapeQueryParameters3D();
-		SphereCast.ShapeRid = Sphere;
-		PhysicsServer3D.ShapeSetData(Sphere, .5f);
-		SphereCast.CollisionMask = (1 << GameManager.ColliderLayer);
-		SphereCast.Motion = Vector3.Zero;
+
+		BodyCast = new PhysicsShapeQueryParameters3D();
+		BodyCast.CollisionMask = (1 << GameManager.ColliderLayer);
+		BodyCast.Motion = Vector3.Zero;
 		SpaceState = GetWorld3D().DirectSpaceState;
+
+		Mass = 80;
 	}
 	void ApplySimpleMove(float deltaTime)
 	{
 		float gravityAccumulator;
 		Vector3 currentPosition = Position;
 
-		SphereCast.Transform = new Transform3D(Basis.Identity, upperBody.GlobalPosition);
-		var hit = SpaceState.GetRestInfo(SphereCast);
+		BodyCast.Transform = new Transform3D(Basis.Identity, upperBody.GlobalPosition);
+		var hit = SpaceState.GetRestInfo(BodyCast);
 		if (hit.Count > 0)
 			gravityAccumulator = 0f;
 		else if (deadWater)
@@ -222,7 +222,7 @@ public partial class PlayerModel : StaticBody3D, Damageable
 
 		if (ragDoll)
 		{
-			ApplySimpleMove(deltaTime);
+//			ApplySimpleMove(deltaTime);
 			UpdateMultiMesh();
 			return;
 		}
@@ -470,10 +470,12 @@ public partial class PlayerModel : StaticBody3D, Damageable
 
 	private void ChangeToRagDoll()
 	{
-		uint OwnerShapeId = CreateShapeOwner(this);
-
+		//		uint OwnerShapeId = CreateShapeOwner(this);
+		
 		for (int i = 0; i < head.meshes.Count; i++)
 		{
+			CollisionShape3D headCollision = new CollisionShape3D();
+			AddChild(headCollision);
 			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
 			Vector3[] faces = headModel.data[i].arrMesh.GetFaces();
 			Quaternion rotation = tagHeadNode.Quaternion;
@@ -483,7 +485,8 @@ public partial class PlayerModel : StaticBody3D, Damageable
 				faces[j] += tagHeadNode.Position + upperBody.Position;
 			}
 			modelColliderShape.Data = faces;
-			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
+			headCollision.Shape = modelColliderShape;
+//			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
 		}
 		Vector3 headGlobalPos = headBody.GlobalPosition;
 		Vector3 headGlobalRot = headBody.GlobalRotation;
@@ -498,6 +501,8 @@ public partial class PlayerModel : StaticBody3D, Damageable
 
 		for (int i = 0; i < upper.meshes.Count; i++)
 		{
+			CollisionShape3D bodyCollision = new CollisionShape3D();
+			AddChild(bodyCollision);
 			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
 			Vector3[] faces = upperModel.data[i].arrMesh.GetFaces();
 			Quaternion rotation = upperBody.Quaternion;
@@ -507,7 +512,8 @@ public partial class PlayerModel : StaticBody3D, Damageable
 				faces[j] += upperBody.Position;
 			}
 			modelColliderShape.Data = faces;
-			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
+			bodyCollision.Shape = modelColliderShape;
+//			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
 		}
 		upperModel.node.QueueFree();
 		MD3GodotConverted upperRagDoll = Mesher.GenerateModelFromMeshes(upper, meshToSkin, GameManager.AllPlayerViewMask, true, currentFrameUpper);
@@ -525,19 +531,20 @@ public partial class PlayerModel : StaticBody3D, Damageable
 		SetMultiMesh(headRagDoll, headBody);
 
 		currentOffset = upperTorsoRotation * upperTorsoOrigin;
-		currentRotation = upperTorsoRotation;
 		for (int i = 0; i < lower.meshes.Count; i++)
 		{
+			CollisionShape3D legCollision = new CollisionShape3D();
+			AddChild(legCollision);
 			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
 			modelColliderShape.Data = lowerModel.data[i].arrMesh.GetFaces();
-			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
+			legCollision.Shape = modelColliderShape;
+//			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
 		}
 		lowerModel.node.QueueFree();
 		MD3GodotConverted lowerRagDoll = Mesher.GenerateModelFromMeshes(lower, meshToSkin, GameManager.AllPlayerViewMask, true, currentFrameLower);
 		lowerRagDoll.node.Name = "lower_body";
 		lowerNode = lowerRagDoll.node;
 		lowerNode.Position = localOrigin + currentOffset;
-		lowerNode.Quaternion = currentRotation;
 		playerModel.AddChild(lowerRagDoll.node);
 		SetMultiMesh(lowerRagDoll, playerModel);
 
@@ -550,6 +557,10 @@ public partial class PlayerModel : StaticBody3D, Damageable
 		ragDoll = true;
 		Reparent(GameManager.Instance.TemporaryObjectsHolder);
 		playerControls.playerThing.interpolatedTransform.QueueFree();
+		playerControls.playerThing.interpolatedTransform = null;
+		LinearVelocity = impulseVector;
+		CenterOfMassMode = CenterOfMassModeEnum.Custom;
+		CenterOfMass = Vector3.Down * .5f;
 	}
 
 	public void Die()
@@ -557,7 +568,7 @@ public partial class PlayerModel : StaticBody3D, Damageable
 		//Need to reset the torso and head view
 		headBody.Basis = new Basis(Quaternion.Identity);
 		upperBody.Basis = new Basis(Quaternion.Identity);
-
+		lowerNode.Basis = new Basis(Quaternion.Identity);
 		int deathNum = 2 * GD.RandRange(0, 2);
 		upperAnimation = deathNum;
 		lowerAnimation = deathNum;

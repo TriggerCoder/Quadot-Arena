@@ -88,6 +88,7 @@ public static class Mesher
 		if (addCollider)
 		{
 			collider = new StaticBody3D();
+			collider.InputRayPickable = false;
 			MapLoader.ColliderGroup.AddChild(collider);
 			collider.Name = "Bezier_" + indexId + "_collider";
 			MapLoader.mapContentTypes.Add(collider, contentType);
@@ -1297,6 +1298,7 @@ public static class Mesher
 
 			holder.AddChild(objCollider);
 		}
+
 		MapLoader.mapContentTypes.Add(objCollider, contentType);
 
 		uint OwnerShapeId = objCollider.CreateShapeOwner(holder);
@@ -1320,6 +1322,7 @@ public static class Mesher
 			objCollider.CollisionLayer = (1 << GameManager.InvisibleBlockerLayer);
 		else
 			objCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
+		objCollider.InputRayPickable = false;
 
 		if (isWater)
 		{
@@ -1478,6 +1481,7 @@ public static class Mesher
 		}
 		objCollider.CollisionLayer = (1 << GameManager.ColliderLayer);
 		objCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+		objCollider.InputRayPickable = false;
 
 		CollisionShape3D mc = new CollisionShape3D();
 		mc.Name = "brushSide: " + brush.brushSide;
@@ -1575,6 +1579,8 @@ public static class Mesher
 		fogArea.Name = "FogArea_" + index;
 		fogArea.CollisionLayer = (1 << GameManager.FogLayer);
 		fogArea.CollisionMask = (1 << GameManager.NoCollisionLayer);
+		fogArea.InputRayPickable = false;
+
 		holder.AddChild(fogArea);
 
 		CollisionShape3D mc = new CollisionShape3D();

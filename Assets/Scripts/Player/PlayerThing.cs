@@ -37,6 +37,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public int hitpoints = 100;
 	public int armor = 0;
 	public int waterLever = 0;
+	public int frags = 0;
 
 	public WaterSurface currentWaterSurface = null;
 
@@ -202,6 +203,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 				{
 					handicap = Mathf.Clamp(handicap - .05f, .5f, 2);
 					agressor.handicap = Mathf.Clamp(agressor.handicap + .05f, .5f, 2);
+					agressor.frags++;
+					GameManager.Instance.CheckDeathCount(agressor.frags);
 				}
 			}
 //			GameManager.Instance.AddDeathCount();

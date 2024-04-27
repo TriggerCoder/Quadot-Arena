@@ -25,7 +25,7 @@ public partial class ClusterPVSManager : Node
 	}
 	public void OnPostRender()
 	{
-		AllClusters.AsParallel().ForAll(mesh => { mesh.Layers = GameManager.InvisibleMask;});
+		AllClusters.AsParallel().ForAll(mesh => { mesh.Layers = (1 << GameManager.NotVisibleLayer); });
 //		GameManager.Print("PostRender");
 	}
 	public void RegisterClusterAndSurface(GeometryInstance3D cluster, QSurface surface)

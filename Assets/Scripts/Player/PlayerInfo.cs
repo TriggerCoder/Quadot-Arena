@@ -99,7 +99,15 @@ public partial class PlayerInfo : Node3D
 		playerThing.inLava = false;
 		playerThing.hitpoints = 100;
 		playerThing.armor = 0;
+
 		playerThing.painTime = 0;
+		playerThing.quadTime = 0;
+		playerThing.hasteTime = 0;
+		playerThing.invisTime = 0;
+		playerThing.regenTime = 0;
+		playerThing.enviroSuitTime = 0;
+		playerThing.flightTime = 0;
+
 		playerThing.holdableItem = PlayerThing.HoldableItem.None;
 
 		playerControls.impulseVector = Vector3.Zero;

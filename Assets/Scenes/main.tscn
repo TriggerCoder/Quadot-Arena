@@ -1,4 +1,4 @@
-[gd_scene load_steps=89 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=90 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Resource" uid="uid://d2qwccitnqm8c" path="res://Assets/Data Resources/SoundData.tres" id="3_0fxsa"]
@@ -84,6 +84,7 @@
 [ext_resource type="PackedScene" uid="uid://dlo5rcwan3lx" path="res://Assets/Things/GamePlay/target/target_location.tscn" id="49_mb0ac"]
 [ext_resource type="PackedScene" uid="uid://bimr3d2dbk00j" path="res://Assets/Things/Pickups/Weapons/weapon_grenadelauncher.tscn" id="53_qje8m"]
 [ext_resource type="PackedScene" uid="uid://byqxrs4xryit5" path="res://Assets/Things/Debris/ItemDrop.tscn" id="59_rmbdm"]
+[ext_resource type="PackedScene" uid="uid://bnes0v0ntwmmg" path="res://Assets/Things/GamePlay/info/info_player_intermission.tscn" id="74_1t76s"]
 [ext_resource type="PackedScene" uid="uid://cwmpgottit0na" path="res://Assets/Things/GamePlay/target/target_relay.tscn" id="79_dvn2g"]
 [ext_resource type="PackedScene" uid="uid://bkiqdp4glmct1" path="res://Assets/Things/GamePlay/target/target_delay.tscn" id="80_bwsan"]
 [ext_resource type="PackedScene" uid="uid://k6bvnispnql3" path="res://Assets/Things/GamePlay/trigger/trigger_always.tscn" id="83_a6fcd"]
@@ -101,14 +102,17 @@ volumetric_fog_density = 0.0
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_rcj1l")
 
-[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "Sun", "Root", "SplitScreen")]
+[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "Sun", "Root", "SplitScreen", "IntermissionContainer", "IntermissionViewPort")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
 Sun = NodePath("../SunLight")
 Root = NodePath("..")
 mapRotation = PackedStringArray("q3dm1", "q3dm7", "q3tourney2", "q3dm17")
+fragLimit = 1
 tessellations = 10
 SplitScreen = [NodePath("SplitScreenContainer/TopRow"), NodePath("SplitScreenContainer/MiddleRow"), NodePath("SplitScreenContainer/BtmRow")]
+IntermissionContainer = NodePath("IntermissionContainer")
+IntermissionViewPort = NodePath("IntermissionContainer/IntermissionViewPort")
 viewPortPrefab = ExtResource("13_tu0mj")
 playerPrefab = ExtResource("7_rdgk2")
 musicType = 1
@@ -142,7 +146,7 @@ _healthsPrefabs = Array[PackedScene]([ExtResource("27_5pqil"), ExtResource("28_d
 _armorPrefabs = Array[PackedScene]([ExtResource("29_slqlw"), ExtResource("30_8nwr7"), ExtResource("32_pviff")])
 _powerUpsPrefabs = Array[PackedScene]([ExtResource("37_60yxr"), ExtResource("42_lo0q4"), ExtResource("43_0nxgr"), ExtResource("44_nb564")])
 _funcPrefabs = Array[PackedScene]([ExtResource("39_63dug"), ExtResource("38_2vxeb"), ExtResource("47_g2dqw"), ExtResource("40_xap66"), ExtResource("34_nkc1v")])
-_infoPrefabs = Array[PackedScene]([ExtResource("46_6njgx"), ExtResource("33_epjyi"), ExtResource("44_er3mv")])
+_infoPrefabs = Array[PackedScene]([ExtResource("46_6njgx"), ExtResource("33_epjyi"), ExtResource("44_er3mv"), ExtResource("74_1t76s")])
 _miscPrefabs = Array[PackedScene]([ExtResource("48_uv6co"), ExtResource("49_gicjp"), ExtResource("37_kkxgn")])
 _targetPrefabs = Array[PackedScene]([ExtResource("32_b20ey"), ExtResource("31_tr8jk"), ExtResource("49_mb0ac"), ExtResource("79_dvn2g"), ExtResource("80_bwsan")])
 _triggerPrefabs = Array[PackedScene]([ExtResource("45_ge4jt"), ExtResource("40_yfkkd"), ExtResource("35_1ytnq"), ExtResource("36_7m5u6"), ExtResource("83_a6fcd")])
@@ -170,6 +174,25 @@ theme_override_constants/separation = 0
 [node name="BtmRow" type="HBoxContainer" parent="Quadot Arena/SplitScreenContainer"]
 layout_mode = 2
 theme_override_constants/separation = 0
+
+[node name="IntermissionContainer" type="SubViewportContainer" parent="Quadot Arena"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="IntermissionViewPort" type="SubViewport" parent="Quadot Arena/IntermissionContainer"]
+handle_input_locally = false
+positional_shadow_atlas_size = 0
+positional_shadow_atlas_16_bits = false
+positional_shadow_atlas_quad_0 = 0
+positional_shadow_atlas_quad_1 = 0
+positional_shadow_atlas_quad_2 = 0
+positional_shadow_atlas_quad_3 = 0
+size = Vector2i(1280, 720)
+render_target_update_mode = 0
 
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)

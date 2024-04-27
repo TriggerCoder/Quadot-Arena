@@ -13,7 +13,9 @@ public partial class GameManager : Node
 	[Export]
 	public string[] mapRotation;
 	[Export]
-	public int mapTime = 5;
+	public int timeLimit = 7;
+	[Export]
+	public int fragLimit = 15;
 	[Export]
 	public int tessellations = 5;
 	[Export]
@@ -24,6 +26,10 @@ public partial class GameManager : Node
 	public float shadowIntensity = 1f;
 	[Export]
 	public Container[] SplitScreen;
+	[Export]
+	public Container IntermissionContainer;
+	[Export]
+	public SubViewport IntermissionViewPort;
 	[Export]
 	public PackedScene viewPortPrefab;
 
@@ -75,7 +81,7 @@ public partial class GameManager : Node
 	public const short Player7UIViewLayer = 14;
 	public const short Player8UIViewLayer = 15;
 	public const short PlayerNormalDepthLayer = 16;
-	public const short NotVisibleLayer = 20;
+	public const short NotVisibleLayer = 17;
 
 	//Physic Masks
 	public const uint TakeDamageMask = ((1 << DamageablesLayer) | 
@@ -134,12 +140,21 @@ public partial class GameManager : Node
 	public SoundData[] OverrideSounds;
 
 	private Dictionary<int, PlayerThing> Players = new Dictionary<int, PlayerThing>();
+
+	public Camera3D interMissionCamera = null;
 	public List<int> controllerWantToJoin = new List<int>();
 	public Vector2I viewPortSize = new Vector2I(1280 , 720);
 	public int QuadMul = 3;
 
 	private int mapNum = 0;
 	private float mapLeftTime = 0;
+
+	public MultiAudioStream AnnouncerStream; 
+	private static readonly string FiveMinutes = "feedback/5_minute";
+	private static readonly string OneMinute = "feedback/1_minute";
+	private static readonly string[] Seconds = { "feedback/three", "feedback/two", "feedback/one" };
+	private static readonly string[] FragsLeft = { "feedback/1_frag", "feedback/2_frags", "feedback/3_frags" };
+	private int second = 0;
 	public enum FuncState
 	{
 		None,
@@ -171,6 +186,12 @@ public partial class GameManager : Node
 		Overload,
 		Harvester
 	}
+	public enum LimitReach
+	{
+		None,
+		Time,
+		Frag
+	}
 	public static class ControllerType
 	{
 		public const int MouseKeyboard = 0;
@@ -185,13 +206,22 @@ public partial class GameManager : Node
 	}
 
 	private FuncState currentState = FuncState.None;
-	
+
+	private LimitReach limitReach = LimitReach.None;
+
 	private static PrintType printType = PrintType.Log;
 	private static int printLine = 0;
 	public override void _Ready()
 	{
 		//Disable Physics Jitter Fix
 		Engine.PhysicsJitterFix = 0;
+
+		AnnouncerStream = new MultiAudioStream();
+		AddChild(AnnouncerStream);
+		AnnouncerStream.Is2DAudio = true;
+		AnnouncerStream.VolumeDb = 14;
+		AnnouncerStream.Name = "AnnouncerStream";
+		AnnouncerStream.Bus = "FXBus";
 
 		GD.Randomize();
 		//Used in order to parse float with "." as decimal separator
@@ -223,7 +253,7 @@ public partial class GameManager : Node
 			MapLoader.GenerateSurfaces();
 			MapLoader.SetLightVolData();
 			ThingsManager.AddThingsToMap();
-			mapLeftTime = mapTime * 60;
+			mapLeftTime = timeLimit * 60;
 		}
 		currentState = FuncState.Ready;
 		return;
@@ -280,13 +310,40 @@ public partial class GameManager : Node
 		}
 
 		if (mapLeftTime > 0)
+		{
 			mapLeftTime -= deltaTime;
+			if ((mapLeftTime > 299) && (mapLeftTime < 300))
+			{
+				if (timeToSync)
+					PlayAnnouncer(FiveMinutes);
+			}
+			else if ((mapLeftTime > 59) && (mapLeftTime < 60))
+			{
+				if (timeToSync)
+					PlayAnnouncer(OneMinute);
+			}
+			else if (mapLeftTime < 4)
+			{
+				if (timeToSync)
+				{
+					if (mapLeftTime < 1)
+						IntermissionContainer.Show();
+					else if (limitReach == LimitReach.None)
+					{
+						PlayAnnouncer(Seconds[second++]);
+						limitReach = LimitReach.Time;
+					}
+				}
+			}
+
+		}
 		if (mapLeftTime < 0)
 		{
 			mapNum++;
 			if (mapNum >= mapRotation.Length)
 				mapNum = 0; 
-			mapLeftTime = mapTime * 60;
+			mapLeftTime = timeLimit * 60;
+			second = 0;
 			paused = true;
 			CallDeferred("ChangeMap");
 		}
@@ -323,6 +380,27 @@ public partial class GameManager : Node
 		}
 	}
 
+	public void PlayAnnouncer(string sound)
+	{
+		AnnouncerStream.Stream = SoundManager.LoadSound(sound);
+		AnnouncerStream.Play();
+	}
+
+	public void CheckDeathCount(int frags)
+	{
+		int left = fragLimit - frags;
+		if (left > 0)
+		{
+			left--;
+			PlayAnnouncer(FragsLeft[left]);
+		}
+		else
+		{
+			limitReach = LimitReach.Frag;
+			mapLeftTime = 1f;
+		}
+	}
+
 	public void ChangeMap()
 	{
 		MapLoader.UnloadMap();
@@ -331,6 +409,7 @@ public partial class GameManager : Node
 		AddChild(TemporaryObjectsHolder);
 		if (MapLoader.Load(mapRotation[mapNum]))
 		{
+			interMissionCamera = null;
 			ClusterPVSManager.Instance.ResetClusterList(MapLoader.surfaces.Count);
 			MapLoader.GenerateMapCollider();
 			MapLoader.GenerateMapFog();
@@ -345,14 +424,15 @@ public partial class GameManager : Node
 					player.playerControls.playerWeapon.QueueFree();
 					player.playerControls.playerWeapon = null;
 				}
-				//There is an small fraction of time (death animation) where player is dead, but avatar hasn't detached yet
-				if (IsInstanceValid(player.interpolatedTransform))
+				if (player.interpolatedTransform != null)
 					player.interpolatedTransform.QueueFree();
-				player.playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
 				player.playerInfo.Reset();
+				player.playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
 				player.InitPlayer();
 			}
 		}
+		limitReach = LimitReach.None;
+		IntermissionContainer.Hide();
 		paused = false;
 	}
 

@@ -572,6 +572,8 @@ public partial class ThingsManager : Node
 						triggerCollider.AddChild(mc);
 						triggerCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
 						triggerCollider.CollisionMask = GameManager.TakeDamageMask;
+						triggerCollider.InputRayPickable = false;
+
 						SphereShape3D sphere = new SphereShape3D();
 						sphere.Radius = max;
 						mc.Shape = sphere;
@@ -679,6 +681,7 @@ public partial class ThingsManager : Node
 							triggerCollider.AddChild(mc);
 							triggerCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
 							triggerCollider.CollisionMask = GameManager.TakeDamageMask;
+							triggerCollider.InputRayPickable = false;
 
 							SphereShape3D sphere = new SphereShape3D();
 							sphere.Radius = max * .5f;
@@ -745,6 +748,29 @@ public partial class ThingsManager : Node
 					{
 						p.Damage(dmg, DamageType.Generic);
 					});
+				}
+				break;
+				//Intermission Camera
+				case "info_player_intermission":
+				{
+					thingObject.GlobalPosition = entity.origin;
+
+					Camera3D camera = new Camera3D();
+					thingObject.AddChild(camera);
+					camera.CullMask = GameManager.AllPlayerViewMask | (1 << GameManager.NotVisibleLayer);
+
+					int angle = 0;
+					Vector3 lookAt = Vector3.Forward;
+
+					if (entity.entityData.TryGetValue("target", out strWord))
+						if (targetsOnMap.ContainsKey(strWord))
+						{
+							lookAt = targetsOnMap[strWord][0].destination;
+							thingObject.LookAt(lookAt, Vector3.Up);
+							angle = targetsOnMap[strWord][0].angle;
+						}
+					GameManager.Instance.interMissionCamera = camera;
+					GameManager.Instance.SetViewPortToCamera(camera, GameManager.Instance.IntermissionViewPort);
 				}
 				break;
 				//Portal Camera

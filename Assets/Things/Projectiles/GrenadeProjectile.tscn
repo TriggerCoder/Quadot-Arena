@@ -16,6 +16,7 @@ height = 0.5
 [node name="GrenadeProjectile" type="RigidBody3D" node_paths=PackedStringArray("fx", "audioStream")]
 collision_layer = 2
 collision_mask = 4
+input_ray_pickable = false
 mass = 2.5
 physics_material_override = SubResource("PhysicsMaterial_x6url")
 center_of_mass_mode = 1
