@@ -38,6 +38,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public int armor = 0;
 	public int waterLever = 0;
 	public int frags = 0;
+	public int deaths = 0;
 
 	public WaterSurface currentWaterSurface = null;
 
@@ -49,6 +50,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public float enviroSuitTime = 0f;
 	public float flightTime = 0f;
 
+	public float lastDamageTime = 0f;
+
 	public float environmentDamageTime = 0f;
 	public float drownTime = 0f;
 
@@ -58,6 +61,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public bool inLava = false;
 	public bool finished = false;
 	public bool invul = false;
+
+	public Node3D lastAttacker = null;
 	public bool ready { get { return currentState == GameManager.FuncState.Start; } }
 	private float handicap = 1;
 	public enum HoldableItem
@@ -199,11 +204,17 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			currentState = GameManager.FuncState.None;
 			if (attacker != this)
 			{
+				if (attacker == null)
+					attacker = lastAttacker;
+
 				if (attacker is PlayerThing agressor)
 				{
 					handicap = Mathf.Clamp(handicap - .05f, .5f, 2);
 					agressor.handicap = Mathf.Clamp(agressor.handicap + .05f, .5f, 2);
 					agressor.frags++;
+					deaths++;
+					agressor.playerInfo.playerPostProcessing.playerHUD.fragsText.Text = "+" + agressor.frags;
+					playerInfo.playerPostProcessing.playerHUD.deathsText.Text = "-" + deaths;
 					GameManager.Instance.CheckDeathCount(agressor.frags);
 				}
 			}
@@ -223,7 +234,20 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 				PlayModelSound("pain25_1");
 
 			painTime = 1f;
+			avatar.Scale = Vector3.One * 1.1f;
 		}
+
+		if (attacker != this)
+		{
+			if (attacker is PlayerThing)
+			{
+				lastAttacker = attacker;
+				lastDamageTime = 3;
+			}
+			else if (lastAttacker != null)
+				lastDamageTime = 3;
+		}
+
 		playerInfo.playerPostProcessing.playerHUD.UpdateHealth(hitpoints);
 		playerInfo.playerPostProcessing.playerHUD.UpdateArmor(armor);
 	}
@@ -343,8 +367,25 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 		//Pain
 		if (painTime > 0f)
+		{
 			painTime -= deltaTime;
+			avatar.Scale = Vector3.One * Mathf.Lerp(1, avatar.Scale.X, painTime);
+		}
+		else if (painTime < 0f)
+		{
+			painTime = 0;
+			avatar.Scale = Vector3.One;
+		}
 
+		//Last Attacker
+		if (lastDamageTime > 0f)
+			lastDamageTime -= deltaTime;
+		if (lastDamageTime < 0f)
+		{
+			lastDamageTime = 0;
+			lastAttacker = null;
+		}
+			
 		//Quad
 		if (quadTime > 0f)
 		{

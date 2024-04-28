@@ -195,7 +195,7 @@ script = ExtResource("2_2cprp")
 rotEnable = true
 rotFPS = 40.0
 
-[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "ArmorContainer", "AmmoContainer", "WeaponContainer", "viewHead", "headAnimation", "healthLabel", "armorLabel", "weaponLabel", "ammoLabel", "weaponIcon", "crossHair", "pickUpIcon", "pickUpText", "powerUpIcon", "powerUpText", "fpsText", "holdableItemIcon")]
+[node name="PlayerHUD" type="MeshInstance3D" parent="ViewPortCamera" node_paths=PackedStringArray("viewHeadContainer", "ArmorContainer", "AmmoContainer", "WeaponContainer", "viewHead", "headAnimation", "healthLabel", "armorLabel", "weaponLabel", "ammoLabel", "weaponIcon", "crossHair", "pickUpIcon", "pickUpText", "powerUpIcon", "powerUpText", "playerName", "deathsText", "fragsText", "holdableItemIcon")]
 layers = 0
 extra_cull_margin = 0.1
 mesh = SubResource("QuadMesh_0iqvi")
@@ -219,7 +219,9 @@ pickUpIcon = NodePath("PickUpIcon")
 pickUpText = NodePath("PickUpText")
 powerUpIcon = [NodePath("PowerUpsContainer/PowerUpIcon_1"), NodePath("PowerUpsContainer/PowerUpIcon_2"), NodePath("PowerUpsContainer/PowerUpIcon_3"), NodePath("PowerUpsContainer/PowerUpIcon_4"), NodePath("PowerUpsContainer/PowerUpIcon_5"), NodePath("PowerUpsContainer/PowerUpIcon_6")]
 powerUpText = [NodePath("PowerUpsContainer/PowerUpText_1"), NodePath("PowerUpsContainer/PowerUpText_2"), NodePath("PowerUpsContainer/PowerUpText_3"), NodePath("PowerUpsContainer/PowerUpText_4"), NodePath("PowerUpsContainer/PowerUpText_5"), NodePath("PowerUpsContainer/PowerUpText_6")]
-fpsText = NodePath("FPS")
+playerName = NodePath("Name")
+deathsText = NodePath("Deaths")
+fragsText = NodePath("Frags")
 holdableItemIcon = NodePath("HoldableItemIcon")
 
 [node name="WeaponsContainer" type="Node3D" parent="ViewPortCamera/PlayerHUD"]
@@ -523,16 +525,45 @@ layers = 0
 double_sided = false
 no_depth_test = true
 
-[node name="FPS" type="Label3D" parent="ViewPortCamera/PlayerHUD"]
+[node name="Name" type="Label3D" parent="ViewPortCamera/PlayerHUD"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
-visible = false
 layers = 0
 transparency = 0.4
 offset = Vector2(-530, 280)
 double_sided = false
 no_depth_test = true
 texture_filter = 1
-modulate = Color(0.988235, 1, 1, 1)
+modulate = Color(1, 0.368627, 0, 1)
+font = ExtResource("7_4bgd3")
+font_size = 50
+outline_size = 10
+horizontal_alignment = 0
+
+[node name="Deaths" type="Label3D" parent="ViewPortCamera/PlayerHUD"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+layers = 0
+transparency = 0.4
+offset = Vector2(-10, 280)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.913725, 0.184314, 0.184314, 1)
+text = "0"
+font = ExtResource("7_4bgd3")
+font_size = 50
+outline_size = 10
+horizontal_alignment = 2
+
+[node name="Frags" type="Label3D" parent="ViewPortCamera/PlayerHUD"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+layers = 0
+transparency = 0.4
+offset = Vector2(10, 280)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.0488692, 0.573594, 0.650645, 1)
+text = "0"
 font = ExtResource("7_4bgd3")
 font_size = 50
 outline_size = 10

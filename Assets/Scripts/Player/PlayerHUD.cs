@@ -41,7 +41,11 @@ public partial class PlayerHUD : MeshInstance3D
 	[Export]
 	public Label3D[] powerUpText;
 	[Export]
-	public Label3D fpsText;
+	public Label3D playerName;
+	[Export]
+	public Label3D deathsText;
+	[Export]
+	public Label3D fragsText;
 	[Export]
 	public Sprite3D holdableItemIcon;
 
@@ -162,7 +166,9 @@ public partial class PlayerHUD : MeshInstance3D
 		pickUpText.Layers = Layers;
 		weaponLabel.Layers = Layers;
 		holdableItemIcon.Layers = Layers;
-		fpsText.Layers = Layers;
+		playerName.Layers = Layers;
+		deathsText.Layers = Layers;
+		fragsText.Layers = Layers;
 
 		for (int i = 0; i < powerUpIcon.Length; i++)
 			powerUpIcon[i].Layers = Layers;
@@ -716,15 +722,8 @@ public partial class PlayerHUD : MeshInstance3D
 		}
 	}
 
-	public void UpdateFPS()
-	{
-		fpsText.Text = "FPS: " + Engine.GetFramesPerSecond();
-	}
-
 	public override void _Process(double delta)
 	{
-		UpdateFPS();
-
 		if (GameManager.Paused)
 			return;
 

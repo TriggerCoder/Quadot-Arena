@@ -108,7 +108,6 @@ worldEnvironment = NodePath("../WorldEnvironment")
 Sun = NodePath("../SunLight")
 Root = NodePath("..")
 mapRotation = PackedStringArray("q3dm1", "q3dm7", "q3tourney2", "q3dm17")
-fragLimit = 1
 tessellations = 10
 SplitScreen = [NodePath("SplitScreenContainer/TopRow"), NodePath("SplitScreenContainer/MiddleRow"), NodePath("SplitScreenContainer/BtmRow")]
 IntermissionContainer = NodePath("IntermissionContainer")
@@ -192,6 +191,7 @@ positional_shadow_atlas_quad_1 = 0
 positional_shadow_atlas_quad_2 = 0
 positional_shadow_atlas_quad_3 = 0
 size = Vector2i(1280, 720)
+render_target_clear_mode = 1
 render_target_update_mode = 0
 
 [node name="SunLight" type="DirectionalLight3D" parent="."]

@@ -107,7 +107,9 @@ public partial class PlayerInfo : Node3D
 		playerThing.regenTime = 0;
 		playerThing.enviroSuitTime = 0;
 		playerThing.flightTime = 0;
+		playerThing.lastDamageTime = 0;
 
+		playerThing.lastAttacker = null;
 		playerThing.holdableItem = PlayerThing.HoldableItem.None;
 
 		playerControls.impulseVector = Vector3.Zero;

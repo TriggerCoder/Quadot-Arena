@@ -392,7 +392,8 @@ public partial class GameManager : Node
 		if (left > 0)
 		{
 			left--;
-			PlayAnnouncer(FragsLeft[left]);
+			if (left < 3)
+				PlayAnnouncer(FragsLeft[left]);
 		}
 		else
 		{
@@ -427,6 +428,8 @@ public partial class GameManager : Node
 				if (player.interpolatedTransform != null)
 					player.interpolatedTransform.QueueFree();
 				player.playerInfo.Reset();
+				player.deaths = 0;
+				player.frags = 0;
 				player.playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
 				player.InitPlayer();
 			}
@@ -453,7 +456,6 @@ public partial class GameManager : Node
 		switch (Players.Count)
 		{
 			default:
-				SplitScreen[2].AddChild(player.playerViewPort);
 			break;
 			case 1:
 				SplitScreen[0].AddChild(player.playerViewPort);
@@ -472,6 +474,16 @@ public partial class GameManager : Node
 			break;
 			case 6:
 				SplitScreen[0].AddChild(player.playerViewPort);
+			break;
+			case 7:
+				Players[2].playerViewPort.Reparent(SplitScreen[2]);
+				SplitScreen[2].AddChild(player.playerViewPort);
+				IntermissionContainer.Reparent(SplitScreen[1]);
+				SplitScreen[1].MoveChild(IntermissionContainer, 1);
+				IntermissionContainer.Show();
+			break;
+			case 8:
+				SplitScreen[2].AddChild(player.playerViewPort);
 			break;
 		}
 		ArrangeSplitScreen();
@@ -515,14 +527,18 @@ public partial class GameManager : Node
 				break;
 				case 7:
 					size.Y /= 3;
-					if ((i == 6))
+					if ((i == 2) || (i == 6))
 						size.X /= 2;
 					else
 						size.X /= 3;
+					if (i == 0)
+						IntermissionViewPort.Size = size;
 				break;
 				case 8:
 					size.Y /= 3;
 					size.X /= 3;
+					if (i == 0)
+						IntermissionViewPort.Size = size;
 				break;
 			}
 			player.playerViewPort.viewPort.Size = size;
