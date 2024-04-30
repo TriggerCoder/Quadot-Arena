@@ -180,7 +180,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 			if (deathTime < respawnDelay)
 				deathTime += deltaTime;
-			else
+			else if (playerThing.interpolatedTransform == null)
 			{
 				if (Input.IsActionJustPressed(playerInput.Action_Jump) || Input.IsActionJustPressed(playerInput.Action_Fire))
 				{

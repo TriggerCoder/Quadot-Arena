@@ -1,12 +1,15 @@
-[gd_scene load_steps=5 format=3 uid="uid://bdjag6sywuono"]
+[gd_scene load_steps=6 format=3 uid="uid://bdjag6sywuono"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Projectile.cs" id="1_ak2u7"]
+[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/BFGBall.cs" id="1_enh3n"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_50ltg"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="3_03le7"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="4_ge3es"]
+[ext_resource type="PackedScene" uid="uid://cawscbtf8jvhy" path="res://Assets/Things/Projectiles/LightningBolt.tscn" id="5_8uuw7"]
 
-[node name="BFGProjectile" type="Node3D" node_paths=PackedStringArray("audioStream")]
-script = ExtResource("1_ak2u7")
+[node name="BFGProjectile" type="Node3D" node_paths=PackedStringArray("boltOrigin", "audioStream")]
+script = ExtResource("1_enh3n")
+boltOrigin = [NodePath("BoltOrigin1"), NodePath("BoltOrigin2"), NodePath("BoltOrigin3"), NodePath("BoltOrigin4"), NodePath("BoltOrigin5"), NodePath("BoltOrigin6"), NodePath("BoltOrigin7"), NodePath("BoltOrigin8")]
+Bolt = ExtResource("5_8uuw7")
 projectileName = "BFGProjectile"
 _lifeTime = 3.0
 speed = 30.0
@@ -18,7 +21,7 @@ explosionRadius = 0.2
 damageType = 5
 OnDeathSpawn = "BFGExplosion"
 decalMark = "BFGMark"
-_onFlySound = "weapons/rocket/rockfly"
+_humSounds = PackedStringArray("weapons/rocket/rockfly", "weapons/lightning/lg_hum")
 _onDeathSound = "weapons/rocket/rocklx1a"
 audioStream = NodePath("MultiAudioStream")
 
@@ -46,3 +49,35 @@ light_color = Color(0.423529, 0.8, 0.239216, 1)
 light_energy = 5.0
 light_bake_mode = 0
 omni_shadow_mode = 0
+
+[node name="BoltOrigin1" type="Node3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
+visible = false
+
+[node name="BoltOrigin2" type="Node3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
+visible = false
+
+[node name="BoltOrigin3" type="Node3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
+visible = false
+
+[node name="BoltOrigin4" type="Node3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
+visible = false
+
+[node name="BoltOrigin5" type="Node3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
+visible = false
+
+[node name="BoltOrigin6" type="Node3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
+visible = false
+
+[node name="BoltOrigin7" type="Node3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
+visible = false
+
+[node name="BoltOrigin8" type="Node3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
+visible = false

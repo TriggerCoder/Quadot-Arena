@@ -272,6 +272,9 @@ public partial class GameManager : Node
 
 		if (@event is InputEventKey)
 		{
+			if (Input.IsActionJustPressed("Start_0"))
+				controllerWantToJoin.Add(0);
+
 			if (Input.IsActionJustPressed("Escape"))
 			{
 				if (!paused)
@@ -327,12 +330,13 @@ public partial class GameManager : Node
 				if (timeToSync)
 				{
 					if (mapLeftTime < 1)
-						IntermissionContainer.Show();
-					else if (limitReach == LimitReach.None)
 					{
-						PlayAnnouncer(Seconds[second++]);
-						limitReach = LimitReach.Time;
+						IntermissionContainer.Show();
+						if (limitReach == LimitReach.None)
+							limitReach = LimitReach.Time;
 					}
+					else if (limitReach == LimitReach.None)
+						PlayAnnouncer(Seconds[second++]);
 				}
 			}
 
@@ -359,8 +363,7 @@ public partial class GameManager : Node
 					skipFrames--;
 					if (skipFrames == 0)
 					{
-						if (Players.Count == 0)
-							SetupNewPlayer(Players.Count, ControllerType.MouseKeyboard);
+						IntermissionViewPort.Size = DisplayServer.WindowGetSize();
 						paused = false;
 						currentState = FuncState.Start;
 					}
@@ -374,7 +377,8 @@ public partial class GameManager : Node
 						continue;
 					SetupNewPlayer(Players.Count, controller);
 					controllerWantToJoin.Remove(controller);
-					ThingsManager.NewLocalPlayerAdded();
+					if (Players.Count > 1)
+						ThingsManager.NewLocalPlayerAdded();
 				}
 			break;
 		}
@@ -427,10 +431,12 @@ public partial class GameManager : Node
 				}
 				if (player.interpolatedTransform != null)
 					player.interpolatedTransform.QueueFree();
+				player.playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
 				player.playerInfo.Reset();
 				player.deaths = 0;
+				player.playerInfo.playerPostProcessing.playerHUD.deathsText.Text = "0";
 				player.frags = 0;
-				player.playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
+				player.playerInfo.playerPostProcessing.playerHUD.fragsText.Text = "0";
 				player.InitPlayer();
 			}
 		}
