@@ -32,6 +32,8 @@ public partial class GameManager : Node
 	public SubViewport IntermissionViewPort;
 	[Export]
 	public PackedScene viewPortPrefab;
+	[Export]
+	public PackedScene scoreBoard;
 
 	public static GameManager Instance;
 

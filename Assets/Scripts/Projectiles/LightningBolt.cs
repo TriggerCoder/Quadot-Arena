@@ -29,6 +29,12 @@ public partial class LightningBolt : Node3D
 
 	}
 
+	public void SetArcsColors(Color color)
+	{
+		for (int i = 0; i < Arcs.Length; i++)
+			Arcs[i].SetInstanceShaderParameter("lightning_color", color);
+	}
+
 	public void SetArcsLayers(uint layer)
 	{
 		for (int i = 0; i < Arcs.Length; i++)

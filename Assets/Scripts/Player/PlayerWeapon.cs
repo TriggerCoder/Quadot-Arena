@@ -337,6 +337,7 @@ public partial class PlayerWeapon : Node3D
 				}
 			}
 		}
+		OnPhysicsUpdate(deltaTime);
 	}
 	Quaternion GetRotation(Vector2 mouse, float delta)
 	{
@@ -368,6 +369,8 @@ public partial class PlayerWeapon : Node3D
 		return Quaternion.Identity;
 	}
 	protected virtual void OnUpdate(float deltaTime) { }
+
+	protected virtual void OnPhysicsUpdate(float deltaTime) { }
 	protected virtual void OnInit() { }
 	public virtual bool Fire()
 	{

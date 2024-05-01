@@ -433,7 +433,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		float vView = -viewDirection.X;
 		float hView = viewDirection.Y - Mathf.RadToDeg(Quaternion.GetEuler().Y);
 
-		headBody.Quaternion = headBody.Quaternion.Slerp(Quaternion.FromEuler(new Vector3(0, Mathf.DegToRad(hView), Mathf.DegToRad(vView))), rotationFPS * deltaTime);
+		headBody.Quaternion = headBody.Quaternion.Slerp(Quaternion.FromEuler(new Vector3(0, Mathf.DegToRad(hView), Mathf.DegToRad(Mathf.Clamp(vView, -50f, 30f)))), rotationFPS * deltaTime);
 		int vAngle = (int)Mathf.Round((vView) / (360) * 32) % 32;
 		int hAngle = (int)Mathf.Round((hView) / (360) * 32) % 32;
 

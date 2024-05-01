@@ -27,7 +27,10 @@ public partial class BFG10KWeapon : PlayerWeapon
 			}
 			putAway = true;
 		}
+	}
 
+	protected override void OnPhysicsUpdate(float deltaTime)
+	{
 		if (chargeDelay > 0)
 		{
 			muzzleObject.Scale = Vector3.One * Mathf.Max(Mathf.Lerp(1, 0.1f, chargeDelay), 0);
@@ -91,7 +94,6 @@ public partial class BFG10KWeapon : PlayerWeapon
 				bfgBall.InvoqueSetTransformReset();
 			}
 		}
-
 	}
 	protected override void OnInit()
 	{

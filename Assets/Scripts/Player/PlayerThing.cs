@@ -212,12 +212,12 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 					handicap = Mathf.Clamp(handicap - .05f, .5f, 2);
 					agressor.handicap = Mathf.Clamp(agressor.handicap + .05f, .5f, 2);
 					agressor.frags++;
-					deaths++;
 					agressor.playerInfo.playerPostProcessing.playerHUD.fragsText.Text = "+" + agressor.frags;
-					playerInfo.playerPostProcessing.playerHUD.deathsText.Text = "-" + deaths;
 					GameManager.Instance.CheckDeathCount(agressor.frags);
 				}
 			}
+			deaths++;
+			playerInfo.playerPostProcessing.playerHUD.deathsText.Text = "-" + deaths;
 //			GameManager.Instance.AddDeathCount();
 		}
 		else if (damageType == DamageType.Drown)

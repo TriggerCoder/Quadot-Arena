@@ -148,6 +148,7 @@ public partial class ThingsManager : Node
 			GameManager.Print("Trigger : " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
+		BFGTracers.SetTracers();
 	}
 	public static void ReadEntities(byte[] entities)
 	{
@@ -758,6 +759,8 @@ public partial class ThingsManager : Node
 					Camera3D camera = new Camera3D();
 					thingObject.AddChild(camera);
 					camera.CullMask = GameManager.AllPlayerViewMask | (1 << GameManager.NotVisibleLayer);
+					Node3D scoreBoard =	(Node3D)GameManager.Instance.scoreBoard.Instantiate();
+					camera.AddChild(scoreBoard);
 
 					int angle = 0;
 					Vector3 lookAt = Vector3.Forward;
@@ -1180,7 +1183,6 @@ public class RespawnItem
 	}
 }
 
-
 public class Portal
 {
 	public string shaderName;
@@ -1208,6 +1210,44 @@ public class Portal
 	{
 		this.shaderName = shaderName;
 		this.commonMat = baseMat;
+	}
+}
+
+public static class BFGTracers
+{
+	public static float[] hx;
+	public static float[] hy;
+	public static int pixels;
+	public static int samples = 500;
+	private static float HaltonSequence(int index, int b)
+	{
+		float r = 0.0f;
+		float f = 1.0f / b;
+		int i = index;
+
+		while (i > 0)
+		{
+			r = r + f * (i % b);
+			i = Mathf.FloorToInt(i / b);
+			f = f / b;
+		}
+
+		return r;
+	}
+
+	public static void SetTracers()
+	{
+		pixels = Mathf.FloorToInt(640 * 360); // 1/4th 720p
+		hx = new float[pixels];
+		hy = new float[pixels];
+
+		for (int i = 0; i < pixels; i++)
+		{
+			hx[i] = HaltonSequence(i, 2);
+			hy[i] = HaltonSequence(i, 3);
+		}
+
+
 	}
 }
 

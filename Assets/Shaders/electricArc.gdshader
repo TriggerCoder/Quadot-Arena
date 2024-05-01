@@ -3,7 +3,7 @@ render_mode unshaded, blend_add, cull_disabled;
 
 uniform sampler2D lightning: source_color, repeat_enable;
 uniform sampler2D noise: source_color, repeat_enable;
-uniform vec4 lightning_color: source_color = vec4(0.6, 0.8, 1.0, 1.0);
+instance uniform vec4 lightning_color: source_color = vec4(0.6, 0.8, 1.0, 1.0);
 global uniform float MsTime;
 
 vec3 lightning_bolt(vec2 uv, float speed, float freq)

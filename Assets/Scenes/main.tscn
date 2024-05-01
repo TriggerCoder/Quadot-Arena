@@ -1,8 +1,9 @@
-[gd_scene load_steps=90 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=91 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Resource" uid="uid://d2qwccitnqm8c" path="res://Assets/Data Resources/SoundData.tres" id="3_0fxsa"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
+[ext_resource type="PackedScene" uid="uid://dsd33pjc1bdk7" path="res://Assets/Scenes/ScoreBoard.tscn" id="3_hqlfm"]
 [ext_resource type="Material" uid="uid://cuswccc2jvs1t" path="res://Assets/Materials/illegal.tres" id="5_7m0rp"]
 [ext_resource type="Material" uid="uid://kujcx0wgflmg" path="res://Assets/Materials/fog.tres" id="5_d2l4q"]
 [ext_resource type="Material" uid="uid://b7a0ll36sihim" path="res://Assets/Materials/default.tres" id="5_is83x"]
@@ -113,6 +114,7 @@ SplitScreen = [NodePath("SplitScreenContainer/TopRow"), NodePath("SplitScreenCon
 IntermissionContainer = NodePath("IntermissionContainer")
 IntermissionViewPort = NodePath("IntermissionContainer/IntermissionViewPort")
 viewPortPrefab = ExtResource("13_tu0mj")
+scoreBoard = ExtResource("3_hqlfm")
 playerPrefab = ExtResource("7_rdgk2")
 musicType = 1
 OverrideSounds = Array[Resource]([ExtResource("3_0fxsa")])

@@ -114,6 +114,8 @@ public partial class DoorController : AnimatableBody3D, Damageable
 
 		hitpoints = hp;
 		speed = sp * GameManager.sizeDividor;
+		//Speed Need to be limited for crusher
+		speed = Mathf.Min(speed, 15.625f);
 		waitTime = wait;
 		lip = openlip * GameManager.sizeDividor;
 		damage = dmg;
