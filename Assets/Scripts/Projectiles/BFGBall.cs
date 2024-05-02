@@ -315,52 +315,37 @@ public partial class BFGBall : InterpolatedNode3D
 				Vector3 dir = d;
 				dir.Y = 0;
 				int numRay = 0;
-				int index = 0;
 				Camerarotation = rayCaster.Quaternion;
 				rayCaster.LookAt(playerInfo.playerCamera.GlobalPosition - dir);
-//				List <Node3D> Tracers = new List<Node3D>(BFGTracers.samples);
-//				List<LightningBolt> TracerBolt = new List<LightningBolt>(BFGTracers.samples);
-				for (int k = 0; (k < BFGTracers.samples) && (numRay <= 40); k++)
+				for (int index = 0; (index < BFGTracers.samples) && (numRay < 40); index++)
 				{
 					Vector3 Origin = playerInfo.playerCamera.GlobalPosition;
-					d = rayCaster.ProjectRayNormal(new Vector2(BFGTracers.hx[index] * 1280 , BFGTracers.hy[index] * 720));
-					Vector3 End = Origin + d * 300;
+					dir = rayCaster.ProjectRayNormal(new Vector2(BFGTracers.hx[index] * 1280 , BFGTracers.hy[index] * 720));
+					Vector3 End = Origin + dir * 300;
 					var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | GameManager.TakeDamageMask & ~((playerInfo.playerLayer) | (1 << GameManager.InvisibleBlockerLayer) | (1 << GameManager.RagdollLayer))));
 					var rayhit = SpaceState.IntersectRay(RayCast);
 					if (rayhit.Count > 0)
 					{
 						CollisionObject3D collider = (CollisionObject3D)rayhit["collider"];
-/*						{
-							Node3D Tracer = new Node3D();
-							GameManager.Instance.TemporaryObjectsHolder.AddChild(Tracer);
-							Tracer.Basis = boltOrigin[0].Basis;
-							Tracer.GlobalPosition = Origin;
-							Tracers.Add(Tracer);
-							Tracers[k].Show();
-							Tracers[k].LookAt(End);
-							{
-								LightningBolt lightBolt = (LightningBolt)Bolt.Instantiate();
-								lightBolt.SetArcsColors(Green);
-								lightBolt.SetArcsLayers(GameManager.AllPlayerViewMask);
-								TracerBolt.Add(lightBolt);
-								Tracers[k].AddChild(TracerBolt[k]);
-							}
-							TracerBolt[k].SetBoltMesh(Origin, End);
-						}
-*/
+
 						if (collider is Damageable damageable)
 						{
-							while ((damageable.Dead == false) && (numRay <= 40))
+							while ((damageable.Dead == false) && (numRay < 40))
 							{
 								damageable.Damage(GD.RandRange(49, 88), DamageType.BFGBlast, owner);
-								damageable.Impulse(d, pushForce);
+								damageable.Impulse(dir, pushForce);
 								numRay++;
+							}
+							if (!string.IsNullOrEmpty(SecondaryOnDeathSpawn))
+							{
+								Node3D DeathSpawn = (Node3D)ThingsManager.thingsPrefabs[SecondaryOnDeathSpawn].Instantiate();
+								GameManager.Instance.TemporaryObjectsHolder.AddChild(DeathSpawn);
+								DeathSpawn.Position = collider.GlobalPosition;
+								DeathSpawn.SetForward(-d);
+								DeathSpawn.Rotate(d, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 							}
 						}
 					}
-					index++;
-					if (index >= BFGTracers.pixels)
-						index = 0;
 				}
 				rayCaster.Quaternion = Camerarotation;
 			}

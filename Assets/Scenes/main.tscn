@@ -1,4 +1,4 @@
-[gd_scene load_steps=91 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=95 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Resource" uid="uid://d2qwccitnqm8c" path="res://Assets/Data Resources/SoundData.tres" id="3_0fxsa"]
@@ -22,8 +22,11 @@
 [ext_resource type="PackedScene" uid="uid://cbqf3w6nv54ds" path="res://Assets/Things/FX/WeaponHits/RocketExplosion.tscn" id="13_l5hcy"]
 [ext_resource type="PackedScene" uid="uid://bki6ifu2qtbfo" path="res://Assets/Player/PlayerViewPort.tscn" id="13_tu0mj"]
 [ext_resource type="PackedScene" uid="uid://c5tu2rku1v7om" path="res://Assets/Things/Projectiles/PlasmaProjectile.tscn" id="15_rsp03"]
+[ext_resource type="Image" uid="uid://s4looumsvxbj" path="res://Assets/Textures/BFGTracer/bfg_tracer1.tga" id="16_clfgu"]
 [ext_resource type="PackedScene" uid="uid://bn0i6jh0khogi" path="res://Assets/Things/FX/WeaponHits/PlasmaExplosion.tscn" id="16_xhuyt"]
+[ext_resource type="Image" uid="uid://bhfaicqtiw8fd" path="res://Assets/Textures/BFGTracer/bfg_tracer2.tga" id="17_07kil"]
 [ext_resource type="PackedScene" uid="uid://wtmx7f0u7egf" path="res://Assets/Things/FX/Damage/BulletMark.tscn" id="17_au5sd"]
+[ext_resource type="Image" uid="uid://dqncv2hv74xau" path="res://Assets/Textures/BFGTracer/bfg_tracer3.tga" id="18_7vq48"]
 [ext_resource type="PackedScene" uid="uid://vbdxg44bm8su" path="res://Assets/Things/Debris/MachineGunAmmoCase.tscn" id="18_dkfmq"]
 [ext_resource type="PackedScene" uid="uid://br3trl8hap8q5" path="res://Assets/Things/FX/WeaponHits/LightningExplosion.tscn" id="18_nyem1"]
 [ext_resource type="PackedScene" uid="uid://ca1g7ktte6e7h" path="res://Assets/Things/FX/Damage/PlasmaMark.tscn" id="18_occpy"]
@@ -46,6 +49,7 @@
 [ext_resource type="PackedScene" uid="uid://bll72amm2jjvr" path="res://Assets/Things/Pickups/Weapons/weapon_rocketlauncher.tscn" id="26_6gxqa"]
 [ext_resource type="PackedScene" uid="uid://bllvvxjn12njn" path="res://Assets/Things/Projectiles/GrenadeProjectile.tscn" id="27_5gm05"]
 [ext_resource type="PackedScene" uid="uid://1aju6wu5vmtu" path="res://Assets/Things/Pickups/Health/item_health.tscn" id="27_5pqil"]
+[ext_resource type="PackedScene" uid="uid://ccfka8e12un61" path="res://Assets/Things/FX/WeaponHits/BFGTracerExplosion.tscn" id="28_5ibyp"]
 [ext_resource type="PackedScene" uid="uid://00qa1h4uy2f7" path="res://Assets/Things/Pickups/Health/item_health_large.tscn" id="28_dpe7f"]
 [ext_resource type="PackedScene" uid="uid://4xiwipor4bi8" path="res://Assets/Things/FX/Damage/BFGMark.tscn" id="29_l1cqu"]
 [ext_resource type="PackedScene" uid="uid://dx8ra3pfwg8c" path="res://Assets/Things/Pickups/Armor/item_armor_body.tscn" id="29_slqlw"]
@@ -130,14 +134,16 @@ defaultTransparentLightMapMaterial = ExtResource("7_wtcy7")
 decalsMapMaterial = ExtResource("9_xagb5")
 baseCameraMaterial = ExtResource("11_1vb85")
 underWaterMaterial = ExtResource("12_8i4o0")
+_extraTextures = Array[Resource]([ExtResource("16_clfgu"), ExtResource("17_07kil"), ExtResource("18_7vq48")])
 _decalsNames = PackedStringArray("gfx/damage/burn_med_mrk", "gfx/damage/bullet_mrk", "gfx/damage/plasma_mrk", "gfx/damage/hole_lg_mrk")
+_extraQShaders = PackedStringArray("res://Assets/QShaders/auxQShaders.txt")
 
 [node name="ClusterPVSManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("8_vpkit")
 
 [node name="ThingsManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("9_71i1l")
-_fxPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("13_l5hcy"), ExtResource("16_xhuyt"), ExtResource("18_nyem1"), ExtResource("20_l0jeh"), ExtResource("21_gxmhp"), ExtResource("22_i5gi6")])
+_fxPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("13_l5hcy"), ExtResource("16_xhuyt"), ExtResource("18_nyem1"), ExtResource("20_l0jeh"), ExtResource("21_gxmhp"), ExtResource("22_i5gi6"), ExtResource("28_5ibyp")])
 _projectilesPrefabs = Array[PackedScene]([ExtResource("12_6703q"), ExtResource("15_rsp03"), ExtResource("22_jphxe"), ExtResource("24_ua1m5"), ExtResource("25_44wy8"), ExtResource("27_5gm05")])
 _decalsPrefabs = Array[PackedScene]([ExtResource("17_au5sd"), ExtResource("19_rmn3i"), ExtResource("18_occpy"), ExtResource("19_q0xlo"), ExtResource("24_5opha"), ExtResource("29_l1cqu"), ExtResource("32_kea4x")])
 _ammoPrefabs = Array[PackedScene]([ExtResource("19_qacws"), ExtResource("21_gcmhg"), ExtResource("30_kksrp"), ExtResource("22_xc5q4"), ExtResource("20_88qir"), ExtResource("35_frbmv"), ExtResource("40_a7icm"), ExtResource("43_por0y")])

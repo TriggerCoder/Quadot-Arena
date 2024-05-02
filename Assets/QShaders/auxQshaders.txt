@@ -1,0 +1,14 @@
+bfgTracerExplosion
+{
+	cull disable
+	{
+		animmap 5 res/assets/textures/bfgtracer/bfg_tracer1.tga  res/assets/textures/bfgtracer/bfg_tracer2.tga res/assets/textures/bfgtracer/bfg_tracer3.tga
+		rgbGen wave inversesawtooth 0 1 0 5
+		blendfunc add
+	}
+	{
+		animmap 5 res/assets/textures/bfgtracer/bfg_tracer2.tga res/assets/textures/bfgtracer/bfg_tracer3.tga gfx/colors/black.tga
+		rgbGen wave sawtooth 0 1 0 5
+		blendfunc add
+	}
+}

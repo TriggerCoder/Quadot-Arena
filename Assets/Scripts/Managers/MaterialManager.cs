@@ -24,7 +24,11 @@ public partial class MaterialManager : Node
 	[Export]
 	public ShaderMaterial underWaterMaterial;
 	[Export]
+	public Resource[] _extraTextures;
+	[Export]
 	public string[] _decalsNames;
+	[Export]
+	public string[] _extraQShaders;
 
 	//PowerUps FX Material
 	public static ShaderMaterial quadFxMaterial;
@@ -75,6 +79,19 @@ public partial class MaterialManager : Node
 		lavaFogMaterial.Density = .3f;
 		lavaFogMaterial.Albedo = new Color(.91f, .18f, .18f);
 		lavaFogMaterial.Emission = new Color(.75f, .38f, .0f);
+
+		foreach (Resource res in _extraTextures)
+			TextureLoader.LoadTexturesFromResource(res);
+
+		foreach (string FileName in _extraQShaders)
+		{
+			var file = FileAccess.Open(FileName, FileAccess.ModeFlags.Read);
+			if (file != null)
+			{
+				byte[] content = file.GetBuffer((long)file.GetLength());
+				QShaderManager.ReadShaderData(content);
+			}
+		}
 	}
 
 	public static void SetAmbient()

@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using static Godot.Image;
-
+using ExtensionMethods;
 public static class TextureLoader
 {
 	public static ImageTexture illegal;
@@ -81,6 +81,75 @@ public static class TextureLoader
 		GameManager.Print("GetTexture: Texture not found \"" + textureName + "\"");
 		return illegal;
 	}
+
+	public static void LoadTexturesFromResource(Resource res)
+	{
+		Image baseTex = (Image)res;
+		string TextName = "RES" + res.ResourcePath.StripExtension().ToUpper().Substring(5);
+		int width = baseTex.GetWidth();
+		int height = baseTex.GetHeight();
+		float luminance = 0;
+
+		if (baseTex.DetectAlpha() == AlphaMode.None)
+		{
+			baseTex.Convert(Format.Rgba8);
+
+			Color black = Colors.Black;
+			for (int i = 0; i < width; i++)
+			{
+				for (int j = 0; j < height; j++)
+				{
+					Color pulledColors = baseTex.GetPixel(i, j);
+					luminance += .21f * pulledColors.R + .72f * pulledColors.G + .07f * pulledColors.G;
+					float alpha = computeAlphaFromColorFilter(pulledColors, black);
+					pulledColors.A = alpha;
+					baseTex.SetPixel(i, j, pulledColors);
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < width; i++)
+			{
+				for (int j = 0; j < height; j++)
+				{
+					Color pulledColors = baseTex.GetPixel(i, j);
+					luminance += .21f * pulledColors.R + .72f * pulledColors.G + .07f * pulledColors.G;
+				}
+			}
+		}
+		luminance /= (width * height);
+		luminance = Mathf.Clamp(luminance, 0f, .35f);
+		baseTex.ResizeToPo2(false, Interpolation.Lanczos);
+		ImageTexture readyTex = ImageTexture.CreateFromImage(baseTex);
+		readyTex.SetMeta("luminance", luminance);
+
+		if (Textures.ContainsKey(TextName))
+		{
+			if (baseTex.DetectAlpha() != AlphaMode.None)
+			{
+				GameManager.Print("Adding transparent texture with name " + TextName);
+				TransparentTextures.Add(TextName, readyTex);
+			}
+			else
+			{
+				GameManager.Print("Updating texture with name " + TextName);
+				Textures[TextName] = readyTex;
+			}
+		}
+		else
+		{
+			if (baseTex.DetectAlpha() != AlphaMode.None)
+			{
+				GameManager.Print("Adding transparent texture with name " + TextName);
+				TransparentTextures.Add(TextName, readyTex);
+			}
+			else
+				GameManager.Print("Adding texture with name " + TextName);
+			Textures.Add(TextName, readyTex);
+		}
+	}
+
 	public static void LoadTextures(List<QShader> mapTextures, bool ignoreShaders, ImageFormat imageFormat = ImageFormat.JPG)
 	{
 		foreach (QShader tex in mapTextures)

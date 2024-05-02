@@ -21,6 +21,7 @@ explosionRadius = 0.2
 damageType = 5
 OnDeathSpawn = "BFGExplosion"
 decalMark = "BFGMark"
+SecondaryOnDeathSpawn = "BFGTracerExplosion"
 _humSounds = PackedStringArray("weapons/rocket/rockfly", "weapons/lightning/lg_hum")
 _onDeathSound = "weapons/rocket/rocklx1a"
 audioStream = NodePath("MultiAudioStream")
