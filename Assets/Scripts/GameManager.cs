@@ -440,6 +440,8 @@ public partial class GameManager : Node
 				player.frags = 0;
 				player.playerInfo.playerPostProcessing.playerHUD.fragsText.Text = "0";
 				player.InitPlayer();
+				if (ScoreBoard.Instance != null)
+					ScoreBoard.Instance.AddPlayer(player);
 			}
 		}
 		limitReach = LimitReach.None;
@@ -495,6 +497,8 @@ public partial class GameManager : Node
 			break;
 		}
 		ArrangeSplitScreen();
+		if (ScoreBoard.Instance != null)
+			ScoreBoard.Instance.AddPlayer(player);
 	}
 
 	public void ArrangeSplitScreen()

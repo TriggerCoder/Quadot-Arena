@@ -32,6 +32,18 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public int Hitpoints { get { return hitpoints; } }
 	public bool Dead { get { return hitpoints <= 0; } }
 	public bool Bleed { get { return true; } }
+
+	public string playerName 
+	{ 
+		get { return _playerName; }
+		set
+		{
+			_playerName = value;
+			playerInfo.playerPostProcessing.playerHUD.playerName.Text = value;
+		}
+	}
+	private string _playerName = "Unnamed Player";
+
 	public BloodType BloodColor { get { return BloodType.Red; } }
 
 	public int hitpoints = 100;
@@ -202,6 +214,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			avatar.Die();
 			playerControls.feetRay.Length = 1.6f;
 			currentState = GameManager.FuncState.None;
+			deaths++;
+			playerInfo.playerPostProcessing.playerHUD.deathsText.Text = "-" + deaths;
 			if (attacker != this)
 			{
 				if (attacker == null)
@@ -216,8 +230,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 					GameManager.Instance.CheckDeathCount(agressor.frags);
 				}
 			}
-			deaths++;
-			playerInfo.playerPostProcessing.playerHUD.deathsText.Text = "-" + deaths;
+			ScoreBoard.Instance.RefreshScore();
 //			GameManager.Instance.AddDeathCount();
 		}
 		else if (damageType == DamageType.Drown)

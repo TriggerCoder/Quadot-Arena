@@ -759,7 +759,7 @@ public partial class ThingsManager : Node
 					Camera3D camera = new Camera3D();
 					thingObject.AddChild(camera);
 					camera.CullMask = GameManager.AllPlayerViewMask | (1 << GameManager.NotVisibleLayer);
-					Node3D scoreBoard =	(Node3D)GameManager.Instance.scoreBoard.Instantiate();
+					ScoreBoard scoreBoard =	(ScoreBoard)GameManager.Instance.scoreBoard.Instantiate();
 					camera.AddChild(scoreBoard);
 
 					int angle = 0;

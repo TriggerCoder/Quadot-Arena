@@ -554,13 +554,13 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		playerControls.playerThing.CollisionLayer = (1 << GameManager.NoCollisionLayer);
 		if (playerControls.playerThing.waterLever > 0)
 			deadWater = true;
-		ragDoll = true;
 		Reparent(GameManager.Instance.TemporaryObjectsHolder);
 		playerControls.playerThing.interpolatedTransform.QueueFree();
 		playerControls.playerThing.interpolatedTransform = null;
 		LinearVelocity = impulseVector;
 		CenterOfMassMode = CenterOfMassModeEnum.Custom;
 		CenterOfMass = Vector3.Down * .5f;
+		ragDoll = true;
 	}
 
 	public void Die()
@@ -1290,6 +1290,12 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 		lastGlobalPosition = GlobalPosition;
 		lastGlobalBasis = GlobalBasis;
+	}
+
+	public override void _ExitTree()
+	{
+		if (ragDoll)
+			ClearPlayerModel();
 	}
 	public void ClearPlayerModel()
 	{

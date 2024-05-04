@@ -10,5 +10,5 @@ billboard = 1
 texture_filter = 1
 script = ExtResource("1_014n0")
 spriteName = "bfgTracerExplosion"
-spriteRadius = 8
+spriteRadius = 16
 destroyTimer = 0.45

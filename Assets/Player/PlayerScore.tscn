@@ -1,0 +1,125 @@
+[gd_scene load_steps=7 format=3 uid="uid://besxblyxvr3gx"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerScore.cs" id="1_47pct"]
+[ext_resource type="FontFile" uid="uid://dr71vpawd8wrt" path="res://Assets/Player/GUI/Fonts/Quark Storm Condensed.ttf" id="2_g3coc"]
+
+[sub_resource type="Gradient" id="Gradient_s8dbf"]
+offsets = PackedFloat32Array(0, 0.532646, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 0.083871, 0.083871, 0.083871, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_uia37"]
+gradient = SubResource("Gradient_s8dbf")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xs2el"]
+albedo_texture = SubResource("GradientTexture1D_uia37")
+
+[sub_resource type="QuadMesh" id="QuadMesh_x6rbm"]
+material = SubResource("StandardMaterial3D_xs2el")
+size = Vector2(4, 0.2)
+
+[node name="PlayerScore" type="Node3D" node_paths=PackedStringArray("PlayerName", "Kills", "Deaths", "Impressive", "Gauntlet", "Excellent", "LifeTime")]
+script = ExtResource("1_47pct")
+PlayerName = NodePath("Name")
+Kills = NodePath("Kills")
+Deaths = NodePath("Deaths")
+Impressive = NodePath("Impressive")
+Gauntlet = NodePath("Gauntlet")
+Excellent = NodePath("Excellent")
+LifeTime = NodePath("LifeTime")
+
+[node name="BackGround" type="MeshInstance3D" parent="."]
+layers = 131072
+mesh = SubResource("QuadMesh_x6rbm")
+
+[node name="Name" type="Label3D" parent="."]
+layers = 131072
+transparency = 0.4
+offset = Vector2(-400, 0)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.745098, 0.745098, 0.0745098, 1)
+text = "UNNAMED PLAYER"
+font = ExtResource("2_g3coc")
+font_size = 40
+outline_size = 10
+horizontal_alignment = 0
+
+[node name="Kills" type="Label3D" parent="."]
+layers = 131072
+transparency = 0.4
+offset = Vector2(-65, 0)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.745098, 0.745098, 0.745098, 1)
+text = "0"
+font = ExtResource("2_g3coc")
+font_size = 50
+outline_size = 10
+
+[node name="Deaths" type="Label3D" parent="."]
+layers = 131072
+transparency = 0.4
+offset = Vector2(50, 0)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.792157, 0.180392, 0.247059, 1)
+text = "0"
+font = ExtResource("2_g3coc")
+font_size = 50
+outline_size = 10
+
+[node name="Impressive" type="Label3D" parent="."]
+layers = 131072
+transparency = 0.4
+offset = Vector2(145, 0)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.745098, 0.745098, 0.745098, 1)
+text = "0"
+font = ExtResource("2_g3coc")
+font_size = 35
+outline_size = 10
+
+[node name="Gauntlet" type="Label3D" parent="."]
+layers = 131072
+transparency = 0.4
+offset = Vector2(185, 0)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.745098, 0.745098, 0.745098, 1)
+text = "0"
+font = ExtResource("2_g3coc")
+font_size = 35
+outline_size = 10
+
+[node name="Excellent" type="Label3D" parent="."]
+layers = 131072
+transparency = 0.4
+offset = Vector2(225, 0)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.745098, 0.745098, 0.745098, 1)
+text = "0
+"
+font = ExtResource("2_g3coc")
+font_size = 35
+outline_size = 10
+
+[node name="LifeTime" type="Label3D" parent="."]
+layers = 131072
+transparency = 0.4
+offset = Vector2(320, 0)
+double_sided = false
+no_depth_test = true
+texture_filter = 1
+modulate = Color(0.745098, 0.745098, 0.745098, 1)
+text = "0"
+font = ExtResource("2_g3coc")
+font_size = 50
+outline_size = 10
