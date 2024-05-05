@@ -326,14 +326,23 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			case PlayerInfo.Shotgun:
 				itemsToDrop.Add("weapon_shotgun");
 			break;
+			case PlayerInfo.GrenadeLauncher:
+				itemsToDrop.Add("weapon_grenadelauncher");
+			break;
 			case PlayerInfo.RocketLauncher:
 				itemsToDrop.Add("weapon_rocketlauncher");
 			break;
 			case PlayerInfo.LightningGun:
 				itemsToDrop.Add("weapon_lightning");
 			break;
+			case PlayerInfo.Railgun:
+				itemsToDrop.Add("weapon_railgun");
+			break;
 			case PlayerInfo.PlasmaGun:
 				itemsToDrop.Add("weapon_plasmagun");
+			break;
+			case PlayerInfo.BFG10K:
+				itemsToDrop.Add("weapon_bfg");
 			break;
 		}
 
