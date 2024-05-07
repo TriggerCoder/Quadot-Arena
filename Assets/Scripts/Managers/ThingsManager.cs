@@ -1,6 +1,5 @@
 using Godot;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -255,6 +254,10 @@ public partial class ThingsManager : Node
 						switch (ClassName)
 						{
 							default:
+								if (ClassName == "trigger_always")
+									entityData.Add("activate", "true");
+								else if ((ClassName == "target_delay") || (ClassName == "target_relay")) //Need to add the delay/relay after
+									found = false;
 								List<Dictionary<string, string>> triggersList = null;
 								if (triggersOnMap.TryGetValue(target, out triggersList))
 									triggersList.Add(entityData);
@@ -272,7 +275,6 @@ public partial class ThingsManager : Node
 								break;
 						}
 					}
-
 				}
 
 				if (!found)
@@ -356,6 +358,10 @@ public partial class ThingsManager : Node
 						}
 						break;
 				}
+
+
+				if (entityData.ContainsKey("activate"))
+					tc.activateOnInit = true;
 
 				float wait;
 				if (entityData.TryGetNumValue("wait", out wait))
@@ -452,6 +458,7 @@ public partial class ThingsManager : Node
 				default:
 				{
 					float num;
+					CollisionObject3D collider = null;
 					if (entity.entityData.TryGetValue("spawnflags", out strWord))
 					{
 						int spawnflags = int.Parse(strWord);
@@ -459,10 +466,13 @@ public partial class ThingsManager : Node
 						if ((spawnflags & 1) != 0)
 							thingObject.GlobalPosition = entity.origin;
 						else
-							thingObject.GlobalPosition = ItemLocationDropToFloor(entity.origin);
+							thingObject.GlobalPosition = ItemLocationDropToFloor(entity.origin, ref collider);
 					}
 					else
-						thingObject.GlobalPosition = ItemLocationDropToFloor(entity.origin);
+						thingObject.GlobalPosition = ItemLocationDropToFloor(entity.origin, ref collider);
+
+					if (collider != null)
+						thingObject.Reparent(collider);
 
 /*					if (entity.name.Contains("item_health_mega"))
 						foreach (var data in entity.entityData)
@@ -844,6 +854,74 @@ public partial class ThingsManager : Node
 					}
 					break;
 */
+				//Delay
+				case "target_delay":
+				{
+					string target;
+					if (!entity.entityData.TryGetValue("target", out target))
+						continue;
+					if (entity.entityData.TryGetValue("targetname", out strWord))
+					{
+						float wait = 0;
+						entity.entityData.TryGetNumValue("wait", out wait);
+
+						string targetName = strWord;
+						TriggerController source, relay;
+						if (!triggerToActivate.TryGetValue(targetName, out source))
+						{
+							source = new TriggerController();
+							thingObject.AddChild(source);
+							triggerToActivate.Add(targetName, source);
+						}
+
+						if (!triggerToActivate.TryGetValue(target, out relay))
+							relay = null;
+
+						source.SetController(targetName, (p) =>
+						{
+							if (relay == null)
+							{
+								if (!triggerToActivate.TryGetValue(target, out relay))
+									return;
+							}
+
+							relay.ActivateAfterTime(wait);
+						});
+						}
+					}
+					break;
+				//Relay
+				case "target_relay":
+					{
+						string target;
+						if (!entity.entityData.TryGetValue("target", out target))
+							continue;
+						if (entity.entityData.TryGetValue("targetname", out strWord))
+						{
+							string targetName = strWord;
+							TriggerController source, relay;
+							if (!triggerToActivate.TryGetValue(targetName, out source))
+							{
+								source = new TriggerController();
+								thingObject.AddChild(source);
+								triggerToActivate.Add(targetName, source);
+							}
+
+							if (!triggerToActivate.TryGetValue(target, out relay))
+								relay = null;
+
+							source.SetController(targetName, (p) =>
+							{
+								if (relay == null)
+								{
+									if (!triggerToActivate.TryGetValue(target, out relay))
+										return;
+								}
+								relay.Activate(null);
+							});
+						}
+					}
+					break;
 				//JumpPad
 				case "trigger_push":
 				{
@@ -1033,6 +1111,12 @@ public partial class ThingsManager : Node
 
 	public static Vector3 ItemLocationDropToFloor(Vector3 Origin)
 	{
+		CollisionObject3D collider = null;
+		return ItemLocationDropToFloor(Origin, ref collider);
+	}
+
+	public static Vector3 ItemLocationDropToFloor(Vector3 Origin, ref CollisionObject3D collider)
+	{
 		float maxRange = 400f;
 		Vector3 collision = Origin;
 		Vector3 End = Origin + Vector3.Down * maxRange;
@@ -1040,7 +1124,10 @@ public partial class ThingsManager : Node
 		var SpaceState = GameManager.Instance.Root.GetWorld3D().DirectSpaceState;
 		var hit = SpaceState.IntersectRay(RayCast);
 		if (hit.Count > 0)
+		{
 			collision = (Vector3)hit["position"] + Vector3.Up * .6f;
+			collider = (CollisionObject3D)hit["collider"];
+		}
 		return collision;
 	}
 	public static void AddPortalsToMap()

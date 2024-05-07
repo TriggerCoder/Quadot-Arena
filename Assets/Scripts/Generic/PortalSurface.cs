@@ -231,7 +231,7 @@ public partial class PortalSurface : Area3D
 						normalRef = Vector3.Forward;
 					break;
 			}
-			changeRotation = CalculateRotation(destPortal.normal, normalRef);
+			changeRotation.CalculateRotation(destPortal.normal, normalRef);
 		}
 
 		float numVert = meshDataTool.GetVertexCount();
@@ -322,15 +322,5 @@ public partial class PortalSurface : Area3D
 //				GameManager.Print("Finally " + other.Name + " got scared of my dominion " + Name);
 			}
 		}
-	}
-	private static Quaternion CalculateRotation(Vector3 normal1, Vector3 normal2)
-	{
-		float dotProduct = normal1.Dot(normal2);
-		float angle = Mathf.RadToDeg(Mathf.Acos(dotProduct));
-
-		Vector3 crossProduct = normal1.Cross(normal2);
-		Vector3 axis = crossProduct.Normalized();
-
-		return new Quaternion(axis, angle);
 	}
 }

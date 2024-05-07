@@ -14,15 +14,24 @@ namespace ExtensionMethods
 
 		public static Vector3 ForwardVector(this Node3D node3D)
 		{
-			return node3D.Basis.Z;
+			Vector3 Forward = node3D.Basis.Z;
+			if (Forward.IsNormalized())
+				return Forward;
+			return Forward.Normalized();
 		}
 		public static Vector3 UpVector(this Node3D node3D)
 		{
-			return node3D.Basis.Y;
+			Vector3 Up = node3D.Basis.Y;
+			if (Up.IsNormalized())
+				return Up;
+			return Up.Normalized();
 		}
 		public static Vector3 RightVector(this Node3D node3D)
 		{
-			return node3D.Basis.X;
+			Vector3 Right = node3D.Basis.X;
+			if (Right.IsNormalized())
+				return Right;
+			return Right.Normalized();
 		}
 	}
 
@@ -35,6 +44,18 @@ namespace ExtensionMethods
 				quaternion *= (2.0f / (1.0f + qmagsq));
 			else
 				quaternion = quaternion.Normalized();
+			return quaternion;
+		}
+
+		public static Quaternion CalculateRotation(this Quaternion quaternion, Vector3 normal1, Vector3 normal2)
+		{
+			float dotProduct = normal1.Dot(normal2);
+			float angle = Mathf.RadToDeg(Mathf.Acos(dotProduct));
+
+			Vector3 crossProduct = normal1.Cross(normal2);
+			Vector3 axis = crossProduct.Normalized();
+			quaternion = new Quaternion(axis, angle);
+
 			return quaternion;
 		}
 	}

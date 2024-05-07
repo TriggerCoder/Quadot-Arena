@@ -13,10 +13,13 @@ public partial class TriggerController : Node3D
 	public bool Repeatable = false;
 	public bool AutoReturn = false;
 	public float AutoReturnTime = 1f;
+	public bool activateOnInit = false;
 
 	public Func<bool> PreReq = new Func<bool>(() => { return true; });
 
 	public float time = 0f;
+	private float waitTime = 0;
+	private GameManager.FuncState currentState = GameManager.FuncState.None;
 
 	public void SetController(string name, Action<PlayerThing> activeAction)
 	{
@@ -44,12 +47,39 @@ public partial class TriggerController : Node3D
 
 		return true;
 	}
+
+	public void ActivateAfterTime(float time)
+	{
+		waitTime = time;
+		currentState = GameManager.FuncState.Start;
+	}
+
 	public override void _Process(double delta)
 	{
 		if (GameManager.Paused)
 			return;
 
 		float deltaTime = (float)delta;
+		switch (currentState)
+		{
+			default:
+			break;
+			case GameManager.FuncState.None:
+				if (activateOnInit)
+					Activate(null);
+				currentState = GameManager.FuncState.Ready;
+			break;
+			case GameManager.FuncState.Start:
+				waitTime -= deltaTime;
+				if (waitTime <= 0)
+				{
+					Activate(null);
+					currentState = GameManager.FuncState.Ready;
+				}
+			break;
+		}
+
+
 		if (time <= 0)
 			return;
 		else

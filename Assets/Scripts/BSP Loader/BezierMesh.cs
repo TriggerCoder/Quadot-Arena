@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using ExtensionMethods;
 public static class BezierMesh
 {
 	private static List<Vector3> vertsCache = new List<Vector3>();
@@ -366,7 +367,7 @@ public static class BezierMesh
 									normalRef = Vector3.Forward;
 								break;
 						}
-						changeRotation = CalculateRotation(normal, normalRef);
+						changeRotation.CalculateRotation(normal, normalRef);
 					}
 
 					//Check if it's a 2D Surface
@@ -461,16 +462,6 @@ public static class BezierMesh
 		return true;
 	}
 
-	private static Quaternion CalculateRotation(Vector3 normal1, Vector3 normal2)
-	{
-		float dotProduct = normal1.Dot(normal2);
-		float angle =  Mathf.RadToDeg(Mathf.Acos(dotProduct));
-
-		Vector3 crossProduct = normal1.Cross(normal2);
-		Vector3 axis = crossProduct.Normalized();
-
-		return new Quaternion(axis, angle);
-	}
 	private static Vector2 BezCurveUV(float t, Vector2 p0, Vector2 p1, Vector2 p2)
 	{
 		float[] tPoints = new float[2];
