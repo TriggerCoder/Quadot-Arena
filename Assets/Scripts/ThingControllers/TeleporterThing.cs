@@ -13,7 +13,7 @@ public partial class TeleporterThing : Area3D
 	{
 		BodyEntered += OnBodyEntered;
 	}
-	public void Init(List<Target> dest)
+	public void Init(List<Target> dest, Dictionary<string, string> entityData)
 	{
 		foreach(var target in dest) 
 		{
@@ -24,7 +24,7 @@ public partial class TeleporterThing : Area3D
 			if (angle > 180)
 				angle -= 360;
 
-			destinations.Add(new Target(destination, angle));
+			destinations.Add(new Target(destination, angle, entityData));
 		}
 	}
 	public static void TelefragEverything(Vector3 position, Node3D node)

@@ -42,9 +42,10 @@ public partial class ThingsManager : Node
 	public static Dictionary<string, TriggerController> triggerToActivate = new Dictionary<string, TriggerController>();
 	public static Dictionary<string, Dictionary<string, string>> timersOnMap = new Dictionary<string, Dictionary<string, string>>();
 	public static Dictionary<string, List<Dictionary<string, string>>> triggersOnMap = new Dictionary<string, List<Dictionary<string, string>>>();
+	public static Dictionary<string, ItemPickup> giveItemPickup = new Dictionary<string, ItemPickup>();
 	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group", "info_null" };
-	public static readonly string[] triggerThings = { "func_timer", "trigger_always", "trigger_multiple", "target_relay" , "target_delay" };
-	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_relay", "target_delay", "target_position", "info_notnull", "misc_teleporter_dest" };
+	public static readonly string[] triggerThings = { "func_timer", "trigger_always", "trigger_multiple", "target_relay" , "target_delay", "target_give" };
+	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_relay", "target_delay", "target_give", "target_position", "info_notnull", "misc_teleporter_dest" };
 	public static List<Portal> portalsOnMap = new List<Portal>();
 	public static readonly string ItemDrop = "ItemDrop";
 	public override void _Ready()
@@ -233,12 +234,12 @@ public partial class ThingsManager : Node
 					{
 						List<Target> targetList = null;
 						if (targetsOnMap.TryGetValue(target, out targetList))
-							targetList.Add(new Target(origin, angle));
+							targetList.Add(new Target(origin, angle, entityData));
 						else
 						{
 							targetList = new List<Target>
 							{
-								new Target(origin, angle)
+								new Target(origin, angle, entityData)
 							};
 							targetsOnMap.Add(target, targetList);
 						}
@@ -256,7 +257,7 @@ public partial class ThingsManager : Node
 							default:
 								if (ClassName == "trigger_always")
 									entityData.Add("activate", "true");
-								else if ((ClassName == "target_delay") || (ClassName == "target_relay")) //Need to add the delay/relay after
+								else if ((ClassName == "target_delay") || (ClassName == "target_relay") || (ClassName == "target_give")) //Need to add the delay/relay and give after
 									found = false;
 								List<Dictionary<string, string>> triggersList = null;
 								if (triggersOnMap.TryGetValue(target, out triggersList))
@@ -295,6 +296,7 @@ public partial class ThingsManager : Node
 		triggerToActivate = new Dictionary<string, TriggerController>();
 		timersOnMap = new Dictionary<string, Dictionary<string, string>>();
 		triggersOnMap = new Dictionary<string, List<Dictionary<string, string>>>();
+		giveItemPickup = new Dictionary<string, ItemPickup>();
 		portalsOnMap = new List<Portal>();
 	}
 
@@ -363,9 +365,18 @@ public partial class ThingsManager : Node
 				if (entityData.ContainsKey("activate"))
 					tc.activateOnInit = true;
 
+				//Delays/Relays
+				if (entityData["classname"].Contains("elay"))
+				{
+					tc.Repeatable = true;
+					tc.AutoReturn = true;
+					tc.AutoReturnTime = .5f;
+				}
+
 				float wait;
 				if (entityData.TryGetNumValue("wait", out wait))
 				{
+					tc.Repeatable = true;
 					tc.AutoReturn = true;
 					tc.AutoReturnTime = wait;
 				}
@@ -493,6 +504,23 @@ public partial class ThingsManager : Node
 
 					if (entity.entityData.TryGetNumValue("count", out num))
 						itemPickup.amount =(int)num;
+
+					string target;
+					if (entity.entityData.TryGetValue("targetname", out target))
+					{
+						List<Target> targetList = null;
+						if (targetsOnMap.TryGetValue(target, out targetList))
+							targetList.Add(new Target(entity.origin, 0, entity.entityData));
+						else
+						{
+							targetList = new List<Target>
+							{
+								new Target(entity.origin, 0, entity.entityData)
+							};
+							targetsOnMap.Add(target, targetList);
+						}
+						giveItemPickup[entity.entityData["classname"]] = itemPickup;
+					}
 				}
 				break;
 
@@ -509,7 +537,7 @@ public partial class ThingsManager : Node
 						angle = int.Parse(strWord);
 
 					SpawnPosition spawnPosition = (SpawnPosition)thingObject;
-					spawnPosition.Init(angle);
+					spawnPosition.Init(angle, entity.entityData);
 				}
 				break;
 
@@ -885,43 +913,78 @@ public partial class ThingsManager : Node
 									return;
 							}
 
-							relay.ActivateAfterTime(wait);
+							relay.ActivateAfterTime(wait, p);
 						});
 						}
 					}
 					break;
 				//Relay
 				case "target_relay":
+				{
+					string target;
+					if (!entity.entityData.TryGetValue("target", out target))
+						continue;
+					if (entity.entityData.TryGetValue("targetname", out strWord))
 					{
-						string target;
-						if (!entity.entityData.TryGetValue("target", out target))
-							continue;
-						if (entity.entityData.TryGetValue("targetname", out strWord))
+						string targetName = strWord;
+						TriggerController source, relay;
+						if (!triggerToActivate.TryGetValue(targetName, out source))
 						{
-							string targetName = strWord;
-							TriggerController source, relay;
-							if (!triggerToActivate.TryGetValue(targetName, out source))
-							{
-								source = new TriggerController();
-								thingObject.AddChild(source);
-								triggerToActivate.Add(targetName, source);
-							}
-
-							if (!triggerToActivate.TryGetValue(target, out relay))
-								relay = null;
-
-							source.SetController(targetName, (p) =>
-							{
-								if (relay == null)
-								{
-									if (!triggerToActivate.TryGetValue(target, out relay))
-										return;
-								}
-								relay.Activate(null);
-							});
+							source = new TriggerController();
+							thingObject.AddChild(source);
+							triggerToActivate.Add(targetName, source);
 						}
+
+						if (!triggerToActivate.TryGetValue(target, out relay))
+							relay = null;
+
+						source.SetController(targetName, (p) =>
+						{
+							if (relay == null)
+							{
+								if (!triggerToActivate.TryGetValue(target, out relay))
+									return;
+							}
+							relay.Activate(p);
+						});
 					}
-					break;
+				}
+				break;
+				//Give
+				case "target_give":
+				{
+					string target;
+					if (!entity.entityData.TryGetValue("target", out target))
+						continue;
+					if (entity.entityData.TryGetValue("targetname", out strWord))
+					{
+						string targetName = strWord;
+						TriggerController tc;
+						if (!triggerToActivate.TryGetValue(targetName, out tc))
+						{
+							tc = new TriggerController();
+							thingObject.AddChild(tc);
+							triggerToActivate.Add(targetName, tc);
+						}
+
+						tc.SetController(targetName, (p) =>
+						{
+							if (p == null)
+								return;
+
+							List<Target> targetList = null;
+							if (!targetsOnMap.TryGetValue(target, out targetList))
+								return;
+							foreach (Target target in targetList)
+							{
+								ItemPickup itemPickup;
+								if (giveItemPickup.TryGetValue(target.entityData["classname"], out itemPickup))
+									itemPickup.PickUp(p, false);
+							}
+						});
+					}
+				}
+				break;
 				//JumpPad
 				case "trigger_push":
 				{
@@ -958,7 +1021,7 @@ public partial class ThingsManager : Node
 					thingObject.AddChild(teleporter);
 					int model = int.Parse(strWord.Trim('*'));
 					MapLoader.GenerateGeometricCollider(thingObject, teleporter, model, ContentFlags.Teleporter);
-					teleporter.Init(dest);
+					teleporter.Init(dest, entity.entityData);
 				}
 				break;
 				//Location
@@ -1238,10 +1301,12 @@ public class Target
 {
 	public Vector3 destination;
 	public int angle;
-	public Target(Vector3 destination, int angle)
+	public Dictionary<string, string> entityData;
+	public Target(Vector3 destination, int angle, Dictionary<string, string> entityData)
 	{
 		this.destination = destination;
 		this.angle = angle;
+		this.entityData = entityData;
 	}
 }
 public class Entity

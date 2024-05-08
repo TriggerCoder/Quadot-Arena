@@ -9,7 +9,7 @@ public partial class TriggerController : Node3D
 	public string triggerName = "";
 	public bool activated = false;
 	private List<Action<PlayerThing>> OnActivate = new List<Action<PlayerThing>>();
-	private HashSet<Node3D> CurrentColliders = new HashSet<Node3D>();
+	private Dictionary<Node3D, int> CurrentColliders = new Dictionary<Node3D, int>();
 	public bool Repeatable = false;
 	public bool AutoReturn = false;
 	public float AutoReturnTime = 1f;
@@ -19,6 +19,7 @@ public partial class TriggerController : Node3D
 
 	public float time = 0f;
 	private float waitTime = 0;
+	private PlayerThing delayActivator = null;
 	private GameManager.FuncState currentState = GameManager.FuncState.None;
 
 	public void SetController(string name, Action<PlayerThing> activeAction)
@@ -48,9 +49,12 @@ public partial class TriggerController : Node3D
 		return true;
 	}
 
-	public void ActivateAfterTime(float time)
+	public void ActivateAfterTime(float time, PlayerThing playerThing)
 	{
+		if (currentState == GameManager.FuncState.Start)
+			return;
 		waitTime = time;
+		delayActivator = playerThing;
 		currentState = GameManager.FuncState.Start;
 	}
 
@@ -73,7 +77,8 @@ public partial class TriggerController : Node3D
 				waitTime -= deltaTime;
 				if (waitTime <= 0)
 				{
-					Activate(null);
+					if (Activate(delayActivator))
+						GameManager.Print("This " + Name + " was delayed activated");
 					currentState = GameManager.FuncState.Ready;
 				}
 			break;
@@ -102,8 +107,8 @@ public partial class TriggerController : Node3D
 			GameManager.Print("Someone " + other.Name + " tried to activate this " + Name);
 
 			//Will activate everything back on the main thread
-			if (!CurrentColliders.Contains(other))
-				CurrentColliders.Add(other);
+			if (!CurrentColliders.ContainsKey(other))
+				CurrentColliders.Add(other,0);
 		}
 	}
 
@@ -135,7 +140,7 @@ public partial class TriggerController : Node3D
 			for (int i = 0; i < CurrentBodiesNum; i++)
 			{
 				Node3D CurrentBody = CurrentBodies[i];
-				if (CurrentColliders.Contains(CurrentBody))
+				if (CurrentColliders.ContainsKey(CurrentBody))
 				{
 					PlayerThing playerThing = CurrentBody as PlayerThing;
 					if ((!playerThing.ready) || (playerThing.Dead))
@@ -143,10 +148,16 @@ public partial class TriggerController : Node3D
 						CurrentColliders.Remove(CurrentBody);
 						continue;
 					}
-
-					GameManager.Print("Someone " + CurrentBody.Name + " activated this " + Name);
-					Activate(playerThing);
-					CurrentColliders.Remove(CurrentBody);
+					//We need antibounce
+					int value = CurrentColliders[CurrentBody]++;
+					if (value > 1)
+					{
+						if (Activate(playerThing))
+							GameManager.Print("Someone " + CurrentBody.Name + " activated this " + Name);
+						CurrentColliders[CurrentBody] = 0;
+						if (!Repeatable)
+							CurrentColliders.Remove(CurrentBody);
+					}
 				}
 			}
 		}

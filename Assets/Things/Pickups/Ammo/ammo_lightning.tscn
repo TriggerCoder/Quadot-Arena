@@ -8,10 +8,11 @@
 [sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
 radius = 0.7
 
-[node name="ammo_lightning" type="Node3D"]
+[node name="ammo_lightning" type="Node3D" node_paths=PackedStringArray("itemPickup")]
 script = ExtResource("1_hiut1")
 respawnTime = 30.0
 thingType = 2
+itemPickup = NodePath("Item")
 
 [node name="NodeAnimation" type="Node3D" parent="."]
 script = ExtResource("2_injsr")
