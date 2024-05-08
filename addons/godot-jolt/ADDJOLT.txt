@@ -1,0 +1,2 @@
+Download Latest
+https://github.com/godot-jolt/godot-jolt/releases/latest
