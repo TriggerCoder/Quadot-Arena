@@ -43,7 +43,7 @@ public partial class ThingsManager : Node
 	public static Dictionary<string, Dictionary<string, string>> timersOnMap = new Dictionary<string, Dictionary<string, string>>();
 	public static Dictionary<string, List<Dictionary<string, string>>> triggersOnMap = new Dictionary<string, List<Dictionary<string, string>>>();
 	public static Dictionary<string, ItemPickup> giveItemPickup = new Dictionary<string, ItemPickup>();
-	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group", "info_null" };
+	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group", "info_null", "info_spectator_start", "info_firstplace", "info_secondplace", "info_thirdplace" };
 	public static readonly string[] triggerThings = { "func_timer", "trigger_always", "trigger_multiple", "target_relay" , "target_delay", "target_give" };
 	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_relay", "target_delay", "target_give", "target_position", "info_notnull", "misc_teleporter_dest" };
 	public static List<Portal> portalsOnMap = new List<Portal>();
@@ -532,12 +532,11 @@ public partial class ThingsManager : Node
 					if (entity.entityData.ContainsKey("nohumans"))
 						continue;
 
-					int angle = 0;
-					if (entity.entityData.TryGetValue("angle", out strWord))
-						angle = int.Parse(strWord);
+					float angle = 0;
+					entity.entityData.TryGetNumValue("angle", out angle);
 
 					SpawnPosition spawnPosition = (SpawnPosition)thingObject;
-					spawnPosition.Init(angle, entity.entityData);
+					spawnPosition.Init((int)angle, entity.entityData);
 				}
 				break;
 
@@ -1078,8 +1077,15 @@ public partial class ThingsManager : Node
 								if (entity.entityData.TryGetValue("targetname", out strWord))
 								{
 									string target = strWord;
+									bool playerSound = false;
 
-									audioStream.Stream = SoundManager.LoadSound(audioFile);
+									if (audioFile.Contains('*'))
+									{
+										playerSound = true;
+										audioFile = audioFile.Trim('*');
+									}
+									else
+										audioStream.Stream = SoundManager.LoadSound(audioFile);
 									TriggerController tc;
 									if (!triggerToActivate.TryGetValue(target, out tc))
 									{
@@ -1090,8 +1096,8 @@ public partial class ThingsManager : Node
 									tc.Repeatable = true;
 									tc.SetController(target, (p) =>
 									{
-										if (audioFile.Contains('*'))
-											p.PlayModelSound(audioFile.Trim('*'));
+										if (playerSound)
+											p.PlayModelSound(audioFile);
 										else if (audioStream != null)
 											audioStream.Play();
 									});

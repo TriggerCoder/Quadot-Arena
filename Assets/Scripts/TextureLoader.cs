@@ -78,7 +78,7 @@ public static class TextureLoader
 		else if (Textures.TryGetValue(textureName, out texture))
 			return texture;
 
-		GameManager.Print("GetTexture: Texture not found \"" + textureName + "\"");
+		GameManager.Print("GetTexture: Texture not found \"" + textureName + "\"", GameManager.PrintType.Warning);
 		return illegal;
 	}
 

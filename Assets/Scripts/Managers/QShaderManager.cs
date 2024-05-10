@@ -312,20 +312,23 @@ public static class QShaderManager
 				}
 			}
 
-			int editorIndex;
-			if (TexIndex.TryGetValue(qShader.qShaderGlobal.editorImage, out editorIndex))
+			if (TextureLoader.HasTextureOrAddTexture(qShader.qShaderGlobal.editorImage, alphaIsTransparent))
 			{
-				GSFragmentUvs += "\tvec2 uv_" + totalStages + " = UV;\n";
-				GSFragmentTexs += "\tvec4 Stage_" + totalStages + " = texture(" + "Tex_" + editorIndex + ", uv_" + totalStages + ");\n";
-			}
-			else
-			{
-				GSUniforms += "uniform sampler2D " + "Tex_" + totalTex + " : repeat_enable;\n";
-				GSFragmentUvs += "\tvec2 uv_" + totalStages + " = UV;\n";
-				GSFragmentTexs += "\tvec4 Stage_" + totalStages + " = texture(" + "Tex_" + totalTex + ", uv_" + totalStages + ");\n";
-				textures.Add(qShader.qShaderGlobal.editorImage);
-				TexIndex.Add(qShader.qShaderGlobal.editorImage, totalTex);
-				totalTex++;
+				int editorIndex;
+				if (TexIndex.TryGetValue(qShader.qShaderGlobal.editorImage, out editorIndex))
+				{
+					GSFragmentUvs += "\tvec2 uv_" + totalStages + " = UV;\n";
+					GSFragmentTexs += "\tvec4 Stage_" + totalStages + " = texture(" + "Tex_" + editorIndex + ", uv_" + totalStages + ");\n";
+				}
+				else
+				{
+					GSUniforms += "uniform sampler2D " + "Tex_" + totalTex + " : repeat_enable;\n";
+					GSFragmentUvs += "\tvec2 uv_" + totalStages + " = UV;\n";
+					GSFragmentTexs += "\tvec4 Stage_" + totalStages + " = texture(" + "Tex_" + totalTex + ", uv_" + totalStages + ");\n";
+					textures.Add(qShader.qShaderGlobal.editorImage);
+					TexIndex.Add(qShader.qShaderGlobal.editorImage, totalTex);
+					totalTex++;
+				}
 			}
 		}
 
@@ -441,12 +444,7 @@ public static class QShaderManager
 		else if (qShader.qShaderGlobal.editorImage.Length != 0)
 		{
 			if (TexIndex.ContainsKey(qShader.qShaderGlobal.editorImage))
-			{
-				if (TextureLoader.HasTextureOrAddTexture(qShader.qShaderGlobal.editorImage, alphaIsTransparent))
-					code += "\tvec4 color = Stage_" + totalStages + ";\n";
-				else
-					code += "\tvec4 color = vec4(0.0, 0.0, 0.0, 0.0);\n";
-			}
+				code += "\tvec4 color = Stage_" + totalStages + ";\n";
 			else
 				code += "\tvec4 color = vec4(0.0, 0.0, 0.0, 0.0);\n";
 		}

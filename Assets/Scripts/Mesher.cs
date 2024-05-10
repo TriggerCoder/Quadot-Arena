@@ -1391,7 +1391,7 @@ public static class Mesher
 		Vector3 normal = Vector3.Zero;
 		if (!CanForm3DConvexHull(intersectPoint, ref normal))
 		{
-			GameManager.Print("Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time", GameManager.PrintType.Info);
+			GameManager.Print("Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time", GameManager.PrintType.Warning);
 			return null;
 		}
 
@@ -1458,7 +1458,7 @@ public static class Mesher
 		Vector3 normal = Vector3.Zero;
 		if (!CanForm3DConvexHull(intersectPoint, ref normal))
 		{
-			GameManager.Print("Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time", GameManager.PrintType.Info);
+			GameManager.Print("Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time", GameManager.PrintType.Warning);
 			return false;
 		}
 
