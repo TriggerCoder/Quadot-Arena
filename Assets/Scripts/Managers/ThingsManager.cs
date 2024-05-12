@@ -485,10 +485,13 @@ public partial class ThingsManager : Node
 					if (collider != null)
 						thingObject.Reparent(collider);
 
-/*					if (entity.name.Contains("item_health_mega"))
+					if (entity.name.Contains("func_bobbing"))
+					{
+						GameManager.Print("func_bobbing");
 						foreach (var data in entity.entityData)
 							GameManager.Print("Key: " + data.Key + " Value: " + data.Value);
-*/
+					}
+
 					if (entity.entityData.TryGetNumValue("wait", out num))
 						thingObject.SetRespawnTime(num);
 
@@ -650,8 +653,17 @@ public partial class ThingsManager : Node
 					int model = int.Parse(strWord.Trim('*'));
 					int angle = 0, hitpoints = 0, speed = 200, lip = 8, dmg = 4;
 					float wait;
+
 					DoorController door = new DoorController();
 					thingObject.AddChild(door);
+
+					Node3D SourceTransform = new Node3D();
+					door.AddChild(SourceTransform);
+
+					InterpolatedTransform interpolatedTransform = new InterpolatedTransform();
+					interpolatedTransform.Source = SourceTransform;
+					thingObject.AddChild(interpolatedTransform);
+
 					if (entity.entityData.TryGetValue("angle", out strWord))
 						angle = int.Parse(strWord);
 					if (entity.entityData.TryGetValue("health", out strWord))
@@ -665,27 +677,28 @@ public partial class ThingsManager : Node
 					if (entity.entityData.TryGetValue("dmg", out strWord))
 						dmg = int.Parse(strWord);
 
-					MapLoader.GenerateGeometricSurface(door, model);
+					MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
 					uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, door, model, 0, false);
 					int shapes = door.ShapeOwnerGetShapeCount(OwnerShapeId);
 					Aabb BigBox = new Aabb();
 
-					DoorCollider doorCollider = new DoorCollider();
-					door.AddChild(doorCollider);
-					doorCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
-					doorCollider.CollisionMask = GameManager.TakeDamageMask;
-					doorCollider.door = door;
-					uint bodyShapeId = doorCollider.CreateShapeOwner(door);
+					MoverCollider moverCollider = new MoverCollider();
+					door.AddChild(moverCollider);
+					moverCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
+					moverCollider.CollisionMask = GameManager.TakeDamageMask;
+
+					uint bodyShapeId = moverCollider.CreateShapeOwner(door);
 					for (int i = 0; i < shapes; i++)
 					{
 						Shape3D shape = door.ShapeOwnerGetShape(OwnerShapeId, i);
-						doorCollider.ShapeOwnerAddShape(bodyShapeId, shape);
+						moverCollider.ShapeOwnerAddShape(bodyShapeId, shape);
 						Aabb box = shape.GetDebugMesh().GetAabb();
 						if (i == 0)
 							BigBox = new Aabb(box.Position, box.Size);
 						else
 							BigBox = BigBox.Merge(box);
 					}
+					door.moverCollider = moverCollider;
 					door.Init(angle, hitpoints, speed, wait, lip, BigBox, dmg);
 
 					if (entity.entityData.TryGetValue("targetname", out strWord))
@@ -740,6 +753,61 @@ public partial class ThingsManager : Node
 							tc.Areas.Add(triggerCollider);
 						}
 					}
+				}
+				break;
+				//Platform
+				case "func_bobbing":
+				{
+					GameManager.Print("func_bobbing");
+					foreach (var data in entity.entityData)
+						GameManager.Print("Key: " + data.Key + " Value: " + data.Value);
+
+					strWord = entity.entityData["model"];
+					int model = int.Parse(strWord.Trim('*'));
+					int angle = 0, spawnflags = 0, height = 32;
+					float speed = 4;
+					string noise;
+
+					PlatformController platform = new PlatformController();
+					thingObject.AddChild(platform);
+
+					Node3D SourceTransform = new Node3D();
+					platform.AddChild(SourceTransform);
+
+					InterpolatedTransform interpolatedTransform = new InterpolatedTransform();
+					interpolatedTransform.Source = SourceTransform;
+					thingObject.AddChild(interpolatedTransform);
+
+					if (entity.entityData.TryGetValue("angle", out strWord))
+						angle = int.Parse(strWord);
+					if (entity.entityData.TryGetValue("height", out strWord))
+						height = int.Parse(strWord);
+					if (entity.entityData.TryGetValue("spawnflags", out strWord))
+						spawnflags = int.Parse(strWord);
+					entity.entityData.TryGetValue("noise", out noise);
+					entity.entityData.TryGetNumValue("speed", out speed);
+
+					Vector3 direction = Vector3.Up;
+					if ((spawnflags & 1) != 0)
+						direction = Vector3.Right;
+					else if ((spawnflags & 2) != 0)
+						direction = Vector3.Forward;
+
+					MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
+					uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, platform, model, 0, false);
+					int shapes = platform.ShapeOwnerGetShapeCount(OwnerShapeId);
+					Aabb BigBox = new Aabb();
+
+					for (int i = 0; i < shapes; i++)
+					{
+						Shape3D shape = platform.ShapeOwnerGetShape(OwnerShapeId, i);
+						Aabb box = shape.GetDebugMesh().GetAabb();
+						if (i == 0)
+							BigBox = new Aabb(box.Position, box.Size);
+						else
+							BigBox = BigBox.Merge(box);
+					}
+					platform.Init(direction, speed, height, BigBox, noise);
 				}
 				break;
 				//Rotating Object

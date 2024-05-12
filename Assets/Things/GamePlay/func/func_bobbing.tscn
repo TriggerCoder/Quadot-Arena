@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://nfj4ju6qkqdo"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_kywsg"]
+
+[node name="func_bobbing" type="Node3D"]
+script = ExtResource("1_kywsg")
+respawnSound = ""
+thingType = 6

@@ -28,9 +28,9 @@ public partial class DoorController : AnimatableBody3D, Damageable
 	public BloodType BloodColor { get { return BloodType.None; } }
 
 	public MultiAudioStream audioStream;
+	public MoverCollider moverCollider = null;
 	private float openSqrMagnitude;
 
-	[System.Serializable]
 	public enum State
 	{
 		None,
@@ -41,24 +41,6 @@ public partial class DoorController : AnimatableBody3D, Damageable
 	}
 
 	public State currentState = State.Closed;
-	public void SetInitialState(State initial)
-	{
-		if (currentState == State.None)
-		{
-			switch (initial)
-			{
-				default:
-					GameManager.Print("Initial DoorState must be only Open/Closed", GameManager.PrintType.Info);
-					break;
-				case State.Open:
-					currentState = initial;
-					break;
-				case State.Closed:
-					currentState = initial;
-					break;
-			}
-		}
-	}
 
 	public State CurrentState
 	{
@@ -73,6 +55,8 @@ public partial class DoorController : AnimatableBody3D, Damageable
 					audioStream.Play();
 				}
 				openWaitTime = waitTime;
+				if (moverCollider != null)
+					moverCollider.checkCollision = false;
 			}
 			else if (value == State.Opening)
 			{
@@ -82,6 +66,8 @@ public partial class DoorController : AnimatableBody3D, Damageable
 					audioStream.Play();
 				}
 				Activated = true;
+				if (moverCollider != null)
+					moverCollider.checkCollision = true;
 				SetPhysicsProcess(true);
 			}
 			else if (value == State.Closing)
@@ -92,6 +78,9 @@ public partial class DoorController : AnimatableBody3D, Damageable
 						audioStream.Stream = SoundManager.LoadSound(startSound);
 						audioStream.Play();
 					}
+
+				if (moverCollider != null)
+					moverCollider.checkCollision = true;
 				SetPhysicsProcess(true);
 			}
 			else if (value == State.Closed)
@@ -103,6 +92,8 @@ public partial class DoorController : AnimatableBody3D, Damageable
 						audioStream.Play();
 					}
 				Activated = false;
+				if (moverCollider != null)
+					moverCollider.checkCollision = false;
 				SetPhysicsProcess(false);
 			}
 			currentState = value;
@@ -127,6 +118,17 @@ public partial class DoorController : AnimatableBody3D, Damageable
 		AddChild(audioStream);
 		audioStream.Bus = "BKGBus";
 		audioStream.Position = door.GetCenter();
+
+		if (moverCollider != null)
+		{
+			moverCollider.SetOnCollideAction((p) =>
+			{
+				p.Damage(damage, DamageType.Crusher);
+				if (!crusher)
+					CurrentState = State.Opening;
+			});
+		}
+
 	}
 	public override void _PhysicsProcess(double delta)
 	{

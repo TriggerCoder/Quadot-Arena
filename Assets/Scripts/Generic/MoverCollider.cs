@@ -1,23 +1,27 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-public partial class DoorCollider : Area3D
+public partial class MoverCollider : Area3D
 {
-	public DoorController door;
-
+	public bool checkCollision = false;
 	private Dictionary<Node3D, float> CurrentColliders = new Dictionary<Node3D, float>();
+	private Action<PlayerThing> OnCollide = new Action<PlayerThing>((p) => { return; });
 	public override void _Ready()
 	{
 		BodyEntered += OnBodyEntered;
 	}
 
-	public int Damage { get { return door.damage; } }
+	public void SetOnCollideAction(Action<PlayerThing> collideAction)
+	{
+		OnCollide = collideAction;
+	}
+
 	void OnBodyEntered(Node3D other)
 	{
 		if (GameManager.Paused)
 			return;
 
-		if ((door.CurrentState != DoorController.State.Closing) && (door.CurrentState != DoorController.State.Opening))
+		if (!checkCollision)
 			return;
 
 		if (other is PlayerThing player)
@@ -54,11 +58,8 @@ public partial class DoorCollider : Area3D
 				float distance = (CurrentBody.GlobalPosition - GlobalPosition).LengthSquared();
 				if (distance < CurrentColliders[CurrentBody])
 				{
-					PlayerThing playerThing = CurrentBody as PlayerThing;
-					CurrentColliders.Remove(CurrentBody);
-					playerThing.Damage(Damage, DamageType.Crusher);
-					if (!door.crusher)
-						door.CurrentState = DoorController.State.Opening;
+					if (CurrentBody is PlayerThing player)
+						OnCollide.Invoke(player);
 				}
 			}
 		}
