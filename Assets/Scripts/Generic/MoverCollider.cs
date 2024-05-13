@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public partial class MoverCollider : Area3D
 {
 	public bool checkCollision = false;
-	private Dictionary<Node3D, float> CurrentColliders = new Dictionary<Node3D, float>();
+	private List<Node3D> CurrentColliders = new List<Node3D>();
 	private Action<PlayerThing> OnCollide = new Action<PlayerThing>((p) => { return; });
 	public override void _Ready()
 	{
@@ -29,8 +29,28 @@ public partial class MoverCollider : Area3D
 			if (player.currentState == GameManager.FuncState.Ready)
 				return;
 
-			if (!CurrentColliders.ContainsKey(other))
-				CurrentColliders.Add(other, (player.GlobalPosition - GlobalPosition).LengthSquared());
+			if (!CurrentColliders.Contains(other))
+				CurrentColliders.Add(other);
+		}
+	}
+
+	public void CheckCurrentColliders()
+	{
+		var CurrentBodies = GetOverlappingBodies();
+		int CurrentBodiesNum = CurrentBodies.Count;
+		if (CurrentBodiesNum == 0)
+			return;
+
+		for (int i = 0; i < CurrentBodiesNum; i++)
+		{
+			Node3D CurrentBody = CurrentBodies[i];
+			if (CurrentBody is PlayerThing player)
+			{
+				if (player.currentState == GameManager.FuncState.Ready)
+					return;
+
+				OnCollide.Invoke(player);
+			}
 		}
 	}
 
@@ -53,16 +73,11 @@ public partial class MoverCollider : Area3D
 		for (int i = 0; i < CurrentBodiesNum; i++)
 		{
 			Node3D CurrentBody = CurrentBodies[i];
-			if (CurrentColliders.ContainsKey(CurrentBody))
+			if (CurrentColliders.Contains(CurrentBody))
 			{
-				float distance = (CurrentBody.GlobalPosition - GlobalPosition).LengthSquared();
-				if (distance < CurrentColliders[CurrentBody])
-				{
-					if (CurrentBody is PlayerThing player)
-						OnCollide.Invoke(player);
-				}
+				if (CurrentBody is PlayerThing player)
+					OnCollide.Invoke(player);
 			}
 		}
 	}
-
 }

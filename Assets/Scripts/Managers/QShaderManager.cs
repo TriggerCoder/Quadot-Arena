@@ -104,6 +104,7 @@ public static class QShaderManager
 		bool animStages = false;
 		bool depthWrite = false;
 		bool entityColor = false;
+		bool needLightMap = false;
 
 		//Needed for Mutipass
 		int needMultiPass = 0;
@@ -505,7 +506,7 @@ public static class QShaderManager
 		{
 			//Lightmap will be added outside of the shader creation
 			if (textures[i].Contains("$LIGHTMAP"))
-				continue;
+				needLightMap = true;
 			else
 			{
 				tex = TextureLoader.GetTextureOrAddTexture(textures[i], alphaIsTransparent);
@@ -518,6 +519,17 @@ public static class QShaderManager
 			ShaderMaterial portalMaterial = PortalMaterial(qShader);
 			shaderMaterial.NextPass = portalMaterial;
 		}
+
+		if (needLightMap)
+		{
+			//If Lightmap is needed but there is no lightmapIndex, then the material is broken
+			if (lm_index < 0)
+			{
+				GameManager.Print("Requested Lightmap, but there is no lightmapIndex");
+				return MaterialManager.Instance.illegal;
+			}
+		}
+
 		return shaderMaterial;
 	}
 

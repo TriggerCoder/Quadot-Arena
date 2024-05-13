@@ -307,6 +307,10 @@ public static class Mesher
 		bool forceSkinAlpha = false;
 		ShaderMaterial material = MaterialManager.GetMaterials(textureName, lmIndex, ref forceSkinAlpha, ref hasPortal);
 
+//		Don't show illegal (sad faced) material, just remove mesh/shader
+		if (material == MaterialManager.Instance.illegal)
+			return;
+
 		MeshInstance3D mesh = new MeshInstance3D();
 		ArrayMesh arrMesh = new ArrayMesh();
 		string Name = "Mesh_Surfaces";

@@ -30,6 +30,7 @@ public partial class DoorController : AnimatableBody3D, Damageable
 	public MultiAudioStream audioStream;
 	public MoverCollider moverCollider = null;
 	private float openSqrMagnitude;
+	private bool checkCurrentCollision = false;
 
 	public enum State
 	{
@@ -68,6 +69,7 @@ public partial class DoorController : AnimatableBody3D, Damageable
 				Activated = true;
 				if (moverCollider != null)
 					moverCollider.checkCollision = true;
+				checkCurrentCollision = true;
 				SetPhysicsProcess(true);
 			}
 			else if (value == State.Closing)
@@ -81,6 +83,7 @@ public partial class DoorController : AnimatableBody3D, Damageable
 
 				if (moverCollider != null)
 					moverCollider.checkCollision = true;
+				checkCurrentCollision = true;
 				SetPhysicsProcess(true);
 			}
 			else if (value == State.Closed)
@@ -134,6 +137,13 @@ public partial class DoorController : AnimatableBody3D, Damageable
 	{
 		if (GameManager.Paused)
 			return;
+
+		if (checkCurrentCollision)
+		{
+			if (moverCollider != null)
+				moverCollider.CheckCurrentColliders();
+			checkCurrentCollision = false;
+		}
 
 		float deltaTime = (float)delta;
 		switch (CurrentState)
