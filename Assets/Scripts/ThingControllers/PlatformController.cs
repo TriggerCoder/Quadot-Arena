@@ -1,77 +1,84 @@
 using Godot;
-using System;
+using System.Collections.Generic;
 
 public partial class PlatformController : AnimatableBody3D
 {
 	private float lenght;
-	private Aabb platform;
 	private float speed;
 
 	private Vector3 startPosition;
 	private Vector3 dirVector;
 
 	public MultiAudioStream audioStream;
-	private float deltaTime = 0;
+	private float deltaTime;
 	private MoverCollider moverCollider;
-	public void Init(Vector3 dir, float sp, int height, Aabb box, string noise)
+	public void Init(Vector3 dir, float sp, float phase, int height, List<Aabb> Boxes, Vector3 origin, string noise)
 	{
 		dirVector = dir;
 
 		lenght = height * GameManager.sizeDividor;
 		speed = sp;
 
-		platform = box;
+		deltaTime = 1000 * sp * phase;
+
 		startPosition = Position;
 		
-		Vector3 center = platform.GetCenter();
 		audioStream = new MultiAudioStream();
 		AddChild(audioStream);
 		audioStream.Bus = "BKGBus";
-		audioStream.Position = center;
+		audioStream.Position = origin;
 		if (!string.IsNullOrEmpty(noise))
 		{
 			audioStream.Stream = SoundManager.LoadSound(noise, true);
 			audioStream.Play();
 		}
 
+		if (Boxes.Count == 0)
+			return;
+
 		moverCollider = new MoverCollider();
 		AddChild(moverCollider);
 		moverCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
 		moverCollider.CollisionMask = GameManager.TakeDamageMask;
-
-		Vector3 size = platform.Abs().Size;
-		if (dir.X > 0)
-		{
-			center.Y -= .25f;
-			size.Y = Mathf.Max(size.Y - .25f, .1f);
-			size.Z = Mathf.Max(size.Z - .25f, .1f);
-		}
-		else if (dir.Y > 0)
-		{
-			size.X = Mathf.Max(size.X - .25f, .1f);
-			size.Z = Mathf.Max(size.Z - .25f, .1f);
-		}
-		else
-		{
-			center.Y -= .25f;
-			size.X = Mathf.Max(size.X - .25f, .1f);
-			size.Y = Mathf.Max(size.Y - .25f, .1f);
-		}
-
-		moverCollider.GlobalPosition = center;
-		moverCollider.GlobalBasis = GlobalBasis;
 
 		moverCollider.SetOnCollideAction((p) =>
 		{
 			p.Damage(1000, DamageType.Crusher);
 		});
 
-		BoxShape3D Box = new BoxShape3D();
-		Box.Size = size;
+		for (int i = 0; i < Boxes.Count; i++) 
+		{
+			BoxShape3D Box = new BoxShape3D();
 
-		CollisionShape3D mc = new CollisionShape3D();
-		mc.Shape = Box;
-		moverCollider.AddChild(mc);
+			Vector3 size = Boxes[i].Abs().Size;
+			Vector3 center = Boxes[i].GetCenter();
+			center.Y -= .3f;
+
+			if (dir.X > 0)
+			{
+				size.Y = Mathf.Max(size.Y - .3f, .1f);
+				size.Z = Mathf.Max(size.Z - .3f, .1f);
+			}
+			else if (dir.Y > 0)
+			{
+				size.X = Mathf.Max(size.X - .3f, .1f);
+				size.Y = Mathf.Max(size.Y - .3f, .1f);
+				size.Z = Mathf.Max(size.Z - .3f, .1f);
+			}
+			else
+			{
+				size.X = Mathf.Max(size.X - .3f, .1f);
+				size.Y = Mathf.Max(size.Y - .3f, .1f);
+			}
+
+			Box.Size = size;
+
+			CollisionShape3D mc = new CollisionShape3D();
+			mc.Shape = Box;
+			mc.Position = center;
+			moverCollider.AddChild(mc);
+		}
+
 		moverCollider.checkCollision = true;
 	}
 	public override void _PhysicsProcess(double delta)

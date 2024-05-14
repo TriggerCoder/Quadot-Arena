@@ -32,6 +32,7 @@ public partial class PortalSurface : Area3D
 		BodyExited += OnBodyExit;
 		radiusSquared = radius * radius;
 		RenderingServer.FramePreDraw += () => OnPreRender();
+		RenderingServer.FramePostDraw += () => OnPostRender();
 	}
 
 	private Transform3D MirrorTransform3D(Vector3 n, Vector3 d)
@@ -75,6 +76,11 @@ public partial class PortalSurface : Area3D
 		}
 	}
 
+	public void OnPostRender()
+	{
+		for (int i = 0; i < destPortal.surfaces.Count; i++)
+			destPortal.surfaces[i].mesh.Layers = GameManager.InvisibleMask;
+	}
 	public void NewLocalPlayerAdded()
 	{
 		int index = destCamera.Count;
@@ -85,6 +91,7 @@ public partial class PortalSurface : Area3D
 
 		MeshInstance3D mesh = new MeshInstance3D();
 		GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
+		mesh.Layers = GameManager.InvisibleMask;
 		mesh.Mesh = destPortal.commonMesh;
 		ShaderMaterial material = (ShaderMaterial)destPortal.commonMat.Duplicate(true);
 		mesh.SetSurfaceOverrideMaterial(0, material);

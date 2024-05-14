@@ -356,7 +356,7 @@ public static class Mesher
 				normals += normalsCache[i];
 
 			ShaderMaterial mat = (ShaderMaterial)material.Duplicate(true);
-			mesh.Layers = (1 << GameManager.Player1ViewLayer);
+			mesh.Layers = GameManager.InvisibleMask;
 			mesh.SetSurfaceOverrideMaterial(0, mat);
 			portal.normal = normals.Normalized();
 			portal.commonMesh = arrMesh;
@@ -1309,8 +1309,10 @@ public static class Mesher
 		for (int i = 0; i < brushes.Length; i++)
 		{
 			ConvexPolygonShape3D convexHull = GenerateBrushCollider(brushes[i]);
-			if (convexHull != null)
-				objCollider.ShapeOwnerAddShape(OwnerShapeId, convexHull);
+			if (convexHull == null)
+				continue;
+
+			objCollider.ShapeOwnerAddShape(OwnerShapeId, convexHull);
 			if (isWater)
 			{
 				Aabb box = convexHull.GetDebugMesh().GetAabb();

@@ -758,18 +758,26 @@ public partial class ThingsManager : Node
 				//Platform
 				case "func_bobbing":
 				{
-					GameManager.Print("func_bobbing");
-					foreach (var data in entity.entityData)
-						GameManager.Print("Key: " + data.Key + " Value: " + data.Value);
-
-					strWord = entity.entityData["model"];
-					int model = int.Parse(strWord.Trim('*'));
+					Vector3 center = Vector3.Zero;
+					int model = -1;
 					int angle = 0, spawnflags = 0, height = 32;
-					float speed = 4;
+					float speed = 4, phase = 0;
 					string noise;
 
 					PlatformController platform = new PlatformController();
 					thingObject.AddChild(platform);
+
+					if (entity.entityData.TryGetValue("model", out strWord))
+						model = int.Parse(strWord.Trim('*'));
+					if (entity.entityData.TryGetValue("model2", out strWord))
+					{
+						model = -1;
+						ModelController modelController = new ModelController();
+						platform.AddChild(modelController);
+						modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
+						modelController.Init();
+						thingObject.GlobalPosition = entity.origin;
+					}
 
 					Node3D SourceTransform = new Node3D();
 					platform.AddChild(SourceTransform);
@@ -784,8 +792,10 @@ public partial class ThingsManager : Node
 						height = int.Parse(strWord);
 					if (entity.entityData.TryGetValue("spawnflags", out strWord))
 						spawnflags = int.Parse(strWord);
-					entity.entityData.TryGetValue("noise", out noise);
+					if (entity.entityData.TryGetValue("noise", out noise))
+						noise = GetSoundName(noise);
 					entity.entityData.TryGetNumValue("speed", out speed);
+					entity.entityData.TryGetNumValue("phase", out phase);
 
 					Vector3 direction = Vector3.Up;
 					if ((spawnflags & 1) != 0)
@@ -793,21 +803,27 @@ public partial class ThingsManager : Node
 					else if ((spawnflags & 2) != 0)
 						direction = Vector3.Forward;
 
-					MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
-					uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, platform, model, 0, false);
-					int shapes = platform.ShapeOwnerGetShapeCount(OwnerShapeId);
-					Aabb BigBox = new Aabb();
-
-					for (int i = 0; i < shapes; i++)
+					List<Aabb> Boxes = new List<Aabb>();
+					if (model >= 0)
 					{
-						Shape3D shape = platform.ShapeOwnerGetShape(OwnerShapeId, i);
-						Aabb box = shape.GetDebugMesh().GetAabb();
-						if (i == 0)
-							BigBox = new Aabb(box.Position, box.Size);
-						else
-							BigBox = BigBox.Merge(box);
+						MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
+						uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, platform, model, 0, false);
+						int shapes = platform.ShapeOwnerGetShapeCount(OwnerShapeId);
+						Aabb BigBox = new Aabb();
+
+						for (int i = 0; i < shapes; i++)
+						{
+							Shape3D shape = platform.ShapeOwnerGetShape(OwnerShapeId, i);
+							Aabb box = shape.GetDebugMesh().GetAabb();
+							Boxes.Add(box);
+							if (i == 0)
+								BigBox = new Aabb(box.Position, box.Size);
+							else
+								BigBox = BigBox.Merge(box);
+						}
+						center = BigBox.GetCenter();
 					}
-					platform.Init(direction, speed, height, BigBox, noise);
+					platform.Init(direction, speed, phase, height, Boxes, center, noise);
 				}
 				break;
 				//Rotating Object
@@ -1102,20 +1118,8 @@ public partial class ThingsManager : Node
 				//Speaker
 				case "target_speaker":
 				{
-					strWord = entity.entityData["noise"];
-					string[] keyValue = strWord.Split('.');
-					strWord = keyValue[0];
-					if (!strWord.Contains('*'))
-					{
-						keyValue = strWord.Split('/');
-						strWord = "";
-						for (int i = 1; i < keyValue.Length; i++)
-						{
-							if (i > 1)
-								strWord += "/";
-								strWord += keyValue[i];
-						}
-					}
+
+					strWord = GetSoundName(entity.entityData["noise"]);
 					bool isAudio3d = true;
 					AudioStreamPlayer audioStream2D = null;
 					MultiAudioStream audioStream = null;
@@ -1337,6 +1341,23 @@ public partial class ThingsManager : Node
 			PortalSurface portalSurface = portalSurfaces[n];
 			portalSurface.NewLocalPlayerAdded();
 		}
+	}
+	public static string GetSoundName(string strWord)
+	{
+		string[] keyValue = strWord.Split('.');
+		strWord = keyValue[0];
+		if (!strWord.Contains('*'))
+		{
+			keyValue = strWord.Split('/');
+			strWord = "";
+			for (int i = 1; i < keyValue.Length; i++)
+			{
+				if (i > 1)
+					strWord += "/";
+				strWord += keyValue[i];
+			}
+		}
+		return strWord;
 	}
 
 	public static void AddRandomTimeToSound(Node3D node, Dictionary<string, string> entityData, AudioStreamPlayer audioStream2D, MultiAudioStream audioStream, bool isAudio3d)
