@@ -355,12 +355,11 @@ public static class Mesher
 			for (var i = 0; i < normalsCache.Count; i++)
 				normals += normalsCache[i];
 
-			ShaderMaterial mat = (ShaderMaterial)material.Duplicate(true);
 			mesh.Layers = GameManager.InvisibleMask;
-			mesh.SetSurfaceOverrideMaterial(0, mat);
+			mesh.SetSurfaceOverrideMaterial(0, material);
 			portal.normal = normals.Normalized();
 			portal.commonMesh = arrMesh;
-			portal.surfaces.Add(new Portal.Surface(mesh, mat));
+			portal.surfaces.Add(new Portal.Surface(mesh, material));
 			ThingsManager.AddPortalToMap(portal);
 		}
 

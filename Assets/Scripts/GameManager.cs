@@ -114,8 +114,11 @@ public partial class GameManager : Node
 	private float timeMs = 0.0f;
 	public static float CurrentTimeMsec { get { return Instance.timeMs; } }
 
+	public static FuncState CurrentState { get { return Instance.currentState; } }
+
 	private bool timeToSync = false;
 	public static bool NewTickSeconds { get { return Instance.timeToSync; } }
+	public static int NumLocalPlayers { get { return Instance.Players.Count; } }
 
 	public float gravity = 25f;					//default 800 * sizeDividor
 	public float friction = 6f;
@@ -130,6 +133,7 @@ public partial class GameManager : Node
 	private Godot.Environment environment;
 	private float syncTime = 1;
 
+	//skip frames are used to easen up deltaTime after loading
 	public int skipFrames = 5;
 	public Node3D TemporaryObjectsHolder;
 	[Export]
@@ -151,7 +155,7 @@ public partial class GameManager : Node
 	private int mapNum = 0;
 	private float mapLeftTime = 0;
 
-	public MultiAudioStream AnnouncerStream; 
+	public AudioStreamPlayer AnnouncerStream; 
 	private static readonly string FiveMinutes = "feedback/5_minute";
 	private static readonly string OneMinute = "feedback/1_minute";
 	private static readonly string[] Seconds = { "feedback/three", "feedback/two", "feedback/one" };
@@ -218,10 +222,9 @@ public partial class GameManager : Node
 		//Disable Physics Jitter Fix
 		Engine.PhysicsJitterFix = 0;
 
-		AnnouncerStream = new MultiAudioStream();
+		AnnouncerStream = new AudioStreamPlayer();
 		AddChild(AnnouncerStream);
-		AnnouncerStream.Is2DAudio = true;
-		AnnouncerStream.VolumeDb = 14;
+		AnnouncerStream.VolumeDb = 7;
 		AnnouncerStream.Name = "AnnouncerStream";
 		AnnouncerStream.Bus = "FXBus";
 
@@ -358,8 +361,18 @@ public partial class GameManager : Node
 		{
 			default:
 			break;
+			case FuncState.None:
+				if (skipFrames > 0)
+				{
+					skipFrames--;
+					if (skipFrames == 0)
+					{
+						LoadMap();
+						currentState = FuncState.Start;
+					}
+				}
+				break;
 			case FuncState.Ready:
-				//skip frames are used to easen up deltaTime after loading
 				if (skipFrames > 0)
 				{
 					skipFrames--;
@@ -408,9 +421,8 @@ public partial class GameManager : Node
 		}
 	}
 
-	public void ChangeMap()
+	public void LoadMap()
 	{
-		MapLoader.UnloadMap();
 		TemporaryObjectsHolder = new Node3D();
 		TemporaryObjectsHolder.Name = "TemporaryObjectsHolder";
 		AddChild(TemporaryObjectsHolder);
@@ -447,6 +459,13 @@ public partial class GameManager : Node
 		limitReach = LimitReach.None;
 		IntermissionContainer.Hide();
 		paused = false;
+	}
+
+	public void ChangeMap()
+	{
+		MapLoader.UnloadMap();
+		skipFrames = 5;
+		currentState = FuncState.None;
 	}
 
 	public static void SetPause ()

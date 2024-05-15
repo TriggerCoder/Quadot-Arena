@@ -185,6 +185,9 @@ public partial class PortalSurface : Area3D
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 
 		destPortal.surfaces[0].material.SetShaderParameter("Tex_0", viewport.GetTexture());
+
+		for (int i = 1; i < GameManager.NumLocalPlayers; i++)
+			NewLocalPlayerAdded();
 	}
 
 	private Vector2 FillMirrorData()
