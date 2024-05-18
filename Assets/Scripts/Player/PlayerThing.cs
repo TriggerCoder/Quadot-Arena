@@ -185,15 +185,11 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		if (hitpoints < -99)
 			hitpoints = -99;
 
-		if (amount > 60)
-			playerInfo.playerPostProcessing.playerHUD.painFlashTime(2.5f);
-		else if (amount > 40)
-			playerInfo.playerPostProcessing.playerHUD.painFlashTime(2f);
-		else if (amount > 20)
-			playerInfo.playerPostProcessing.playerHUD.painFlashTime(1.5f);
-		else
-			playerInfo.playerPostProcessing.playerHUD.painFlashTime(1f);
+		float painFlash = Mathf.Lerp(1, 2.5f, Mathf.Clamp(amount / 60, 0, 1));
+		if (attacker == this)
+			painFlash /= 2;
 
+		playerInfo.playerPostProcessing.playerHUD.painFlashTime(painFlash);
 		if (hitpoints <= 0)
 		{
 			CollisionLayer = (1 << GameManager.RagdollLayer);

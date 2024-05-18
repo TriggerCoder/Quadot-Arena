@@ -18,6 +18,8 @@ public partial class RailgunWeapon : PlayerWeapon
 	public MultiAudioStream humStream;
 	[Export]
 	public string _humSound;
+	[Export]
+	public float pushForce = 0f;
 
 	public Color white = Colors.White;
 	private List<MeshInstance3D> modulateMeshes;
@@ -138,10 +140,15 @@ public partial class RailgunWeapon : PlayerWeapon
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
 				if (collider is Damageable damageable)
 				{
+					Vector3 Distance = (collider.GlobalPosition - global.Origin);
+					float lenght;
+					Vector3 impulseDir = Distance.GetLenghtAndNormalize(out lenght);
+					int Damage = GD.RandRange(DamageMin, DamageMax);
+					Damage += Mathf.CeilToInt(Mathf.Lerp(0, DamageMax, lenght / maxRange));
 					if (hasQuad)
-						damageable.Damage(GD.RandRange(DamageMin * GameManager.Instance.QuadMul, DamageMax * GameManager.Instance.QuadMul), DamageType.Rail, playerInfo.playerThing);
-					else
-						damageable.Damage(GD.RandRange(DamageMin, DamageMax), DamageType.Rail, playerInfo.playerThing);
+						Damage *= GameManager.Instance.QuadMul;
+					damageable.Damage(Damage, DamageType.Rail, playerInfo.playerThing);
+					damageable.Impulse(impulseDir, pushForce);
 				}
 
 				Vector3 collision = (Vector3)hit["position"];

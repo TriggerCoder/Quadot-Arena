@@ -177,7 +177,11 @@ public partial class Projectile : InterpolatedNode3D
 					{
 						case DamageType.Explosion:
 						case DamageType.Rocket:
-							damageable.Damage(Mathf.CeilToInt(Mathf.Lerp(blastDamage, 1, lenght / explosionRadius)), DamageType.Explosion, owner);
+							int damage = blastDamage;
+							//in order to enable rocket jump
+							if (collider == owner)
+								damage = Mathf.CeilToInt(damage / 3);
+							damageable.Damage(Mathf.CeilToInt(Mathf.Lerp(damage, 1, lenght / explosionRadius)), DamageType.Explosion, owner);
 							damageable.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, lenght / explosionRadius));
 						break;
 						case DamageType.Plasma:

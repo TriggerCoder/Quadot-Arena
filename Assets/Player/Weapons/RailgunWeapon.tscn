@@ -8,6 +8,7 @@ script = ExtResource("1_r5wvs")
 modulate = Color(0.313726, 0.631373, 0.803922, 1)
 humStream = NodePath("HumAudioStream")
 _humSound = "weapons/railgun/rg_hum"
+pushForce = 500.0
 Offset = Vector3(0.25, -0.3, -0.1)
 MuzzleOffset = Vector3(-0.6, 0.1, -0.06)
 audioStream = NodePath("WeaponAudioStream")

@@ -340,7 +340,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (playerWeapon == null)
 		{
 			if (SwapWeapon == -1)
-				SwapToBestWeapon();
+				SwapToBestSafeWeapon();
 
 			if (SwapWeapon > -1)
 			{
@@ -798,16 +798,28 @@ public partial class PlayerControls : InterpolatedNode3D
 		SwapWeapon = weapon;
 		return true;
 	}
+	public void SwapToBestSafeWeapon()
+	{
+		if (TrySwapWeapon(PlayerInfo.BFG10K)) return;
+		if (TrySwapWeapon(PlayerInfo.PlasmaGun)) return;
+		if (TrySwapWeapon(PlayerInfo.LightningGun)) return;
+		if (TrySwapWeapon(PlayerInfo.Shotgun)) return;
+		if (TrySwapWeapon(PlayerInfo.MachineGun)) return;
+		if (TrySwapWeapon(PlayerInfo.Railgun)) return;
+		if (TrySwapWeapon(PlayerInfo.RocketLauncher)) return;
+		if (TrySwapWeapon(PlayerInfo.GrenadeLauncher)) return;
+		if (TrySwapWeapon(PlayerInfo.Gauntlet)) return;
+	}
 	public void SwapToBestWeapon()
 	{
 		if (TrySwapWeapon(PlayerInfo.BFG10K)) return;
-		if (TrySwapWeapon(PlayerInfo.LightningGun)) return;
 		if (TrySwapWeapon(PlayerInfo.PlasmaGun)) return;
 		if (TrySwapWeapon(PlayerInfo.Railgun)) return;
-		if (TrySwapWeapon(PlayerInfo.Shotgun)) return;
-		if (TrySwapWeapon(PlayerInfo.MachineGun)) return;
+		if (TrySwapWeapon(PlayerInfo.LightningGun)) return;
 		if (TrySwapWeapon(PlayerInfo.RocketLauncher)) return;
 		if (TrySwapWeapon(PlayerInfo.GrenadeLauncher)) return;
+		if (TrySwapWeapon(PlayerInfo.Shotgun)) return;
+		if (TrySwapWeapon(PlayerInfo.MachineGun)) return;
 		if (TrySwapWeapon(PlayerInfo.Gauntlet)) return;
 	}
 
@@ -823,7 +835,11 @@ public partial class PlayerControls : InterpolatedNode3D
 					break;
 			}
 			if (!gotWeapon)
+			{
+				if (TrySwapWeapon(PlayerInfo.MachineGun))
+					return;
 				TrySwapWeapon(PlayerInfo.Gauntlet);
+			}
 		}
 		else if (Input.IsActionJustPressed(playerInput.Action_WeaponSwitch_Down))
 		{
