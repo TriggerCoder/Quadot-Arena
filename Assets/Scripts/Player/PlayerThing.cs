@@ -29,6 +29,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public Node3D player;
 	public PlayerModel avatar;
 
+	private Area3D damageArea;
+	public CollisionShape3D damageShape;
 	public int Hitpoints { get { return hitpoints; } }
 	public bool Dead { get { return hitpoints <= 0; } }
 	public bool Bleed { get { return true; } }
@@ -92,6 +94,22 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.feetRay = new SeparationRayShape3D();
 		playerControls.feetRay.Length = .8f;
 		Feet.Shape = playerControls.feetRay;
+
+		damageArea = new Area3D();
+		damageArea.Name = "Damage Area";
+		damageArea.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
+		damageArea.CollisionMask = (1 << GameManager.ColliderLayer);
+
+		AddChild(damageArea);
+		damageArea.BodyEntered += OnBodyEntered;
+
+		playerControls.damageCollider = new CapsuleShape3D();
+		playerControls.damageCollider.Radius = .45f;
+		playerControls.damageCollider.Height = 1.5f;
+
+		damageShape = new CollisionShape3D();
+		damageShape.Shape = playerControls.damageCollider;
+		damageArea.AddChild(damageShape);
 
 		playerControls.collider = new CapsuleShape3D();
 		playerControls.collider.Radius = .5f;
@@ -527,4 +545,11 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			}
 		}
 	}
+
+	void OnBodyEntered(Node3D other)
+	{
+		if (other is Crusher crusher)
+			crusher.Crush(this);
+	}
+
 }

@@ -16,6 +16,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	public SeparationRayShape3D feetRay;
 
 	public CapsuleShape3D	collider;
+	public CapsuleShape3D damageCollider;
 
 	private Vector2 centerHeight = new Vector2(0.5f, 0.2f);	// character controller center height, x standing, y crouched
 	private Vector2 height = new Vector2(1.6f, 1.1f);		// character controller height, x standing, y crouched
@@ -205,6 +206,9 @@ public partial class PlayerControls : InterpolatedNode3D
 			int Joy = playerInput.Device - 1;
 			viewDirection.Y -= Input.GetJoyAxis(Joy, JoyAxis.RightX) * GameOptions.GamePadSensitivity.X;
 			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * GameOptions.GamePadSensitivity.Y;
+
+//			viewDirection.Y -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * GameOptions.GamePadSensitivity.X;
+//			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.TriggerLeft) * GameOptions.GamePadSensitivity.Y;
 		}
 
 		if (viewDirection.Y < -180)
@@ -475,8 +479,10 @@ public partial class PlayerControls : InterpolatedNode3D
 			newHeight = height.X;
 		}
 		playerThing.Torso.Position = new Vector3(0, newCenter, 0);
-		collider.Height = newHeight;
+		playerThing.damageShape.Position = new Vector3(0, newCenter, 0);
 
+		collider.Height = newHeight;
+		damageCollider.Height = newHeight - .1f; ;
 		//Don't move camera on thirdperson
 		if (playerCamera.currentThirdPerson)
 			playerCamera.yOffset = .85f;

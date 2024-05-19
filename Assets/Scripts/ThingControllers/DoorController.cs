@@ -1,7 +1,7 @@
 using Godot;
-using System;
+using System.Collections.Generic;
 
-public partial class DoorController : AnimatableBody3D, Damageable
+public partial class DoorController : AnimatableBody3D, Damageable, Crusher
 {
 	public bool doorOn = false;
 	public bool playSoundClose = true;
@@ -28,10 +28,8 @@ public partial class DoorController : AnimatableBody3D, Damageable
 	public BloodType BloodColor { get { return BloodType.None; } }
 
 	public MultiAudioStream audioStream;
-	public MoverCollider moverCollider = null;
 	private float openSqrMagnitude;
-	private bool checkCurrentCollision = false;
-
+	private List<PlayerThing> playersToCrush = new List<PlayerThing>();
 	public enum State
 	{
 		None,
@@ -56,8 +54,6 @@ public partial class DoorController : AnimatableBody3D, Damageable
 					audioStream.Play();
 				}
 				openWaitTime = waitTime;
-				if (moverCollider != null)
-					moverCollider.checkCollision = false;
 			}
 			else if (value == State.Opening)
 			{
@@ -67,9 +63,6 @@ public partial class DoorController : AnimatableBody3D, Damageable
 					audioStream.Play();
 				}
 				Activated = true;
-				if (moverCollider != null)
-					moverCollider.checkCollision = true;
-				checkCurrentCollision = true;
 				SetPhysicsProcess(true);
 			}
 			else if (value == State.Closing)
@@ -81,9 +74,6 @@ public partial class DoorController : AnimatableBody3D, Damageable
 						audioStream.Play();
 					}
 
-				if (moverCollider != null)
-					moverCollider.checkCollision = true;
-				checkCurrentCollision = true;
 				SetPhysicsProcess(true);
 			}
 			else if (value == State.Closed)
@@ -95,8 +85,6 @@ public partial class DoorController : AnimatableBody3D, Damageable
 						audioStream.Play();
 					}
 				Activated = false;
-				if (moverCollider != null)
-					moverCollider.checkCollision = false;
 				SetPhysicsProcess(false);
 			}
 			currentState = value;
@@ -108,8 +96,6 @@ public partial class DoorController : AnimatableBody3D, Damageable
 
 		hitpoints = hp;
 		speed = sp * GameManager.sizeDividor;
-		//Speed Need to be limited for crusher
-		speed = Mathf.Min(speed, 15.625f);
 		waitTime = wait;
 		lip = openlip * GameManager.sizeDividor;
 		damage = dmg;
@@ -121,28 +107,22 @@ public partial class DoorController : AnimatableBody3D, Damageable
 		AddChild(audioStream);
 		audioStream.Bus = "BKGBus";
 		audioStream.Position = door.GetCenter();
-
-		if (moverCollider != null)
-		{
-			moverCollider.SetOnCollideAction((p) =>
-			{
-				p.Damage(damage, DamageType.Crusher);
-				if (!crusher)
-					CurrentState = State.Opening;
-			});
-		}
-
 	}
 	public override void _PhysicsProcess(double delta)
 	{
 		if (GameManager.Paused)
 			return;
 
-		if (checkCurrentCollision)
+		if (playersToCrush.Count > 0)
 		{
-			if (moverCollider != null)
-				moverCollider.CheckCurrentColliders();
-			checkCurrentCollision = false;
+			for (int i = 0; i < playersToCrush.Count; i++)
+			{
+				playersToCrush[i].Damage(damage, DamageType.Crusher);
+				if (!crusher)
+					CurrentState = State.Opening;
+
+			}
+			playersToCrush.Clear();
 		}
 
 		float deltaTime = (float)delta;
@@ -225,5 +205,12 @@ public partial class DoorController : AnimatableBody3D, Damageable
 	public void Impulse(Vector3 direction, float force)
 	{
 
+	}
+
+	public void Crush(PlayerThing player)
+	{
+		//Crush on main thread
+		if (!playersToCrush.Contains(player))
+			playersToCrush.Add(player);
 	}
 }

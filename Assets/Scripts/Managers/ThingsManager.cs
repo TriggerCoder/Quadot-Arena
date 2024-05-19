@@ -682,23 +682,15 @@ public partial class ThingsManager : Node
 					int shapes = door.ShapeOwnerGetShapeCount(OwnerShapeId);
 					Aabb BigBox = new Aabb();
 
-					MoverCollider moverCollider = new MoverCollider();
-					door.AddChild(moverCollider);
-					moverCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
-					moverCollider.CollisionMask = GameManager.TakeDamageMask;
-
-					uint bodyShapeId = moverCollider.CreateShapeOwner(door);
 					for (int i = 0; i < shapes; i++)
 					{
 						Shape3D shape = door.ShapeOwnerGetShape(OwnerShapeId, i);
-						moverCollider.ShapeOwnerAddShape(bodyShapeId, shape);
 						Aabb box = shape.GetDebugMesh().GetAabb();
 						if (i == 0)
 							BigBox = new Aabb(box.Position, box.Size);
 						else
 							BigBox = BigBox.Merge(box);
 					}
-					door.moverCollider = moverCollider;
 					door.Init(angle, hitpoints, speed, wait, lip, BigBox, dmg);
 
 					if (entity.entityData.TryGetValue("targetname", out strWord))
@@ -803,7 +795,7 @@ public partial class ThingsManager : Node
 					else if ((spawnflags & 2) != 0)
 						direction = Vector3.Forward;
 
-					List<Aabb> Boxes = new List<Aabb>();
+					bool isCrusher = false;
 					if (model >= 0)
 					{
 						MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
@@ -815,15 +807,15 @@ public partial class ThingsManager : Node
 						{
 							Shape3D shape = platform.ShapeOwnerGetShape(OwnerShapeId, i);
 							Aabb box = shape.GetDebugMesh().GetAabb();
-							Boxes.Add(box);
 							if (i == 0)
 								BigBox = new Aabb(box.Position, box.Size);
 							else
 								BigBox = BigBox.Merge(box);
 						}
 						center = BigBox.GetCenter();
+						isCrusher = true;
 					}
-					platform.Init(direction, speed, phase, height, Boxes, center, noise);
+					platform.Init(direction, speed, phase, height, isCrusher, center, noise);
 				}
 				break;
 				//Rotating Object

@@ -1,7 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 
-public partial class PlatformController : AnimatableBody3D
+public partial class PlatformController : AnimatableBody3D, Crusher
 {
 	private float lenght;
 	private float speed;
@@ -11,8 +11,9 @@ public partial class PlatformController : AnimatableBody3D
 
 	public MultiAudioStream audioStream;
 	private float deltaTime;
-	private MoverCollider moverCollider;
-	public void Init(Vector3 dir, float sp, float phase, int height, List<Aabb> Boxes, Vector3 origin, string noise)
+	private bool isCrusher = false;
+	private List<PlayerThing> playersToCrush = new List<PlayerThing>();
+	public void Init(Vector3 dir, float sp, float phase, int height, bool crush, Vector3 origin, string noise)
 	{
 		dirVector = dir;
 
@@ -32,63 +33,32 @@ public partial class PlatformController : AnimatableBody3D
 			audioStream.Stream = SoundManager.LoadSound(noise, true);
 			audioStream.Play();
 		}
-
-		if (Boxes.Count == 0)
-			return;
-
-		moverCollider = new MoverCollider();
-		AddChild(moverCollider);
-		moverCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
-		moverCollider.CollisionMask = GameManager.TakeDamageMask;
-
-		moverCollider.SetOnCollideAction((p) =>
-		{
-			p.Damage(1000, DamageType.Crusher);
-		});
-
-		for (int i = 0; i < Boxes.Count; i++) 
-		{
-			BoxShape3D Box = new BoxShape3D();
-
-			Vector3 size = Boxes[i].Abs().Size;
-			Vector3 center = Boxes[i].GetCenter();
-			center.Y -= .3f;
-
-			if (dir.X > 0)
-			{
-				size.Y = Mathf.Max(size.Y - .3f, .1f);
-				size.Z = Mathf.Max(size.Z - .3f, .1f);
-			}
-			else if (dir.Y > 0)
-			{
-				size.X = Mathf.Max(size.X - .3f, .1f);
-				size.Y = Mathf.Max(size.Y - .3f, .1f);
-				size.Z = Mathf.Max(size.Z - .3f, .1f);
-			}
-			else
-			{
-				size.X = Mathf.Max(size.X - .3f, .1f);
-				size.Y = Mathf.Max(size.Y - .3f, .1f);
-			}
-
-			Box.Size = size;
-
-			CollisionShape3D mc = new CollisionShape3D();
-			mc.Shape = Box;
-			mc.Position = center;
-			moverCollider.AddChild(mc);
-		}
-
-		moverCollider.checkCollision = true;
+		isCrusher = crush;
 	}
 	public override void _PhysicsProcess(double delta)
 	{
 		if (GameManager.Paused)
 			return;
 
+		if (isCrusher && playersToCrush.Count > 0)
+		{
+			for (int i = 0; i < playersToCrush.Count; i++)
+				playersToCrush[i].Damage(1000, DamageType.Crusher);
+			playersToCrush.Clear();
+		}
+
 		deltaTime += (float)delta;
 		float newDistance = Mathf.Sin(2 * Mathf.Pi * deltaTime / speed) * lenght;
 		Vector3 newPosition = startPosition + dirVector * newDistance;
 		Position = newPosition;
+	}
+	public void Crush(PlayerThing player)
+	{
+		if (!isCrusher)
+			return;
+
+		//Crush on main thread
+		if (!playersToCrush.Contains(player))
+			playersToCrush.Add(player);
 	}
 }
