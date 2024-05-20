@@ -1,9 +1,8 @@
 using Godot;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using ExtensionMethods;
 public static class MapLoader
 {
 	public static string CurrentMap;
@@ -112,7 +111,7 @@ public static class MapLoader
 			GameManager.Print("mapTextures " + num);
 			for (int i = 0; i < num; i++)
 			{
-				mapTextures.Add(new QShader(new string(BSPMap.ReadChars(64)), BSPMap.ReadUInt32(), BSPMap.ReadUInt32(), false));
+				mapTextures.Add(new QShader(mapName.GetStringFromBytes(BSPMap.ReadBytes(64)).ToUpper(), BSPMap.ReadUInt32(), BSPMap.ReadUInt32(), false));
 			}
 		}
 
@@ -250,7 +249,7 @@ public static class MapLoader
 			GameManager.Print("mapFog " + num);
 			for (int i = 0; i < num; i++)
 			{
-				mapFog.Add(new QFog(new string(BSPMap.ReadChars(64)), BSPMap.ReadInt32(), BSPMap.ReadInt32()));
+				mapFog.Add(new QFog(mapName.GetStringFromBytes(BSPMap.ReadBytes(64)).ToUpper(), BSPMap.ReadInt32(), BSPMap.ReadInt32()));
 			}
 		}
 
@@ -559,7 +558,7 @@ public static void LerpColorOnRepeatedVertex()
 							Mesher.GeneratePolygonObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, holder, groupSurfaces, false);
 						break;
 					case QSurfaceType.Billboard:
-						//					Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, modelObject, groupSurfaces);
+//							Mesher.GenerateBillBoardObject(mapTextures[groupSurfaces[0].shaderId].name, groupSurfaces[0].lightMapID, groupId, holder, modelObject, groupSurfaces);
 						break;
 					default:
 						GameManager.Print("Group " + groupId + "Skipped surface because it was not a polygon, mesh, or bez patch (" + bigGroup.Key.type + ").", GameManager.PrintType.Info);

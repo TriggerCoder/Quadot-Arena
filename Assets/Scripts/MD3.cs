@@ -1,7 +1,7 @@
 using Godot;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
+using ExtensionMethods;
 
 public class MD3GodotConverted
 {
@@ -57,7 +57,6 @@ public class MD3
 	public static MD3 ImportModel(string modelName, bool forceSkinAlpha)
 	{
 		BinaryReader Md3ModelFile;
-		string[] name;
 		string FileName;
 		string path = Directory.GetCurrentDirectory() + "/StreamingAssets/models/" + modelName + ".md3";
 		if (File.Exists(path))
@@ -73,7 +72,7 @@ public class MD3
 			return null;
 
 		Md3ModelFile.BaseStream.Seek(0, SeekOrigin.Begin);
-		string header = new string(Md3ModelFile.ReadChars(4)); //4 IDP3
+		string header = path.GetStringFromBytes(Md3ModelFile.ReadBytes(4)); //4 IDP3
 		if (header != "IDP3")
 		{
 			GD.PrintErr(modelName + " not a md3 model");
@@ -83,9 +82,7 @@ public class MD3
 		MD3 md3Model = new MD3();
 
 		md3Model.version = Md3ModelFile.ReadInt32();
-
-		name = (new string(Md3ModelFile.ReadChars(64))).Split('\0');
-		md3Model.name = name[0].Replace("\0", string.Empty);
+		md3Model.name = path.GetStringFromBytes(Md3ModelFile.ReadBytes(64));
 
 		md3Model.flags = Md3ModelFile.ReadInt32();
 		md3Model.numFrames = Md3ModelFile.ReadInt32();
@@ -123,79 +120,77 @@ public class MD3
 			frame.bs_Radius = Md3ModelFile.ReadSingle();
 
 			Md3ModelFile.ReadBytes(16);
-//			name = (new string(Md3ModelFile.ReadChars(16))).Split('\0');
-//			frame.name = name[0].Replace("\0", string.Empty);
+//			frame.name = GetStringFromBytes(Md3ModelFile.ReadBytes(16));
 			frame.name = "Frame " + i;
 			frame.QuakeToGodotCoordSystem();
 			md3Model.frames.Add(frame);
 		}
 
-		Md3ModelFile.BaseStream.Seek(ofsTags, SeekOrigin.Begin);
-
-		for (int i = 0, tagId = 0; i < md3Model.numFrames * md3Model.numTags; i++)
+		for (int numFrame = 0; numFrame < md3Model.numFrames; numFrame++) 
 		{
-			MD3Tag tag = new MD3Tag();
-			name = (new string(Md3ModelFile.ReadChars(64))).Split('\0');
-			tag.name = name[0].Replace("\0", string.Empty);
-			float x = Md3ModelFile.ReadSingle();
-			float y = Md3ModelFile.ReadSingle();
-			float z = Md3ModelFile.ReadSingle();
-
-			tag.origin = new Vector3(x, y, z);
-
-			float m00 = Md3ModelFile.ReadSingle();
-			float m01 = Md3ModelFile.ReadSingle();
-			float m02 = Md3ModelFile.ReadSingle();
-
-			float m10 = Md3ModelFile.ReadSingle();
-			float m11 = Md3ModelFile.ReadSingle();
-			float m12 = Md3ModelFile.ReadSingle();
-
-			float m20 = Md3ModelFile.ReadSingle();
-			float m21 = Md3ModelFile.ReadSingle();
-			float m22 = Md3ModelFile.ReadSingle();
-
-			Vector3 column0 = new Vector3(m00, m10, m20);
-			Vector3 column1 = new Vector3(m01, m11, m21);
-			Vector3 column2 = new Vector3(m02, m12, m22);
-			Vector3 column3 = new Vector3(0, 0, 0);
-
-			//https://math.stackexchange.com/questions/3882851/convert-rotation-matrix-between-coordinate-systems
-			//We need to convert the rotation to the new coordinate system, the new coordinate system conversion is given by T (Quakt To Unity Conversion)
-			//If the two coordinate system are in the same space and they are related by T, with the old rotation Ra then the new rotation Rb is given by 
-			//Rb = TRaT^-1
-			Transform3D R = new Transform3D(column0, column1, column2, column3);
-			if (R.IsFinite())
+			for (int numtag = 0; numtag < md3Model.numTags; numtag++)
 			{
-				//https://gamedev.stackexchange.com/questions/203073/how-to-convert-a-4x4-matrix-transformation-to-another-coordinate-system
-				//We want to map +x to -x (-1 ,  0 ,  0)
-				//We want to map +y to +z ( 0 ,  0 ,  1)
-				//We want to map +z to +y ( 0 ,  1 ,  0)
-				//We want the origin, coordinate to survive unchanged (0, 0, 0)
-				//If we left-multiply this matrix by any homogeneous vector in our old coordinate system,
-				//it converts it to the corresponding vector in the new coordinate system:
-				//Vnew = T*Vold
-				Transform3D T = new Transform3D(-1, 0, 0, 
-												 0, 0, 1, 
-												 0, 1, 0, 
-												 0, 0, 0);
+				MD3Tag tag = new MD3Tag();
+				tag.name = path.GetStringFromBytes(Md3ModelFile.ReadBytes(64));
+				float x = Md3ModelFile.ReadSingle();
+				float y = Md3ModelFile.ReadSingle();
+				float z = Md3ModelFile.ReadSingle();
 
-				tag.orientation = T * R * T.Inverse();
-				Quaternion Rot = tag.orientation.Basis.GetRotationQuaternion();
-				if (Rot.IsNormalized())
-					tag.rotation = Rot.Inverse();
-			}
-			tag.QuakeToGodotCoordSystem();
-			if (!md3Model.tagsIdbyName.ContainsKey(tag.name))
-			{
-				List<MD3Tag> tagList = new List<MD3Tag>();
-				md3Model.tagsIdbyName.Add(tag.name, tagId++);
-				md3Model.tagsbyId.Add(tagList);
-			}
+				tag.origin = new Vector3(x, y, z);
 
-			int numFram = i % md3Model.numFrames;
-			tag.localOrigin = md3Model.frames[numFram].locOrigin;
-			md3Model.tagsbyId[md3Model.tagsIdbyName[tag.name]].Add(tag);
+				float m00 = Md3ModelFile.ReadSingle();
+				float m01 = Md3ModelFile.ReadSingle();
+				float m02 = Md3ModelFile.ReadSingle();
+
+				float m10 = Md3ModelFile.ReadSingle();
+				float m11 = Md3ModelFile.ReadSingle();
+				float m12 = Md3ModelFile.ReadSingle();
+
+				float m20 = Md3ModelFile.ReadSingle();
+				float m21 = Md3ModelFile.ReadSingle();
+				float m22 = Md3ModelFile.ReadSingle();
+
+				Vector3 column0 = new Vector3(m00, m10, m20);
+				Vector3 column1 = new Vector3(m01, m11, m21);
+				Vector3 column2 = new Vector3(m02, m12, m22);
+				Vector3 column3 = new Vector3(0, 0, 0);
+
+				//https://math.stackexchange.com/questions/3882851/convert-rotation-matrix-between-coordinate-systems
+				//We need to convert the rotation to the new coordinate system, the new coordinate system conversion is given by T (Quakt To Unity Conversion)
+				//If the two coordinate system are in the same space and they are related by T, with the old rotation Ra then the new rotation Rb is given by 
+				//Rb = TRaT^-1
+				Transform3D R = new Transform3D(column0, column1, column2, column3);
+				if (R.IsFinite())
+				{
+					//https://gamedev.stackexchange.com/questions/203073/how-to-convert-a-4x4-matrix-transformation-to-another-coordinate-system
+					//We want to map +x to -x (-1 ,  0 ,  0)
+					//We want to map +y to +z ( 0 ,  0 ,  1)
+					//We want to map +z to +y ( 0 ,  1 ,  0)
+					//We want the origin, coordinate to survive unchanged (0, 0, 0)
+					//If we left-multiply this matrix by any homogeneous vector in our old coordinate system,
+					//it converts it to the corresponding vector in the new coordinate system:
+					//Vnew = T*Vold
+					Transform3D T = new Transform3D(-1, 0, 0,
+													 0, 0, 1,
+													 0, 1, 0,
+													 0, 0, 0);
+
+					tag.orientation = T * R * T.Inverse();
+					Quaternion Rot = tag.orientation.Basis.GetRotationQuaternion();
+					if (Rot.IsNormalized())
+						tag.rotation = Rot.Inverse();
+				}
+				tag.QuakeToGodotCoordSystem();
+				if (!md3Model.tagsIdbyName.ContainsKey(tag.name))
+				{
+					List<MD3Tag> tagList = new List<MD3Tag>();
+					md3Model.tagsIdbyName.Add(tag.name, numtag);
+					md3Model.tagsbyId.Add(tagList);
+				}
+
+				tag.localOrigin = md3Model.frames[numFrame].locOrigin;
+				md3Model.tagsbyId[md3Model.tagsIdbyName[tag.name]].Add(tag);
+			}
 		}
 
 		int offset = ofsMeshes;
@@ -273,11 +268,9 @@ public class MD3Mesh
 	public int meshSize;                // This stores the total mesh size
 	public void parseMesh(int MeshNum, string modelName, BinaryReader Md3ModelFile, int MeshOffset, bool forceSkinAlpha)
 	{
-		string[] fullName;
 		meshNum = MeshNum;
 		meshId = Md3ModelFile.ReadInt32();
-		fullName = (new string(Md3ModelFile.ReadChars(64))).Split('\0');
-		name = fullName[0].Replace("\0", string.Empty).ToUpper();
+		name = modelName.GetStringFromBytes(Md3ModelFile.ReadBytes(64)).ToUpper();
 
 //		GameManager.Print("Loading Mesh: " + name + " , " + meshId);
 
@@ -298,26 +291,21 @@ public class MD3Mesh
 		Md3ModelFile.BaseStream.Seek(MeshOffset + ofsSkins, SeekOrigin.Begin);
 		for (int i = 0; i < numSkins; i++)
 		{
-			fullName = (new string(Md3ModelFile.ReadChars(64))).Split('\0');
-			string skinName = fullName[0].Replace("\0", string.Empty);
-			//Need to strip extension
-			fullName = skinName.Split('.');
-			fullName[0] = fullName[0].ToUpper();
-
+			string skinName = modelName.GetStringFromBytes(Md3ModelFile.ReadBytes(64)).StripExtension().ToUpper();
 			int num = Md3ModelFile.ReadInt32();
 
 			//Some skins are mentioned more than once
-			if (skinList.Contains(fullName[0]))
+			if (skinList.Contains(skinName))
 				continue;
 
-			if (string.IsNullOrEmpty(fullName[0]))
+			if (string.IsNullOrEmpty(skinName))
 				continue;
 
-			if (!TextureLoader.HasTexture(fullName[0]))
-				TextureLoader.AddNewTexture(fullName[0], forceSkinAlpha);
+			if (!TextureLoader.HasTexture(skinName))
+				TextureLoader.AddNewTexture(skinName, forceSkinAlpha);
 
-			skins.Add(new MD3Skin(num, fullName[0]));
-			skinList.Add(fullName[0]);
+			skins.Add(new MD3Skin(num, skinName));
+			skinList.Add(skinName);
 		}
 		//Update Number of skins as some are repeated
 		numSkins = skins.Count;

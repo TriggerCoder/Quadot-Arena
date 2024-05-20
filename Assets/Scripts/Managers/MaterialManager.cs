@@ -92,6 +92,7 @@ public partial class MaterialManager : Node
 				QShaderManager.ReadShaderData(content);
 			}
 		}
+		TextureLoader.CreateWhiteImage();
 	}
 
 	public static void SetAmbient()

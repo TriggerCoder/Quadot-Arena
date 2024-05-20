@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using static Godot.Image;
 using ExtensionMethods;
+
 public static class TextureLoader
 {
 	public static ImageTexture illegal;
@@ -17,6 +18,19 @@ public static class TextureLoader
 	public static Dictionary<string, ImageTexture> Textures = new Dictionary<string, ImageTexture>();
 	public static Dictionary<string, ImageTexture> TransparentTextures = new Dictionary<string, ImageTexture>();
 	public static Dictionary<string, ImageTexture> ColorizeTextures = new Dictionary<string, ImageTexture>();
+
+	public static void CreateWhiteImage()
+	{
+		Image whiteImage = new Image();
+		byte[] colors = new byte[8 * 8 * 3];
+		for (int i = 0; i < colors.Length; i++)
+			colors[i] = 0xFF;
+		whiteImage.SetData(8, 8, false, Format.Rgb8, colors);
+		ImageTexture whiteTex = ImageTexture.CreateFromImage(whiteImage);
+		whiteTex.SetMeta("luminance", .35f);
+		Textures.Add("$WHITEIMAGE", whiteTex);
+	}
+
 	public static void AddNewTexture(string textureName, bool forceSkinAlpha)
 	{
 		List<QShader> list = new List<QShader>

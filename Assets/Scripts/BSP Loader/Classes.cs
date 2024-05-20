@@ -27,8 +27,7 @@ public class QShader
 	public bool addAlpha;               // Shader add Alpha 
 	public QShader(string name, uint surfaceFlags, uint contentsFlags, bool addAlpha)
 	{
-		//The string is read as 64 characters, which includes a bunch of null bytes.  We strip them to avoid oddness when printing and using the texture names.
-		this.name = name.Replace("\0", string.Empty).ToUpper();
+		this.name = name;
 		this.surfaceFlags = surfaceFlags;
 		this.contentsFlags = contentsFlags;
 		this.addAlpha = addAlpha;
@@ -224,8 +223,7 @@ public class QFog
 	public int reserved;			// Reserved
 	public QFog(string name, int brushNum, int reserved)
 	{
-		//The string is read as 64 characters, which includes a bunch of null bytes.  We strip them to avoid oddness when printing and using the texture names.
-		this.name = name.Replace("\0", string.Empty).ToUpper();
+		this.name = name;
 		this.brushNum = brushNum;
 		this.reserved = reserved;
 	}

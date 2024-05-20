@@ -1,4 +1,5 @@
 using Godot;
+using System;
 
 namespace ExtensionMethods
 {
@@ -116,6 +117,30 @@ namespace ExtensionMethods
 			if (fileExtPos >= 0)
 				return String.Substring(0, fileExtPos);
 			return String;
+		}
+		public static string GetStringFromBytes(this string String, byte[] bytes)
+		{
+			string name;
+			char[] nameData = new char[bytes.Length];
+			bool fill = true;
+			for (int i = 0; i < bytes.Length; i++)
+			{
+				if (fill)
+					nameData[i] = Convert.ToChar(bytes[i]);
+				else
+				{
+					nameData[i] = '\0';
+					continue;
+				}
+				if (nameData[i] == '\0')
+					fill = false;
+			}
+			if (nameData[0] == '\0')
+				name = string.Empty;
+			else
+				name = new string(nameData).Replace("\0", string.Empty);
+
+			return name;
 		}
 	}
 
