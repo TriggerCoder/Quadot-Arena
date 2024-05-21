@@ -1219,13 +1219,7 @@ public partial class ThingsManager : Node
 							{
 								strWord = keyValue[0].Split('.')[0].Replace('\\', '/');
 								GameManager.Print("Music : " + strWord);
-								AudioStreamPlayer audioStream = new AudioStreamPlayer();
-								GameManager.Instance.TemporaryObjectsHolder.AddChild(audioStream);
-								audioStream.VolumeDb = 7;
-								audioStream.Name = "Music";
-								audioStream.Bus = "BKGBus";
-								audioStream.Stream = SoundManager.LoadSound(strWord, true, true);
-								audioStream.Play();
+								GameManager.Instance.StaticMusicPlayer.Stream = SoundManager.LoadSound(strWord, true, true);
 							}
 						}
 					}

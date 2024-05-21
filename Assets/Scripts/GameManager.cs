@@ -155,12 +155,15 @@ public partial class GameManager : Node
 	private int mapNum = 0;
 	private float mapLeftTime = 0;
 
-	public AudioStreamPlayer AnnouncerStream; 
+	public AudioStreamPlayer AnnouncerStream;
+	public AudioStreamPlayer StaticMusicPlayer = null;
+
 	private static readonly string FiveMinutes = "feedback/5_minute";
 	private static readonly string OneMinute = "feedback/1_minute";
 	private static readonly string[] Seconds = { "feedback/three", "feedback/two", "feedback/one" };
 	private static readonly string[] FragsLeft = { "feedback/1_frag", "feedback/2_frags", "feedback/3_frags" };
 	private int second = 0;
+	private int currentDeathCount = 0;
 	public enum FuncState
 	{
 		None,
@@ -246,6 +249,15 @@ public partial class GameManager : Node
 		TemporaryObjectsHolder = new Node3D();
 		TemporaryObjectsHolder.Name = "TemporaryObjectsHolder";
 		AddChild(TemporaryObjectsHolder);
+		if (musicType == MusicType.Static)
+		{
+			StaticMusicPlayer = new AudioStreamPlayer();
+			AddChild(StaticMusicPlayer);
+			StaticMusicPlayer.VolumeDb = 7;
+			StaticMusicPlayer.Name = "Music";
+			StaticMusicPlayer.Bus = "BKGBus";
+		}
+
 		PakManager.LoadPK3Files();
 		QShaderManager.ProcessShaders();
 		MaterialManager.LoadFXShaders();
@@ -354,6 +366,8 @@ public partial class GameManager : Node
 			mapLeftTime = timeLimit * 60;
 			second = 0;
 			paused = true;
+			if (musicType == MusicType.Dynamic)
+				AdaptativeMusicManager.Instance.StopMusic();
 			CallDeferred("ChangeMap");
 		}
 
@@ -390,10 +404,10 @@ public partial class GameManager : Node
 					int controller = controllerWantToJoin[i];
 					if (Players.ContainsKey(controller))
 						continue;
-					SetupNewPlayer(Players.Count, controller);
+					int playerNum = Players.Count;
+					SetupNewPlayer(playerNum, controller);
+					CheckNumPlayerAdded(playerNum);
 					controllerWantToJoin.Remove(controller);
-					if (Players.Count > 1)
-						ThingsManager.NewLocalPlayerAdded();
 				}
 			break;
 		}
@@ -419,8 +433,15 @@ public partial class GameManager : Node
 			limitReach = LimitReach.Frag;
 			mapLeftTime = 1f;
 		}
+		currentDeathCount++;
 	}
 
+	public float GetDeathRatioAndReset()
+	{
+		float deathRatio = (currentDeathCount / Players.Count);
+		currentDeathCount = 0;
+		return deathRatio;
+	}
 	public void LoadMap()
 	{
 		TemporaryObjectsHolder = new Node3D();
@@ -459,6 +480,10 @@ public partial class GameManager : Node
 		limitReach = LimitReach.None;
 		IntermissionContainer.Hide();
 		paused = false;
+		if (musicType == MusicType.Static)
+			StaticMusicPlayer.Play();
+		else if (musicType == MusicType.Dynamic)
+			AdaptativeMusicManager.Instance.StartMusic();
 	}
 
 	public void ChangeMap()
@@ -472,6 +497,21 @@ public partial class GameManager : Node
 	{ 
 		Instance.paused = true;
 	}
+
+	public void CheckNumPlayerAdded(int playerNum)
+	{
+		if (playerNum > 0)
+		{
+			ThingsManager.NewLocalPlayerAdded();
+			return;
+		}
+
+		if (musicType == MusicType.Static)
+			StaticMusicPlayer.Play();
+		else if (musicType == MusicType.Dynamic)
+			AdaptativeMusicManager.Instance.StartMusic();
+	}
+
 	public void SetupNewPlayer(int playerNum, int controllerNum)
 	{
 		PlayerThing player = (PlayerThing)playerPrefab.Instantiate();
@@ -680,6 +720,17 @@ public partial class GameManager : Node
 		if (type >= printType)
 		{
 			GD.Print(printLine + ": " + Message);
+			switch (type)
+			{
+				default:
+				break;
+				case PrintType.Warning:
+					GD.PushWarning(printLine + ": " + Message);
+				break;
+				case PrintType.Error:
+					GD.PushError(printLine + ": " + Message);
+				break;
+			}
 			printLine++;
 		}
 	}

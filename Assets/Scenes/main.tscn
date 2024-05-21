@@ -1,14 +1,15 @@
-[gd_scene load_steps=97 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=129 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
-[ext_resource type="Resource" uid="uid://d2qwccitnqm8c" path="res://Assets/Data Resources/SoundData.tres" id="3_0fxsa"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
 [ext_resource type="PackedScene" uid="uid://dsd33pjc1bdk7" path="res://Assets/Scenes/ScoreBoard.tscn" id="3_hqlfm"]
 [ext_resource type="Material" uid="uid://cuswccc2jvs1t" path="res://Assets/Materials/illegal.tres" id="5_7m0rp"]
 [ext_resource type="Material" uid="uid://kujcx0wgflmg" path="res://Assets/Materials/fog.tres" id="5_d2l4q"]
 [ext_resource type="Material" uid="uid://b7a0ll36sihim" path="res://Assets/Materials/default.tres" id="5_is83x"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SoundData.cs" id="5_wdlai"]
 [ext_resource type="Material" uid="uid://dx20p677lxv8l" path="res://Assets/Materials/transparentDefault.tres" id="6_fojn5"]
 [ext_resource type="Material" uid="uid://bxnkqiouvmut0" path="res://Assets/Materials/defaultLightMap.tres" id="6_i1nl1"]
+[ext_resource type="AudioStream" uid="uid://bn1dyxhk3ad4y" path="res://Assets/Sounds/weapons/BFG10K.wav" id="6_qhnn0"]
 [ext_resource type="PackedScene" uid="uid://xi3ybp7mrio2" path="res://Assets/Player/Player.tscn" id="7_rdgk2"]
 [ext_resource type="Material" uid="uid://b4co3lx7imeoo" path="res://Assets/Materials/transparentLightMap.tres" id="7_wtcy7"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/ClusterPVSManager.cs" id="8_vpkit"]
@@ -95,6 +96,24 @@
 [ext_resource type="PackedScene" uid="uid://bkiqdp4glmct1" path="res://Assets/Things/GamePlay/target/target_delay.tscn" id="80_bwsan"]
 [ext_resource type="PackedScene" uid="uid://k6bvnispnql3" path="res://Assets/Things/GamePlay/trigger/trigger_always.tscn" id="83_a6fcd"]
 [ext_resource type="PackedScene" uid="uid://dbyfx8j7w2bf8" path="res://Assets/Things/GamePlay/target/target_give.tscn" id="88_nvs58"]
+[ext_resource type="Script" path="res://Assets/Scripts/Managers/AdaptativeMusicManager.cs" id="95_viiyv"]
+[ext_resource type="AudioStream" uid="uid://by58bujxtsieb" path="res://Assets/Music/Tracks/Out/Ambient_1_Outro.ogg" id="96_e3wmk"]
+[ext_resource type="AudioStream" uid="uid://bbh1a7o5ma5ip" path="res://Assets/Music/Tracks/Main/Ambient_1.ogg" id="97_ff5rj"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AdaptativeTrack.cs" id="98_5huls"]
+[ext_resource type="AudioStream" uid="uid://c040ju5yn4mep" path="res://Assets/Music/Tracks/Out/Ambient_2_Outro.ogg" id="99_bq65s"]
+[ext_resource type="AudioStream" uid="uid://btulamc337i7x" path="res://Assets/Music/Tracks/Main/Ambient_2.ogg" id="100_q7s6t"]
+[ext_resource type="AudioStream" uid="uid://ceckgkf8e3tkm" path="res://Assets/Music/Tracks/Main/Intensity_1.ogg" id="101_6ilvq"]
+[ext_resource type="AudioStream" uid="uid://bwh3k5y57v6ms" path="res://Assets/Music/Tracks/Out/Intensity_2_Outro.ogg" id="102_dislq"]
+[ext_resource type="AudioStream" uid="uid://crgc4bcvb8swc" path="res://Assets/Music/Tracks/Main/Intensity_2.ogg" id="103_ykysf"]
+[ext_resource type="AudioStream" uid="uid://y1oyoeq7o2ay" path="res://Assets/Music/Tracks/Out/Intensity_3_Outro.ogg" id="104_pvalh"]
+[ext_resource type="AudioStream" uid="uid://0oq4cefv33uo" path="res://Assets/Music/Tracks/Main/Intensity_3.ogg" id="105_l6j8q"]
+[ext_resource type="AudioStream" uid="uid://x1vve4f2kvuw" path="res://Assets/Music/Blends/Alarm.ogg" id="106_q64dm"]
+[ext_resource type="AudioStream" uid="uid://d8hn2jhdbx4x" path="res://Assets/Music/Blends/Big_Hit_Stinger.ogg" id="107_imfew"]
+[ext_resource type="AudioStream" uid="uid://c5bky7v2phnu8" path="res://Assets/Music/Blends/Lond_Sweep_Drone.ogg" id="108_f8x07"]
+[ext_resource type="AudioStream" uid="uid://bw3em04hny83e" path="res://Assets/Music/Blends/Low_Drone_Wubs.ogg" id="109_0k0k0"]
+[ext_resource type="AudioStream" uid="uid://2qggc1hkygq8" path="res://Assets/Music/Blends/Sweep_Drop_Off.ogg" id="110_dxybh"]
+[ext_resource type="AudioStream" uid="uid://kk5q33151ba3" path="res://Assets/Music/Blends/Wubs.ogg" id="111_2dxqd"]
+[ext_resource type="AudioStream" uid="uid://ddb8765t61kdp" path="res://Assets/Music/Blends/Drum_Fill_Intro.ogg" id="112_ouf8h"]
 
 [sub_resource type="Environment" id="Environment_rcj1l"]
 background_mode = 2
@@ -103,6 +122,100 @@ ambient_light_color = Color(0.376471, 0.376471, 0.376471, 1)
 tonemap_mode = 2
 volumetric_fog_enabled = true
 volumetric_fog_density = 0.0
+
+[sub_resource type="Resource" id="Resource_wypao"]
+script = ExtResource("5_wdlai")
+name = "weapons/bfg/bfg_charge"
+sound = ExtResource("6_qhnn0")
+
+[sub_resource type="Resource" id="Resource_r0lgg"]
+script = ExtResource("98_5huls")
+intesityLevel = 0
+isRepeatable = true
+TrackFile = ExtResource("97_ff5rj")
+hasOutro = true
+OutroFile = ExtResource("96_e3wmk")
+
+[sub_resource type="Resource" id="Resource_n18eb"]
+script = ExtResource("98_5huls")
+intesityLevel = 0
+isRepeatable = true
+TrackFile = ExtResource("100_q7s6t")
+hasOutro = true
+OutroFile = ExtResource("99_bq65s")
+
+[sub_resource type="Resource" id="Resource_5gy5c"]
+script = ExtResource("98_5huls")
+intesityLevel = 1
+isRepeatable = true
+TrackFile = ExtResource("101_6ilvq")
+hasOutro = true
+OutroFile = ExtResource("96_e3wmk")
+
+[sub_resource type="Resource" id="Resource_1dilk"]
+script = ExtResource("98_5huls")
+intesityLevel = 2
+isRepeatable = true
+TrackFile = ExtResource("103_ykysf")
+hasOutro = true
+OutroFile = ExtResource("102_dislq")
+
+[sub_resource type="Resource" id="Resource_cx3w0"]
+script = ExtResource("98_5huls")
+intesityLevel = 3
+isRepeatable = true
+TrackFile = ExtResource("105_l6j8q")
+hasOutro = true
+OutroFile = ExtResource("104_pvalh")
+
+[sub_resource type="Resource" id="Resource_whqjk"]
+script = ExtResource("98_5huls")
+intesityLevel = 0
+isRepeatable = true
+TrackFile = ExtResource("106_q64dm")
+hasOutro = false
+
+[sub_resource type="Resource" id="Resource_io036"]
+script = ExtResource("98_5huls")
+intesityLevel = 1
+isRepeatable = true
+TrackFile = ExtResource("107_imfew")
+hasOutro = false
+
+[sub_resource type="Resource" id="Resource_f7ph5"]
+script = ExtResource("98_5huls")
+intesityLevel = 2
+isRepeatable = true
+TrackFile = ExtResource("108_f8x07")
+hasOutro = false
+
+[sub_resource type="Resource" id="Resource_dndje"]
+script = ExtResource("98_5huls")
+intesityLevel = 3
+isRepeatable = true
+TrackFile = ExtResource("109_0k0k0")
+hasOutro = false
+
+[sub_resource type="Resource" id="Resource_xagbu"]
+script = ExtResource("98_5huls")
+intesityLevel = 0
+isRepeatable = false
+TrackFile = ExtResource("110_dxybh")
+hasOutro = false
+
+[sub_resource type="Resource" id="Resource_ydpk3"]
+script = ExtResource("98_5huls")
+intesityLevel = 2
+isRepeatable = true
+TrackFile = ExtResource("111_2dxqd")
+hasOutro = false
+
+[sub_resource type="Resource" id="Resource_amkdl"]
+script = ExtResource("98_5huls")
+intesityLevel = 1
+isRepeatable = true
+TrackFile = ExtResource("112_ouf8h")
+hasOutro = false
 
 [node name="main" type="Node3D"]
 
@@ -114,7 +227,7 @@ script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
 Sun = NodePath("../SunLight")
 Root = NodePath("..")
-mapRotation = PackedStringArray("q3dm7", "q3dm7", "q3tourney2", "q3dm17")
+mapRotation = PackedStringArray("q3dm1", "q3dm7", "q3tourney2", "q3dm17")
 tessellations = 10
 SplitScreen = [NodePath("SplitScreenContainer/TopRow"), NodePath("SplitScreenContainer/MiddleRow"), NodePath("SplitScreenContainer/BtmRow")]
 IntermissionContainer = NodePath("IntermissionContainer")
@@ -123,7 +236,7 @@ viewPortPrefab = ExtResource("13_tu0mj")
 scoreBoard = ExtResource("3_hqlfm")
 playerPrefab = ExtResource("7_rdgk2")
 musicType = 1
-OverrideSounds = Array[Resource]([ExtResource("3_0fxsa")])
+OverrideSounds = Array[Resource]([SubResource("Resource_wypao")])
 
 [node name="MaterialManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("3_amftv")
@@ -159,6 +272,12 @@ _infoPrefabs = Array[PackedScene]([ExtResource("46_6njgx"), ExtResource("33_epjy
 _miscPrefabs = Array[PackedScene]([ExtResource("48_uv6co"), ExtResource("49_gicjp"), ExtResource("37_kkxgn")])
 _targetPrefabs = Array[PackedScene]([ExtResource("32_b20ey"), ExtResource("31_tr8jk"), ExtResource("49_mb0ac"), ExtResource("79_dvn2g"), ExtResource("80_bwsan"), ExtResource("88_nvs58")])
 _triggerPrefabs = Array[PackedScene]([ExtResource("45_ge4jt"), ExtResource("40_yfkkd"), ExtResource("35_1ytnq"), ExtResource("36_7m5u6"), ExtResource("83_a6fcd")])
+
+[node name="AdaptativeMusicManager" type="Node" parent="Quadot Arena"]
+script = ExtResource("95_viiyv")
+MainTracks = Array[Resource]([SubResource("Resource_r0lgg"), SubResource("Resource_n18eb"), SubResource("Resource_5gy5c"), SubResource("Resource_1dilk"), SubResource("Resource_cx3w0")])
+BlendTracks = Array[Resource]([SubResource("Resource_whqjk"), SubResource("Resource_io036"), SubResource("Resource_f7ph5"), SubResource("Resource_dndje"), SubResource("Resource_xagbu"), SubResource("Resource_ydpk3"), SubResource("Resource_amkdl")])
+baseVol = 7.0
 
 [node name="MultiAudioListener" type="AudioListener3D" parent="Quadot Arena"]
 current = true

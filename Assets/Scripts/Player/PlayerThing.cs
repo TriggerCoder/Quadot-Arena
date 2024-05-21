@@ -313,7 +313,6 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 				}
 			}
 			ScoreBoard.Instance.RefreshScore();
-//			GameManager.Instance.AddDeathCount();
 		}
 		else if (damageType == DamageType.Drown)
 			SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(drowningSound + GD.RandRange(1, 2)));

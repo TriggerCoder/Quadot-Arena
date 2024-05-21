@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://dhtf2j20ek74y"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AdaptativeTrack.cs" id="1_p2q4s"]
+
+[resource]
+script = ExtResource("1_p2q4s")
+uniqueId = 0
+intesityLevel = 0
+isRepeatable = false
+hasOutro = false
