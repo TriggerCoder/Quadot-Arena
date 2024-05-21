@@ -58,9 +58,11 @@ public partial class PlayerControls : InterpolatedNode3D
 	private bool wishFire = false;
 	private bool wishActivate = false;
 	private bool controllerIsGrounded = true;
-
+	private bool controllerWasGrounded = true;
 	private float deathTime = 0;
 	private float respawnDelay = 1.7f;
+
+	private int lastJumpIndex = PlayerModel.LowerAnimation.Jump;
 
 	//Head/Weapon Bob
 	public float vBob = .005f;
@@ -87,6 +89,8 @@ public partial class PlayerControls : InterpolatedNode3D
 		Walk,
 		Run
 	}
+
+	public PlayerThing.FootStepType footStep = PlayerThing.FootStepType.Normal;
 
 	public PlayerInput playerInput;
 	public struct PlayerInput
@@ -290,6 +294,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		}
 
 		bool doGoundChecks = false;
+		PlayerThing.FootStepType currentFootStep = PlayerThing.FootStepType.None;
 		//Movement Checks
 		if (playerThing.waterLever > 0)
 		{
@@ -318,17 +323,45 @@ public partial class PlayerControls : InterpolatedNode3D
 				QueueJump();
 			if (controllerIsGrounded)
 			{
-				if (playerThing.avatar.enableOffset)
+				if (!controllerWasGrounded)
+					AnimateLegsOnLand();
+				else if (playerThing.avatar.enableOffset)
 					playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed, deltaTime);
 				if (wishJump)
 					AnimateLegsOnJump();
+				else
+				{
+					KinematicCollision3D lastCollision = playerThing.GetLastSlideCollision();
+					if (lastCollision != null)
+					{
+						CollisionObject3D collisionObject = (CollisionObject3D)lastCollision.GetCollider();
+						SurfaceType st;
+						if (MapLoader.mapSurfaceTypes.TryGetValue(collisionObject, out st))
+						{
+							if (playerThing.waterLever == 1)
+								currentFootStep = PlayerThing.FootStepType.Splash;
+							else if (st.MetalSteps)
+								currentFootStep = PlayerThing.FootStepType.Clank;
+							else
+								currentFootStep = footStep;
+						}
+
+					}
+				}
+
 			}
 			else
 				playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed, deltaTime);
 		}
 
+		controllerWasGrounded = controllerIsGrounded;
+
 		if ((GlobalPosition - lastGlobalPosition).LengthSquared() > .0001f)
+		{
 			bobActive = true;
+			if ((controllerIsGrounded) && (currentMoveType == MoveType.Run))
+				playerThing.PlayStepSound(currentFootStep);
+		}
 		else
 			bobActive = false;
 
@@ -724,12 +757,24 @@ public partial class PlayerControls : InterpolatedNode3D
 		playerVelocity.Z *= speed;
 	}
 
+	public void AnimateLegsOnLand()
+	{
+		if (lastJumpIndex == PlayerModel.LowerAnimation.Jump)
+			playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.Land;
+		else
+			playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.LandBack;
+
+		playerThing.PlayModelSound("land1", false);
+	}
+
 	public void AnimateLegsOnJump()
 	{
 		if (cMove.forwardSpeed <= 0)
-			playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.Jump;
-		else if (cMove.forwardSpeed > 0)
-			playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.JumpBack;
+			lastJumpIndex = PlayerModel.LowerAnimation.Jump;
+		else
+			lastJumpIndex = PlayerModel.LowerAnimation.JumpBack;
+
+		playerThing.avatar.lowerAnimation = lastJumpIndex;
 		playerThing.avatar.enableOffset = false;
 		playerThing.PlayModelSound("jump1");
 	}

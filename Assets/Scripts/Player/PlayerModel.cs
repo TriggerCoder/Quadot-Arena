@@ -292,16 +292,13 @@ public partial class PlayerModel : RigidBody3D, Damageable
 							lowerAnimation++;
 							break;
 						case LowerAnimation.Jump:
-							lowerAnimation = LowerAnimation.Land;
-							_enableOffset = true;
-							break;
 						case LowerAnimation.JumpBack:
-							lowerAnimation = LowerAnimation.LandBack;
-							_enableOffset = true;
+							lowerAnimation = LowerAnimation.Idle;
 							break;
 						case LowerAnimation.Land:
 						case LowerAnimation.LandBack:
 							lowerAnimation += 7;
+							_enableOffset = true;
 							break;
 						case LowerAnimation.Turn:
 						case LowerAnimation.Fall:
@@ -596,32 +593,6 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		if (airFrames < readyToLand)
 			return;
 
-		switch (lowerAnimation)
-		{
-			default:
-				return;
-				break;
-			case LowerAnimation.Idle:
-			case LowerAnimation.IdleCR:
-			case LowerAnimation.Run:
-			case LowerAnimation.Walk:
-			case LowerAnimation.WalkCR:
-				lowerAnimation = LowerAnimation.Land;
-				return;
-				break;
-			case LowerAnimation.RunBack:
-			case LowerAnimation.WalkBack:
-			case LowerAnimation.WalkCRBack:
-				lowerAnimation = LowerAnimation.LandBack;
-				return;
-				break;
-			case LowerAnimation.Land:
-			case LowerAnimation.LandBack:
-			case LowerAnimation.Fall:
-			case LowerAnimation.FallBack:
-				break;
-		}
-
 		if (sideMove > 0)
 			rotate = new Quaternion(this.UpVector(), 30f);
 		else if (sideMove < 0)
@@ -888,6 +859,8 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 	public bool LoadPlayer(ref string modelName, ref string SkinName, uint layer, PlayerControls control)
 	{
+		playerControls = control;
+
 		string playerModelPath = "players/" + modelName;
 		string lowerModelName = playerModelPath + "/lower";
 
@@ -978,7 +951,6 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 			loaded = true;
 		}
-		playerControls = control;
 		currentLayer = layer;
 		
 		AddAllMeshInstance3D(playerModel);
@@ -1090,6 +1062,31 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 			if (!char.IsDigit(strWord[0]))
 			{
+				if (strWord[0] != 'f')
+					continue;
+
+				strWord = strWord.Trim();
+				strWord = strWord.Replace('\t', ' ');
+				string[] type = strWord.Split(' ');
+				strWord = type[type.Length - 1].Trim();
+				switch (strWord[0])
+				{
+					default:
+						playerControls.footStep = PlayerThing.FootStepType.Normal;
+					break;
+					case 'b':
+						playerControls.footStep = PlayerThing.FootStepType.Boot;
+					break;
+					case 'm':
+						playerControls.footStep = PlayerThing.FootStepType.Mech;
+					break;
+					case 'f':
+						playerControls.footStep = PlayerThing.FootStepType.Flesh;
+					break;
+					case 'e':
+						playerControls.footStep = PlayerThing.FootStepType.Energy;
+					break;
+				}
 				continue;
 			}
 

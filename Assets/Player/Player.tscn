@@ -21,7 +21,7 @@
 [sub_resource type="SphereShape3D" id="SphereShape3D_xhpms"]
 radius = 0.1
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Torso", "Feet", "playerInfo", "playerControls", "audioStream", "player") groups=["Player"]]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Torso", "Feet", "playerInfo", "playerControls", "audioStream", "stepAudioStream", "player") groups=["Player"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 collision_layer = 64
 collision_mask = 32765
@@ -34,6 +34,7 @@ Feet = NodePath("Feet")
 playerInfo = NodePath("PlayerInfo")
 playerControls = NodePath("PlayerControls")
 audioStream = NodePath("PlayerVoiceAudioStream")
+stepAudioStream = NodePath("StepAudioStream")
 player = NodePath("PlayerControls/PlayerModel")
 
 [node name="Torso" type="CollisionShape3D" parent="."]
@@ -103,3 +104,7 @@ far = 300.0
 [node name="PlayerVoiceAudioStream" type="Node3D" parent="."]
 script = ExtResource("7_qljl7")
 Bus = "VoicesBus"
+
+[node name="StepAudioStream" type="Node3D" parent="."]
+script = ExtResource("7_qljl7")
+Bus = "FXBus"

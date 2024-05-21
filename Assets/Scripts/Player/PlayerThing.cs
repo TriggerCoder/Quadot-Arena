@@ -14,7 +14,9 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public PlayerControls playerControls;
 	[Export]
 	public MultiAudioStream audioStream;
-	
+	[Export]
+	public MultiAudioStream stepAudioStream;
+
 	public PlayerViewPort playerViewPort;
 
 	public InterpolatedTransform interpolatedTransform;
@@ -24,6 +26,14 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public static string drowningSound = "player/gurp";
 	public static string wearOffSound = "items/wearoff";
 	public static string regenSound = "items/regen";
+
+	private static readonly string[] normalStep = { "player/footsteps/step1", "player/footsteps/step2", "player/footsteps/step3", "player/footsteps/step4" };
+	private static readonly string[] clankStep = { "player/footsteps/clank1", "player/footsteps/clank2", "player/footsteps/clank3", "player/footsteps/clank4" };
+	private static readonly string[] splashStep = { "player/footsteps/splash1", "player/footsteps/splash2", "player/footsteps/splash3", "player/footsteps/splash4" };
+	private static readonly string[] bootStep = { "player/footsteps/boot1", "player/footsteps/boot2", "player/footsteps/boot3", "player/footsteps/boot4" };
+	private static readonly string[] mechStep = { "player/footsteps/mech1", "player/footsteps/mech2", "player/footsteps/mech3", "player/footsteps/mech4" };
+	private static readonly string[] fleshStep = { "player/footsteps/flesh1", "player/footsteps/flesh2", "player/footsteps/flesh3", "player/footsteps/flesh4" };
+	private static readonly string[] energyStep = { "player/footsteps/energy1", "player/footsteps/energy2", "player/footsteps/energy3", "player/footsteps/energy4" };
 
 	[Export]
 	public Node3D player;
@@ -69,6 +79,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public float environmentDamageTime = 0f;
 	public float drownTime = 0f;
 
+	private float stepTime = -1;
+
 	public int drownDamage = 0;
 
 	public bool underWater = false;
@@ -87,7 +99,20 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	}
 	public HoldableItem holdableItem = HoldableItem.None;
 
+	public enum FootStepType
+	{
+		None,
+		Normal,
+		Clank,
+		Splash,
+		Boot,
+		Mech,
+		Flesh,
+		Energy
+	}
+
 	private int skipFrames = 3;
+
 	public GameManager.FuncState currentState = GameManager.FuncState.None;
 	public override void _Ready()
 	{
@@ -143,11 +168,54 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.playerCamera.ChangeThirdPersonCamera(false);
 		currentState = GameManager.FuncState.Ready;
 	}
-	public void PlayModelSound(string soundName)
+	public void PlayModelSound(string soundName, bool byModel = true)
 	{
-		soundName = "player/" + modelName + "/" + soundName;
+		if (byModel)
+			soundName = "player/" + modelName + "/" + soundName;
+		else
+			soundName = "player/" + soundName;
 		audioStream.Stream = SoundManager.LoadSound(soundName);
 		audioStream.Play();
+	}
+
+	public void PlayStepSound(FootStepType footstepType) 
+	{
+		if (stepTime > 0)
+			return;
+
+		switch(footstepType)
+		{
+			default:
+			case FootStepType.None:
+				return;
+			break;
+			case FootStepType.Normal:
+				stepAudioStream.Stream = SoundManager.LoadSound(normalStep[GD.RandRange(0, 3)]);
+			break;
+			case FootStepType.Clank:
+				stepAudioStream.Stream = SoundManager.LoadSound(clankStep[GD.RandRange(0, 3)]);
+			break;
+			case FootStepType.Splash:
+				stepAudioStream.Stream = SoundManager.LoadSound(splashStep[GD.RandRange(0, 3)]);
+			break;
+			case FootStepType.Boot:
+				stepAudioStream.Stream = SoundManager.LoadSound(bootStep[GD.RandRange(0, 3)]);
+			break;
+			case FootStepType.Mech:
+				stepAudioStream.Stream = SoundManager.LoadSound(mechStep[GD.RandRange(0, 3)]);
+			break;
+			case FootStepType.Flesh:
+				stepAudioStream.Stream = SoundManager.LoadSound(fleshStep[GD.RandRange(0, 3)]);
+			break;
+			case FootStepType.Energy:
+				stepAudioStream.Stream = SoundManager.LoadSound(energyStep[GD.RandRange(0, 3)]);
+			break;
+		}
+		stepAudioStream.Play();
+		if (hasteTime > 0)
+			stepTime = .25f;
+		else
+			stepTime = .32f;
 	}
 	public void Impulse(Vector3 direction, float force)
 	{
@@ -400,6 +468,10 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 		float deltaTime = (float)delta;
 		bool newTick = GameManager.NewTickSeconds;
+
+		//Step
+		if (stepTime > 0f)
+			stepTime -= deltaTime;
 
 		//Pain
 		if (painTime > 0f)
