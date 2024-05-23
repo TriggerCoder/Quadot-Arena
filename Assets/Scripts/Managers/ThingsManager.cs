@@ -1212,7 +1212,7 @@ public partial class ThingsManager : Node
 						GameManager.Print("Map Message: " + strWord);
 					if (entity.entityData.TryGetValue("music", out strWord))
 					{
-						if (GameManager.Instance.musicType == GameManager.MusicType.Static)
+						if ((GameManager.Instance.musicType == GameManager.MusicType.Static) || (GameManager.Instance.musicType == GameManager.MusicType.Random))
 						{
 							string[] keyValue = strWord.Split(' ');
 							if (keyValue.Length > 0)

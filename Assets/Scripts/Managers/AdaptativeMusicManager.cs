@@ -261,6 +261,8 @@ public partial class AdaptativeMusicManager : Node
 	public void StopMusic()
 	{
 		StartedPlaying = false;
+		track01.Stop();
+		track02.Stop();
 	}
 
 	public void GetTrackOnCurrentIntensity(int intensity, bool crossFade = false, bool secondary = false)

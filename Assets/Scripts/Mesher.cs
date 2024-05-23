@@ -1311,10 +1311,13 @@ public static class Mesher
 			if (convexHull == null)
 				continue;
 
+			//Fill Map BB
+			Aabb box = convexHull.GetDebugMesh().GetAabb();
+			MapLoader.mapBounds = MapLoader.mapBounds.Merge(box);
+
 			objCollider.ShapeOwnerAddShape(OwnerShapeId, convexHull);
 			if (isWater)
 			{
-				Aabb box = convexHull.GetDebugMesh().GetAabb();
 				waterSurface.Boxes.Add(box);
 				GenerateWaterFog(indexId + "_" + i, holder, box, waterSurface.isLava);
 			}

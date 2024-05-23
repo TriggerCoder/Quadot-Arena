@@ -182,7 +182,8 @@ public partial class GameManager : Node
 	{
 		None,
 		Static,
-		Dynamic
+		Dynamic,
+		Random
 	}
 	public enum GameType
 	{
@@ -249,7 +250,7 @@ public partial class GameManager : Node
 		TemporaryObjectsHolder = new Node3D();
 		TemporaryObjectsHolder.Name = "TemporaryObjectsHolder";
 		AddChild(TemporaryObjectsHolder);
-		if (musicType == MusicType.Static)
+		if ((musicType == MusicType.Static) || (musicType == MusicType.Random))
 		{
 			StaticMusicPlayer = new AudioStreamPlayer();
 			AddChild(StaticMusicPlayer);
@@ -366,8 +367,6 @@ public partial class GameManager : Node
 			mapLeftTime = timeLimit * 60;
 			second = 0;
 			paused = true;
-			if (musicType == MusicType.Dynamic)
-				AdaptativeMusicManager.Instance.StopMusic();
 			CallDeferred("ChangeMap");
 		}
 
@@ -480,10 +479,25 @@ public partial class GameManager : Node
 		limitReach = LimitReach.None;
 		IntermissionContainer.Hide();
 		paused = false;
-		if (musicType == MusicType.Static)
-			StaticMusicPlayer.Play();
-		else if (musicType == MusicType.Dynamic)
-			AdaptativeMusicManager.Instance.StartMusic();
+		switch (musicType)
+		{
+			default:
+			break;
+			case MusicType.Static:
+				StaticMusicPlayer.Play();
+			break;
+			case MusicType.Dynamic:
+				AdaptativeMusicManager.Instance.StopMusic();
+				AdaptativeMusicManager.Instance.StartMusic();
+			break;
+			case MusicType.Random:
+				AdaptativeMusicManager.Instance.StopMusic();
+				if (GD.RandRange(0,1) > 0)
+					StaticMusicPlayer.Play();
+				else
+					AdaptativeMusicManager.Instance.StartMusic();
+			break;
+		}
 	}
 
 	public void ChangeMap()
@@ -506,10 +520,23 @@ public partial class GameManager : Node
 			return;
 		}
 
-		if (musicType == MusicType.Static)
-			StaticMusicPlayer.Play();
-		else if (musicType == MusicType.Dynamic)
-			AdaptativeMusicManager.Instance.StartMusic();
+		switch (musicType)
+		{
+			default:
+			break;
+			case MusicType.Static:
+				StaticMusicPlayer.Play();
+			break;
+			case MusicType.Dynamic:
+				AdaptativeMusicManager.Instance.StartMusic();
+			break;
+			case MusicType.Random:
+				if (GD.RandRange(0, 1) > 0)
+					StaticMusicPlayer.Play();
+				else
+					AdaptativeMusicManager.Instance.StartMusic();
+			break;
+		}
 	}
 
 	public void SetupNewPlayer(int playerNum, int controllerNum)
@@ -618,7 +645,6 @@ public partial class GameManager : Node
 			i++;
 		}
 	}
-
 
 	public void SetViewPortToCamera(Camera3D camera, SubViewport viewPort)
 	{

@@ -6,7 +6,7 @@ public static class SpawnerManager
 	public static List<Target> deathMatchSpawner = new List<Target>();
 
 	public static string respawnSound = "world/telein";
-
+	public static int lastSpawn = 0;
 	public static void AddToList(Target target)
 	{
 		deathMatchSpawner.Add(target);
@@ -14,7 +14,13 @@ public static class SpawnerManager
 
 	public static void SpawnToLocation(PlayerThing player)
 	{
-		Target target = deathMatchSpawner[GD.RandRange(0, deathMatchSpawner.Count - 1)];
+		int spawnIndex;
+		do
+			spawnIndex = GD.RandRange(0, deathMatchSpawner.Count - 1);
+		while (spawnIndex == lastSpawn);
+	
+		lastSpawn = spawnIndex;
+		Target target = deathMatchSpawner[spawnIndex];
 		ClusterPVSManager.CheckPVS(player.playerInfo.viewLayer, target.destination);
 		TeleporterThing.TelefragEverything(target.destination, player);
 		player.Position = target.destination;

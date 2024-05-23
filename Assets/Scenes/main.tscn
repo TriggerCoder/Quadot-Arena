@@ -235,7 +235,7 @@ IntermissionViewPort = NodePath("IntermissionContainer/IntermissionViewPort")
 viewPortPrefab = ExtResource("13_tu0mj")
 scoreBoard = ExtResource("3_hqlfm")
 playerPrefab = ExtResource("7_rdgk2")
-musicType = 1
+musicType = 3
 OverrideSounds = Array[Resource]([SubResource("Resource_wypao")])
 
 [node name="MaterialManager" type="Node" parent="Quadot Arena"]

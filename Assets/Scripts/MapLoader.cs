@@ -53,8 +53,10 @@ public static class MapLoader
 	public static Dictionary<CollisionObject3D, SurfaceType> mapSurfaceTypes;
 	public static Dictionary<CollisionObject3D, ContentType> mapContentTypes;
 
+	//Map Data Limits
 	public static Vector3 mapMinCoord;
 	public static Vector3 mapMaxCoord;
+	public static Aabb mapBounds;
 
 	//Light Vol Data
 	public static Vector3 LightVolNormalize;
@@ -225,7 +227,6 @@ public static class MapLoader
 				verts.Add(new QVertex(i, new Vector3(BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle()),
 													BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle(),
 													new Vector3(BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle()), BSPMap.ReadBytes(4)));
-				Vector3 vertex = verts[i].position;
 			}
 		}
 
@@ -353,6 +354,7 @@ public static class MapLoader
 		ColliderGroup = MapColliders;
 		GameManager.Instance.AddChild(MapColliders);
 
+		mapBounds = new Aabb();
 		List<QBrush> staticBrushes = new List<QBrush>();
 		for (int i = 0; i < models[0].numBrushes; i++)
 			staticBrushes.Add(brushes[models[0].firstBrush + i]);
@@ -370,6 +372,8 @@ public static class MapLoader
 
 			Mesher.GenerateGroupBrushCollider(groupId, ColliderGroup, groupBrushes);
 		}
+		mapMinCoord = mapBounds.Position;
+		mapMaxCoord = mapBounds.Size;
 	}
 	public static void GenerateSurfaces()
 	{
@@ -384,9 +388,6 @@ public static class MapLoader
 		List<QSurface> staticGeometry = new List<QSurface>();
 		for (int i = 0; i < models[0].numSurfaces; i++)
 			staticGeometry.Add(surfaces[models[0].firstSurface + i]);
-
-		mapMinCoord = QuakeToGodot.Vect3(models[0].bb_Min);
-		mapMaxCoord = QuakeToGodot.Vect3(models[0].bb_Max);
 
 		// Each surface group is its own object
 		var groups = staticGeometry.GroupBy(x => new { x.type, x.shaderId, x.lightMapID });
