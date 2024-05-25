@@ -355,7 +355,7 @@ public static class Mesher
 			for (var i = 0; i < normalsCache.Count; i++)
 				normals += normalsCache[i];
 
-			mesh.Layers = GameManager.InvisibleMask;
+			mesh.Layers = (1 << GameManager.Player1ViewLayer);
 			mesh.SetSurfaceOverrideMaterial(0, material);
 			portal.normal = normals.Normalized();
 			portal.commonMesh = arrMesh;

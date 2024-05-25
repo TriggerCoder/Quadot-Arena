@@ -221,6 +221,7 @@ public partial class GameManager : Node
 
 	private static PrintType printType = PrintType.Log;
 	private static int printLine = 0;
+	private bool loading = false;
 	public override void _Ready()
 	{
 		//Disable Physics Jitter Fix
@@ -381,7 +382,7 @@ public partial class GameManager : Node
 					if (skipFrames == 0)
 					{
 						LoadMap();
-						currentState = FuncState.Start;
+						currentState = FuncState.Ready;
 					}
 				}
 				break;
@@ -391,7 +392,13 @@ public partial class GameManager : Node
 					skipFrames--;
 					if (skipFrames == 0)
 					{
-						IntermissionViewPort.Size = DisplayServer.WindowGetSize();
+						if (loading)
+						{
+							AddAllPlayer();
+							loading = false;
+						}
+						else
+							IntermissionViewPort.Size = DisplayServer.WindowGetSize();
 						paused = false;
 						currentState = FuncState.Start;
 					}
@@ -441,6 +448,51 @@ public partial class GameManager : Node
 		currentDeathCount = 0;
 		return deathRatio;
 	}
+
+	public void AddAllPlayer()
+	{
+		foreach (var dic in Players)
+		{
+			PlayerThing player = dic.Value;
+			if (player.playerControls.playerWeapon != null)
+			{
+				player.playerControls.playerWeapon.QueueFree();
+				player.playerControls.playerWeapon = null;
+			}
+			if (player.interpolatedTransform != null)
+				player.interpolatedTransform.QueueFree();
+			player.playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
+			player.playerInfo.Reset();
+			player.deaths = 0;
+			player.playerInfo.playerPostProcessing.playerHUD.deathsText.Text = "0";
+			player.frags = 0;
+			player.playerInfo.playerPostProcessing.playerHUD.fragsText.Text = "0";
+			player.InitPlayer();
+			if (ScoreBoard.Instance != null)
+				ScoreBoard.Instance.AddPlayer(player);
+		}
+		IntermissionContainer.Hide();
+		switch (musicType)
+		{
+			default:
+			break;
+			case MusicType.Static:
+				StaticMusicPlayer.Play();
+			break;
+			case MusicType.Dynamic:
+				AdaptativeMusicManager.Instance.StopMusic();
+				AdaptativeMusicManager.Instance.StartMusic();
+			break;
+			case MusicType.Random:
+				AdaptativeMusicManager.Instance.StopMusic();
+				if (GD.RandRange(0, 1) > 0)
+					StaticMusicPlayer.Play();
+				else
+					AdaptativeMusicManager.Instance.StartMusic();
+			break;
+		}
+	}
+
 	public void LoadMap()
 	{
 		TemporaryObjectsHolder = new Node3D();
@@ -455,49 +507,10 @@ public partial class GameManager : Node
 			MapLoader.GenerateSurfaces();
 			MapLoader.SetLightVolData();
 			ThingsManager.AddThingsToMap();
-			foreach (var dic in Players)
-			{
-				PlayerThing player = dic.Value;
-				if (player.playerControls.playerWeapon != null)
-				{
-					player.playerControls.playerWeapon.QueueFree();
-					player.playerControls.playerWeapon = null;
-				}
-				if (player.interpolatedTransform != null)
-					player.interpolatedTransform.QueueFree();
-				player.playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
-				player.playerInfo.Reset();
-				player.deaths = 0;
-				player.playerInfo.playerPostProcessing.playerHUD.deathsText.Text = "0";
-				player.frags = 0;
-				player.playerInfo.playerPostProcessing.playerHUD.fragsText.Text = "0";
-				player.InitPlayer();
-				if (ScoreBoard.Instance != null)
-					ScoreBoard.Instance.AddPlayer(player);
-			}
 		}
 		limitReach = LimitReach.None;
-		IntermissionContainer.Hide();
-		paused = false;
-		switch (musicType)
-		{
-			default:
-			break;
-			case MusicType.Static:
-				StaticMusicPlayer.Play();
-			break;
-			case MusicType.Dynamic:
-				AdaptativeMusicManager.Instance.StopMusic();
-				AdaptativeMusicManager.Instance.StartMusic();
-			break;
-			case MusicType.Random:
-				AdaptativeMusicManager.Instance.StopMusic();
-				if (GD.RandRange(0,1) > 0)
-					StaticMusicPlayer.Play();
-				else
-					AdaptativeMusicManager.Instance.StartMusic();
-			break;
-		}
+		skipFrames = 5;
+		loading = true;
 	}
 
 	public void ChangeMap()

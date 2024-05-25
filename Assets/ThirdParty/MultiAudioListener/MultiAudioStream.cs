@@ -450,9 +450,10 @@ public partial class MultiAudioStream : Node3D
 
 	public override void _Ready()
 	{
+		ProcessPhysicsPriority = 10;
 	}
 
-	public void LatePhysicsUpdate()
+	public override void _PhysicsProcess(double delta)
 	{
 		if (_Playing)
 		{
@@ -491,9 +492,5 @@ public partial class MultiAudioStream : Node3D
 					Stop();
 			}
 		}
-	}
-	public override void _PhysicsProcess(double delta)
-	{
-		CallDeferred("LatePhysicsUpdate");
 	}
 }
