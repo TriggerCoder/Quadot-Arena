@@ -50,7 +50,6 @@ public partial class PortalSurface : Area3D
 		{
 			int playerNum = currentPlayers[i].playerInfo.localPlayerNum;
 			Camera3D playerCamera = currentPlayers[i].playerInfo.playerCamera.CurrentCamera;
-			ClusterPVSManager.CheckPVS(currentPlayers[i].playerInfo.viewLayer, destCamera[playerNum].GlobalPosition);
 			Basis globalBasis = playerCamera.GlobalTransform.Basis;
 			if (mirror)
 			{
@@ -71,6 +70,7 @@ public partial class PortalSurface : Area3D
 				float lenght = Mathf.Clamp(1.3f - (distanceSquared / radiusSquared), 0f, 1f);
 				destPortal.surfaces[playerNum].material.SetShaderParameter("Transparency", lenght);
 				destCamera[playerNum].Basis = globalBasis;
+				ClusterPVSManager.CheckPVS(currentPlayers[i].playerInfo.viewLayer, destCamera[playerNum].GlobalPosition);
 			}
 		}
 	}

@@ -621,17 +621,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 				}
 			}
 		}
-
-/*		if (!ready)
-			return;
-
-		if (Dead)
-			return;
-
-		//If out of bounds, then teleport to correct location
-		if (!MapLoader.mapBounds.HasPoint(GlobalPosition))
-			SpawnerManager.SpawnToLocation(this);
-*/	}
+	}
 
 	void OnBodyEntered(Node3D other)
 	{

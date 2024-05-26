@@ -5,7 +5,7 @@
 
 [node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("audioStream", "muzzleLight")]
 script = ExtResource("1_pbxxv")
-Offset = Vector3(0.2, -0.2, 0.22)
+Offset = Vector3(0.2, -0.2, 0.23)
 audioStream = NodePath("WeaponAudioStream")
 _sounds = PackedStringArray("weapons/machinegun/machgf1b", "weapons/noammo", "weapons/change", "weapons/machinegun/ric1", "weapons/machinegun/ric2", "weapons/machinegun/ric3")
 ModelName = "weapons2/machinegun/machinegun"

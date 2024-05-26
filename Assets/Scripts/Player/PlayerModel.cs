@@ -294,6 +294,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 						case LowerAnimation.Jump:
 						case LowerAnimation.JumpBack:
 							lowerAnimation = LowerAnimation.Idle;
+							_enableOffset = true;
 							break;
 						case LowerAnimation.Land:
 						case LowerAnimation.LandBack:
@@ -675,7 +676,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			else if (sideMove < 0)
 				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(50f));
 		}
-		else if (lowerAnimation != LowerAnimation.Turn)
+		else if ((lowerAnimation != LowerAnimation.Turn) && (lowerAnimation != LowerAnimation.Land) && (lowerAnimation != LowerAnimation.LandBack))
 		{
 			if (nextMoveType == MoveType.Crouch)
 				lowerAnimation = LowerAnimation.IdleCR;
