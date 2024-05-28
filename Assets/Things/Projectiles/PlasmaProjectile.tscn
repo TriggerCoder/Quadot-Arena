@@ -37,6 +37,7 @@ interpolationReset = NodePath("..")
 layers = 255
 cast_shadow = 0
 billboard = 1
+transparent = false
 script = ExtResource("2_usudf")
 spriteName = "sprites/plasma1"
 spriteRadius = 16

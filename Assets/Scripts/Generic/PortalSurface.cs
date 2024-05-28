@@ -8,6 +8,7 @@ public partial class PortalSurface : Area3D
 	public bool mirror = false;
 	public string targetName;
 	private List<Camera3D> destCamera = new List<Camera3D>();
+	private List<SubViewport> viewPorts = new List<SubViewport>();
 	private Portal destPortal;
 	private float radius = 256 * GameManager.sizeDividor;
 	private float radiusSquared;
@@ -49,6 +50,7 @@ public partial class PortalSurface : Area3D
 		for (int i = 0; i < currentPlayers.Count; i++) 
 		{
 			int playerNum = currentPlayers[i].playerInfo.localPlayerNum;
+			viewPorts[playerNum].RenderTargetUpdateMode = SubViewport.UpdateMode.Once;
 			Camera3D playerCamera = currentPlayers[i].playerInfo.playerCamera.CurrentCamera;
 			Basis globalBasis = playerCamera.GlobalTransform.Basis;
 			if (mirror)
@@ -110,7 +112,7 @@ public partial class PortalSurface : Area3D
 		else
 			viewport.Size = GameManager.Instance.viewPortSize;
 
-		viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
+		viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.Once;
 		viewport.HandleInputLocally = false;
 
 		var CamRID = camera.GetCameraRid();
@@ -118,6 +120,7 @@ public partial class PortalSurface : Area3D
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 
 		destPortal.surfaces[index].material.SetShaderParameter("Tex_0", viewport.GetTexture());
+		viewPorts.Add(viewport);
 	}
 
 	public void SetUpPortal(Camera3D camera, Portal portal, bool isMirror = false)
@@ -171,7 +174,7 @@ public partial class PortalSurface : Area3D
 		else
 			viewport.Size = GameManager.Instance.viewPortSize;
 
-		viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
+		viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.Once;
 		viewport.HandleInputLocally = false;
 
 		var CamRID = camera.GetCameraRid();
@@ -179,7 +182,7 @@ public partial class PortalSurface : Area3D
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 
 		destPortal.surfaces[0].material.SetShaderParameter("Tex_0", viewport.GetTexture());
-
+		viewPorts.Add(viewport);
 		for (int i = 1; i < GameManager.NumLocalPlayers; i++)
 			NewLocalPlayerAdded();
 	}
@@ -326,5 +329,10 @@ public partial class PortalSurface : Area3D
 //				GameManager.Print("Finally " + other.Name + " got scared of my dominion " + Name);
 			}
 		}
+	}
+
+	public override void _PhysicsProcess(double delta)
+	{
+		
 	}
 }
