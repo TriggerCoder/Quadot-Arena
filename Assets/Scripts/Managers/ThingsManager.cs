@@ -661,7 +661,7 @@ public partial class ThingsManager : Node
 					door.AddChild(SourceTransform);
 
 					InterpolatedTransform interpolatedTransform = new InterpolatedTransform();
-					interpolatedTransform.Source = SourceTransform;
+					interpolatedTransform.SetSource(SourceTransform);
 					thingObject.AddChild(interpolatedTransform);
 
 					if (entity.entityData.TryGetValue("angle", out strWord))
@@ -775,7 +775,7 @@ public partial class ThingsManager : Node
 					platform.AddChild(SourceTransform);
 
 					InterpolatedTransform interpolatedTransform = new InterpolatedTransform();
-					interpolatedTransform.Source = SourceTransform;
+					interpolatedTransform.SetSource(SourceTransform);
 					thingObject.AddChild(interpolatedTransform);
 
 					if (entity.entityData.TryGetValue("angle", out strWord))

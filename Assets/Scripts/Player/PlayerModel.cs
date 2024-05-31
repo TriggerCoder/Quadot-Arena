@@ -19,10 +19,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	private int airFrames = 0;
 	private const int readyToLand = 25;
 	private uint currentLayer;
-	public bool enableOffset { get { return _enableOffset; } set { _enableOffset = value; } }
+	public bool enableOffset = true;
 	public bool isGrounded { get { return _isGrounded; } set { if ((!_isGrounded) && (!value)) { airFrames++; if (airFrames > readyToLand) airFrames = readyToLand; } else airFrames = 0; _isGrounded = value; } }
 
-	private bool _enableOffset = true;
 	private bool _isGrounded = true;
 	private List<ModelAnimation> upperAnim = new List<ModelAnimation>();
 	private List<ModelAnimation> lowerAnim = new List<ModelAnimation>();
@@ -134,7 +133,6 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 	private Node3D lowerNode;
 
-	private Node3D playerModel;
 	private Node3D tagHeadNode;
 	private Node3D weaponNode;
 
@@ -155,10 +153,6 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	//Needed to keep impulse once it turn into ragdoll
 	private PlayerControls playerControls;
 	private float impulseDampening = 4f;
-	private Vector3 impulseVector = Vector3.Zero;
-
-	private PhysicsShapeQueryParameters3D BodyCast;
-	private PhysicsDirectSpaceState3D SpaceState;
 	public int Hitpoints { get { return hitpoints; } }
 	public bool Dead { get { return hitpoints <= 0; } }
 	public bool Bleed { get { return true; } }
@@ -177,38 +171,14 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		FxLight.Position = Vector3.Up;
 		FxLight.LightColor = new Color(0.2f, 0.2f, 1);
 
-
-		BodyCast = new PhysicsShapeQueryParameters3D();
-		BodyCast.CollisionMask = (1 << GameManager.ColliderLayer);
-		BodyCast.Motion = Vector3.Zero;
-		SpaceState = GetWorld3D().DirectSpaceState;
-
+		CollisionLayer = (1 << GameManager.RagdollLayer);
+		CollisionMask = (1 << GameManager.ColliderLayer);
+		Freeze = true;
 		Mass = 80;
-	}
-	void ApplySimpleMove(float deltaTime)
-	{
-		float gravityAccumulator;
-		Vector3 currentPosition = Position;
+		GravityScale = 2.5f;
 
-		BodyCast.Transform = new Transform3D(Basis.Identity, upperBody.GlobalPosition);
-		var hit = SpaceState.GetRestInfo(BodyCast);
-		if (hit.Count > 0)
-			gravityAccumulator = 0f;
-		else if (deadWater)
-			gravityAccumulator = GameManager.Instance.waterDeadFall;
-		else
-			gravityAccumulator = GameManager.Instance.gravity;
-		Vector3 gravity = Vector3.Down * gravityAccumulator;
-		currentPosition += (gravity + impulseVector) * deltaTime;
-
-		//dampen impulse
-		if (impulseVector.LengthSquared() > 0)
-		{
-			impulseVector = impulseVector.Lerp(Vector3.Zero, impulseDampening * deltaTime);
-			if (impulseVector.LengthSquared() < 1f)
-				impulseVector = Vector3.Zero;
-		}
-		Position = (currentPosition);
+		CenterOfMassMode = CenterOfMassModeEnum.Custom;
+		CenterOfMass = Vector3.Down * .5f;
 	}
 	public override void _Process(double delta)
 	{
@@ -222,13 +192,12 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 		if (ragDoll)
 		{
-//			ApplySimpleMove(deltaTime);
 			UpdateMultiMesh();
 			return;
 		}
 
 		if (turnTo.LengthSquared() > 0)
-			playerModel.Quaternion = playerModel.Quaternion.Slerp(turnTo, rotationFPS * deltaTime);
+			Quaternion = Quaternion.Slerp(turnTo, rotationFPS * deltaTime);
 
 		{
 			nextUpper = upperAnim[upperAnimation];
@@ -294,12 +263,12 @@ public partial class PlayerModel : RigidBody3D, Damageable
 						case LowerAnimation.Jump:
 						case LowerAnimation.JumpBack:
 							lowerAnimation = LowerAnimation.Idle;
-							_enableOffset = true;
+							enableOffset = true;
 							break;
 						case LowerAnimation.Land:
 						case LowerAnimation.LandBack:
 							lowerAnimation += 7;
-							_enableOffset = true;
+							enableOffset = true;
 							break;
 						case LowerAnimation.Turn:
 						case LowerAnimation.Fall:
@@ -308,7 +277,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 							{
 								if (turnTo.LengthSquared() > 0)
 								{
-									playerModel.Quaternion = turnTo;
+									Quaternion = turnTo;
 									turnTo = QuaternionZero;
 								}
 								lowerAnimation = LowerAnimation.Idle;
@@ -367,7 +336,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 				weaponNode.Position = currentOffset;
 				weaponNode.Basis = new Basis(currentRotation);
 
-				Position = localOrigin;
+//				Position = localOrigin;
 
 				currentOffset = upperTorsoRotation * upperTorsoOrigin;
 				currentRotation = upperTorsoRotation;
@@ -415,7 +384,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		{
 			hasQuad = playerControls.playerInfo.quadDamage;
 			FxLight.Visible = hasQuad;
-			GameManager.ChangeQuadFx(fxMeshes,hasQuad);
+			GameManager.ChangeQuadFx(fxMeshes, hasQuad);
 		}
 	}
 
@@ -425,7 +394,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			return;
 
 		//In order to keep proper animation and not offset it by looking at target, otherwise head could go Exorcist-like
-		if (!_enableOffset)
+		if (!enableOffset)
 			return;
 
 		float vView = -viewDirection.X;
@@ -466,26 +435,95 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			upperAnimation = UpperAnimation.Attack;
 	}
 
+	private void GenerateRagDollCollider()
+	{
+		CollisionShape3D collisionShape = new CollisionShape3D();
+		AddChild(collisionShape);
+
+		int currentDeathUpper = upperAnim[upperAnimation + 1].startFrame;
+		int currentDeathLower = lowerAnim[lowerAnimation + 1].startFrame;
+
+		Quaternion upperTorsoRotation = upper.tagsbyId[upper_tag_torso][currentDeathUpper].rotation;
+		Quaternion upperHeadRotation = upper.tagsbyId[upper_tag_head][currentDeathUpper].rotation;
+		Quaternion lowerTorsoRotation = lower.tagsbyId[lower_tag_torso][currentDeathLower].rotation;
+
+		Vector3 upperTorsoOrigin = upper.tagsbyId[upper_tag_torso][currentDeathUpper].origin;
+		Vector3 upperHeadOrigin = upper.tagsbyId[upper_tag_head][currentDeathUpper].origin;
+		Vector3 lowerTorsoOrigin = lower.tagsbyId[lower_tag_torso][currentDeathLower].origin;
+
+		ConvexPolygonShape3D modelColliderShape = new ConvexPolygonShape3D();
+		List<Vector3> modelPoints = new List<Vector3>();
+		{
+			Vector3 currentOffset = lowerTorsoRotation * upperTorsoOrigin;
+			Quaternion currentRotation = lowerTorsoRotation * upperTorsoRotation;
+
+			for (int i = 0; i < upper.meshes.Count; i++)
+			{
+				MD3Mesh currentMesh = upper.meshes[i];
+				List<Vector3> verts = new List<Vector3>();
+				for (int j = 0; j < currentMesh.numVertices; j++)
+				{
+					Vector3 newVertex = currentRotation * currentMesh.verts[currentDeathUpper][j];
+					newVertex += currentOffset + lowerTorsoOrigin;
+					verts.Add(newVertex);
+				}
+				modelPoints.AddRange(verts);
+			}
+
+			Quaternion baseRotation = lowerTorsoRotation;
+			currentOffset = baseRotation * upperHeadOrigin;
+			currentRotation = baseRotation * upperHeadRotation;
+
+			for (int i = 0; i < head.meshes.Count; i++)
+			{
+
+				Vector3[] faces = headModel.data[i].arrMesh.GetFaces();
+				Quaternion rotation = currentRotation;
+				for (int j = 0; j < faces.Length; j++)
+				{
+					faces[j] = rotation * faces[j];
+					faces[j] += currentOffset + lowerTorsoOrigin;
+				}
+				modelPoints.AddRange(faces);
+			}
+
+			currentOffset = upperTorsoRotation * upperTorsoOrigin;
+			currentRotation = upperTorsoRotation;
+
+			for (int i = 0; i < lower.meshes.Count; i++)
+			{
+				MD3Mesh currentMesh = lower.meshes[i];
+				List<Vector3> verts = new List<Vector3>();
+				for (int j = 0; j < currentMesh.numVertices; j++)
+				{
+					Vector3 newVertex = currentRotation * currentMesh.verts[currentDeathLower][j];
+					newVertex += currentOffset;
+					verts.Add(newVertex);
+				}
+				modelPoints.AddRange(verts);
+			}
+		}
+		modelColliderShape.Points = modelPoints.ToArray();
+		collisionShape.Shape = modelColliderShape;
+
+		playerControls.playerThing.CollisionLayer = (1 << GameManager.NoCollisionLayer);
+		if (playerControls.playerThing.waterLever > 0)
+			deadWater = true;
+
+		if (turnTo.LengthSquared() > 0)
+		{
+			Quaternion = turnTo;
+			turnTo = QuaternionZero;
+		}
+
+		Reparent(GameManager.Instance.TemporaryObjectsHolder);
+		Freeze = false;
+		LinearVelocity = playerControls.impulseVector * .8f;
+
+	}
+
 	private void ChangeToRagDoll()
 	{
-		//		uint OwnerShapeId = CreateShapeOwner(this);
-		
-		for (int i = 0; i < head.meshes.Count; i++)
-		{
-			CollisionShape3D headCollision = new CollisionShape3D();
-			AddChild(headCollision);
-			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
-			Vector3[] faces = headModel.data[i].arrMesh.GetFaces();
-			Quaternion rotation = tagHeadNode.Quaternion;
-			for (int j = 0; j < faces.Length; j++)
-			{
-				faces[j] = rotation * faces[j];
-				faces[j] += tagHeadNode.Position + upperBody.Position;
-			}
-			modelColliderShape.Data = faces;
-			headCollision.Shape = modelColliderShape;
-//			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
-		}
 		Vector3 headGlobalPos = headBody.GlobalPosition;
 		Vector3 headGlobalRot = headBody.GlobalRotation;
 		headModel.node.QueueFree();
@@ -497,22 +535,6 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		Vector3 currentOffset = lowerTorsoRotation * upperTorsoOrigin;
 		Quaternion currentRotation = lowerTorsoRotation * upperTorsoRotation;
 
-		for (int i = 0; i < upper.meshes.Count; i++)
-		{
-			CollisionShape3D bodyCollision = new CollisionShape3D();
-			AddChild(bodyCollision);
-			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
-			Vector3[] faces = upperModel.data[i].arrMesh.GetFaces();
-			Quaternion rotation = upperBody.Quaternion;
-			for (int j = 0; j < faces.Length; j++)
-			{
-				faces[j] = rotation * faces[j];
-				faces[j] += upperBody.Position;
-			}
-			modelColliderShape.Data = faces;
-			bodyCollision.Shape = modelColliderShape;
-//			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
-		}
 		upperModel.node.QueueFree();
 		MD3GodotConverted upperRagDoll = Mesher.GenerateModelFromMeshes(upper, meshToSkin, GameManager.AllPlayerViewMask, true, currentFrameUpper);
 		upperRagDoll.node.Name = "upper_body";
@@ -529,35 +551,17 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		SetMultiMesh(headRagDoll, headBody);
 
 		currentOffset = upperTorsoRotation * upperTorsoOrigin;
-		for (int i = 0; i < lower.meshes.Count; i++)
-		{
-			CollisionShape3D legCollision = new CollisionShape3D();
-			AddChild(legCollision);
-			ConcavePolygonShape3D modelColliderShape = new ConcavePolygonShape3D();
-			modelColliderShape.Data = lowerModel.data[i].arrMesh.GetFaces();
-			legCollision.Shape = modelColliderShape;
-//			ShapeOwnerAddShape(OwnerShapeId, modelColliderShape);
-		}
 		lowerModel.node.QueueFree();
+
 		MD3GodotConverted lowerRagDoll = Mesher.GenerateModelFromMeshes(lower, meshToSkin, GameManager.AllPlayerViewMask, true, currentFrameLower);
 		lowerRagDoll.node.Name = "lower_body";
 		lowerNode = lowerRagDoll.node;
 		lowerNode.Position = localOrigin + currentOffset;
-		playerModel.AddChild(lowerRagDoll.node);
-		SetMultiMesh(lowerRagDoll, playerModel);
+		AddChild(lowerRagDoll.node);
+		SetMultiMesh(lowerRagDoll, this);
 
-		CollisionLayer = (1 << GameManager.RagdollLayer);
-		CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.RagdollLayer));
-		impulseVector = playerControls.impulseVector;
-		playerControls.playerThing.CollisionLayer = (1 << GameManager.NoCollisionLayer);
-		if (playerControls.playerThing.waterLever > 0)
-			deadWater = true;
-		Reparent(GameManager.Instance.TemporaryObjectsHolder);
 		playerControls.playerThing.interpolatedTransform.QueueFree();
 		playerControls.playerThing.interpolatedTransform = null;
-		LinearVelocity = impulseVector;
-		CenterOfMassMode = CenterOfMassModeEnum.Custom;
-		CenterOfMass = Vector3.Down * .5f;
 		ragDoll = true;
 	}
 
@@ -575,6 +579,8 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		GameManager.ChangeQuadFx(fxMeshes, false);
 
 		ownerDead = true;
+
+		CallDeferred("GenerateRagDollCollider");
 	}
 
 	public void Damage(int amount, DamageType damageType = DamageType.Generic, Node3D attacker = null)
@@ -796,7 +802,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		}
 		AddAllMeshInstance3D(weaponNode, false);
 		if (hasQuad)
-			GameManager.ChangeQuadFx(fxMeshes,true);
+			GameManager.ChangeQuadFx(fxMeshes, true);
 	}
 
 	public void UnloadWeapon()
@@ -918,12 +924,11 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		currentFrameLower = currentLower.startFrame;
 
 		{
-			playerModel = this;
-			playerModel.Name = modelName;
+			Name = modelName;
 
 			upperBody = new Node3D();
 			upperBody.Name = "Upper Body";
-			playerModel.AddChild(upperBody);
+			AddChild(upperBody);
 
 			tagHeadNode = new Node3D();
 			tagHeadNode.Name = "tag_head";
@@ -948,13 +953,13 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			lowerModel = Mesher.GenerateModelFromMeshes(lower, meshToSkin, layer);
 			lowerModel.node.Name = "lower_body";
 			lowerNode = lowerModel.node;
-			playerModel.AddChild(lowerModel.node);
+			AddChild(lowerModel.node);
 
 			loaded = true;
 		}
 		currentLayer = layer;
-		
-		AddAllMeshInstance3D(playerModel);
+
+		AddAllMeshInstance3D(this);
 
 		playerControls.playerInfo.playerPostProcessing.playerHUD.InitHUD(head, meshToSkin);
 		return true;
@@ -969,9 +974,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	}
 
 	private void AddAllMeshInstance3D(Node parent, bool addFx = true)
-	{		
+	{
 		var Childrens = GameManager.GetAllChildrens(parent);
-		foreach(var child in Childrens)
+		foreach (var child in Childrens)
 		{
 			if (child is MeshInstance3D mesh)
 			{
