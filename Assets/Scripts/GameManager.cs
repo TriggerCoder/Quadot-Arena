@@ -96,9 +96,9 @@ public partial class GameManager : Node
 										(1 << Player7Layer) | 
 										(1 << Player8Layer));
 
-	public const uint NoHitMask = ((1 << NoCollisionLayer) | 
-									(1 << InvisibleBlockerLayer) | 
-									(1 << WalkTriggerLayer) | 
+	public const uint NoHitMask = ((1 << NoCollisionLayer) |
+									(1 << InvisibleBlockerLayer) |
+									(1 << WalkTriggerLayer) |
 									(1 << ThingsLayer));
 
 	//Rendering Masks
@@ -124,7 +124,8 @@ public partial class GameManager : Node
 	public float friction = 6f;
 	public float waterFriction = 12f;
 	public float waterDeadFall = 4.5f;
-	public float terminalVelocity = 100f;
+	public float terminalLimit = 300f;
+	public float terminalVelocity = 17.25f;
 	public float barrierVelocity = 1024f;
 	public float playerHeight = 1.2f;
 

@@ -133,6 +133,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 	private Node3D lowerNode;
 
+	private Node3D playerModel;
 	private Node3D tagHeadNode;
 	private Node3D weaponNode;
 
@@ -147,8 +148,6 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	private List<MeshInstance3D> fxMeshes = new List<MeshInstance3D>();
 	private int hitpoints = 50;
 	private List<MultiMeshData> multiMeshDataList = new List<MultiMeshData>();
-	private Vector3 lastGlobalPosition = new Vector3(0, 0, 0);
-	private Basis lastGlobalBasis = Basis.Identity;
 
 	//Needed to keep impulse once it turn into ragdoll
 	private PlayerControls playerControls;
@@ -172,13 +171,24 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		FxLight.LightColor = new Color(0.2f, 0.2f, 1);
 
 		CollisionLayer = (1 << GameManager.RagdollLayer);
-		CollisionMask = (1 << GameManager.ColliderLayer);
+		CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.InvisibleBlockerLayer));
 		Freeze = true;
 		Mass = 80;
 		GravityScale = 2.5f;
 
 		CenterOfMassMode = CenterOfMassModeEnum.Custom;
 		CenterOfMass = Vector3.Down * .5f;
+	}
+
+	public override void _IntegrateForces(PhysicsDirectBodyState3D state)
+	{
+		if (!ownerDead)
+			return;
+		float speed = state.LinearVelocity.LengthSquared();
+		
+		if (speed > GameManager.Instance.terminalLimit)
+			state.LinearVelocity = state.LinearVelocity.Normalized() * GameManager.Instance.terminalVelocity;
+
 	}
 	public override void _Process(double delta)
 	{
@@ -197,7 +207,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		}
 
 		if (turnTo.LengthSquared() > 0)
-			Quaternion = Quaternion.Slerp(turnTo, rotationFPS * deltaTime);
+			playerModel.Quaternion = playerModel.Quaternion.Slerp(turnTo, rotationFPS * deltaTime);
 
 		{
 			nextUpper = upperAnim[upperAnimation];
@@ -277,7 +287,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 							{
 								if (turnTo.LengthSquared() > 0)
 								{
-									Quaternion = turnTo;
+									playerModel.Quaternion = turnTo;
 									turnTo = QuaternionZero;
 								}
 								lowerAnimation = LowerAnimation.Idle;
@@ -336,7 +346,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 				weaponNode.Position = currentOffset;
 				weaponNode.Basis = new Basis(currentRotation);
 
-//				Position = localOrigin;
+				playerModel.Position = localOrigin;
 
 				currentOffset = upperTorsoRotation * upperTorsoOrigin;
 				currentRotation = upperTorsoRotation;
@@ -398,7 +408,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			return;
 
 		float vView = -viewDirection.X;
-		float hView = viewDirection.Y - Mathf.RadToDeg(Quaternion.GetEuler().Y);
+		float hView = viewDirection.Y - Mathf.RadToDeg(playerModel.Quaternion.GetEuler().Y);
 
 		headBody.Quaternion = headBody.Quaternion.Slerp(Quaternion.FromEuler(new Vector3(0, Mathf.DegToRad(hView), Mathf.DegToRad(Mathf.Clamp(vView, -50f, 30f)))), rotationFPS * deltaTime);
 		int vAngle = (int)Mathf.Round((vView) / (360) * 32) % 32;
@@ -413,7 +423,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		if (ownerDead)
 			return;
 
-		Vector3 forward = this.ForwardVector();
+		Vector3 forward = playerModel.ForwardVector();
 		int angle = (int)Mathf.Round((Mathf.Atan2(direction.X, direction.Z)) / (Mathf.Pi * 2) * 8) % 8;
 		Quaternion dir = Quaternion.FromEuler(new Vector3(0f, Mathf.DegToRad(angle * 45f), 0f));
 
@@ -447,9 +457,13 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		Quaternion upperHeadRotation = upper.tagsbyId[upper_tag_head][currentDeathUpper].rotation;
 		Quaternion lowerTorsoRotation = lower.tagsbyId[lower_tag_torso][currentDeathLower].rotation;
 
+		Vector3 localOrigin = lower.tagsbyId[lower_tag_torso][currentDeathLower].localOrigin;
 		Vector3 upperTorsoOrigin = upper.tagsbyId[upper_tag_torso][currentDeathUpper].origin;
 		Vector3 upperHeadOrigin = upper.tagsbyId[upper_tag_head][currentDeathUpper].origin;
 		Vector3 lowerTorsoOrigin = lower.tagsbyId[lower_tag_torso][currentDeathLower].origin;
+
+		collisionShape.Quaternion = playerModel.Quaternion;
+		collisionShape.Position = localOrigin;
 
 		ConvexPolygonShape3D modelColliderShape = new ConvexPolygonShape3D();
 		List<Vector3> modelPoints = new List<Vector3>();
@@ -512,7 +526,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 		if (turnTo.LengthSquared() > 0)
 		{
-			Quaternion = turnTo;
+			playerModel.Quaternion = turnTo;
 			turnTo = QuaternionZero;
 		}
 
@@ -557,8 +571,8 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		lowerRagDoll.node.Name = "lower_body";
 		lowerNode = lowerRagDoll.node;
 		lowerNode.Position = localOrigin + currentOffset;
-		AddChild(lowerRagDoll.node);
-		SetMultiMesh(lowerRagDoll, this);
+		playerModel.AddChild(lowerRagDoll.node);
+		SetMultiMesh(lowerRagDoll, playerModel);
 
 		playerControls.playerThing.interpolatedTransform.QueueFree();
 		playerControls.playerThing.interpolatedTransform = null;
@@ -601,9 +615,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			return;
 
 		if (sideMove > 0)
-			rotate = new Quaternion(this.UpVector(), 30f);
+			rotate = new Quaternion(playerModel.UpVector(), 30f);
 		else if (sideMove < 0)
-			rotate = new Quaternion(this.UpVector(), -30f);
+			rotate = new Quaternion(playerModel.UpVector(), -30f);
 
 		lowerNode.Quaternion = lowerNode.Quaternion.Slerp(rotate, lowerRotationFPS * deltaTime);
 	}
@@ -638,9 +652,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 					break;
 			}
 			if (sideMove > 0)
-				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(-30f));
+				rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(-30f));
 			else if (sideMove < 0)
-				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(30f));
+				rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(30f));
 		}
 		else if (forwardMove > 0)
 		{
@@ -658,9 +672,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 					break;
 			}
 			if (sideMove > 0)
-				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(30f));
+				rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(30f));
 			else if (sideMove < 0)
-				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(-30f));
+				rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(-30f));
 		}
 		else if (sideMove != 0)
 		{
@@ -678,9 +692,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 					break;
 			}
 			if (sideMove > 0)
-				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(-50f));
+				rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(-50f));
 			else if (sideMove < 0)
-				rotate = new Quaternion(this.UpVector(), Mathf.DegToRad(50f));
+				rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(50f));
 		}
 		else if ((lowerAnimation != LowerAnimation.Turn) && (lowerAnimation != LowerAnimation.Land) && (lowerAnimation != LowerAnimation.LandBack))
 		{
@@ -924,11 +938,13 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		currentFrameLower = currentLower.startFrame;
 
 		{
-			Name = modelName;
+			playerModel = new Node3D();
+			AddChild(playerModel);
+			playerModel.Name = modelName;
 
 			upperBody = new Node3D();
 			upperBody.Name = "Upper Body";
-			AddChild(upperBody);
+			playerModel.AddChild(upperBody);
 
 			tagHeadNode = new Node3D();
 			tagHeadNode.Name = "tag_head";
@@ -953,13 +969,13 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			lowerModel = Mesher.GenerateModelFromMeshes(lower, meshToSkin, layer);
 			lowerModel.node.Name = "lower_body";
 			lowerNode = lowerModel.node;
-			AddChild(lowerModel.node);
+			playerModel.AddChild(lowerModel.node);
 
 			loaded = true;
 		}
 		currentLayer = layer;
 
-		AddAllMeshInstance3D(this);
+		AddAllMeshInstance3D(playerModel);
 
 		playerControls.playerInfo.playerPostProcessing.playerHUD.InitHUD(head, meshToSkin);
 		return true;
@@ -1281,18 +1297,12 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		if (multiMeshDataList.Count == 0)
 			return;
 
-		if (((GlobalPosition - lastGlobalPosition).LengthSquared() > Mathf.Epsilon) ||
-			((GlobalBasis.X - lastGlobalBasis.X).LengthSquared() > Mathf.Epsilon) ||
-			((GlobalBasis.Y - lastGlobalBasis.Y).LengthSquared() > Mathf.Epsilon) ||
-			((GlobalBasis.Z - lastGlobalBasis.Z).LengthSquared() > Mathf.Epsilon))
-		{
+		if (Sleeping)
+			return;
 
-			for (int i = 0; i < multiMeshDataList.Count; i++)
-				Mesher.UpdateInstanceMultiMesh(multiMeshDataList[i].multiMesh, multiMeshDataList[i].owner);
-		}
-
-		lastGlobalPosition = GlobalPosition;
-		lastGlobalBasis = GlobalBasis;
+		for (int i = 0; i < multiMeshDataList.Count; i++)
+			Mesher.UpdateInstanceMultiMesh(multiMeshDataList[i].multiMesh, multiMeshDataList[i].owner);
+		
 	}
 
 	public override void _ExitTree()

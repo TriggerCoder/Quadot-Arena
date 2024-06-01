@@ -9,7 +9,7 @@ bounce = 0.6
 
 [node name="ItemDrop" type="RigidBody3D"]
 collision_layer = 2
-collision_mask = 4
+collision_mask = 12
 input_ray_pickable = false
 axis_lock_angular_x = true
 axis_lock_angular_y = true
