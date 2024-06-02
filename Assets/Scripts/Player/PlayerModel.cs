@@ -141,6 +141,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	private float upperCurrentLerpTime = 0;
 	private float lowerLerpTime = 0;
 	private float lowerCurrentLerpTime = 0;
+	private bool createRagdollColliders = false;
 
 	private Quaternion QuaternionZero = new Quaternion(0, 0, 0, 0);
 	private Quaternion turnTo = new Quaternion(0, 0, 0, 0);
@@ -184,10 +185,23 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	{
 		if (!ownerDead)
 			return;
+
 		float speed = state.LinearVelocity.LengthSquared();
-		
 		if (speed > GameManager.Instance.terminalLimit)
 			state.LinearVelocity = state.LinearVelocity.Normalized() * GameManager.Instance.terminalVelocity;
+
+	}
+
+	public override void _PhysicsProcess(double delta)
+	{
+		if (!ownerDead)
+			return;
+
+		if (createRagdollColliders)
+		{
+			GenerateRagDollCollider();
+			createRagdollColliders = false;
+		}
 
 	}
 	public override void _Process(double delta)
@@ -210,6 +224,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			playerModel.Quaternion = playerModel.Quaternion.Slerp(turnTo, rotationFPS * deltaTime);
 
 		{
+			bool deadUpperReady = false;
+			bool deadLowerReady = false;
+
 			nextUpper = upperAnim[upperAnimation];
 			nextLower = lowerAnim[lowerAnimation];
 
@@ -227,8 +244,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 						case UpperAnimation.Death1:
 						case UpperAnimation.Death2:
 						case UpperAnimation.Death3:
-							ChangeToRagDoll();
-							return;
+								nextFrameUpper = upperAnim[upperAnimation + 1].startFrame;
+								deadUpperReady = true;
+							break;
 						case UpperAnimation.Melee:
 						case UpperAnimation.Attack:
 						case UpperAnimation.Raise:
@@ -268,7 +286,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 						case LowerAnimation.Death1:
 						case LowerAnimation.Death2:
 						case LowerAnimation.Death3:
-							lowerAnimation++;
+							deadLowerReady = true;
 							break;
 						case LowerAnimation.Jump:
 						case LowerAnimation.JumpBack:
@@ -294,12 +312,23 @@ public partial class PlayerModel : RigidBody3D, Damageable
 							}
 							break;
 					}
-					nextLower = lowerAnim[lowerAnimation];
-					nextFrameLower = currentLower.startFrame;
+					if (deadLowerReady)
+						nextFrameLower = lowerAnim[lowerAnimation + 1].startFrame;
+					else
+					{
+						nextLower = lowerAnim[lowerAnimation];
+						nextFrameLower = currentLower.startFrame;
+					}
 				}
 			}
 			else
 				nextFrameLower = nextLower.startFrame;
+
+			if (deadUpperReady && deadLowerReady)
+			{
+				ChangeToRagDoll();
+				return;
+			}
 
 			Quaternion upperTorsoRotation = upper.tagsbyId[upper_tag_torso][currentFrameUpper].rotation.Slerp(upper.tagsbyId[upper_tag_torso][nextFrameUpper].rotation, upperCurrentLerpTime).FastNormal();
 			Quaternion upperHeadRotation = upper.tagsbyId[upper_tag_head][currentFrameUpper].rotation.Slerp(upper.tagsbyId[upper_tag_head][nextFrameUpper].rotation, upperCurrentLerpTime).FastNormal();
@@ -533,49 +562,59 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		Reparent(GameManager.Instance.TemporaryObjectsHolder);
 		Freeze = false;
 		LinearVelocity = playerControls.impulseVector * .8f;
+		SetPhysicsProcess(false);
 
 	}
 
 	private void ChangeToRagDoll()
 	{
-		Vector3 headGlobalPos = headBody.GlobalPosition;
-		Vector3 headGlobalRot = headBody.GlobalRotation;
-		headModel.node.QueueFree();
+		int currentDeathUpper = nextFrameUpper;
+		int currentDeathLower = nextFrameLower;
 
-		Quaternion upperTorsoRotation = upper.tagsbyId[upper_tag_torso][currentFrameUpper].rotation;
-		Quaternion lowerTorsoRotation = lower.tagsbyId[lower_tag_torso][currentFrameLower].rotation;
-		Vector3 localOrigin = lower.tagsbyId[lower_tag_torso][currentFrameLower].localOrigin;
-		Vector3 upperTorsoOrigin = upper.tagsbyId[upper_tag_torso][currentFrameUpper].origin;
+		Quaternion upperTorsoRotation = upper.tagsbyId[upper_tag_torso][currentDeathUpper].rotation;
+		Quaternion upperHeadRotation = upper.tagsbyId[upper_tag_head][currentDeathUpper].rotation;
+		Quaternion lowerTorsoRotation = lower.tagsbyId[lower_tag_torso][currentDeathLower].rotation;
+
+		Vector3 localOrigin = lower.tagsbyId[lower_tag_torso][currentDeathLower].localOrigin;
+		Vector3 upperTorsoOrigin = upper.tagsbyId[upper_tag_torso][currentDeathUpper].origin;
+		Vector3 upperHeadOrigin = upper.tagsbyId[upper_tag_head][currentDeathUpper].origin;
+		Vector3 lowerTorsoOrigin = lower.tagsbyId[lower_tag_torso][currentDeathLower].origin;
+
 		Vector3 currentOffset = lowerTorsoRotation * upperTorsoOrigin;
 		Quaternion currentRotation = lowerTorsoRotation * upperTorsoRotation;
 
-		upperModel.node.QueueFree();
-		MD3GodotConverted upperRagDoll = Mesher.GenerateModelFromMeshes(upper, meshToSkin, GameManager.AllPlayerViewMask, true, currentFrameUpper);
+		upperBody.QueueFree();
+		MD3GodotConverted upperRagDoll = Mesher.GenerateModelFromMeshes(upper, meshToSkin, GameManager.AllPlayerViewMask, true, currentDeathUpper);
 		upperRagDoll.node.Name = "upper_body";
-		upperBody.AddChild(upperRagDoll.node);
-		upperBody.Quaternion = currentRotation;
-		upperBody.Position += currentOffset;
-		SetMultiMesh(upperRagDoll, upperBody);
+		playerModel.AddChild(upperRagDoll.node);
+		upperRagDoll.node.Quaternion = currentRotation;
+		upperRagDoll.node.Position = currentOffset + lowerTorsoOrigin;
+		SetMultiMesh(upperRagDoll, upperRagDoll.node);
+
+		Quaternion baseRotation = lowerTorsoRotation;
+		currentOffset = baseRotation * upperHeadOrigin;
+		currentRotation = baseRotation * upperHeadRotation;
 
 		MD3GodotConverted headRagDoll = Mesher.GenerateModelFromMeshes(head, meshToSkin, GameManager.AllPlayerViewMask, true);
 		headRagDoll.node.Name = "head";
-		headBody.AddChild(headRagDoll.node);
-		headBody.GlobalPosition = headGlobalPos;
-		headBody.GlobalRotation = headGlobalRot;
-		SetMultiMesh(headRagDoll, headBody);
+		playerModel.AddChild(headRagDoll.node);
+		headRagDoll.node.Position = currentOffset + lowerTorsoOrigin;
+		headRagDoll.node.Basis = new Basis(currentRotation);
+		SetMultiMesh(headRagDoll, headRagDoll.node);
 
 		currentOffset = upperTorsoRotation * upperTorsoOrigin;
 		lowerModel.node.QueueFree();
 
-		MD3GodotConverted lowerRagDoll = Mesher.GenerateModelFromMeshes(lower, meshToSkin, GameManager.AllPlayerViewMask, true, currentFrameLower);
+		MD3GodotConverted lowerRagDoll = Mesher.GenerateModelFromMeshes(lower, meshToSkin, GameManager.AllPlayerViewMask, true, currentDeathLower);
 		lowerRagDoll.node.Name = "lower_body";
 		lowerNode = lowerRagDoll.node;
 		lowerNode.Position = localOrigin + currentOffset;
 		playerModel.AddChild(lowerRagDoll.node);
-		SetMultiMesh(lowerRagDoll, playerModel);
+		SetMultiMesh(lowerRagDoll, lowerRagDoll.node);
 
 		playerControls.playerThing.interpolatedTransform.QueueFree();
 		playerControls.playerThing.interpolatedTransform = null;
+		Sleeping = false;
 		ragDoll = true;
 	}
 
@@ -593,8 +632,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		GameManager.ChangeQuadFx(fxMeshes, false);
 
 		ownerDead = true;
-
-		CallDeferred("GenerateRagDollCollider");
+		createRagdollColliders = true;
 	}
 
 	public void Damage(int amount, DamageType damageType = DamageType.Generic, Node3D attacker = null)

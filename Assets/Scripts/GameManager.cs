@@ -124,8 +124,8 @@ public partial class GameManager : Node
 	public float friction = 6f;
 	public float waterFriction = 12f;
 	public float waterDeadFall = 4.5f;
-	public float terminalLimit = 300f;
-	public float terminalVelocity = 17.25f;
+	public float terminalLimit = 256f;
+	public float terminalVelocity = 16f;
 	public float barrierVelocity = 1024f;
 	public float playerHeight = 1.2f;
 
