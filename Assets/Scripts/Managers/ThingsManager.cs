@@ -16,6 +16,8 @@ public partial class ThingsManager : Node
 	[Export]
 	public PackedScene[] _debrisPrefabs;
 	[Export]
+	public PackedScene[] _gibsPrefabs;
+	[Export]
 	public PackedScene[] _weaponsPrefabs;
 	[Export]
 	public PackedScene[] _healthsPrefabs;
@@ -43,6 +45,8 @@ public partial class ThingsManager : Node
 	public static Dictionary<string, Dictionary<string, string>> timersOnMap = new Dictionary<string, Dictionary<string, string>>();
 	public static Dictionary<string, List<Dictionary<string, string>>> triggersOnMap = new Dictionary<string, List<Dictionary<string, string>>>();
 	public static Dictionary<string, ItemPickup> giveItemPickup = new Dictionary<string, ItemPickup>();
+	public static Dictionary<string, ConvexPolygonShape3D> gibsShapes = new Dictionary<string, ConvexPolygonShape3D>();
+	public static readonly string[] gibsParts = { "GibSkull", "GibBrain", "GibAbdomen", "GibArm", "GibChest", "GibFist", "GibFoot", "GibForearm", "GibIntestine", "GibLeg", "GibLeg" };
 	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group", "info_null", "info_spectator_start", "info_firstplace", "info_secondplace", "info_thirdplace" };
 	public static readonly string[] triggerThings = { "func_timer", "trigger_always", "trigger_multiple", "target_relay" , "target_delay", "target_give" };
 	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_relay", "target_delay", "target_give", "target_position", "info_notnull", "misc_teleporter_dest" };
@@ -83,6 +87,13 @@ public partial class ThingsManager : Node
 			SceneState sceneState = thing.GetState();
 			string prefabName = sceneState.GetNodeName(0);
 			GameManager.Print("Debris Name: " + prefabName);
+			thingsPrefabs.Add(prefabName, thing);
+		}
+		foreach (var thing in _gibsPrefabs)
+		{
+			SceneState sceneState = thing.GetState();
+			string prefabName = sceneState.GetNodeName(0);
+			GameManager.Print("Gib Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _weaponsPrefabs)
@@ -150,6 +161,12 @@ public partial class ThingsManager : Node
 		}
 		BFGTracers.SetTracers();
 	}
+
+	public static void AddGibsShapes(string name, ConvexPolygonShape3D shape3D)
+	{
+		gibsShapes[name] = shape3D;
+	}
+
 	public static void ReadEntities(byte[] entities)
 	{
 		MemoryStream ms = new MemoryStream(entities);

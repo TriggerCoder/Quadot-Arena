@@ -1,0 +1,44 @@
+[gd_scene load_steps=7 format=3 uid="uid://c54qqfwrdg1fc"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/DestroyAfterTime.cs" id="1_4kyl8"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/GibsController.cs" id="1_6oai7"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="2_m8mco"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_uwiw4"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_ih0nl"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_x6url"]
+bounce = 0.6
+
+[node name="GibAbdomen" type="RigidBody3D" node_paths=PackedStringArray("audioStream", "modelController")]
+collision_layer = 2
+collision_mask = 12
+input_ray_pickable = false
+mass = 20.0
+physics_material_override = SubResource("PhysicsMaterial_x6url")
+continuous_cd = true
+max_contacts_reported = 1
+contact_monitor = true
+script = ExtResource("1_6oai7")
+audioStream = NodePath("MultiAudioStream")
+_sounds = PackedStringArray("player/gibimp1", "player/gibimp2", "player/gibimp3")
+modelController = NodePath("InterpolatedTransform/Abdomen")
+
+[node name="SourceGib" type="Node3D" parent="."]
+
+[node name="MultiAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_uwiw4")
+
+[node name="Destroy" type="Node" parent="."]
+script = ExtResource("1_4kyl8")
+destroyTimer = 30.0
+
+[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source")]
+script = ExtResource("2_m8mco")
+Source = NodePath("../SourceGib")
+
+[node name="Abdomen" type="Node3D" parent="InterpolatedTransform"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+script = ExtResource("3_ih0nl")
+modelName = "gibs/abdomen"
+receiveShadows = true
+castShadows = true

@@ -172,7 +172,7 @@ public partial class BFGBall : InterpolatedNode3D
 		if (Hit == null)
 		{
 			PhysicsServer3D.ShapeSetData(Sphere, lightningRadius);
-			SphereCast.CollisionMask = GameManager.TakeDamageMask;
+			SphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
 			SphereCast.Motion = Vector3.Zero;
 			SphereCast.Transform = GlobalTransform;
 			var hits = SpaceState.IntersectShape(SphereCast);
@@ -190,7 +190,7 @@ public partial class BFGBall : InterpolatedNode3D
 				if (posibleCollider is Damageable)
 				{
 					Vector3 collision = posibleCollider.Position;
-					var RayCast = PhysicsRayQueryParameters3D.Create(GlobalPosition, collision, ((1 << GameManager.ColliderLayer) | GameManager.TakeDamageMask));
+					var RayCast = PhysicsRayQueryParameters3D.Create(GlobalPosition, collision, ((1 << GameManager.ColliderLayer) | (1 << GameManager.RagdollLayer) | GameManager.TakeDamageMask));
 					var check = SpaceState.IntersectRay(RayCast);
 					if (check.Count > 0)
 					{
@@ -248,7 +248,7 @@ public partial class BFGBall : InterpolatedNode3D
 		else
 		{
 			PhysicsServer3D.ShapeSetData(Sphere, explosionRadius);
-			SphereCast.CollisionMask = GameManager.TakeDamageMask;
+			SphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
 			SphereCast.Motion = Vector3.Zero;
 			SphereCast.Transform = new Transform3D(GlobalTransform.Basis, Collision);
 			var hits = SpaceState.IntersectShape(SphereCast);
@@ -292,7 +292,7 @@ public partial class BFGBall : InterpolatedNode3D
 			if (CheckIfCanMark(SpaceState, Hit, Collision))
 			{
 				Node3D DecalMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
-				GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
+				Hit.AddChild(DecalMark);
 				DecalMark.Position = Collision + (Normal * .03f);
 				DecalMark.SetForward(-Normal);
 				DecalMark.Rotate((DecalMark.UpVector()).Normalized(), -Mathf.Pi * .5f);
@@ -300,7 +300,7 @@ public partial class BFGBall : InterpolatedNode3D
 				if (!string.IsNullOrEmpty(secondaryMark))
 				{
 					Node3D SecondMark = (Node3D)ThingsManager.thingsPrefabs[secondaryMark].Instantiate();
-					GameManager.Instance.TemporaryObjectsHolder.AddChild(SecondMark);
+					Hit.AddChild(SecondMark);
 					SecondMark.Position = Collision + (Normal * .05f);
 					SecondMark.SetForward(-Normal);
 					SecondMark.Rotate((SecondMark.UpVector()).Normalized(), -Mathf.Pi * .5f);

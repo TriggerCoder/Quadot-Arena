@@ -128,6 +128,7 @@ public partial class GameManager : Node
 	public float terminalVelocity = 16f;
 	public float barrierVelocity = 1024f;
 	public float playerHeight = 1.2f;
+	public int gibHealth = -40;
 
 	public float PlayerDamageReceive = 1f;
 	public int PlayerAmmoReceive = 1;

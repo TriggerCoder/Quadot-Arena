@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://buu4veqfyypvx"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="1_mv0wv"]
+
+[node name="BloodMark8" type="Node3D"]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
+script = ExtResource("1_mv0wv")
+modelName = "weaphits/boom01"
+shaderName = "RES/ASSETS/TEXTURES/BLOOD/BLOOD8"
+useLowCountMultiMesh = false
+alphaFade = true
+destroyType = 1
+destroyTimer = 200.0

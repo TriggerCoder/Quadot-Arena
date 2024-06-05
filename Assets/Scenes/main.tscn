@@ -1,4 +1,4 @@
-[gd_scene load_steps=129 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=155 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
@@ -36,20 +36,28 @@
 [ext_resource type="PackedScene" uid="uid://wfrbjpq2b7t7" path="res://Assets/Things/Pickups/Ammo/ammo_bullets.tscn" id="19_qacws"]
 [ext_resource type="PackedScene" uid="uid://dkn4pgx2b86gy" path="res://Assets/Things/FX/Damage/BurnMark.tscn" id="19_rmn3i"]
 [ext_resource type="PackedScene" uid="uid://bvxapvmn28o6t" path="res://Assets/Things/Pickups/Ammo/ammo_shells.tscn" id="20_88qir"]
+[ext_resource type="Image" uid="uid://dnxb6lp7sa1bn" path="res://Assets/Textures/Blood/blood1.tga" id="20_aerov"]
 [ext_resource type="PackedScene" uid="uid://dmh4ni5reuxgo" path="res://Assets/Things/FX/WeaponHits/BFGExplosion.tscn" id="20_l0jeh"]
 [ext_resource type="PackedScene" uid="uid://da17o45p1fpov" path="res://Assets/Things/Pickups/Ammo/ammo_cells.tscn" id="21_gcmhg"]
 [ext_resource type="PackedScene" uid="uid://cytib7fikj5yo" path="res://Assets/Things/FX/WeaponHits/RailExplosion.tscn" id="21_gxmhp"]
+[ext_resource type="Image" uid="uid://e3j31puuo1or" path="res://Assets/Textures/Blood/blood2.tga" id="21_q6y6v"]
+[ext_resource type="Image" uid="uid://bmhr7ywjsyt3d" path="res://Assets/Textures/Blood/blood3.tga" id="22_axq7l"]
 [ext_resource type="PackedScene" uid="uid://cw5fdj3otdth" path="res://Assets/Things/FX/WeaponHits/GrenadeExplosion.tscn" id="22_i5gi6"]
 [ext_resource type="PackedScene" uid="uid://bdjag6sywuono" path="res://Assets/Things/Projectiles/BFGProjectile.tscn" id="22_jphxe"]
 [ext_resource type="PackedScene" uid="uid://djgfyife6qicb" path="res://Assets/Things/Pickups/Ammo/ammo_rockets.tscn" id="22_xc5q4"]
+[ext_resource type="Image" uid="uid://c5b1evi8nwpc5" path="res://Assets/Textures/Blood/blood4.tga" id="23_17lpe"]
 [ext_resource type="PackedScene" uid="uid://cwxdv8qsopm5" path="res://Assets/Things/FX/Damage/LightningMark.tscn" id="24_5opha"]
 [ext_resource type="PackedScene" uid="uid://dxnvn5gs552we" path="res://Assets/Things/Pickups/Weapons/weapon_shotgun.tscn" id="24_5ts3k"]
+[ext_resource type="Image" uid="uid://c4katdtb2krvd" path="res://Assets/Textures/Blood/blood5.tga" id="24_npn2v"]
 [ext_resource type="PackedScene" uid="uid://cawscbtf8jvhy" path="res://Assets/Things/Projectiles/LightningBolt.tscn" id="24_ua1m5"]
+[ext_resource type="Image" uid="uid://851r3idl4tg4" path="res://Assets/Textures/Blood/blood6.tga" id="25_5aknc"]
 [ext_resource type="PackedScene" uid="uid://b2uuscwsgltoa" path="res://Assets/Things/Pickups/Weapons/weapon_plasmagun.tscn" id="25_5i6m0"]
 [ext_resource type="PackedScene" uid="uid://c1t32gv5y7icn" path="res://Assets/Things/Projectiles/RailTrail.tscn" id="25_44wy8"]
 [ext_resource type="PackedScene" uid="uid://bll72amm2jjvr" path="res://Assets/Things/Pickups/Weapons/weapon_rocketlauncher.tscn" id="26_6gxqa"]
+[ext_resource type="Image" uid="uid://bofx66cqg2535" path="res://Assets/Textures/Blood/blood7.tga" id="26_61pdm"]
 [ext_resource type="PackedScene" uid="uid://bllvvxjn12njn" path="res://Assets/Things/Projectiles/GrenadeProjectile.tscn" id="27_5gm05"]
 [ext_resource type="PackedScene" uid="uid://1aju6wu5vmtu" path="res://Assets/Things/Pickups/Health/item_health.tscn" id="27_5pqil"]
+[ext_resource type="Image" uid="uid://dqgr0oxudhmhd" path="res://Assets/Textures/Blood/blood8.tga" id="27_m0ak5"]
 [ext_resource type="PackedScene" uid="uid://ccfka8e12un61" path="res://Assets/Things/FX/WeaponHits/BFGTracerExplosion.tscn" id="28_5ibyp"]
 [ext_resource type="PackedScene" uid="uid://00qa1h4uy2f7" path="res://Assets/Things/Pickups/Health/item_health_large.tscn" id="28_dpe7f"]
 [ext_resource type="PackedScene" uid="uid://4xiwipor4bi8" path="res://Assets/Things/FX/Damage/BFGMark.tscn" id="29_l1cqu"]
@@ -79,17 +87,35 @@
 [ext_resource type="PackedScene" uid="uid://3kdaobbeqoxp" path="res://Assets/Things/Pickups/PowerUps/item_haste.tscn" id="42_lo0q4"]
 [ext_resource type="PackedScene" uid="uid://sdf2rj3p3tbh" path="res://Assets/Things/Pickups/PowerUps/item_regen.tscn" id="43_0nxgr"]
 [ext_resource type="PackedScene" uid="uid://bat7yn34ag74j" path="res://Assets/Things/Pickups/Ammo/ammo_grenades.tscn" id="43_por0y"]
+[ext_resource type="PackedScene" uid="uid://dpswf1hxglr0x" path="res://Assets/Things/FX/BloodMarks/BloodMark1.tscn" id="43_xrsn8"]
 [ext_resource type="PackedScene" uid="uid://dcu0dylsbjrp0" path="res://Assets/Things/GamePlay/worldspawn.tscn" id="44_er3mv"]
 [ext_resource type="PackedScene" uid="uid://78i07xdk6vt4" path="res://Assets/Things/Pickups/PowerUps/holdable_teleporter.tscn" id="44_nb564"]
 [ext_resource type="PackedScene" uid="uid://c3wij33wsqbg" path="res://Assets/Things/GamePlay/trigger/trigger_hurt.tscn" id="45_ge4jt"]
 [ext_resource type="PackedScene" uid="uid://dumbqwobmx7ko" path="res://Assets/Things/GamePlay/info/info_notnull.tscn" id="46_6njgx"]
+[ext_resource type="PackedScene" uid="uid://67c1cxd5hoar" path="res://Assets/Things/FX/BloodMarks/BloodMark2.tscn" id="46_h6uxe"]
 [ext_resource type="PackedScene" uid="uid://bwx6v47koleqb" path="res://Assets/Things/GamePlay/func/func_rotating.tscn" id="47_g2dqw"]
 [ext_resource type="PackedScene" uid="uid://7pbrpwetygt8" path="res://Assets/Things/Pickups/Weapons/weapon_railgun.tscn" id="48_k36jd"]
+[ext_resource type="PackedScene" uid="uid://c2htilwd1kllr" path="res://Assets/Things/FX/BloodMarks/BloodMark3.tscn" id="48_o5g2n"]
 [ext_resource type="PackedScene" uid="uid://mp5ryxp1smn2" path="res://Assets/Things/GamePlay/misc/misc_portal_camera.tscn" id="48_uv6co"]
 [ext_resource type="PackedScene" uid="uid://p0n8fxq1vf8t" path="res://Assets/Things/GamePlay/misc/misc_portal_surface.tscn" id="49_gicjp"]
 [ext_resource type="PackedScene" uid="uid://dlo5rcwan3lx" path="res://Assets/Things/GamePlay/target/target_location.tscn" id="49_mb0ac"]
 [ext_resource type="PackedScene" uid="uid://bimr3d2dbk00j" path="res://Assets/Things/Pickups/Weapons/weapon_grenadelauncher.tscn" id="53_qje8m"]
+[ext_resource type="PackedScene" uid="uid://c54qqfwrdg1fc" path="res://Assets/Things/Gibs/GibAbdomen.tscn" id="54_rkkly"]
+[ext_resource type="PackedScene" uid="uid://c247rthpf7m0u" path="res://Assets/Things/FX/BloodMarks/BloodMark4.tscn" id="54_ylum8"]
+[ext_resource type="PackedScene" uid="uid://c3h67smdbpn1o" path="res://Assets/Things/FX/BloodMarks/BloodMark5.tscn" id="55_2cxke"]
+[ext_resource type="PackedScene" uid="uid://c4y3fqin6vymy" path="res://Assets/Things/Gibs/GibArm.tscn" id="55_f0i75"]
+[ext_resource type="PackedScene" uid="uid://b24hymyo1kel1" path="res://Assets/Things/Gibs/GibBrain.tscn" id="56_6f34d"]
+[ext_resource type="PackedScene" uid="uid://37whhw7y5375" path="res://Assets/Things/FX/BloodMarks/BloodMark6.tscn" id="56_tyh37"]
+[ext_resource type="PackedScene" uid="uid://ie21kkwuksyq" path="res://Assets/Things/FX/BloodMarks/BloodMark7.tscn" id="57_40726"]
+[ext_resource type="PackedScene" uid="uid://dtidc4aw00d6e" path="res://Assets/Things/Gibs/GibChest.tscn" id="57_yotn7"]
+[ext_resource type="PackedScene" uid="uid://c6pqdv17uojq7" path="res://Assets/Things/Gibs/GibFist.tscn" id="58_16pvy"]
+[ext_resource type="PackedScene" uid="uid://buu4veqfyypvx" path="res://Assets/Things/FX/BloodMarks/BloodMark8.tscn" id="58_qsrid"]
+[ext_resource type="PackedScene" uid="uid://canwr3ef4eyrs" path="res://Assets/Things/Gibs/GibFoot.tscn" id="59_byap5"]
 [ext_resource type="PackedScene" uid="uid://byqxrs4xryit5" path="res://Assets/Things/Debris/ItemDrop.tscn" id="59_rmbdm"]
+[ext_resource type="PackedScene" uid="uid://dm3xmjcp36qb5" path="res://Assets/Things/Gibs/GibForearm.tscn" id="60_a3qpk"]
+[ext_resource type="PackedScene" uid="uid://fqklsegp0ojx" path="res://Assets/Things/Gibs/GibIntestine.tscn" id="61_eaowh"]
+[ext_resource type="PackedScene" uid="uid://bwjt75ccw7kyg" path="res://Assets/Things/Gibs/GibLeg.tscn" id="62_chqu0"]
+[ext_resource type="PackedScene" uid="uid://177nrp1rieks" path="res://Assets/Things/Gibs/GibSkull.tscn" id="63_k1tst"]
 [ext_resource type="PackedScene" uid="uid://bnes0v0ntwmmg" path="res://Assets/Things/GamePlay/info/info_player_intermission.tscn" id="74_1t76s"]
 [ext_resource type="PackedScene" uid="uid://nfj4ju6qkqdo" path="res://Assets/Things/GamePlay/func/func_bobbing.tscn" id="76_lanxu"]
 [ext_resource type="PackedScene" uid="uid://cwmpgottit0na" path="res://Assets/Things/GamePlay/target/target_relay.tscn" id="79_dvn2g"]
@@ -249,8 +275,8 @@ defaultTransparentLightMapMaterial = ExtResource("7_wtcy7")
 decalsMapMaterial = ExtResource("9_xagb5")
 baseCameraMaterial = ExtResource("11_1vb85")
 underWaterMaterial = ExtResource("12_8i4o0")
-_extraTextures = Array[Resource]([ExtResource("16_clfgu"), ExtResource("17_07kil"), ExtResource("18_7vq48")])
-_decalsNames = PackedStringArray("gfx/damage/burn_med_mrk", "gfx/damage/bullet_mrk", "gfx/damage/plasma_mrk", "gfx/damage/hole_lg_mrk")
+_extraTextures = Array[Resource]([ExtResource("16_clfgu"), ExtResource("17_07kil"), ExtResource("18_7vq48"), ExtResource("20_aerov"), ExtResource("21_q6y6v"), ExtResource("22_axq7l"), ExtResource("23_17lpe"), ExtResource("24_npn2v"), ExtResource("25_5aknc"), ExtResource("26_61pdm"), ExtResource("27_m0ak5")])
+_decalsNames = PackedStringArray("gfx/damage/burn_med_mrk", "gfx/damage/bullet_mrk", "gfx/damage/plasma_mrk", "gfx/damage/hole_lg_mrk", "res/assets/textures/blood/blood1", "res/assets/textures/blood/blood2", "res/assets/textures/blood/blood3", "res/assets/textures/blood/blood4", "res/assets/textures/blood/blood5", "res/assets/textures/blood/blood6", "res/assets/textures/blood/blood7", "res/assets/textures/blood/blood8")
 _extraQShaders = PackedStringArray("res://Assets/QShaders/auxQShaders.txt")
 
 [node name="ClusterPVSManager" type="Node" parent="Quadot Arena"]
@@ -260,9 +286,10 @@ script = ExtResource("8_vpkit")
 script = ExtResource("9_71i1l")
 _fxPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("13_l5hcy"), ExtResource("16_xhuyt"), ExtResource("18_nyem1"), ExtResource("20_l0jeh"), ExtResource("21_gxmhp"), ExtResource("22_i5gi6"), ExtResource("28_5ibyp")])
 _projectilesPrefabs = Array[PackedScene]([ExtResource("12_6703q"), ExtResource("15_rsp03"), ExtResource("22_jphxe"), ExtResource("24_ua1m5"), ExtResource("25_44wy8"), ExtResource("27_5gm05")])
-_decalsPrefabs = Array[PackedScene]([ExtResource("17_au5sd"), ExtResource("19_rmn3i"), ExtResource("18_occpy"), ExtResource("19_q0xlo"), ExtResource("24_5opha"), ExtResource("29_l1cqu"), ExtResource("32_kea4x")])
+_decalsPrefabs = Array[PackedScene]([ExtResource("17_au5sd"), ExtResource("19_rmn3i"), ExtResource("18_occpy"), ExtResource("19_q0xlo"), ExtResource("24_5opha"), ExtResource("29_l1cqu"), ExtResource("32_kea4x"), ExtResource("43_xrsn8"), ExtResource("46_h6uxe"), ExtResource("48_o5g2n"), ExtResource("54_ylum8"), ExtResource("55_2cxke"), ExtResource("56_tyh37"), ExtResource("57_40726"), ExtResource("58_qsrid")])
 _ammoPrefabs = Array[PackedScene]([ExtResource("19_qacws"), ExtResource("21_gcmhg"), ExtResource("30_kksrp"), ExtResource("22_xc5q4"), ExtResource("20_88qir"), ExtResource("35_frbmv"), ExtResource("40_a7icm"), ExtResource("43_por0y")])
 _debrisPrefabs = Array[PackedScene]([ExtResource("18_dkfmq"), ExtResource("19_flqi0"), ExtResource("59_rmbdm")])
+_gibsPrefabs = Array[PackedScene]([ExtResource("54_rkkly"), ExtResource("55_f0i75"), ExtResource("56_6f34d"), ExtResource("57_yotn7"), ExtResource("58_16pvy"), ExtResource("59_byap5"), ExtResource("60_a3qpk"), ExtResource("61_eaowh"), ExtResource("62_chqu0"), ExtResource("63_k1tst")])
 _weaponsPrefabs = Array[PackedScene]([ExtResource("24_5ts3k"), ExtResource("25_5i6m0"), ExtResource("26_6gxqa"), ExtResource("37_ho6wf"), ExtResource("42_f3nx2"), ExtResource("48_k36jd"), ExtResource("53_qje8m")])
 _healthsPrefabs = Array[PackedScene]([ExtResource("27_5pqil"), ExtResource("28_dpe7f"), ExtResource("30_u4mvd"), ExtResource("31_g11tp")])
 _armorPrefabs = Array[PackedScene]([ExtResource("29_slqlw"), ExtResource("30_8nwr7"), ExtResource("32_pviff")])

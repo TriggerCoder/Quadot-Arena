@@ -174,7 +174,7 @@ public partial class LightningGunWeapon : PlayerWeapon
 			d = d.Normalized();
 			Vector3 Origin = playerInfo.playerCamera.GlobalPosition;
 			Vector3 End = Origin - d * maxRange;
-			var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | (1 << GameManager.WaterLayer) | GameManager.TakeDamageMask & ~((playerInfo.playerLayer) | (1 << GameManager.InvisibleBlockerLayer) | (1 << GameManager.RagdollLayer))));
+			var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | (1 << GameManager.RagdollLayer) | (1 << GameManager.WaterLayer) | GameManager.TakeDamageMask & ~((playerInfo.playerLayer) | (1 << GameManager.InvisibleBlockerLayer) | (1 << GameManager.RagdollLayer))));
 			if (MapLoader.waterSurfaces.Count > 0)
 				RayCast.CollideWithAreas = true;
 			var SpaceState = GetWorld3D().DirectSpaceState;
@@ -212,7 +212,7 @@ public partial class LightningGunWeapon : PlayerWeapon
 				if (CheckIfCanMark(SpaceState, collider, collision))
 				{
 					Node3D BulletMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
-					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletMark);
+					collider.AddChild(BulletMark);
 					BulletMark.Position = collision + (normal * .05f);
 					BulletMark.SetForward(-normal);
 					BulletMark.Rotate((BulletMark.UpVector()).Normalized(), -Mathf.Pi * .5f);

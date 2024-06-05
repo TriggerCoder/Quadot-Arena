@@ -289,11 +289,16 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 			playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
 
-			if (damageType == DamageType.Drown)
-				PlayModelSound("drown");
+			if (hitpoints <= GameManager.Instance.gibHealth)
+				avatar.Gib();
 			else
-				PlayModelSound("death" + GD.RandRange(1, 3));
-			avatar.Die();
+			{
+				if (damageType == DamageType.Drown)
+					PlayModelSound("drown");
+				else
+					PlayModelSound("death" + GD.RandRange(1, 3));
+				avatar.Die();
+			}
 			playerControls.feetRay.Length = 1.6f;
 			currentState = GameManager.FuncState.None;
 			deaths++;

@@ -33,7 +33,7 @@ public partial class TeleporterThing : Area3D
 		PhysicsShapeQueryParameters3D SphereCast = new PhysicsShapeQueryParameters3D();
 		SphereCast.ShapeRid = Sphere;
 		PhysicsServer3D.ShapeSetData(Sphere, 2f);
-		SphereCast.CollisionMask = GameManager.TakeDamageMask;
+		SphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
 		SphereCast.Motion = Vector3.Zero;
 		SphereCast.Transform = new Transform3D(Basis.Identity, position);
 		var SpaceState = node.GetWorld3D().DirectSpaceState;

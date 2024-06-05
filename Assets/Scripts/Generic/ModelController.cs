@@ -19,7 +19,8 @@ public partial class ModelController : Node3D
 	[Export]
 	public bool alphaFade = false;
 
-	private MD3 md3Model;
+	public MD3 Model { get { return md3Model; } }
+	private MD3 md3Model = null;
 
 	private MD3GodotConverted model;
 	[Export]

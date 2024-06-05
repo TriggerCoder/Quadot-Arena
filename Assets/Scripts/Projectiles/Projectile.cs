@@ -154,7 +154,7 @@ public partial class Projectile : InterpolatedNode3D
 		if (Hit != null)
 		{
 			PhysicsServer3D.ShapeSetData(Sphere, explosionRadius);
-			SphereCast.CollisionMask = GameManager.TakeDamageMask;
+			SphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
 			SphereCast.Motion = Vector3.Zero;
 			SphereCast.Transform = new Transform3D(GlobalTransform.Basis, Collision);
 			var hits = SpaceState.IntersectShape(SphereCast);
@@ -225,7 +225,7 @@ public partial class Projectile : InterpolatedNode3D
 			if (CheckIfCanMark(SpaceState, Hit, Collision))
 			{
 				Node3D DecalMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
-				GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
+				Hit.AddChild(DecalMark);
 				DecalMark.Position = Collision + (Normal * .03f);
 				DecalMark.SetForward(-Normal);
 				DecalMark.Rotate((DecalMark.UpVector()).Normalized(), -Mathf.Pi * .5f);
@@ -233,7 +233,7 @@ public partial class Projectile : InterpolatedNode3D
 				if (!string.IsNullOrEmpty(secondaryMark))
 				{
 					Node3D SecondMark = (Node3D)ThingsManager.thingsPrefabs[secondaryMark].Instantiate();
-					GameManager.Instance.TemporaryObjectsHolder.AddChild(SecondMark);
+					Hit.AddChild(SecondMark);
 					SecondMark.Position = Collision + (Normal * .05f);
 					SecondMark.SetForward(-Normal);
 					SecondMark.Rotate((SecondMark.UpVector()).Normalized(), -Mathf.Pi * .5f);

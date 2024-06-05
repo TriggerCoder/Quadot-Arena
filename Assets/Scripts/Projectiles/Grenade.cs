@@ -53,7 +53,7 @@ public partial class Grenade : RigidBody3D
 
 	public void Init(uint ignoreSelfLayer)
 	{
-		CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.InvisibleBlockerLayer) | (1 << GameManager.WaterLayer) | GameManager.TakeDamageMask & ~(ignoreSelfLayer));
+		CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.RagdollLayer) | (1 << GameManager.InvisibleBlockerLayer) | (1 << GameManager.WaterLayer) | GameManager.TakeDamageMask & ~(ignoreSelfLayer));
 	}
 	public void EnableQuad()
 	{
@@ -111,7 +111,7 @@ public partial class Grenade : RigidBody3D
 
 		//explosion
 		PhysicsServer3D.ShapeSetData(Sphere, explosionRadius);
-		SphereCast.CollisionMask = GameManager.TakeDamageMask;
+		SphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
 		SphereCast.Motion = Vector3.Zero;
 		SphereCast.Transform = GlobalTransform;
 		var hits = SpaceState.IntersectShape(SphereCast);
@@ -149,7 +149,7 @@ public partial class Grenade : RigidBody3D
 			if (CheckIfCanMark(SpaceState, Hit, Collision))
 			{
 				Node3D DecalMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
-				GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
+				Hit.AddChild(DecalMark);
 				DecalMark.Position = Collision + (Normal * .03f);
 				DecalMark.SetForward(-Normal);
 				DecalMark.Rotate((DecalMark.UpVector()).Normalized(), -Mathf.Pi * .5f);
@@ -157,7 +157,7 @@ public partial class Grenade : RigidBody3D
 				if (!string.IsNullOrEmpty(secondaryMark))
 				{
 					Node3D SecondMark = (Node3D)ThingsManager.thingsPrefabs[secondaryMark].Instantiate();
-					GameManager.Instance.TemporaryObjectsHolder.AddChild(SecondMark);
+					Hit.AddChild(SecondMark);
 					SecondMark.Position = Collision + (Normal * .05f);
 					SecondMark.SetForward(-Normal);
 					SecondMark.Rotate((SecondMark.UpVector()).Normalized(), -Mathf.Pi * .5f);

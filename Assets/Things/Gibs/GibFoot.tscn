@@ -1,0 +1,44 @@
+[gd_scene load_steps=7 format=3 uid="uid://canwr3ef4eyrs"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/GibsController.cs" id="1_in6e6"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/DestroyAfterTime.cs" id="1_vxtpi"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="2_ctwiw"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_me47s"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_8ky0j"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_x6url"]
+bounce = 0.6
+
+[node name="GibFoot" type="RigidBody3D" node_paths=PackedStringArray("audioStream", "modelController")]
+collision_layer = 2
+collision_mask = 12
+input_ray_pickable = false
+mass = 3.0
+physics_material_override = SubResource("PhysicsMaterial_x6url")
+continuous_cd = true
+max_contacts_reported = 1
+contact_monitor = true
+script = ExtResource("1_in6e6")
+audioStream = NodePath("MultiAudioStream")
+_sounds = PackedStringArray("player/gibimp1", "player/gibimp2", "player/gibimp3")
+modelController = NodePath("InterpolatedTransform/Foot")
+
+[node name="SourceGib" type="Node3D" parent="."]
+
+[node name="MultiAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_me47s")
+
+[node name="Destroy" type="Node" parent="."]
+script = ExtResource("1_vxtpi")
+destroyTimer = 30.0
+
+[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source")]
+script = ExtResource("2_ctwiw")
+Source = NodePath("../SourceGib")
+
+[node name="Foot" type="Node3D" parent="InterpolatedTransform"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+script = ExtResource("3_8ky0j")
+modelName = "gibs/foot"
+receiveShadows = true
+castShadows = true

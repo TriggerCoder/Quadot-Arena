@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://dnxb6lp7sa1bn"
+path="res://.godot/imported/blood1.tga-f3dbaf6263b5b698bfa384963474fddd.image"
+
+[deps]
+
+source_file="res://Assets/Textures/Blood/blood1.tga"
+dest_files=["res://.godot/imported/blood1.tga-f3dbaf6263b5b698bfa384963474fddd.image"]
+
+[params]
+

@@ -230,7 +230,8 @@ public partial class PlayerWeapon : Node3D
 							if (muzzleObject.Visible)
 							{
 								muzzleObject.Visible = false;
-								playerInfo.playerThing.avatar.MuzzleFlashSetActive(false);
+								if (playerInfo.playerThing.avatar != null)
+									playerInfo.playerThing.avatar.MuzzleFlashSetActive(false);
 							}
 					}
 				}
@@ -351,7 +352,8 @@ public partial class PlayerWeapon : Node3D
 			Quaternion rotBarrel = RotateBarrel(delta).FastNormal();
 			float speed = rotateSpeed * delta;
 			barrelObject.Quaternion = barrelObject.Quaternion.Slerp(rotBarrel, speed);
-			playerInfo.playerThing.avatar.RotateBarrel(rotBarrel, speed);
+			if (playerInfo.playerThing.avatar != null)
+				playerInfo.playerThing.avatar.RotateBarrel(rotBarrel, speed);
 		}
 
 		Quaternion targetRot = rotX * rotY;

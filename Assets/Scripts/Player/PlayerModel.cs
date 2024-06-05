@@ -147,8 +147,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	private Quaternion turnTo = new Quaternion(0, 0, 0, 0);
 	private List<MeshInstance3D> modelsMeshes = new List<MeshInstance3D>();
 	private List<MeshInstance3D> fxMeshes = new List<MeshInstance3D>();
-	private int hitpoints = 50;
+	private int hitpoints;
 	private List<MultiMeshData> multiMeshDataList = new List<MultiMeshData>();
+	private static readonly string gibSound = "player/gibsplt1";
 
 	//Needed to keep impulse once it turn into ragdoll
 	private PlayerControls playerControls;
@@ -179,6 +180,8 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 		CenterOfMassMode = CenterOfMassModeEnum.Custom;
 		CenterOfMass = Vector3.Down * .5f;
+
+		hitpoints = -GameManager.Instance.gibHealth;
 	}
 
 	public override void _IntegrateForces(PhysicsDirectBodyState3D state)
@@ -612,6 +615,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		playerModel.AddChild(lowerRagDoll.node);
 		SetMultiMesh(lowerRagDoll, lowerRagDoll.node);
 
+		playerControls.playerThing.avatar = null;
 		playerControls.playerThing.interpolatedTransform.QueueFree();
 		playerControls.playerThing.interpolatedTransform = null;
 		Sleeping = false;
@@ -635,10 +639,56 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		createRagdollColliders = true;
 	}
 
+	public void Gib()
+	{
+		int init = GD.RandRange(0, 1);
+		SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(gibSound));
+		for (; init < ThingsManager.gibsParts.Length; init++)
+		{
+			RigidBody3D gipPart = (RigidBody3D)ThingsManager.thingsPrefabs[ThingsManager.gibsParts[init]].Instantiate();
+			if (gipPart != null)
+			{
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(gipPart);
+				gipPart.GlobalPosition = GlobalPosition;
+				Vector3 velocity = new Vector3((float)GD.RandRange(-20f, 20f), (float)GD.RandRange(5f, 10f), (float)GD.RandRange(-20f, 20f));
+				gipPart.LinearVelocity = velocity;
+				gipPart.AngularVelocity = velocity;
+			}
+			//Never throw brains and skull
+			if (init == 0)
+				init++;
+		}
+		SetProcess(false);
+		SetPhysicsProcess(false);
+		if (ragDoll)
+			QueueFree();
+		else
+		{
+			FxLight.Visible = false;
+			GameManager.ChangeQuadFx(fxMeshes, false);
+			playerControls.playerThing.avatar = null;
+			playerControls.playerThing.interpolatedTransform.QueueFree();
+			playerControls.playerThing.interpolatedTransform = null;
+		}
+	}
+
 	public void Damage(int amount, DamageType damageType = DamageType.Generic, Node3D attacker = null)
 	{
 		if (!ragDoll)
 			return;
+
+		//Already Gibbed
+		if (hitpoints <= 0)
+			return;
+
+		hitpoints -= amount;
+
+		//Cap Negative Damage
+		if (hitpoints < -99)
+			hitpoints = -99;
+
+		if (hitpoints <= 0)
+			Gib();
 	}
 	public void Impulse(Vector3 direction, float force)
 	{
