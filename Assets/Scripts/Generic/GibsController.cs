@@ -99,11 +99,15 @@ public partial class GibsController : RigidBody3D
 				return;
 
 			Node3D DecalMark = (Node3D)ThingsManager.thingsPrefabs[decalMark[GD.RandRange(0, decalMark.Length - 1)]].Instantiate();
-			Hit.AddChild(DecalMark);
-			DecalMark.Position = Collision + (Normal * .03f);
-			DecalMark.SetForward(-Normal);
-			DecalMark.Rotate((DecalMark.UpVector()).Normalized(), -Mathf.Pi * .5f);
-			DecalMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+			GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
+			RemoteTransform3D remoteTransform = new RemoteTransform3D();
+			Hit.AddChild(remoteTransform);
+			remoteTransform.UpdateScale = false;
+			remoteTransform.RemotePath = DecalMark.GetPath();
+			remoteTransform.GlobalPosition = Collision + (Normal * .03f);
+			remoteTransform.SetForward(-Normal);
+			remoteTransform.Rotate((remoteTransform.UpVector()).Normalized(), -Mathf.Pi * .5f);
+			remoteTransform.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 		}
 	}
 

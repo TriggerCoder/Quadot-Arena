@@ -211,12 +211,16 @@ public partial class LightningGunWeapon : PlayerWeapon
 
 				if (CheckIfCanMark(SpaceState, collider, collision))
 				{
-					Node3D BulletMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
-					collider.AddChild(BulletMark);
-					BulletMark.Position = collision + (normal * .05f);
-					BulletMark.SetForward(-normal);
-					BulletMark.Rotate((BulletMark.UpVector()).Normalized(), -Mathf.Pi * .5f);
-					BulletMark.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+					Node3D ElectricMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(ElectricMark);
+					RemoteTransform3D remoteTransform = new RemoteTransform3D();
+					collider.AddChild(remoteTransform);
+					remoteTransform.UpdateScale = false;
+					remoteTransform.RemotePath = ElectricMark.GetPath();
+					remoteTransform.Position = collision + (normal * .05f);
+					remoteTransform.SetForward(-normal);
+					remoteTransform.Rotate((remoteTransform.UpVector()).Normalized(), -Mathf.Pi * .5f);
+					remoteTransform.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}
 			}
 			else

@@ -225,19 +225,27 @@ public partial class Projectile : InterpolatedNode3D
 			if (CheckIfCanMark(SpaceState, Hit, Collision))
 			{
 				Node3D DecalMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
-				Hit.AddChild(DecalMark);
-				DecalMark.Position = Collision + (Normal * .03f);
-				DecalMark.SetForward(-Normal);
-				DecalMark.Rotate((DecalMark.UpVector()).Normalized(), -Mathf.Pi * .5f);
-				DecalMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
+				RemoteTransform3D remoteTransform3D = new RemoteTransform3D();
+				Hit.AddChild(remoteTransform3D);
+				remoteTransform3D.UpdateScale = false;
+				remoteTransform3D.RemotePath = DecalMark.GetPath();
+				remoteTransform3D.GlobalPosition = Collision + (Normal * .03f);
+				remoteTransform3D.SetForward(-Normal);
+				remoteTransform3D.Rotate((remoteTransform3D.UpVector()).Normalized(), -Mathf.Pi * .5f);
+				remoteTransform3D.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				if (!string.IsNullOrEmpty(secondaryMark))
 				{
 					Node3D SecondMark = (Node3D)ThingsManager.thingsPrefabs[secondaryMark].Instantiate();
-					Hit.AddChild(SecondMark);
-					SecondMark.Position = Collision + (Normal * .05f);
-					SecondMark.SetForward(-Normal);
-					SecondMark.Rotate((SecondMark.UpVector()).Normalized(), -Mathf.Pi * .5f);
-					SecondMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(SecondMark);
+					RemoteTransform3D remoteTransform = new RemoteTransform3D();
+					Hit.AddChild(remoteTransform);
+					remoteTransform.UpdateScale = false;
+					remoteTransform.RemotePath = SecondMark.GetPath();
+					remoteTransform.GlobalPosition = Collision + (Normal * .05f);
+					remoteTransform.SetForward(-Normal);
+					remoteTransform.Rotate((remoteTransform.UpVector()).Normalized(), -Mathf.Pi * .5f);
+					remoteTransform.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}
 			}
 			if (!string.IsNullOrEmpty(_onDeathSound))

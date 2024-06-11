@@ -169,11 +169,15 @@ public partial class RailgunWeapon : PlayerWeapon
 				if (CheckIfCanMark(SpaceState, collider, collision))
 				{
 					Node3D RailMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
-					collider.AddChild(RailMark);
-					RailMark.Position = collision + (normal * .05f);
-					RailMark.SetForward(-normal);
-					RailMark.Rotate((RailMark.UpVector()).Normalized(), -Mathf.Pi * .5f);
-					RailMark.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(RailMark);
+					RemoteTransform3D remoteTransform = new RemoteTransform3D();
+					collider.AddChild(remoteTransform);
+					remoteTransform.UpdateScale = false;
+					remoteTransform.RemotePath = RailMark.GetPath();
+					remoteTransform.GlobalPosition = collision + (normal * .05f);
+					remoteTransform.SetForward(-normal);
+					remoteTransform.Rotate((remoteTransform.UpVector()).Normalized(), -Mathf.Pi * .5f);
+					remoteTransform.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 					if (RailMark.GetChildCount() > 0)
 					{
 						Node child = RailMark.GetChild(0);
