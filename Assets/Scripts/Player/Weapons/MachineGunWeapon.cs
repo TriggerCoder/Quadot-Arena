@@ -121,7 +121,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 
 				if (CheckIfCanMark(SpaceState, collider, collision))
 				{
-					Node3D BulletMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
+					ModelController BulletMark = (ModelController)ThingsManager.thingsPrefabs[decalMark].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletMark);
 					RemoteTransform3D remoteTransform = new RemoteTransform3D();
 					collider.AddChild(remoteTransform);
@@ -131,6 +131,7 @@ public partial class MachineGunWeapon : PlayerWeapon
 					remoteTransform.SetForward(-normal);
 					remoteTransform.Rotate((remoteTransform.UpVector()).Normalized(), -Mathf.Pi * .5f);
 					remoteTransform.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+					BulletMark.AddDestroyNode(remoteTransform);
 				}
 			}
 		}

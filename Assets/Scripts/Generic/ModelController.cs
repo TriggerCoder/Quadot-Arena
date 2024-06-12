@@ -32,7 +32,8 @@ public partial class ModelController : Node3D
 	[Export]
 	public float destroyTimer = 0;
 
-	public List<MultiMeshData> multiMeshDataList = new List<MultiMeshData>();
+	private List<MultiMeshData> multiMeshDataList = new List<MultiMeshData>();
+	private List<Node3D> destroyNodes = new List<Node3D>();
 	private List<int> modelAnim = new List<int>();
 	private List<int> textureAnim = new List<int>();
 	private Dictionary<int, ShaderMaterial[]> materials = new Dictionary<int, ShaderMaterial[]>();
@@ -63,6 +64,12 @@ public partial class ModelController : Node3D
 
 	private Vector3 lastGlobalPosition = new Vector3(0, 0, 0);
 	private Basis	lastGlobalBasis = Basis.Identity;	
+
+	public void AddDestroyNode(Node3D node)
+	{
+		if (!destroyNodes.Contains(node))
+			destroyNodes.Add(node);
+	}
 
 	public override void _Ready()
 	{
@@ -127,6 +134,7 @@ public partial class ModelController : Node3D
 		modelCurrentFrame = 0;
 		if (destroyTimer != 0)
 			baseTime = destroyTimer;
+		ModelsManager.AddModel(this);
 	}
 	void AnimateModel(float deltaTime)
 	{
@@ -269,30 +277,45 @@ public partial class ModelController : Node3D
 		lastGlobalPosition = GlobalPosition;
 		lastGlobalBasis = GlobalBasis;	
 	}
-	public override void _ExitTree()
+
+	public override void _Notification(int what)
+	{
+		if (what == NotificationPredelete)
+			Destroy();
+	}
+	public void Destroy()
 	{
 		List<MultiMesh> updateMultiMesh = new List<MultiMesh>();
 		for (int i = 0; i < multiMeshDataList.Count; i++)
 		{
 			MultiMesh multiMesh = multiMeshDataList[i].multiMesh;
-			List<Node3D> multiMeshList;
-			if (Mesher.MultiMeshes.TryGetValue(multiMesh, out multiMeshList))
+			Dictionary<Node3D, int> multiMeshSet;
+			if (Mesher.MultiMeshes.TryGetValue(multiMesh, out multiMeshSet))
 			{
-				if (multiMeshList.Contains(multiMeshDataList[i].owner))
-					multiMeshList.Remove(multiMeshDataList[i].owner);
+				if (multiMeshSet.ContainsKey(multiMeshDataList[i].owner))
+					multiMeshSet.Remove(multiMeshDataList[i].owner);
 			}
 			if (!updateMultiMesh.Contains(multiMesh))
 				updateMultiMesh.Add(multiMesh);
 		}
+
+		//No need to update or detroy other nodes if changing map
+		if (GameManager.CurrentState != GameManager.FuncState.Start)
+			return;
+
 		foreach (MultiMesh multiMesh in updateMultiMesh)
 			Mesher.MultiMeshUpdateInstances(multiMesh);
 
-	}
-	public override void _Process(double delta)
-	{
-		if (GameManager.Paused)
-			return;
+		foreach (Node3D node in destroyNodes)
+		{
+			if (IsInstanceValid(node))
+				node.QueueFree();
+		}
 
+		ModelsManager.RemoveModel(this);
+	}
+	public void Process(float deltaTime)
+	{
 		switch (currentState)
 		{
 			default:
@@ -301,8 +324,6 @@ public partial class ModelController : Node3D
 				Start();
 			break;
 		}
-
-		float deltaTime = (float)delta;
 
 		AnimateModel(deltaTime);
 		AnimateTexture(deltaTime);

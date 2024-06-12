@@ -147,7 +147,6 @@ public partial class PlayerControls : InterpolatedNode3D
 	{
 		moveSpeed = runSpeed;
 		currentMoveType = MoveType.Run;
-		playerThing.CollisionLayer = playerInfo.playerLayer;
 	}
 
 	public void Init(int contollerNum)

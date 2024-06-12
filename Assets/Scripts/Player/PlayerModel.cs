@@ -1404,15 +1404,20 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		for (int i = 0; i < multiMeshDataList.Count; i++)
 		{
 			MultiMesh multiMesh = multiMeshDataList[i].multiMesh;
-			List<Node3D> multiMeshList;
-			if (Mesher.MultiMeshes.TryGetValue(multiMesh, out multiMeshList))
+			Dictionary<Node3D, int> multiMeshSet;
+			if (Mesher.MultiMeshes.TryGetValue(multiMesh, out multiMeshSet))
 			{
-				if (multiMeshList.Contains(multiMeshDataList[i].owner))
-					multiMeshList.Remove(multiMeshDataList[i].owner);
+				if (multiMeshSet.ContainsKey(multiMeshDataList[i].owner))
+					multiMeshSet.Remove(multiMeshDataList[i].owner);
 			}
 			if (!updateMultiMesh.Contains(multiMesh))
 				updateMultiMesh.Add(multiMesh);
 		}
+
+		//No need to update if changing map
+		if (GameManager.CurrentState != GameManager.FuncState.Start)
+			return;
+
 		foreach (MultiMesh multiMesh in updateMultiMesh)
 			Mesher.MultiMeshUpdateInstances(multiMesh);
 	}

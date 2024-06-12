@@ -148,7 +148,7 @@ public partial class Grenade : RigidBody3D
 			//Check if collider can be marked
 			if (CheckIfCanMark(SpaceState, Hit, Collision))
 			{
-				Node3D DecalMark = (Node3D)ThingsManager.thingsPrefabs[decalMark].Instantiate();
+				ModelController DecalMark = (ModelController)ThingsManager.thingsPrefabs[decalMark].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
 				RemoteTransform3D remoteTransform3D = new RemoteTransform3D();
 				Hit.AddChild(remoteTransform3D);
@@ -158,9 +158,10 @@ public partial class Grenade : RigidBody3D
 				remoteTransform3D.SetForward(-Normal);
 				remoteTransform3D.Rotate((remoteTransform3D.UpVector()).Normalized(), -Mathf.Pi * .5f);
 				remoteTransform3D.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+				DecalMark.AddDestroyNode(remoteTransform3D);
 				if (!string.IsNullOrEmpty(secondaryMark))
 				{
-					Node3D SecondMark = (Node3D)ThingsManager.thingsPrefabs[secondaryMark].Instantiate();
+					ModelController SecondMark = (ModelController)ThingsManager.thingsPrefabs[secondaryMark].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(SecondMark);
 					RemoteTransform3D remoteTransform = new RemoteTransform3D();
 					Hit.AddChild(remoteTransform);
@@ -170,6 +171,7 @@ public partial class Grenade : RigidBody3D
 					remoteTransform.SetForward(-Normal);
 					remoteTransform.Rotate((remoteTransform.UpVector()).Normalized(), -Mathf.Pi * .5f);
 					remoteTransform.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+					SecondMark.AddDestroyNode(remoteTransform);
 				}
 			}
 		}

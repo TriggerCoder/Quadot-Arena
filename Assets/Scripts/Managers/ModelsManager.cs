@@ -4,6 +4,26 @@ using System.Collections.Generic;
 public static class ModelsManager
 {
 	public static Dictionary<string, MD3> Models = new Dictionary<string, MD3>();
+	public static HashSet<ModelController> ActiveModels = new HashSet<ModelController>();
+
+	public static void ClearModels()
+	{
+		ActiveModels = new HashSet<ModelController>();
+	}
+	public static void AddModel(ModelController controller)
+	{
+		if (ActiveModels.Contains(controller))
+			return;
+		ActiveModels.Add(controller);
+	}
+
+	public static void RemoveModel(ModelController controller)
+	{
+		if (ActiveModels.Contains(controller))
+			ActiveModels.Remove(controller);
+	}
+
+
 	public static void CacheModel(string modelName, bool forceSkinAlpha = false)
 	{
 		if (Models.ContainsKey(modelName))
@@ -29,5 +49,13 @@ public static class ModelsManager
 		Models.Add(modelName, model);
 		return model;
 	}
+
+	public static void FrameProcessModels(float deltaTime)
+	{
+		foreach (var model in ActiveModels)
+			model.Process(deltaTime);
+
+	}
+
 }
 

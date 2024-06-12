@@ -25,8 +25,8 @@ public static class Mesher
 
 	public const float APROX_ERROR = 0.001f;
 
-	public const int LOW_USE_MULTIMESHES = 128;
-	public const int HIGH_USE_MULTIMESHES = 512;
+	public const int LOW_USE_MULTIMESHES = 256;
+	public const int HIGH_USE_MULTIMESHES = 1024;
 
 	public const uint MaskSolid = ContentFlags.Solid;
 	public const uint MaskPlayerSolid = ContentFlags.Solid | ContentFlags.PlayerClip | ContentFlags.Body;
@@ -38,7 +38,7 @@ public static class Mesher
 	public const uint MaskTransparent = SurfaceFlags.NonSolid | SurfaceFlags.Sky;
 	public const uint NoMarks = SurfaceFlags.NoImpact | SurfaceFlags.NoMarks;
 
-	public static Dictionary<MultiMesh, List<Node3D>> MultiMeshes = new Dictionary<MultiMesh, List<Node3D>>();
+	public static Dictionary<MultiMesh, Dictionary<Node3D, int>> MultiMeshes = new Dictionary<MultiMesh, Dictionary<Node3D, int>>();
 	public static Dictionary<MultiMesh, MultiMeshInstance3D> MultiMeshesInstances = new Dictionary<MultiMesh, MultiMeshInstance3D>();
 	public static void ClearMesherCache()
 	{
@@ -793,8 +793,8 @@ public static class Mesher
 
 				if (!MultiMeshes.ContainsKey(multiMesh))
 				{
-					List<Node3D> list = new List<Node3D> ();
-					MultiMeshes.Add(multiMesh, list);
+					Dictionary<Node3D, int> Set = new Dictionary<Node3D, int>();
+					MultiMeshes.Add(multiMesh, Set);
 				}
 
 				if (useCommon && !currentTransparent)
@@ -922,8 +922,8 @@ public static class Mesher
 
 					if (!MultiMeshes.ContainsKey(multiMesh))
 					{
-						List<Node3D> list = new List<Node3D>();
-						MultiMeshes.Add(multiMesh, list);
+						Dictionary<Node3D, int> Set = new Dictionary<Node3D, int>();
+						MultiMeshes.Add(multiMesh, Set);
 					}
 
 					if (useCommon && !currentTransparent)
@@ -1117,8 +1117,8 @@ public static class Mesher
 				frameSurfaces.readySurfaces.Add(surfaceData);
 				if (!MultiMeshes.ContainsKey(multiMesh))
 				{
-					List<Node3D> list = new List<Node3D>();
-					MultiMeshes.Add(multiMesh, list);
+					Dictionary<Node3D, int> Set = new Dictionary<Node3D, int>();
+					MultiMeshes.Add(multiMesh, Set);
 				}
 
 				md3Model.data[model.meshes[i].meshNum].isTransparent = useTransparent;
@@ -1738,20 +1738,19 @@ public static class Mesher
 
 	public static void AddNodeToMultiMeshes(MultiMesh multiMesh, Node3D owner)
 	{
-		List<Node3D> multiMeshList;
+		Dictionary<Node3D, int> multiMeshSet;
 		int instanceNum;
-		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshList))
+		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshSet))
 		{
-			if (multiMeshList.Contains(owner))
+			if (multiMeshSet.ContainsKey(owner))
 				return;
 
-			instanceNum = multiMeshList.Count;
+			instanceNum = multiMeshSet.Count;
 			int threshold = (multiMesh.InstanceCount >> 1);
 			if (instanceNum > threshold)
 			{
-				for (int i = 0; i < multiMeshList.Count; i++)
+				foreach (Node3D node3D in multiMeshSet.Keys)
 				{
-					Node3D node3D = multiMeshList[i];
 					if (node3D.HasMeta("destroying"))
 						continue;
 
@@ -1792,7 +1791,7 @@ public static class Mesher
 				}
 			}
 
-			multiMeshList.Add(owner);
+			multiMeshSet.Add(owner, instanceNum);
 			if (multiMesh.UseColors)
 				multiMesh.SetInstanceColor(instanceNum, Colors.Black);
 			multiMesh.SetInstanceTransform(instanceNum, owner.GlobalTransform);
@@ -1801,13 +1800,13 @@ public static class Mesher
 	}
 	public static void UpdateInstanceMultiMesh(MultiMesh multiMesh, Node3D owner)
 	{
-		List<Node3D> multiMeshList;
-		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshList))
+		Dictionary<Node3D, int> multiMeshSet;
+		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshSet))
 		{
-			if (!multiMeshList.Contains(owner))
+			int index;
+			if (!multiMeshSet.TryGetValue(owner, out index))
 				return;
 
-			int index = multiMeshList.IndexOf(owner);
 			if (owner.IsVisibleInTree())
 				multiMesh.SetInstanceTransform(index, owner.GlobalTransform);
 			else //Move it out of the map
@@ -1819,13 +1818,13 @@ public static class Mesher
 	}
 	public static void UpdateInstanceMultiMesh(MultiMesh multiMesh, Node3D owner, Color color)
 	{
-		List<Node3D> multiMeshList;
-		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshList))
+		Dictionary<Node3D, int> multiMeshSet;
+		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshSet))
 		{
-			if (!multiMeshList.Contains(owner))
+			int index; 
+			if (!multiMeshSet.TryGetValue(owner, out index))
 				return;
 
-			int index = multiMeshList.IndexOf(owner);
 			multiMesh.SetInstanceColor(index, color);
 			if (owner.IsVisibleInTree())
 				multiMesh.SetInstanceTransform(index, owner.GlobalTransform);
@@ -1838,13 +1837,15 @@ public static class Mesher
 	}
 	public static void MultiMeshUpdateInstances(MultiMesh multiMesh)
 	{
-		List<Node3D> multiMeshList;
-		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshList))
+		Dictionary<Node3D, int> multiMeshSet;
+		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshSet))
 		{
-			multiMesh.VisibleInstanceCount = multiMeshList.Count;
-			for (int i = 0; i < multiMeshList.Count; i++)
+			multiMesh.VisibleInstanceCount = multiMeshSet.Count;
+			int i = 0;
+			foreach (var instance in multiMeshSet)
 			{
-				Node3D node = multiMeshList[i];
+				Node3D node = instance.Key;
+				multiMeshSet[node] = i;
 				if (node.IsVisibleInTree())
 					multiMesh.SetInstanceTransform(i, node.GlobalTransform);
 				else
@@ -1852,6 +1853,7 @@ public static class Mesher
 					Transform3D min = new Transform3D(node.Basis, MapLoader.mapMinCoord * 2f);
 					multiMesh.SetInstanceTransform(i, min);
 				}
+				i++;
 			}
 		}
 	}

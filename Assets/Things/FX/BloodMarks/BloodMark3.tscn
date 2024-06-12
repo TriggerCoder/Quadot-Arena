@@ -10,4 +10,4 @@ shaderName = "RES/ASSETS/TEXTURES/BLOOD/BLOOD3"
 useLowCountMultiMesh = false
 alphaFade = true
 destroyType = 1
-destroyTimer = 200.0
+destroyTimer = 300.0

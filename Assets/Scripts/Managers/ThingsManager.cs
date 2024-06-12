@@ -162,6 +162,13 @@ public partial class ThingsManager : Node
 		BFGTracers.SetTracers();
 	}
 
+	public override void _Process(double delta)
+	{
+		if (GameManager.Paused)
+			return;
+
+		ModelsManager.FrameProcessModels((float)delta);
+	}
 	public static void AddGibsShapes(string name, ConvexPolygonShape3D shape3D)
 	{
 		gibsShapes[name] = shape3D;
@@ -1495,8 +1502,6 @@ public static class BFGTracers
 			hx[i] = HaltonSequence(i, 2);
 			hy[i] = HaltonSequence(i, 3);
 		}
-
-
 	}
 }
 
