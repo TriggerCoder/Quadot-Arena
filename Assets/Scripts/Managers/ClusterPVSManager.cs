@@ -1,7 +1,6 @@
 using Godot;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+
 public partial class ClusterPVSManager : Node
 {
 	public static ClusterPVSManager Instance;
@@ -16,17 +15,12 @@ public partial class ClusterPVSManager : Node
 	public override void _Ready()
 	{
 		Instance = this;
-		RenderingServer.FramePreDraw += () => OnPreRender();
 		RenderingServer.FramePostDraw += () => OnPostRender();
-	}
-	public void OnPreRender()
-	{
-//		GameManager.Print("PreRender");
 	}
 	public void OnPostRender()
 	{
-		AllClusters.AsParallel().ForAll(mesh => { mesh.Layers = (1 << GameManager.NotVisibleLayer); });
-//		GameManager.Print("PostRender");
+		for (int i = 0; i < AllClusters.Count; i++) 
+			AllClusters[i].Layers = (1 << GameManager.NotVisibleLayer);
 	}
 	public void RegisterClusterAndSurface(GeometryInstance3D cluster, QSurface surface)
 	{
@@ -44,10 +38,7 @@ public partial class ClusterPVSManager : Node
 	{
 		GeometryInstance3D cluster = SurfaceToCluster[surface];
 		if (cluster == null)
-		{
-//			GameManager.Print("Cluster not found for surface: " + surface);
 			return;
-		}
 		cluster.Layers |= layer;
 	}
 	private static int FindCurrentLeaf(Vector3 currentPos)

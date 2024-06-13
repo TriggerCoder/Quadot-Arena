@@ -118,10 +118,6 @@ public partial class PlayerInfo : Node3D
 			if (Weapon[i])
 				playerPostProcessing.playerHUD.AddWeapon(i);
 		}
-		//		playerControls.SwapToBestWeapon();
-
-		//		playerHUD.HUDUpdateHealthNum();
-		//		playerHUD.HUDUpdateArmorNum();
 	}
 	public override void _Process(double delta)
 	{
@@ -129,8 +125,9 @@ public partial class PlayerInfo : Node3D
 			return;
 
 		ClusterPVSManager.CheckPVS(viewLayer, playerCamera.CurrentCamera.GlobalPosition);
+
 		//if camera is thirdperson, need to make sure at all that it can see 
-		if (playerCamera.currentThirdPerson)
-			ClusterPVSManager.CheckPVS(viewLayer, GlobalPosition);
+//		if (playerCamera.currentThirdPerson)
+//			ClusterPVSManager.CheckPVS(viewLayer, GlobalPosition);
 	}
 }

@@ -235,7 +235,18 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public void Damage(int amount, DamageType damageType = DamageType.Generic, Node3D attacker = null)
 	{
 		if (!ready)
-			return;
+		{
+			if (damageType != DamageType.Telefrag)
+				return;
+
+			if (currentState != GameManager.FuncState.Ready)
+				return;
+
+			//If damageType is Telefrag, and player hasn't spawn yet then we need to move this player, otherwise both will spawn to the same place
+			//this could happen just after loading a new map
+			SpawnerManager.SpawnToLocation(this);
+		}
+
 
 		if (Dead)
 			return;
