@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://brww1kwpkmx6a"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="1_2hiw4"]
+
+[node name="Blood" type="Sprite3D"]
+layers = 255
+sorting_offset = -3000.0
+cast_shadow = 0
+modulate = Color(0.627451, 0.117647, 0.196078, 1)
+billboard = 1
+transparent = false
+texture_filter = 1
+script = ExtResource("1_2hiw4")
+spriteName = "bloodExplosion"
+spriteRadius = 48
+destroyTimer = 0.5

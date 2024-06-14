@@ -128,6 +128,7 @@ public partial class GameManager : Node
 	public float terminalVelocity = 16f;
 	public float barrierVelocity = 1024f;
 	public float playerHeight = 1.2f;
+	public int playerMass = 80;
 	public int gibHealth = -40;
 
 	public float PlayerDamageReceive = 1f;
@@ -277,7 +278,6 @@ public partial class GameManager : Node
 			mapLeftTime = timeLimit * 60;
 		}
 		currentState = FuncState.Ready;
-		return;
 	}
 
 	public override void _Input(InputEvent @event)

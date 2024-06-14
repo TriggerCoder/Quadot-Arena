@@ -52,6 +52,8 @@ public partial class ThingsManager : Node
 	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_relay", "target_delay", "target_give", "target_position", "info_notnull", "misc_teleporter_dest" };
 	public static List<Portal> portalsOnMap = new List<Portal>();
 	public static readonly string ItemDrop = "ItemDrop";
+	public static readonly string Blood = "Blood";
+
 	public override void _Ready()
 	{
 		foreach (var thing in _fxPrefabs)

@@ -222,13 +222,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		if (!ready)
 			return;
 
-		float length = force / 80;
-
-		//Gravity will be the only force down
+		float length = force / GameManager.Instance.playerMass;
 		Vector3 impulse = direction * length;
-		float magnitude = impulse.Length();
-		impulse.Y = 0;
-		impulse = impulse.Normalized() * magnitude;
 
 		playerControls.impulseVector += impulse;
 	}

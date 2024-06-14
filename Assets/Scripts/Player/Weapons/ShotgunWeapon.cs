@@ -100,22 +100,33 @@ public partial class ShotgunWeapon : PlayerWeapon
 			if (hit.Count > 0)
 			{
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
+				Vector3 collision = (Vector3)hit["position"];
+				Vector3 normal = (Vector3)hit["normal"];
+
 				if (collider is Damageable damageable)
 				{
 					if (hasQuad)
 						damageable.Damage(GD.RandRange(DamageMin * GameManager.Instance.QuadMul, DamageMax * GameManager.Instance.QuadMul), DamageType.Pellet, playerInfo.playerThing);
 					else
 						damageable.Damage(GD.RandRange(DamageMin, DamageMax), DamageType.Pellet, playerInfo.playerThing);
+
+					if (damageable.Bleed)
+					{
+						Node3D Blood = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.Blood].Instantiate();
+						GameManager.Instance.TemporaryObjectsHolder.AddChild(Blood);
+						Blood.GlobalPosition = collision + (normal * .05f);
+					}
+				}
+				else
+				{
+					Node3D BulletHit = (Node3D)ThingsManager.thingsPrefabs[onDeathSpawn].Instantiate();
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletHit);
+					BulletHit.Position = collision + (normal * .2f);
+					BulletHit.SetForward(normal);
+					BulletHit.Rotate(BulletHit.UpVector(), -Mathf.Pi * .5f);
+					BulletHit.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}
 
-				Vector3 collision = (Vector3)hit["position"];
-				Vector3 normal = (Vector3)hit["normal"];
-				Node3D BulletHit = (Node3D)ThingsManager.thingsPrefabs[onDeathSpawn].Instantiate();
-				GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletHit);
-				BulletHit.Position = collision + (normal * .2f);
-				BulletHit.SetForward(normal);
-				BulletHit.Rotate(BulletHit.UpVector(), -Mathf.Pi * .5f);
-				BulletHit.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				if (Sounds.Length > 3)
 					SoundManager.Create3DSound(collision, Sounds[GD.RandRange(3, Sounds.Length - 1)]);
 

@@ -27,6 +27,9 @@ public static class QShaderManager
 				ReadShaderData(rawShader);
 			}
 		}
+
+		//Process extra shaders
+		MaterialManager.Instance.AddExtraShaders();
 	}
 
 	public static ShaderMaterial GetFog(string shaderName, float height)
@@ -478,6 +481,11 @@ public static class QShaderManager
 				else
 					code += "\temission = defaultEmission;\n";
 			}
+
+			//FOG gets removed from sprites
+			if ((MaterialManager.HasBillBoard.Contains(qShader.Name)) && (qShader.qShaderGlobal.sort == QShaderGlobal.SortType.Additive))
+				code += "\talbedo -= FOG.rgb;\n";
+
 			code += "\tALBEDO = albedo;\n";
 			code += "\tEMISSION = emission;\n";
 		}
@@ -490,8 +498,6 @@ public static class QShaderManager
 
 		if (alphaIsTransparent)
 			code += "\tALPHA = color.a;\n";
-//		else if (multiPassList != null)
-//			code += "\tALPHA = 1.0;\n";
 		code += "}\n\n";
 
 //		if (shaderName.Contains("RAILGUN"))
@@ -1217,7 +1223,7 @@ public static class QShaderManager
 							{
 								if (FogShaders.ContainsKey(qShaderData.Name))
 								{
-									GameManager.Print("Fog Shader already on the list: " + qShaderData.Name + " md5: " + qShaderData.Name.Md5Text(), GameManager.PrintType.Info);
+									GameManager.Print("Fog Shader already on the list: " + qShaderData.Name, GameManager.PrintType.Info);
 									FogShaders[qShaderData.Name] = qShaderData;
 								}
 								else
@@ -1228,7 +1234,7 @@ public static class QShaderManager
 							{
 								if (QShaders.ContainsKey(qShaderData.Name))
 								{
-									GameManager.Print("Shader already on the list: " + qShaderData.Name + " md5: " + qShaderData.Name.Md5Text(), GameManager.PrintType.Info);
+									GameManager.Print("Shader already on the list: " + qShaderData.Name, GameManager.PrintType.Info);
 									QShaders[qShaderData.Name] = qShaderData;
 								}
 								else

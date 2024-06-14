@@ -175,7 +175,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		CollisionLayer = (1 << GameManager.RagdollLayer);
 		CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.InvisibleBlockerLayer));
 		Freeze = true;
-		Mass = 80;
+		Mass = GameManager.Instance.playerMass;
 		GravityScale = 2.5f;
 
 		CenterOfMassMode = CenterOfMassModeEnum.Custom;
@@ -692,8 +692,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	}
 	public void Impulse(Vector3 direction, float force)
 	{
-		if (!ragDoll)
-			return;
+
 	}
 	public void TurnLegsOnJump(float sideMove, float deltaTime)
 	{

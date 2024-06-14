@@ -83,6 +83,11 @@ public partial class MaterialManager : Node
 		foreach (Resource res in _extraTextures)
 			TextureLoader.LoadTexturesFromResource(res);
 
+		TextureLoader.CreateWhiteImage();
+	}
+
+	public void AddExtraShaders()
+	{
 		foreach (string FileName in _extraQShaders)
 		{
 			var file = FileAccess.Open(FileName, FileAccess.ModeFlags.Read);
@@ -92,7 +97,6 @@ public partial class MaterialManager : Node
 				QShaderManager.ReadShaderData(content);
 			}
 		}
-		TextureLoader.CreateWhiteImage();
 	}
 
 	public static void SetAmbient()

@@ -138,6 +138,9 @@ public partial class RailgunWeapon : PlayerWeapon
 			if (hit.Count > 0)
 			{
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
+				Vector3 collision = (Vector3)hit["position"];
+				Vector3 normal = (Vector3)hit["normal"];
+
 				if (collider is Damageable damageable)
 				{
 					Vector3 Distance = (collider.GlobalPosition - global.Origin);
@@ -149,22 +152,29 @@ public partial class RailgunWeapon : PlayerWeapon
 						Damage *= GameManager.Instance.QuadMul;
 					damageable.Damage(Damage, DamageType.Rail, playerInfo.playerThing);
 					damageable.Impulse(impulseDir, pushForce);
+
+					if (damageable.Bleed)
+					{
+						Node3D Blood = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.Blood].Instantiate();
+						GameManager.Instance.TemporaryObjectsHolder.AddChild(Blood);
+						Blood.GlobalPosition = collision + (normal * .05f);
+					}
+				}
+				else
+				{
+					Node3D RailHit = (Node3D)ThingsManager.thingsPrefabs[explosionFx].Instantiate();
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(RailHit);
+					RailHit.Position = collision + (normal * .1f);
+					RailHit.SetForward(-normal);
+					RailHit.Rotate((RailHit.UpVector()).Normalized(), -Mathf.Pi * .5f);
+					RailHit.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}
 
-				Vector3 collision = (Vector3)hit["position"];
-				Vector3 normal = (Vector3)hit["normal"];
 				RailTrail railTrail = (RailTrail)ThingsManager.thingsPrefabs[onDeathSpawn].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(railTrail);
 				railTrail.Init(muzzleObject.GlobalPosition, collision, modulate);
 				railTrail.Position = muzzleObject.GlobalPosition.Lerp(collision, 0.5f);
 				railTrail.LookAt(collision);
-
-				Node3D RailHit = (Node3D)ThingsManager.thingsPrefabs[explosionFx].Instantiate();
-				GameManager.Instance.TemporaryObjectsHolder.AddChild(RailHit);
-				RailHit.Position = collision + (normal * .1f);
-				RailHit.SetForward(-normal);
-				RailHit.Rotate((RailHit.UpVector()).Normalized(), -Mathf.Pi * .5f);
-				RailHit.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 
 				if (CheckIfCanMark(SpaceState, collider, collision))
 				{

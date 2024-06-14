@@ -182,16 +182,23 @@ public partial class LightningGunWeapon : PlayerWeapon
 			if (hit.Count > 0)
 			{
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
+				Vector3 collision = (Vector3)hit["position"];
+				Vector3 normal = (Vector3)hit["normal"];
+
 				if (collider is Damageable damageable)
 				{
 					if (hasQuad)
 						damageable.Damage(GD.RandRange(DamageMin * GameManager.Instance.QuadMul, DamageMax * GameManager.Instance.QuadMul), DamageType.Lightning, playerInfo.playerThing);
 					else
 						damageable.Damage(GD.RandRange(DamageMin, DamageMax), DamageType.Lightning, playerInfo.playerThing);
-				}
 
-				Vector3 collision = (Vector3)hit["position"];
-				Vector3 normal = (Vector3)hit["normal"];
+					if (damageable.Bleed)
+					{
+						Node3D Blood = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.Blood].Instantiate();
+						GameManager.Instance.TemporaryObjectsHolder.AddChild(Blood);
+						Blood.GlobalPosition = collision + (normal * .05f);
+					}
+				}
 
 				boltOrigin.LookAt(collision);
 				lightningBolt.SetBoltMesh(boltOrigin.GlobalPosition, collision);

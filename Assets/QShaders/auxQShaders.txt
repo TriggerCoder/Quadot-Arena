@@ -12,3 +12,25 @@ bfgTracerExplosion
 		blendfunc add
 	}
 }
+
+bloodTrail
+{
+	cull disable
+	sort additive
+	{
+		clampmap gfx/damage/blood_spurt.tga
+		rgbGen		vertex
+		blendfunc GL_SRC_ALPHA GL_ZERO
+	}
+}
+
+bloodExplosion
+{
+	cull disable
+	sort additive
+	{
+		animmap 5 models/weaphits/blood201.tga models/weaphits/blood202.tga models/weaphits/blood203.tga models/weaphits/blood204.tga models/weaphits/blood205.tga
+		rgbGen		vertex
+		blendfunc GL_SRC_ALPHA GL_ZERO
+	}
+}
