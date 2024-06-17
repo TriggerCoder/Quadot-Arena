@@ -53,7 +53,7 @@ public partial class ThingsManager : Node
 	public static List<Portal> portalsOnMap = new List<Portal>();
 	public static readonly string ItemDrop = "ItemDrop";
 	public static readonly string Blood = "Blood";
-
+	public static readonly string BloodTrail = "BloodTrail";
 	public override void _Ready()
 	{
 		foreach (var thing in _fxPrefabs)
@@ -169,7 +169,10 @@ public partial class ThingsManager : Node
 		if (GameManager.Paused)
 			return;
 
-		ModelsManager.FrameProcessModels((float)delta);
+		float deltaTime = (float)delta;
+
+		ModelsManager.FrameProcessModels(deltaTime);
+		Mesher.ProcessSprites(deltaTime);
 	}
 	public static void AddGibsShapes(string name, ConvexPolygonShape3D shape3D)
 	{

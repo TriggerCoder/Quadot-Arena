@@ -1,17 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://duayunnb324b7"]
+[gd_scene load_steps=5 format=3 uid="uid://duayunnb324b7"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="1_87sbg"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteController.cs" id="1_6qbiv"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SpriteData.cs" id="2_6323t"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/LightFade.cs" id="3_1gxkv"]
 
-[node name="RailMark" type="Node3D"]
-transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
-script = ExtResource("1_87sbg")
-modelName = "weaphits/boom01"
-shaderName = "GFX/DAMAGE/BURN_MED_MRK"
-useLowCountMultiMesh = false
+[sub_resource type="Resource" id="Resource_0xebx"]
+resource_local_to_scene = true
+script = ExtResource("2_6323t")
 alphaFade = true
 destroyType = 1
 destroyTimer = 200.0
+Modulate = Color(0, 0, 0, 1)
+
+[node name="RailMark" type="Node3D"]
+script = ExtResource("1_6qbiv")
+spriteName = "gfx/damage/burn_med_mrk"
+spriteRadius = 1.8
+spriteData = SubResource("Resource_0xebx")
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 layers = 255

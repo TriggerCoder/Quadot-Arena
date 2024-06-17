@@ -1,0 +1,45 @@
+[gd_scene load_steps=7 format=3 uid="uid://d3jcvshatpij6"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/BloodTrail.cs" id="1_1scif"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="2_abcff"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteController.cs" id="3_aiv0e"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SpriteData.cs" id="4_k526t"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_2d63j"]
+radius = 0.2
+
+[sub_resource type="Resource" id="Resource_ko1dw"]
+resource_local_to_scene = true
+script = ExtResource("4_k526t")
+alphaFade = false
+destroyType = 1
+destroyTimer = 1.5
+Modulate = Color(0.627451, 0.117647, 0.196078, 1)
+
+[node name="BloodTrail" type="RigidBody3D"]
+collision_layer = 2
+collision_mask = 12
+input_ray_pickable = false
+gravity_scale = 2.5
+continuous_cd = true
+max_contacts_reported = 1
+contact_monitor = true
+script = ExtResource("1_1scif")
+destroyTimer = 1.5
+
+[node name="SourceBlood" type="Node3D" parent="."]
+
+[node name="Sphere" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_2d63j")
+
+[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source")]
+script = ExtResource("2_abcff")
+Source = NodePath("../SourceBlood")
+
+[node name="BloodDrop" type="Node3D" parent="InterpolatedTransform"]
+script = ExtResource("3_aiv0e")
+spriteName = "bloodTrail"
+spriteRadius = 0.5
+billboard = 1
+useMultiMesh = 2
+spriteData = SubResource("Resource_ko1dw")

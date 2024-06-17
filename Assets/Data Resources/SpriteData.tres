@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://bg5btv1gtnen3"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SpriteData.cs" id="1_yh2b4"]
+
+[resource]
+script = ExtResource("1_yh2b4")
+alphaFade = false
+destroyType = 0
+destroyTimer = 0.0
+Modulate = Color(0, 0, 0, 1)

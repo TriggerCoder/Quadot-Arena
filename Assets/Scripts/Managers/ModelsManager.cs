@@ -1,9 +1,11 @@
 using Godot;
 using System.Collections;
 using System.Collections.Generic;
+
 public static class ModelsManager
 {
 	public static Dictionary<string, MD3> Models = new Dictionary<string, MD3>();
+	public static Dictionary<string, MeshProcessed.dataMeshes> Sprites = new Dictionary<string, MeshProcessed.dataMeshes>();
 	public static HashSet<ModelController> ActiveModels = new HashSet<ModelController>();
 
 	public static void ClearModels()

@@ -162,11 +162,10 @@ public partial class RailgunWeapon : PlayerWeapon
 				}
 				else
 				{
-					Node3D RailHit = (Node3D)ThingsManager.thingsPrefabs[explosionFx].Instantiate();
+					SpriteController RailHit = (SpriteController)ThingsManager.thingsPrefabs[explosionFx].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(RailHit);
 					RailHit.Position = collision + (normal * .1f);
-					RailHit.SetForward(-normal);
-					RailHit.Rotate((RailHit.UpVector()).Normalized(), -Mathf.Pi * .5f);
+					RailHit.SetForward(normal);
 					RailHit.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 				}
 
@@ -178,17 +177,13 @@ public partial class RailgunWeapon : PlayerWeapon
 
 				if (CheckIfCanMark(SpaceState, collider, collision))
 				{
-					ModelController RailMark = (ModelController)ThingsManager.thingsPrefabs[decalMark].Instantiate();
+					SpriteController RailMark = (SpriteController)ThingsManager.thingsPrefabs[decalMark].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(RailMark);
-					RemoteTransform3D remoteTransform = new RemoteTransform3D();
-					collider.AddChild(remoteTransform);
-					remoteTransform.UpdateScale = false;
-					remoteTransform.RemotePath = RailMark.GetPath();
-					remoteTransform.GlobalPosition = collision + (normal * .05f);
-					remoteTransform.SetForward(-normal);
-					remoteTransform.Rotate((remoteTransform.UpVector()).Normalized(), -Mathf.Pi * .5f);
-					remoteTransform.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
-					RailMark.AddDestroyNode(remoteTransform);
+					RailMark.GlobalPosition = collision + (normal * .05f);
+					RailMark.SetForward(normal);
+					RailMark.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+					if (collider is Crusher)
+						RailMark.referenceNode = collider;
 					if (RailMark.GetChildCount() > 0)
 					{
 						Node child = RailMark.GetChild(0);

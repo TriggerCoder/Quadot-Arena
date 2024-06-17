@@ -1,9 +1,18 @@
-[gd_scene load_steps=5 format=3 uid="uid://c5tu2rku1v7om"]
+[gd_scene load_steps=7 format=3 uid="uid://c5tu2rku1v7om"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Projectile.cs" id="1_ikbab"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="2_usudf"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="3_85jl5"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteController.cs" id="4_8eear"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="4_nkpjw"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SpriteData.cs" id="5_v3q4n"]
+
+[sub_resource type="Resource" id="Resource_sc861"]
+resource_local_to_scene = true
+script = ExtResource("5_v3q4n")
+alphaFade = false
+destroyType = 0
+destroyTimer = 0.0
+Modulate = Color(0, 0, 0, 1)
 
 [node name="PlasmaProjectile" type="Node3D" node_paths=PackedStringArray("audioStream")]
 script = ExtResource("1_ikbab")
@@ -33,14 +42,12 @@ script = ExtResource("3_85jl5")
 Source = NodePath("../SourcePlasma")
 interpolationReset = NodePath("..")
 
-[node name="Plasma" type="Sprite3D" parent="InterpolatedTransform"]
-layers = 255
-cast_shadow = 0
-billboard = 1
-transparent = false
-script = ExtResource("2_usudf")
+[node name="Plasma" type="Node3D" parent="InterpolatedTransform" node_paths=PackedStringArray("referenceNode")]
+script = ExtResource("4_8eear")
 spriteName = "sprites/plasma1"
-spriteRadius = 16
+billboard = 1
+spriteData = SubResource("Resource_sc861")
+referenceNode = NodePath("..")
 
 [node name="OmniLight3D" type="OmniLight3D" parent="InterpolatedTransform"]
 layers = 255

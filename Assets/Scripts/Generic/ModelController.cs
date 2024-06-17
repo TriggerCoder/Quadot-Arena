@@ -1,5 +1,4 @@
 using Godot;
-using System.Collections;
 using System.Collections.Generic;
 
 public partial class ModelController : Node3D
@@ -22,7 +21,7 @@ public partial class ModelController : Node3D
 	public MD3 Model { get { return md3Model; } }
 	private MD3 md3Model = null;
 
-	private MD3GodotConverted model;
+	private MeshProcessed model;
 	[Export]
 	public float modelAnimationFPS = 0;
 	[Export]
@@ -243,7 +242,7 @@ public partial class ModelController : Node3D
 				{
 					MultiMeshData multiMeshData = new MultiMeshData();
 					multiMeshData.multiMesh = model.data[i].multiMesh;
-					Mesher.AddNodeToMultiMeshes(model.data[i].multiMesh, this);
+					Mesher.AddNodeToMultiMeshes(model.data[i].multiMesh, this, Modulate);
 					multiMeshData.owner = this;
 					multiMeshDataList.Add(multiMeshData);
 				}

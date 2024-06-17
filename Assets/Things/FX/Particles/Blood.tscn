@@ -1,16 +1,20 @@
-[gd_scene load_steps=2 format=3 uid="uid://brww1kwpkmx6a"]
+[gd_scene load_steps=4 format=3 uid="uid://brww1kwpkmx6a"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="1_2hiw4"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteController.cs" id="1_vly5r"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SpriteData.cs" id="2_g8yti"]
 
-[node name="Blood" type="Sprite3D"]
-layers = 255
-sorting_offset = -3000.0
-cast_shadow = 0
-modulate = Color(0.627451, 0.117647, 0.196078, 1)
-billboard = 1
-transparent = false
-texture_filter = 1
-script = ExtResource("1_2hiw4")
-spriteName = "bloodExplosion"
-spriteRadius = 48
+[sub_resource type="Resource" id="Resource_vl7gj"]
+resource_local_to_scene = true
+script = ExtResource("2_g8yti")
+alphaFade = false
+destroyType = 1
 destroyTimer = 0.5
+Modulate = Color(0.627451, 0.117647, 0.196078, 1)
+
+[node name="Blood" type="Node3D"]
+script = ExtResource("1_vly5r")
+spriteName = "bloodExplosion"
+spriteRadius = 0.5
+billboard = 1
+useMultiMesh = 0
+spriteData = SubResource("Resource_vl7gj")

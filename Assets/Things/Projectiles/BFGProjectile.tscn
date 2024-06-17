@@ -1,10 +1,19 @@
-[gd_scene load_steps=6 format=3 uid="uid://bdjag6sywuono"]
+[gd_scene load_steps=8 format=3 uid="uid://bdjag6sywuono"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Projectiles/BFGBall.cs" id="1_enh3n"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_50ltg"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="3_03le7"]
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="4_ge3es"]
 [ext_resource type="PackedScene" uid="uid://cawscbtf8jvhy" path="res://Assets/Things/Projectiles/LightningBolt.tscn" id="5_8uuw7"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteController.cs" id="5_tesid"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SpriteData.cs" id="6_ynxl8"]
+
+[sub_resource type="Resource" id="Resource_ml10e"]
+resource_local_to_scene = true
+script = ExtResource("6_ynxl8")
+alphaFade = false
+destroyType = 0
+destroyTimer = 0.0
+Modulate = Color(0, 0, 0, 1)
 
 [node name="BFGProjectile" type="Node3D" node_paths=PackedStringArray("boltOrigin", "audioStream")]
 script = ExtResource("1_enh3n")
@@ -36,14 +45,12 @@ script = ExtResource("3_03le7")
 Source = NodePath("../SourceBFG")
 interpolationReset = NodePath("..")
 
-[node name="BFGBall" type="Sprite3D" parent="InterpolatedTransform"]
-layers = 255
-cast_shadow = 0
-billboard = 1
-transparent = false
-script = ExtResource("4_ge3es")
+[node name="BFGBall" type="Node3D" parent="InterpolatedTransform" node_paths=PackedStringArray("referenceNode")]
+script = ExtResource("5_tesid")
 spriteName = "models/weaphits/bfg01"
-spriteRadius = 10
+billboard = 1
+spriteData = SubResource("Resource_ml10e")
+referenceNode = NodePath("..")
 
 [node name="OmniLight3D" type="OmniLight3D" parent="InterpolatedTransform"]
 layers = 255

@@ -32,10 +32,10 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	private int upper_tag_head = 0;
 	private int upper_tag_weapon = 0;
 
-	private MD3GodotConverted lowerModel;
-	private MD3GodotConverted upperModel;
-	private MD3GodotConverted headModel;
-	private MD3GodotConverted weaponModel;
+	private MeshProcessed lowerModel;
+	private MeshProcessed upperModel;
+	private MeshProcessed headModel;
+	private MeshProcessed weaponModel;
 
 	private ModelAnimation nextUpper;
 	private ModelAnimation nextLower;
@@ -587,7 +587,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		Quaternion currentRotation = lowerTorsoRotation * upperTorsoRotation;
 
 		upperBody.QueueFree();
-		MD3GodotConverted upperRagDoll = Mesher.GenerateModelFromMeshes(upper, meshToSkin, GameManager.AllPlayerViewMask, true, currentDeathUpper);
+		MeshProcessed upperRagDoll = Mesher.GenerateModelFromMeshes(upper, meshToSkin, GameManager.AllPlayerViewMask, true, currentDeathUpper);
 		upperRagDoll.node.Name = "upper_body";
 		playerModel.AddChild(upperRagDoll.node);
 		upperRagDoll.node.Quaternion = currentRotation;
@@ -598,7 +598,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		currentOffset = baseRotation * upperHeadOrigin;
 		currentRotation = baseRotation * upperHeadRotation;
 
-		MD3GodotConverted headRagDoll = Mesher.GenerateModelFromMeshes(head, meshToSkin, GameManager.AllPlayerViewMask, true);
+		MeshProcessed headRagDoll = Mesher.GenerateModelFromMeshes(head, meshToSkin, GameManager.AllPlayerViewMask, true);
 		headRagDoll.node.Name = "head";
 		playerModel.AddChild(headRagDoll.node);
 		headRagDoll.node.Position = currentOffset + lowerTorsoOrigin;
@@ -608,7 +608,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		currentOffset = upperTorsoRotation * upperTorsoOrigin;
 		lowerModel.node.QueueFree();
 
-		MD3GodotConverted lowerRagDoll = Mesher.GenerateModelFromMeshes(lower, meshToSkin, GameManager.AllPlayerViewMask, true, currentDeathLower);
+		MeshProcessed lowerRagDoll = Mesher.GenerateModelFromMeshes(lower, meshToSkin, GameManager.AllPlayerViewMask, true, currentDeathLower);
 		lowerRagDoll.node.Name = "lower_body";
 		lowerNode = lowerRagDoll.node;
 		lowerNode.Position = localOrigin + currentOffset;
@@ -1360,7 +1360,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		return true;
 	}
 
-	public void SetMultiMesh(MD3GodotConverted model, Node3D owner)
+	public void SetMultiMesh(MeshProcessed model, Node3D owner)
 	{
 		for (int i = 0; i < model.data.Length; i++)
 		{
@@ -1373,7 +1373,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			{
 				MultiMeshData multiMeshData = new MultiMeshData();
 				multiMeshData.multiMesh = model.data[i].multiMesh;
-				Mesher.AddNodeToMultiMeshes(model.data[i].multiMesh, owner);
+				Mesher.AddNodeToMultiMeshes(model.data[i].multiMesh, owner, Colors.Black);
 				multiMeshData.owner = owner;
 				multiMeshDataList.Add(multiMeshData);
 			}

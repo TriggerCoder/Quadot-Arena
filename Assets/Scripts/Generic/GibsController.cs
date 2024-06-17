@@ -12,6 +12,7 @@ public partial class GibsController : RigidBody3D
 
 	public string[] decalMark = { "BloodMark1", "BloodMark2", "BloodMark3", "BloodMark4", "BloodMark5", "BloodMark6", "BloodMark7", "BloodMark8" };
 	public AudioStreamWav[] Sounds = new AudioStreamWav[0];
+	public float spawnTime = .1f;
 
 	private Rid Sphere;
 	private PhysicsShapeQueryParameters3D SphereCast;
@@ -19,6 +20,9 @@ public partial class GibsController : RigidBody3D
 
 	private ConvexPolygonShape3D shape;
 	private GameManager.FuncState currentState = GameManager.FuncState.None;
+	private bool spawnBlood = true;
+	private bool leaveMark = true;
+	private float dropTime;
 	public override void _Ready()
 	{
 		Sounds = new AudioStreamWav[_sounds.Length];
@@ -29,6 +33,7 @@ public partial class GibsController : RigidBody3D
 			GenerateCollider(true);
 
 		Sphere = PhysicsServer3D.SphereShapeCreate();
+		PhysicsServer3D.ShapeSetData(Sphere, .5f);
 		SphereCast = new PhysicsShapeQueryParameters3D();
 		SphereCast.ShapeRid = Sphere;
 
@@ -36,12 +41,27 @@ public partial class GibsController : RigidBody3D
 		PointIntersect.CollideWithAreas = true;
 		PointIntersect.CollideWithBodies = false;
 		PointIntersect.CollisionMask = (1 << GameManager.FogLayer);
+		dropTime = spawnTime;
 	}
 
 	public override void _Process(double delta)
 	{
 		if (GameManager.Paused)
 			return;
+
+		if (spawnBlood)
+		{
+			float deltaTime = (float)delta;
+			if (dropTime > 0)
+				dropTime -= deltaTime;
+			else if (dropTime < 0)
+			{
+				Node3D Blood = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.BloodTrail].Instantiate();
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(Blood);
+				Blood.GlobalTransform = GlobalTransform;
+				dropTime += spawnTime;
+			}
+		}
 
 		if (currentState != GameManager.FuncState.None)
 			return;
@@ -56,14 +76,21 @@ public partial class GibsController : RigidBody3D
 		int soundIndex = 0;
 		float speed = LinearVelocity.LengthSquared();
 
-		CheckCollision();
+		if (leaveMark)
+			CheckCollision();
 
 		if (speed > 30)
 			soundIndex = GD.RandRange(0, 2);
 		else if (speed > 10)
+		{
 			soundIndex = GD.RandRange(0, 1);
+			spawnBlood = false;
+		}
 		else if (speed < 5)
+		{
+			leaveMark = false;
 			return;
+		}
 
 		if (Sounds.Length > soundIndex)
 		{
@@ -81,7 +108,6 @@ public partial class GibsController : RigidBody3D
 
 		//check for collision on surfaces
 		{
-			PhysicsServer3D.ShapeSetData(Sphere, .5f);
 			SphereCast.CollisionMask = (1 << GameManager.ColliderLayer);
 			SphereCast.Transform = GlobalTransform;
 			var hit = SpaceState.GetRestInfo(SphereCast);
@@ -98,17 +124,13 @@ public partial class GibsController : RigidBody3D
 			if (CheckIfCanMark(SpaceState, Hit, Collision) == false)
 				return;
 
-			ModelController DecalMark = (ModelController)ThingsManager.thingsPrefabs[decalMark[GD.RandRange(0, decalMark.Length - 1)]].Instantiate();
+			SpriteController DecalMark = (SpriteController)ThingsManager.thingsPrefabs[decalMark[GD.RandRange(0, decalMark.Length - 1)]].Instantiate();
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
-			RemoteTransform3D remoteTransform = new RemoteTransform3D();
-			Hit.AddChild(remoteTransform);
-			remoteTransform.UpdateScale = false;
-			remoteTransform.RemotePath = DecalMark.GetPath();
-			remoteTransform.GlobalPosition = Collision + (Normal * .03f);
-			remoteTransform.SetForward(-Normal);
-			remoteTransform.Rotate((remoteTransform.UpVector()).Normalized(), -Mathf.Pi * .5f);
-			remoteTransform.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
-			DecalMark.AddDestroyNode(remoteTransform);
+			DecalMark.GlobalPosition = Collision + (Normal * .03f);
+			DecalMark.SetForward(Normal);
+			DecalMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+			if (Hit is Crusher)
+				DecalMark.referenceNode = Hit;
 		}
 	}
 
@@ -140,7 +162,6 @@ public partial class GibsController : RigidBody3D
 			ThingsManager.AddGibsShapes(Name, shape);
 		}
 		collisionShape.Shape = shape;
-		SetPhysicsProcess(false);
 		currentState = GameManager.FuncState.Start;
 	}
 

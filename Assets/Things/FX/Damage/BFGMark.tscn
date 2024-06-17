@@ -1,17 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://4xiwipor4bi8"]
+[gd_scene load_steps=5 format=3 uid="uid://4xiwipor4bi8"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="1_piwg0"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteController.cs" id="1_t76xu"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SpriteData.cs" id="2_iuxb2"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/LightFade.cs" id="3_er0r3"]
 
-[node name="BFGMark" type="Node3D"]
-transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
-script = ExtResource("1_piwg0")
-modelName = "weaphits/boom01"
-shaderName = "GFX/DAMAGE/BURN_MED_MRK"
-useLowCountMultiMesh = false
+[sub_resource type="Resource" id="Resource_bigbr"]
+resource_local_to_scene = true
+script = ExtResource("2_iuxb2")
 alphaFade = true
 destroyType = 1
 destroyTimer = 200.0
+Modulate = Color(0, 0, 0, 1)
+
+[node name="BFGMark" type="Node3D"]
+script = ExtResource("1_t76xu")
+spriteName = "gfx/damage/burn_med_mrk"
+spriteRadius = 3.75
+spriteData = SubResource("Resource_bigbr")
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 layers = 255

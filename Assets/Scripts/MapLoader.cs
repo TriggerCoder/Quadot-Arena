@@ -340,6 +340,7 @@ public static class MapLoader
 		ModelsManager.ClearModels();
 		ClusterPVSManager.Instance.ResetClusterList(1);
 		Mesher.MultiMeshesInstances = new Dictionary<MultiMesh, MultiMeshInstance3D>();
+		Mesher.MultiMeshSprites = new Dictionary<MultiMesh, HashSet<SpriteData>>();
 		ThingsManager.UnloadThings();
 		MapMesh.QueueFree();
 		MapFlares.QueueFree();

@@ -1,13 +1,19 @@
-[gd_scene load_steps=2 format=3 uid="uid://p0c8bbt6juft"]
+[gd_scene load_steps=4 format=3 uid="uid://p0c8bbt6juft"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="1_v6csq"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteController.cs" id="1_1adrg"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SpriteData.cs" id="2_igi8i"]
 
-[node name="ShotMark" type="Node3D"]
-transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
-script = ExtResource("1_v6csq")
-modelName = "weaphits/boom01"
-shaderName = "GFX/DAMAGE/BULLET_MRK"
-useLowCountMultiMesh = false
+[sub_resource type="Resource" id="Resource_8ifdl"]
+resource_local_to_scene = true
+script = ExtResource("2_igi8i")
 alphaFade = true
 destroyType = 1
 destroyTimer = 200.0
+Modulate = Color(0, 0, 0, 1)
+
+[node name="ShotMark" type="Node3D"]
+script = ExtResource("1_1adrg")
+spriteName = "gfx/damage/bullet_mrk"
+spriteRadius = 0.75
+useMultiMesh = 2
+spriteData = SubResource("Resource_8ifdl")

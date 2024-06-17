@@ -1,17 +1,23 @@
-[gd_scene load_steps=3 format=3 uid="uid://ca1g7ktte6e7h"]
+[gd_scene load_steps=5 format=3 uid="uid://ca1g7ktte6e7h"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="1_ylrnw"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteController.cs" id="1_3630b"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SpriteData.cs" id="2_3p3to"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/LightFade.cs" id="3_ways6"]
 
-[node name="PlasmaMark" type="Node3D"]
-transform = Transform3D(0.75, 0, 0, 0, 0.75, 0, 0, 0, 0.75, 0, 0, 0)
-script = ExtResource("1_ylrnw")
-modelName = "weaphits/boom01"
-shaderName = "GFX/DAMAGE/PLASMA_MRK"
-useLowCountMultiMesh = false
+[sub_resource type="Resource" id="Resource_kjs51"]
+resource_local_to_scene = true
+script = ExtResource("2_3p3to")
 alphaFade = true
 destroyType = 1
 destroyTimer = 5.0
+Modulate = Color(0, 0, 0, 1)
+
+[node name="PlasmaMark" type="Node3D"]
+script = ExtResource("1_3630b")
+spriteName = "gfx/damage/plasma_mrk"
+spriteRadius = 5.5
+useMultiMesh = 2
+spriteData = SubResource("Resource_kjs51")
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 layers = 255

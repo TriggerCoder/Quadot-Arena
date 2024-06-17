@@ -3,7 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using ExtensionMethods;
 
-public class MD3GodotConverted
+public class MeshProcessed
 {
 	public Node3D	node;
 	public int numMeshes;

@@ -1,14 +1,20 @@
-[gd_scene load_steps=2 format=3 uid="uid://bn0i6jh0khogi"]
+[gd_scene load_steps=4 format=3 uid="uid://bn0i6jh0khogi"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteBillboard.cs" id="1_drdno"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteController.cs" id="1_48cae"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SpriteData.cs" id="2_72dus"]
 
-[node name="PlasmaExplosion" type="Sprite3D"]
-layers = 255
-sorting_offset = -3000.0
-cast_shadow = 0
-billboard = 1
-texture_filter = 1
-script = ExtResource("1_drdno")
-spriteName = "plasmaExplosion"
-spriteRadius = 16
+[sub_resource type="Resource" id="Resource_wtu2s"]
+resource_local_to_scene = true
+script = ExtResource("2_72dus")
+alphaFade = false
+destroyType = 1
 destroyTimer = 0.5
+Modulate = Color(0, 0, 0, 1)
+
+[node name="PlasmaExplosion" type="Node3D"]
+script = ExtResource("1_48cae")
+spriteName = "plasmaExplosion"
+spriteRadius = 1.5
+billboard = 1
+useMultiMesh = 0
+spriteData = SubResource("Resource_wtu2s")

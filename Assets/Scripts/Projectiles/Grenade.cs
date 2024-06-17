@@ -148,30 +148,22 @@ public partial class Grenade : RigidBody3D
 			//Check if collider can be marked
 			if (CheckIfCanMark(SpaceState, Hit, Collision))
 			{
-				ModelController DecalMark = (ModelController)ThingsManager.thingsPrefabs[decalMark].Instantiate();
+				SpriteController DecalMark = (SpriteController)ThingsManager.thingsPrefabs[decalMark].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
-				RemoteTransform3D remoteTransform3D = new RemoteTransform3D();
-				Hit.AddChild(remoteTransform3D);
-				remoteTransform3D.UpdateScale = false;
-				remoteTransform3D.RemotePath = DecalMark.GetPath();
-				remoteTransform3D.GlobalPosition = Collision + (Normal * .03f);
-				remoteTransform3D.SetForward(-Normal);
-				remoteTransform3D.Rotate((remoteTransform3D.UpVector()).Normalized(), -Mathf.Pi * .5f);
-				remoteTransform3D.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
-				DecalMark.AddDestroyNode(remoteTransform3D);
+				DecalMark.GlobalPosition = Collision + (Normal * .03f);
+				DecalMark.SetForward(Normal);
+				DecalMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+				if (Hit is Crusher)
+					DecalMark.referenceNode = Hit;
 				if (!string.IsNullOrEmpty(secondaryMark))
 				{
-					ModelController SecondMark = (ModelController)ThingsManager.thingsPrefabs[secondaryMark].Instantiate();
+					SpriteController SecondMark = (SpriteController)ThingsManager.thingsPrefabs[secondaryMark].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(SecondMark);
-					RemoteTransform3D remoteTransform = new RemoteTransform3D();
-					Hit.AddChild(remoteTransform);
-					remoteTransform.UpdateScale = false;
-					remoteTransform.RemotePath = SecondMark.GetPath();
-					remoteTransform.GlobalPosition = Collision + (Normal * .05f);
-					remoteTransform.SetForward(-Normal);
-					remoteTransform.Rotate((remoteTransform.UpVector()).Normalized(), -Mathf.Pi * .5f);
-					remoteTransform.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
-					SecondMark.AddDestroyNode(remoteTransform);
+					SecondMark.GlobalPosition = Collision + (Normal * .05f);
+					SecondMark.SetForward(Normal);
+					SecondMark.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+					if (Hit is Crusher)
+						SecondMark.referenceNode = Hit;
 				}
 			}
 		}

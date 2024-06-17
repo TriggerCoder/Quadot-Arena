@@ -1,13 +1,19 @@
-[gd_scene load_steps=2 format=3 uid="uid://buu4veqfyypvx"]
+[gd_scene load_steps=4 format=3 uid="uid://buu4veqfyypvx"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="1_mv0wv"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteController.cs" id="1_pnaac"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/SpriteData.cs" id="2_r08xd"]
 
-[node name="BloodMark8" type="Node3D"]
-transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
-script = ExtResource("1_mv0wv")
-modelName = "weaphits/boom01"
-shaderName = "RES/ASSETS/TEXTURES/BLOOD/BLOOD8"
-useLowCountMultiMesh = false
+[sub_resource type="Resource" id="Resource_kgoqr"]
+resource_local_to_scene = true
+script = ExtResource("2_r08xd")
 alphaFade = true
 destroyType = 1
 destroyTimer = 300.0
+Modulate = Color(0, 0, 0, 1)
+
+[node name="BloodMark8" type="Node3D"]
+script = ExtResource("1_pnaac")
+spriteName = "res/Assets/Textures/Blood/blood8"
+spriteRadius = 1.875
+useMultiMesh = 2
+spriteData = SubResource("Resource_kgoqr")

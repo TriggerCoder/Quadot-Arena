@@ -3,8 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using static MD3GodotConverted;
-
 public static class Mesher
 {
 	public static Node3D MapMeshes;
@@ -25,8 +23,8 @@ public static class Mesher
 
 	public const float APROX_ERROR = 0.001f;
 
-	public const int LOW_USE_MULTIMESHES = 256;
-	public const int HIGH_USE_MULTIMESHES = 1024;
+	public const int LOW_USE_MULTIMESHES = 512;
+	public const int HIGH_USE_MULTIMESHES = 2048;
 
 	public const uint MaskSolid = ContentFlags.Solid;
 	public const uint MaskPlayerSolid = ContentFlags.Solid | ContentFlags.PlayerClip | ContentFlags.Body;
@@ -39,7 +37,9 @@ public static class Mesher
 	public const uint NoMarks = SurfaceFlags.NoImpact | SurfaceFlags.NoMarks;
 
 	public static Dictionary<MultiMesh, Dictionary<Node3D, int>> MultiMeshes = new Dictionary<MultiMesh, Dictionary<Node3D, int>>();
+	public static Dictionary<MultiMesh, HashSet<SpriteData>> MultiMeshSprites = new Dictionary<MultiMesh, HashSet<SpriteData>>();
 	public static Dictionary<MultiMesh, MultiMeshInstance3D> MultiMeshesInstances = new Dictionary<MultiMesh, MultiMeshInstance3D>();
+	
 	public static void ClearMesherCache()
 	{
 		vertsCache = new List<Vector3>();
@@ -690,32 +690,25 @@ public static class Mesher
 
 		for (var i = 0; i < surfaces.Length; i++)
 		{
-			SpriteBillboard sprite = new SpriteBillboard();
+			SpriteController sprite = new SpriteController();
 			string Name = "BillBoard_Surfaces_" + surfaces[i].surfaceId;
 			holder.AddChild(sprite);
 			sprite.spriteName = textureName;
-			sprite.Billboard = BaseMaterial3D.BillboardModeEnum.Enabled;
-			if (addPVS)
-				sprite.Layers = GameManager.InvisibleMask;
-			else //As dynamic surface don't have bsp data, assign it to the always visible layer 
-				sprite.Layers = GameManager.AllPlayerViewMask;
+			sprite.billboard = BaseMaterial3D.BillboardModeEnum.Enabled;
 			sprite.Name = Name;
-			sprite.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
-			sprite.spriteRadius = 20;
+			sprite.spriteRadius = 1;
 			sprite.Position = surfaces[i].lm_Origin;
-			sprite.Modulate = new Color(surfaces[i].lm_vecs[0].X, surfaces[i].lm_vecs[0].Y, surfaces[i].lm_vecs[0].Z, 1f);
+			sprite.spriteData = new SpriteData();
+			sprite.spriteData.Modulate = new Color(surfaces[i].lm_vecs[0].X, surfaces[i].lm_vecs[0].Y, surfaces[i].lm_vecs[0].Z, 1f);
 			sprite.Init();
-			//PVS only add on Static Geometry, as it has BSP Nodes
-			if (addPVS)
-				ClusterPVSManager.Instance.RegisterClusterAndSurface(sprite, surfaces[i]);
 		}
 	}
 
-	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask, bool useCommon = false, int frame = 0)
+	public static MeshProcessed GenerateModelFromMeshes(MD3 model, Dictionary<string, string> meshToSkin, uint layer = GameManager.AllPlayerViewMask, bool useCommon = false, int frame = 0)
 	{
 		return GenerateModelFromMeshes(model, layer, true, true, null, false, useCommon, meshToSkin, true, false, false, true, frame);
 	}
-	public static MD3GodotConverted GenerateModelFromMeshes(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false, bool useLightVol = true, int frame = 0)
+	public static MeshProcessed GenerateModelFromMeshes(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false, bool useLightVol = true, int frame = 0)
 	{
 		if (model == null || model.meshes.Count == 0)
 		{
@@ -734,10 +727,10 @@ public static class Mesher
 		}
 
 		FrameSurfaces frameSurfaces = new FrameSurfaces();
-		MD3GodotConverted md3Model = new MD3GodotConverted();
+		MeshProcessed md3Model = new MeshProcessed();
 		md3Model.node = ownerObject;
 		md3Model.numMeshes = model.meshes.Count;
-		md3Model.data = new dataMeshes[md3Model.numMeshes];
+		md3Model.data = new MeshProcessed.dataMeshes[md3Model.numMeshes];
 
 		int n = 0;
 		if ((model.numFrames > 1) || (meshToSkin != null))
@@ -745,7 +738,7 @@ public static class Mesher
 			for(n = 0; n < model.meshes.Count; n++)
 			{
 				MD3Mesh modelMesh = model.meshes[n];
-				dataMeshes data = new dataMeshes();
+				MeshProcessed.dataMeshes data = new MeshProcessed.dataMeshes();
 				var surfaceArray = GenerateModelMesh(modelMesh, frame);
 				data.arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 
@@ -768,6 +761,7 @@ public static class Mesher
 					skinName = meshToSkin[modelMesh.name];
 				bool currentTransparent = forceSkinAlpha;
 				ShaderMaterial material = MaterialManager.GetMaterials(skinName, -1, ref currentTransparent);
+				data.isTransparent = currentTransparent;
 				data.arrMesh.SurfaceSetMaterial(0, material);
 				data.meshDataTool.CreateFromSurface(data.arrMesh, 0);
 				md3Model.data[modelMesh.meshNum] = data;
@@ -876,7 +870,7 @@ public static class Mesher
 						Name += meshes[i].name;
 					}
 
-					dataMeshes data = new dataMeshes();
+					MeshProcessed.dataMeshes data = new MeshProcessed.dataMeshes();
 					var surfaceArray = FinalizeModelMesh();
 					data.arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 
@@ -898,6 +892,7 @@ public static class Mesher
 					for (int i = 0; i < meshes.Length; i++)
 						md3Model.data[meshes[i].meshNum] = data;
 
+					data.isTransparent = currentTransparent;
 					data.arrMesh.SurfaceSetMaterial(0, material);
 					data.meshDataTool.CreateFromSurface(data.arrMesh, 0);
 					frameSurfaces.readySurfaceArray.Add(surfaceArray);
@@ -985,7 +980,7 @@ public static class Mesher
 		return md3Model;
 	}
 	
-	public static MD3GodotConverted FillModelFromProcessedData(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool forceSkinAlpha = false, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false, bool useLightVol = true, int frame = 0)
+	public static MeshProcessed FillModelFromProcessedData(MD3 model, uint layer, bool receiveShadows, bool castShadows, Node3D ownerObject = null, bool useCommon = true, Dictionary<string, string> meshToSkin = null, bool forceSkinAlpha = false, bool useLowMultimeshes = true, bool useColorData = false, bool isViewModel = false, bool useLightVol = true, int frame = 0)
 	{
 		if (ownerObject == null)
 		{
@@ -993,10 +988,10 @@ public static class Mesher
 			ownerObject.Name = "Model_" + model.name;
 		}
 
-		MD3GodotConverted md3Model = new MD3GodotConverted();
-		md3Model.node = ownerObject;
-		md3Model.numMeshes = model.meshes.Count;
-		md3Model.data = new dataMeshes[md3Model.numMeshes];
+		MeshProcessed meshProcessed = new MeshProcessed();
+		meshProcessed.node = ownerObject;
+		meshProcessed.numMeshes = model.meshes.Count;
+		meshProcessed.data = new MeshProcessed.dataMeshes[meshProcessed.numMeshes];
 
 		FrameSurfaces frameSurfaces = model.frameSurfaces[frame];
 		for (int i = 0; i < frameSurfaces.readySurfaceArray.Count; i++)
@@ -1012,7 +1007,7 @@ public static class Mesher
 				modelObject.Position = Vector3.Zero;
 			}
 
-			md3Model.data[model.meshes[i].meshNum] = new dataMeshes();
+			meshProcessed.data[model.meshes[i].meshNum] = new MeshProcessed.dataMeshes();
 			SurfaceData surfaceData = null;
 			int skinIndex = -1;
 			string skinName;
@@ -1031,10 +1026,10 @@ public static class Mesher
 					surfaceData = frameSurfaces.readySurfaces[skinIndex];
 
 				bool useTransparent = surfaceData.useTransparent;
-				md3Model.data[model.meshes[i].meshNum].isTransparent = useTransparent;
+				meshProcessed.data[model.meshes[i].meshNum].isTransparent = useTransparent;
 				if (useCommon && !useTransparent)
 				{
-					md3Model.data[model.meshes[i].meshNum].multiMesh = surfaceData.commonMesh;
+					meshProcessed.data[model.meshes[i].meshNum].multiMesh = surfaceData.commonMesh;
 					if (!MultiMeshesInstances.ContainsKey(surfaceData.commonMesh))
 					{
 						MultiMeshInstance3D mesh = new MultiMeshInstance3D();
@@ -1063,11 +1058,11 @@ public static class Mesher
 				{
 					MeshInstance3D mesh = new MeshInstance3D();
 					var surfaceArray = frameSurfaces.readySurfaceArray[i];
-					md3Model.data[model.meshes[i].meshNum].arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
-					md3Model.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, surfaceData.readyMaterials);
-					md3Model.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(md3Model.data[model.meshes[i].meshNum].arrMesh, 0);
+					meshProcessed.data[model.meshes[i].meshNum].arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+					meshProcessed.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, surfaceData.readyMaterials);
+					meshProcessed.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(meshProcessed.data[model.meshes[i].meshNum].arrMesh, 0);
 					mesh.Name = "Mesh_" + model.name;
-					mesh.Mesh = md3Model.data[model.meshes[i].meshNum].arrMesh;
+					mesh.Mesh = meshProcessed.data[model.meshes[i].meshNum].arrMesh;
 					mesh.Layers = layer;
 					if (!castShadows)
 						mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
@@ -1121,10 +1116,10 @@ public static class Mesher
 					MultiMeshes.Add(multiMesh, Set);
 				}
 
-				md3Model.data[model.meshes[i].meshNum].isTransparent = useTransparent;
+				meshProcessed.data[model.meshes[i].meshNum].isTransparent = useTransparent;
 				if (useCommon && !useTransparent)
 				{
-					md3Model.data[model.meshes[i].meshNum].multiMesh = surfaceData.commonMesh;
+					meshProcessed.data[model.meshes[i].meshNum].multiMesh = surfaceData.commonMesh;
 					if (!MultiMeshesInstances.ContainsKey(surfaceData.commonMesh))
 					{
 						MultiMeshInstance3D mesh = new MultiMeshInstance3D();
@@ -1143,10 +1138,10 @@ public static class Mesher
 				else
 				{
 					MeshInstance3D mesh = new MeshInstance3D();
-					md3Model.data[model.meshes[i].meshNum].arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
-					md3Model.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, surfaceData.readyMaterials);
-					md3Model.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(md3Model.data[model.meshes[i].meshNum].arrMesh, 0);
-					mesh.Mesh = md3Model.data[model.meshes[i].meshNum].arrMesh;
+					meshProcessed.data[model.meshes[i].meshNum].arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
+					meshProcessed.data[model.meshes[i].meshNum].arrMesh.SurfaceSetMaterial(0, surfaceData.readyMaterials);
+					meshProcessed.data[model.meshes[i].meshNum].meshDataTool.CreateFromSurface(meshProcessed.data[model.meshes[i].meshNum].arrMesh, 0);
+					mesh.Mesh = meshProcessed.data[model.meshes[i].meshNum].arrMesh;
 					mesh.Layers = layer;
 					if (!castShadows)
 						mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
@@ -1159,7 +1154,141 @@ public static class Mesher
 				}
 			}
 		}
-		return md3Model;
+		return meshProcessed;
+	}
+
+	public static MeshProcessed GenerateSprite(string spriteName, float width, float height, uint layer, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, bool useLowMultimeshes = true, bool useLightVol = false)
+	{
+		if (ModelsManager.Sprites.ContainsKey(spriteName))
+			return FillSpriteFromProcessedData(spriteName, layer, castShadows, ownerObject, forceSkinAlpha, useCommon, useLightVol);
+
+		if (ownerObject == null)
+		{
+			GameManager.Print("No ownerObject");
+			ownerObject = new Node3D();
+			ownerObject.Name = "Sprite_" + spriteName;
+		}
+
+		MeshProcessed meshProcessed = new MeshProcessed();
+		meshProcessed.node = ownerObject;
+		meshProcessed.numMeshes = 1;
+		meshProcessed.data = new MeshProcessed.dataMeshes[meshProcessed.numMeshes];
+
+		MeshProcessed.dataMeshes data = new MeshProcessed.dataMeshes();
+		data.arrMesh =  GenerateQuadMesh(width, height, 0.5f, 0.5f);
+
+		bool currentTransparent = forceSkinAlpha;
+		ShaderMaterial material = MaterialManager.GetMaterials(spriteName, -1, ref currentTransparent);
+
+		meshProcessed.data[0] = data;
+		data.isTransparent = currentTransparent;
+		data.arrMesh.SurfaceSetMaterial(0, material);
+		data.meshDataTool.CreateFromSurface(data.arrMesh, 0);
+		MultiMesh multiMesh = new MultiMesh();
+		data.multiMesh = multiMesh;
+		multiMesh.Mesh = data.arrMesh;
+		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
+		multiMesh.UseColors = true;
+		if (useLowMultimeshes)
+			multiMesh.InstanceCount = LOW_USE_MULTIMESHES;
+		else
+			multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
+
+		if (!MultiMeshSprites.ContainsKey(multiMesh))
+		{
+			HashSet<SpriteData> Set = new HashSet<SpriteData>();
+			MultiMeshSprites.Add(multiMesh, Set);
+		}
+
+		if (useCommon && !currentTransparent)
+		{
+			MultiMeshInstance3D mesh = new MultiMeshInstance3D();
+			mesh.Name = "MultiMeshSprite_" + spriteName;
+			mesh.Multimesh = multiMesh;
+			mesh.Layers = layer;
+			if (!castShadows)
+				mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+			mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+			if (useLightVol)
+				mesh.SetInstanceShaderParameter("UseLightVol", true);
+			GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
+			MultiMeshesInstances.Add(multiMesh, mesh);
+			GameManager.Print("Adding MultiMesh : " + mesh.Name);
+		}
+		else
+		{
+			MeshInstance3D mesh = new MeshInstance3D();
+			mesh.Name = spriteName;
+			mesh.Mesh = data.arrMesh;
+			mesh.Layers = layer;
+			if (!castShadows)
+				mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+			mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+			if (useLightVol)
+				mesh.SetInstanceShaderParameter("UseLightVol", true);
+			ownerObject.AddChild(mesh);
+		}
+		ModelsManager.Sprites.Add(spriteName, data);
+		return meshProcessed;
+	}
+	public static MeshProcessed FillSpriteFromProcessedData(string spriteName, uint layer, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, bool useLightVol = false)
+	{
+		if (ownerObject == null)
+		{
+			GameManager.Print("No ownerObject");
+			ownerObject = new Node3D();
+			ownerObject.Name = "Sprite_" + spriteName;
+		}
+
+		MeshProcessed meshProcessed = new MeshProcessed();
+		meshProcessed.node = ownerObject;
+		meshProcessed.numMeshes = 1;
+		meshProcessed.data = new MeshProcessed.dataMeshes[meshProcessed.numMeshes];
+
+		MeshProcessed.dataMeshes data = ModelsManager.Sprites[spriteName];
+		MultiMesh multiMesh = data.multiMesh;
+		bool currentTransparent = forceSkinAlpha;
+		ShaderMaterial material = MaterialManager.GetMaterials(spriteName, -1, ref currentTransparent);
+		meshProcessed.data[0] = data;
+
+		if (useCommon && !currentTransparent)
+		{
+			if (!MultiMeshesInstances.ContainsKey(multiMesh))
+			{
+				MultiMeshInstance3D mesh = new MultiMeshInstance3D();
+				mesh.Name = "MultiMeshSprite_" + spriteName;
+				mesh.Multimesh = multiMesh;
+				mesh.Layers = layer;
+				if (!castShadows)
+					mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
+				MultiMeshesInstances.Add(multiMesh, mesh);
+				GameManager.Print("Adding MultiMesh : " + mesh.Name);
+				mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+				if (useLightVol)
+					mesh.SetInstanceShaderParameter("UseLightVol", true);
+			}
+
+			if (!MultiMeshSprites.ContainsKey(multiMesh))
+			{
+				HashSet<SpriteData> Set = new HashSet<SpriteData>();
+				MultiMeshSprites.Add(multiMesh, Set);
+			}
+		}
+		else
+		{
+			MeshInstance3D mesh = new MeshInstance3D();
+			mesh.Name = spriteName;
+			mesh.Mesh = data.arrMesh;
+			mesh.Layers = layer;
+			if (!castShadows)
+				mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+			mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
+			if (useLightVol)
+				mesh.SetInstanceShaderParameter("UseLightVol", true);
+			ownerObject.AddChild(mesh);
+		}
+		return meshProcessed;
 	}
 
 	public static Godot.Collections.Array GenerateModelMesh(MD3Mesh md3Mesh, int frame)
@@ -1736,7 +1865,34 @@ public static class Mesher
 		return d;
 	}
 
-	public static void AddNodeToMultiMeshes(MultiMesh multiMesh, Node3D owner)
+	public static void AddSpriteToMultiMeshes(MultiMesh multiMesh, SpriteData sprite, Color color)
+	{
+		HashSet<SpriteData> multiMeshSprites;
+		int instanceNum;
+		if (MultiMeshSprites.TryGetValue(multiMesh, out multiMeshSprites))
+		{
+			instanceNum = multiMeshSprites.Count;
+			int threshold = (multiMesh.InstanceCount >> 1);
+			if (instanceNum > threshold)
+			{
+				foreach (SpriteData spriteToDestroy in multiMeshSprites)
+				{
+					if (spriteToDestroy.readyToDestroy)
+						continue;
+
+					spriteToDestroy.readyToDestroy = true;
+					break;
+				}
+			}
+
+			multiMeshSprites.Add(sprite);
+			if (multiMesh.UseColors)
+				multiMesh.SetInstanceColor(instanceNum, color);
+			multiMesh.SetInstanceTransform(instanceNum, sprite.GlobalTransform);
+			multiMesh.VisibleInstanceCount = instanceNum + 1;
+		}
+	}
+	public static void AddNodeToMultiMeshes(MultiMesh multiMesh, Node3D owner, Color color)
 	{
 		Dictionary<Node3D, int> multiMeshSet;
 		int instanceNum;
@@ -1793,7 +1949,7 @@ public static class Mesher
 
 			multiMeshSet.Add(owner, instanceNum);
 			if (multiMesh.UseColors)
-				multiMesh.SetInstanceColor(instanceNum, Colors.Black);
+				multiMesh.SetInstanceColor(instanceNum, color);
 			multiMesh.SetInstanceTransform(instanceNum, owner.GlobalTransform);
 			multiMesh.VisibleInstanceCount = instanceNum + 1;
 		}
@@ -1857,5 +2013,40 @@ public static class Mesher
 			}
 		}
 	}
+
+	public static void ProcessSprites(float deltaTime)
+	{
+		foreach (var keyValuePair in MultiMeshSprites)
+		{
+			MultiMesh multiMesh = keyValuePair.Key;
+			HashSet<SpriteData> spriteDataList = keyValuePair.Value;
+			List<SpriteData> detroyDataList = new List<SpriteData>();
+			int oldCount = spriteDataList.Count;
+			foreach (SpriteData spriteData in spriteDataList)
+			{
+				spriteData.Process(deltaTime);
+				if (spriteData.readyToDestroy)
+					detroyDataList.Add(spriteData);
+			}
+
+			for (int i = 0; i < detroyDataList.Count; i++)
+				detroyDataList[i].Destroy();
+
+			multiMesh.VisibleInstanceCount = spriteDataList.Count;
+			bool forceUpdate = oldCount != multiMesh.VisibleInstanceCount;
+			int index = 0;
+
+			foreach (SpriteData spriteData in spriteDataList)
+			{
+				if ((forceUpdate) || (spriteData.update))
+				{
+					multiMesh.SetInstanceColor(index, spriteData.Modulate);
+					multiMesh.SetInstanceTransform(index, spriteData.GlobalTransform);
+				}
+				index++;
+			}
+		}
+	}
+
 }
 

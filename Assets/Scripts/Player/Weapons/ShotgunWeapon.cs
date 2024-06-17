@@ -132,17 +132,13 @@ public partial class ShotgunWeapon : PlayerWeapon
 
 				if (CheckIfCanMark(SpaceState, collider, collision))
 				{
-					ModelController BulletMark = (ModelController)ThingsManager.thingsPrefabs[decalMark].Instantiate();
+					SpriteController BulletMark = (SpriteController)ThingsManager.thingsPrefabs[decalMark].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletMark);
-					RemoteTransform3D remoteTransform = new RemoteTransform3D();
-					collider.AddChild(remoteTransform);
-					remoteTransform.UpdateScale = false;
-					remoteTransform.RemotePath = BulletMark.GetPath();
-					remoteTransform.GlobalPosition = collision + (normal * .05f);
-					remoteTransform.SetForward(-normal);
-					remoteTransform.Rotate((remoteTransform.UpVector()).Normalized(), -Mathf.Pi * .5f);
-					remoteTransform.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
-					BulletMark.AddDestroyNode(remoteTransform);
+					BulletMark.GlobalPosition = collision + (normal * .05f);
+					BulletMark.SetForward(normal);
+					BulletMark.Rotate(normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
+					if (collider is Crusher)
+						BulletMark.referenceNode = collider;
 				}
 			}
 		}

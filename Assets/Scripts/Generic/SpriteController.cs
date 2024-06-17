@@ -1,0 +1,107 @@
+using Godot;
+using System;
+using System.Diagnostics;
+
+public partial class SpriteController : Node3D
+{
+	[Export]
+	public string spriteName = "";
+	[Export]
+	public float spriteRadius = 2;
+	[Export]
+	public BaseMaterial3D.BillboardModeEnum billboard = BaseMaterial3D.BillboardModeEnum.Disabled;
+	[Export]
+	public bool isTransparent = false;
+	[Export]
+	public bool castShadows = false;
+	[Export]
+	public MultiMeshType useMultiMesh = MultiMeshType.LowCount;
+	[Export]
+	public SpriteData spriteData;
+	[Export]
+	public Node3D referenceNode = null;
+
+	public enum MultiMeshType
+	{
+		NoMultiMesh,
+		LowCount,
+		HighCount
+	}
+	private MeshProcessed sprite;
+
+	private GameManager.FuncState currentState = GameManager.FuncState.None;
+	public override void _Ready()
+	{
+		Init();
+	}
+
+	public void Init()
+	{
+		currentState = GameManager.FuncState.Ready;
+		if (string.IsNullOrEmpty(spriteName))
+			return;
+
+		spriteName = spriteName.ToUpper();
+
+		if (billboard != BaseMaterial3D.BillboardModeEnum.Disabled)
+			MaterialManager.AddBillBoard(spriteName);
+
+		if (!TextureLoader.HasTexture(spriteName))
+			TextureLoader.AddNewTexture(spriteName, isTransparent);
+
+		sprite = Mesher.GenerateSprite(spriteName, spriteRadius, spriteRadius, GameManager.AllPlayerViewMask, castShadows, this, isTransparent, ((useMultiMesh != MultiMeshType.NoMultiMesh) && !isTransparent), (useMultiMesh == MultiMeshType.LowCount), spriteData.alphaFade);
+
+		spriteData.baseTime = spriteData.destroyTimer;
+	}
+
+	public void Start()
+	{
+		currentState = GameManager.FuncState.Start;
+		if (string.IsNullOrEmpty(spriteName))
+		{
+			QueueFree();
+			return;
+		}
+
+		if (sprite.data[0] == null)
+			return;
+		if (sprite.data[0].isTransparent)
+			return;
+
+		if (useMultiMesh == MultiMeshType.NoMultiMesh)
+			return;
+
+		if (Mesher.MultiMeshSprites.ContainsKey(sprite.data[0].multiMesh))
+		{
+			MultiMeshData multiMeshData = new MultiMeshData();
+			multiMeshData.multiMesh = sprite.data[0].multiMesh;
+			spriteData.GlobalTransform = GlobalTransform;
+			spriteData.GlobalPosition = GlobalPosition;
+			spriteData.GlobalBasis = GlobalBasis;
+			spriteData.SetReferenceNode(referenceNode);
+			spriteData.SetMultiMeshData(multiMeshData);
+			Mesher.AddSpriteToMultiMeshes(sprite.data[0].multiMesh, spriteData, spriteData.Modulate);
+			QueueFree();
+		}
+	}
+
+	public override void _Process(double delta)
+	{
+		if (GameManager.Paused)
+			return;
+
+		switch (currentState)
+		{
+			default:
+				break;
+			case GameManager.FuncState.Ready:
+				Start();
+			break;
+			case GameManager.FuncState.Start:
+				spriteData.Process((float)delta);
+				if (spriteData.readyToDestroy)
+					QueueFree();
+			break;
+		}
+	}
+}
