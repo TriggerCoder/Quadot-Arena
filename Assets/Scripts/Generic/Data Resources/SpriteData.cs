@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Collections.Generic;
 
 public partial class SpriteData : Resource
@@ -12,6 +11,9 @@ public partial class SpriteData : Resource
 	public float destroyTimer = 0;
 	[Export]
 	public Color Modulate = Colors.Black;
+
+	public int refreshFrame = 0;
+	public List<Node> destroyNodes;
 	public enum DestroyType
 	{
 		NoDestroy,
@@ -53,7 +55,7 @@ public partial class SpriteData : Resource
 		if (referenceNode == null)
 			return;
 
-		//Node was detroyed
+		//"Parent" node was detroyed
 		if (!IsInstanceValid(referenceNode))
 		{
 			readyToDestroy = true;
@@ -70,8 +72,7 @@ public partial class SpriteData : Resource
 		if (multiMeshData == null)
 			return;
 
-		if ((alphaFade) ||
-			((GlobalPosition - lastGlobalPosition).LengthSquared() > Mathf.Epsilon) ||
+		if (((GlobalPosition - lastGlobalPosition).LengthSquared() > Mathf.Epsilon) ||
 			((GlobalBasis.X - lastGlobalBasis.X).LengthSquared() > Mathf.Epsilon) ||
 			((GlobalBasis.Y - lastGlobalBasis.Y).LengthSquared() > Mathf.Epsilon) ||
 			((GlobalBasis.Z - lastGlobalBasis.Z).LengthSquared() > Mathf.Epsilon))
@@ -81,13 +82,19 @@ public partial class SpriteData : Resource
 			lastGlobalBasis = GlobalBasis;
 			GlobalTransform = new Transform3D(GlobalBasis, GlobalPosition);
 		}
+		else if (alphaFade)
+		{
+			if ((Engine.GetFramesDrawn() % 10) == refreshFrame)
+				update = true;
+		}
+
 	}
 
 	public void Process(float deltaTime)
 	{
 		CheckReference();
 		UpdateMultiMesh();
-		if (alphaFade)
+		if ((alphaFade) && (update))
 		{
 			float alphaValue = Mathf.Lerp(1.0f, 0.0f, destroyTimer / baseTime);
 			Modulate = new Color(alphaValue, alphaValue, alphaValue);
@@ -109,5 +116,7 @@ public partial class SpriteData : Resource
 			if (multiMeshSet.Contains(this))
 				multiMeshSet.Remove(this);
 		}
+		foreach(Node node in destroyNodes)
+			node.QueueFree();
 	}
 }

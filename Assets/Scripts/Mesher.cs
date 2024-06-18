@@ -24,7 +24,7 @@ public static class Mesher
 	public const float APROX_ERROR = 0.001f;
 
 	public const int LOW_USE_MULTIMESHES = 512;
-	public const int HIGH_USE_MULTIMESHES = 2048;
+	public const int HIGH_USE_MULTIMESHES = 16384;
 
 	public const uint MaskSolid = ContentFlags.Solid;
 	public const uint MaskPlayerSolid = ContentFlags.Solid | ContentFlags.PlayerClip | ContentFlags.Body;
@@ -2035,11 +2035,12 @@ public static class Mesher
 			multiMesh.VisibleInstanceCount = spriteDataList.Count;
 			bool forceUpdate = oldCount != multiMesh.VisibleInstanceCount;
 			int index = 0;
-
 			foreach (SpriteData spriteData in spriteDataList)
 			{
 				if ((forceUpdate) || (spriteData.update))
 				{
+					if (spriteData.update)
+						spriteData.update = false;
 					multiMesh.SetInstanceColor(index, spriteData.Modulate);
 					multiMesh.SetInstanceTransform(index, spriteData.GlobalTransform);
 				}

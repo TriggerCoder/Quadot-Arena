@@ -4,12 +4,11 @@ using Godot;
 public partial class BloodTrail : RigidBody3D
 {
 	[Export]
-	public float destroyTimer = 0;
+	public float destroyTimer = 1;
 	public string[] decalMark = { "BloodMark1", "BloodMark2", "BloodMark3", "BloodMark4", "BloodMark5", "BloodMark6", "BloodMark7", "BloodMark8" };
 
 	private Rid Sphere;
 	private PhysicsShapeQueryParameters3D SphereCast;
-	private float baseTime = 1;
 	public override void _Ready()
 	{
 		BodyEntered += OnBodyEntered;
@@ -17,7 +16,6 @@ public partial class BloodTrail : RigidBody3D
 		PhysicsServer3D.ShapeSetData(Sphere, .5f);
 		SphereCast = new PhysicsShapeQueryParameters3D();
 		SphereCast.ShapeRid = Sphere;
-		baseTime = destroyTimer;
 	}
 
 	public override void _Process(double delta)
@@ -59,7 +57,6 @@ public partial class BloodTrail : RigidBody3D
 				return;
 
 			SpriteController DecalMark = (SpriteController)ThingsManager.thingsPrefabs[decalMark[GD.RandRange(0, decalMark.Length - 1)]].Instantiate();
-			DecalMark.Name = "MarkFromBloodTrail"+ GD.RandRange(0, 1000);
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
 			DecalMark.GlobalPosition = Collision + (Normal * .03f);
 			DecalMark.SetForward(Normal);
@@ -71,6 +68,10 @@ public partial class BloodTrail : RigidBody3D
 	public bool CheckIfCanMark(PhysicsDirectSpaceState3D SpaceState, CollisionObject3D collider, Vector3 collision)
 	{
 		if (collider is Damageable)
+			return false;
+
+		//Don't mark moving platforms
+		if (collider is Crusher)
 			return false;
 
 		//Check if mapcollider are noMarks

@@ -36,10 +36,11 @@ shape = SubResource("SphereShape3D_2d63j")
 script = ExtResource("2_abcff")
 Source = NodePath("../SourceBlood")
 
-[node name="BloodDrop" type="Node3D" parent="InterpolatedTransform"]
+[node name="BloodDrop" type="Node3D" parent="InterpolatedTransform" node_paths=PackedStringArray("referenceNode")]
 script = ExtResource("3_aiv0e")
 spriteName = "bloodTrail"
 spriteRadius = 0.5
 billboard = 1
 useMultiMesh = 2
 spriteData = SubResource("Resource_ko1dw")
+referenceNode = NodePath("..")

@@ -365,6 +365,10 @@ public partial class BFGBall : InterpolatedNode3D
 		if (collider is Damageable)
 			return false;
 
+		//Don't mark moving platforms
+		if (collider is Crusher)
+			return false;
+
 		//Check if mapcollider are noMarks
 		if (MapLoader.noMarks.Contains(collider))
 			return false;

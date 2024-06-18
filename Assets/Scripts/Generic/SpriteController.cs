@@ -1,6 +1,6 @@
 using Godot;
 using System;
-using System.Diagnostics;
+using System.Linq;
 
 public partial class SpriteController : Node3D
 {
@@ -30,8 +30,10 @@ public partial class SpriteController : Node3D
 	private MeshProcessed sprite;
 
 	private GameManager.FuncState currentState = GameManager.FuncState.None;
+	private int indexFrame = 0;
 	public override void _Ready()
 	{
+		indexFrame = GD.RandRange(0, 9);
 		Init();
 	}
 
@@ -52,6 +54,7 @@ public partial class SpriteController : Node3D
 		sprite = Mesher.GenerateSprite(spriteName, spriteRadius, spriteRadius, GameManager.AllPlayerViewMask, castShadows, this, isTransparent, ((useMultiMesh != MultiMeshType.NoMultiMesh) && !isTransparent), (useMultiMesh == MultiMeshType.LowCount), spriteData.alphaFade);
 
 		spriteData.baseTime = spriteData.destroyTimer;
+		spriteData.refreshFrame = indexFrame;
 	}
 
 	public void Start()
@@ -80,7 +83,13 @@ public partial class SpriteController : Node3D
 			spriteData.GlobalBasis = GlobalBasis;
 			spriteData.SetReferenceNode(referenceNode);
 			spriteData.SetMultiMeshData(multiMeshData);
+
 			Mesher.AddSpriteToMultiMeshes(sprite.data[0].multiMesh, spriteData, spriteData.Modulate);
+			//As Node is going to be deleted, children need to be reparented
+			var Parent = GetParent();
+			spriteData.destroyNodes = GetChildren().ToList();
+			foreach (var child in spriteData.destroyNodes)
+				child.Reparent(Parent);
 			QueueFree();
 		}
 	}

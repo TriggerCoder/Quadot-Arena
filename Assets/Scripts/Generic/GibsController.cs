@@ -82,10 +82,7 @@ public partial class GibsController : RigidBody3D
 		if (speed > 30)
 			soundIndex = GD.RandRange(0, 2);
 		else if (speed > 10)
-		{
 			soundIndex = GD.RandRange(0, 1);
-			spawnBlood = false;
-		}
 		else if (speed < 5)
 		{
 			leaveMark = false;
@@ -123,6 +120,8 @@ public partial class GibsController : RigidBody3D
 
 			if (CheckIfCanMark(SpaceState, Hit, Collision) == false)
 				return;
+
+			spawnBlood = false;
 
 			SpriteController DecalMark = (SpriteController)ThingsManager.thingsPrefabs[decalMark[GD.RandRange(0, decalMark.Length - 1)]].Instantiate();
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
@@ -168,6 +167,10 @@ public partial class GibsController : RigidBody3D
 	public bool CheckIfCanMark(PhysicsDirectSpaceState3D SpaceState, CollisionObject3D collider, Vector3 collision)
 	{
 		if (collider is Damageable)
+			return false;
+
+		//Don't mark moving platforms
+		if (collider is Crusher)
 			return false;
 
 		//Check if mapcollider are noMarks
