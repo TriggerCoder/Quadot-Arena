@@ -49,7 +49,7 @@ public partial class ThingsManager : Node
 	public static readonly string[] gibsParts = { "GibSkull", "GibBrain", "GibAbdomen", "GibArm", "GibChest", "GibFist", "GibFoot", "GibForearm", "GibIntestine", "GibLeg", "GibLeg" };
 	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group", "info_null", "info_spectator_start", "info_firstplace", "info_secondplace", "info_thirdplace" };
 	public static readonly string[] triggerThings = { "func_timer", "trigger_always", "trigger_multiple", "target_relay" , "target_delay", "target_give" };
-	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_relay", "target_delay", "target_give", "target_position", "info_notnull", "misc_teleporter_dest" };
+	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_relay", "target_delay", "target_give", "target_position", "target_location", "info_notnull", "misc_teleporter_dest" };
 	public static List<Portal> portalsOnMap = new List<Portal>();
 	public static readonly string ItemDrop = "ItemDrop";
 	public static readonly string Blood = "Blood";
@@ -829,20 +829,23 @@ public partial class ThingsManager : Node
 					{
 						MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
 						uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, platform, model, 0, false);
-						int shapes = platform.ShapeOwnerGetShapeCount(OwnerShapeId);
-						Aabb BigBox = new Aabb();
-
-						for (int i = 0; i < shapes; i++)
+						if (OwnerShapeId != 0)
 						{
-							Shape3D shape = platform.ShapeOwnerGetShape(OwnerShapeId, i);
-							Aabb box = shape.GetDebugMesh().GetAabb();
-							if (i == 0)
-								BigBox = new Aabb(box.Position, box.Size);
-							else
-								BigBox = BigBox.Merge(box);
+							int shapes = platform.ShapeOwnerGetShapeCount(OwnerShapeId);
+							Aabb BigBox = new Aabb();
+
+							for (int i = 0; i < shapes; i++)
+							{
+								Shape3D shape = platform.ShapeOwnerGetShape(OwnerShapeId, i);
+								Aabb box = shape.GetDebugMesh().GetAabb();
+								if (i == 0)
+									BigBox = new Aabb(box.Position, box.Size);
+								else
+									BigBox = BigBox.Merge(box);
+							}
+							center = BigBox.GetCenter();
+							isCrusher = true;
 						}
-						center = BigBox.GetCenter();
-						isCrusher = true;
 					}
 					platform.Init(direction, speed, phase, height, isCrusher, center, noise);
 				}
@@ -1131,8 +1134,10 @@ public partial class ThingsManager : Node
 				//Location
 				case "target_location":
 				{
+					string message;
 					thingObject.GlobalPosition = entity.origin;
-					thingObject.EditorDescription = entity.entityData["message"];
+					if (entity.entityData.TryGetValue("message", out message))
+						thingObject.EditorDescription = message;
 					MapLoader.Locations.Add(thingObject);
 				}
 				break;

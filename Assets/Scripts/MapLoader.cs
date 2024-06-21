@@ -577,6 +577,12 @@ public static void LerpColorOnRepeatedVertex()
 		for (int i = 0; i < models[num].numBrushes; i++)
 			listBrushes.Add(brushes[models[num].firstBrush + i]);
 
+		if (listBrushes.Count == 0)
+		{
+			GameManager.Print("brushes: " + num + " is empty", GameManager.PrintType.Info);
+			return 0;
+		}
+
 		uint OwnerShapeId = Mesher.GenerateGroupBrushCollider(num, node, listBrushes.ToArray(), collider, contentFlags);
 		return OwnerShapeId;
 	}

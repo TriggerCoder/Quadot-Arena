@@ -80,6 +80,8 @@ public static class Mesher
 		ContentType contentType = new ContentType();
 		contentType.Init(type);
 
+		if (((contentType.value & ContentFlags.Details) != 0) || ((contentType.value & ContentFlags.Structural) != 0))
+			addCollider = false;
 		if ((contentType.value & MaskPlayerSolid) == 0)
 			addCollider = false;
 
@@ -1406,7 +1408,10 @@ public static class Mesher
 		if (((type & ContentFlags.Water) != 0) || ((type & ContentFlags.Lava) != 0))
 			isWater = true;
 		else if ((type & MaskPlayerSolid) == 0)
+		{
+			GameManager.Print("brushes: " + indexId + " Is not solid, Content Type is: " + type);
 			return 0;
+		}
 
 		ContentType contentType = new ContentType();
 		contentType.Init(type);
@@ -1443,7 +1448,6 @@ public static class Mesher
 			//Fill Map BB
 			Aabb box = convexHull.GetDebugMesh().GetAabb();
 			MapLoader.mapBounds = MapLoader.mapBounds.Merge(box);
-
 			objCollider.ShapeOwnerAddShape(OwnerShapeId, convexHull);
 			if (isWater)
 			{
@@ -1528,7 +1532,7 @@ public static class Mesher
 		Vector3 normal = Vector3.Zero;
 		if (!CanForm3DConvexHull(intersectPoint, ref normal))
 		{
-			GameManager.Print("Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time", GameManager.PrintType.Warning);
+			GameManager.Print("GenerateGroupBrushCollider: Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time", GameManager.PrintType.Warning);
 			return null;
 		}
 
@@ -1545,7 +1549,7 @@ public static class Mesher
 
 		if (((type & ContentFlags.Details) != 0) || ((type & ContentFlags.Structural) != 0))
 		{
-//			GameManager.Print("brushSide: " + brush.brushSide + " Not used for collisions, Content Type is: " + type);
+			GameManager.Print("GenerateBrushCollider: brushSide: " + brush.brushSide + " Not used for collisions, Content Type is: " + type);
 			return false;
 		}
 
@@ -1595,7 +1599,7 @@ public static class Mesher
 		Vector3 normal = Vector3.Zero;
 		if (!CanForm3DConvexHull(intersectPoint, ref normal))
 		{
-			GameManager.Print("Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time", GameManager.PrintType.Warning);
+			GameManager.Print("GenerateBrushCollider: Cannot Form 3DConvexHull " + brush.brushSide + " this was a waste of time", GameManager.PrintType.Warning);
 			return false;
 		}
 

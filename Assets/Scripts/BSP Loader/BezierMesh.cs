@@ -335,7 +335,6 @@ public static class BezierMesh
 						axis = Axis.Z;
 					else
 					{
-						GameManager.Print("2D Plane is Rotated");
 						float x = Mathf.Abs(normal.X), y = Mathf.Abs(normal.Y), z = Mathf.Abs(normal.Z);
 						Vector3 normalRef = Vector3.Zero;
 
