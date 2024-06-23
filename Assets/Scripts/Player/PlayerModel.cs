@@ -480,7 +480,6 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	private void GenerateRagDollCollider()
 	{
 		CollisionShape3D collisionShape = new CollisionShape3D();
-		AddChild(collisionShape);
 
 		int currentDeathUpper = upperAnim[upperAnimation + 1].startFrame;
 		int currentDeathLower = lowerAnim[lowerAnimation + 1].startFrame;
@@ -551,6 +550,8 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		}
 		modelColliderShape.Points = modelPoints.ToArray();
 		collisionShape.Shape = modelColliderShape;
+		//JOLTS need Node to be added after all the shapes have been adeed:
+		AddChild(collisionShape);
 
 		playerControls.playerThing.CollisionLayer = (1 << GameManager.NoCollisionLayer);
 		if (playerControls.playerThing.waterLever > 0)

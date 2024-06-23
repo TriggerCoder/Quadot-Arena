@@ -1698,7 +1698,7 @@ public static class Mesher
 		holder.AddChild(Fog);
 
 		Fog.Layers = GameManager.AllPlayerViewMask;
-		Fog.GlobalPosition = box.GetCenter();
+		Fog.Position = box.GetCenter();
 		Fog.Shape = RenderingServer.FogVolumeShape.Box;
 		Fog.Size = box.Size;
 		if (isLava)

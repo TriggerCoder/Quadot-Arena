@@ -116,7 +116,15 @@ public partial class SpriteData : Resource
 			if (multiMeshSet.Contains(this))
 				multiMeshSet.Remove(this);
 		}
-		foreach(Node node in destroyNodes)
-			node.QueueFree();
+		
+		if (destroyNodes == null)
+			return;
+		
+		for (int i = 0; i < destroyNodes.Count; i++)
+		{
+			Node node = destroyNodes[i];
+			if (IsInstanceValid(node))
+				node.QueueFree();
+		}
 	}
 }

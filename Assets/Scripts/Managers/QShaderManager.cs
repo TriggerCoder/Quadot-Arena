@@ -278,6 +278,13 @@ public static class QShaderManager
 				else
 					GSHeader += "depth_draw_opaque, blend_add, ";
 			break;
+			case QShaderGlobal.SortType.Multiplicative:
+				if (depthWrite)
+					GSHeader += "depth_draw_always, blend_mul, ";
+				else
+					GSHeader += "depth_draw_opaque, blend_mul, ";
+				qShader.qShaderGlobal.unShaded = true;
+			break;
 		}
 
 		if ((qShader.qShaderGlobal.unShaded) || (qShader.qShaderGlobal.isSky))
@@ -423,7 +430,7 @@ public static class QShaderManager
 		}
 
 		//Lightning
-		if (multiPassList == null)
+		if ((multiPassList == null) && (qShader.qShaderGlobal.unShaded == false))
 		{
 			code += GSLigtH;
 			code += GetDiffuseLightning();
@@ -464,6 +471,8 @@ public static class QShaderManager
 			code += "\tALBEDO = (color.rgb * ambient);\n";
 			code += "\tEMISSION = ambient;\n";
 		}
+		else if (qShader.qShaderGlobal.sort == QShaderGlobal.SortType.Multiplicative)
+			code += "\tALBEDO = color.rgb;\n";
 		else
 		{
 			code += "\tvec3 albedo = color.rgb * vertx_color.rgb;\n";
@@ -667,7 +676,9 @@ public static class QShaderManager
 				Vertex += "\tPROJECTION_MATRIX[0][0] =  InvTanFOV / Aspect;\n";
 			}
 			Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);\n";
-			if (forceView)
+			if (qShader.qShaderGlobal.polygonOffset)
+				Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.001);\n";
+			else if (forceView)
 				Vertex += "\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
 			else if (useView)
 				Vertex += "\tPOSITION.z = mix(POSITION.z, mix(POSITION.z, 0, 0.999), float(ViewModel));\n";
@@ -778,7 +789,9 @@ public static class QShaderManager
 			Vertex += "\tPROJECTION_MATRIX[0][0] =  InvTanFOV / Aspect;\n";
 		}
 		Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);\n";
-		if (forceView)
+		if (qShader.qShaderGlobal.polygonOffset)
+			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.001);\n";
+		else if (forceView)
 			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
 		else if (useView)
 			Vertex += "\tPOSITION.z = mix(POSITION.z, mix(POSITION.z, 0, 0.999), float(ViewModel));\n";
@@ -1118,8 +1131,8 @@ public static class QShaderManager
 									qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
 								break;
 								case "GL_ONE_MINUS_SRC_COLOR":
-									Blend = "\tcolor.rgb = color.rgb * " + cdst + ";\n";
-									Blend += "\tcolor.a = Stage_" + currentStage + ".a; \n";
+									Blend = "\tcolor.rgb = " + cdst + ";\n";
+									qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Multiplicative;
 								break;
 							}
 						}
@@ -1432,13 +1445,9 @@ public class QShaderGlobal
 	}
 	public enum SortType
 	{
-		Portal,
-		Sky,
 		Opaque,
-		Banner,
-		Underwater,
 		Additive,
-		Nearest
+		Multiplicative
 	}
 	public void AddGlobal(string Params, string Value)
 	{

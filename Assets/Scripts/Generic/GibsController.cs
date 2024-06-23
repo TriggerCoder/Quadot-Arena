@@ -19,8 +19,6 @@ public partial class GibsController : RigidBody3D
 	private PhysicsPointQueryParameters3D PointIntersect;
 
 	private ConvexPolygonShape3D shape;
-	private GameManager.FuncState currentState = GameManager.FuncState.None;
-	private bool spawnBlood = true;
 	private bool leaveMark = true;
 	private float dropTime;
 	public override void _Ready()
@@ -49,21 +47,20 @@ public partial class GibsController : RigidBody3D
 		if (GameManager.Paused)
 			return;
 
-		if (spawnBlood)
+		float deltaTime = (float)delta;
+		if (dropTime > 0)
+			dropTime -= deltaTime;
+		else if (dropTime < 0)
 		{
-			float deltaTime = (float)delta;
-			if (dropTime > 0)
-				dropTime -= deltaTime;
-			else if (dropTime < 0)
-			{
-				Node3D Blood = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.BloodTrail].Instantiate();
-				GameManager.Instance.TemporaryObjectsHolder.AddChild(Blood);
-				Blood.GlobalTransform = GlobalTransform;
-				dropTime += spawnTime;
-			}
+			Node3D Blood = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.BloodTrail].Instantiate();
+			GameManager.Instance.TemporaryObjectsHolder.AddChild(Blood);
+			Blood.GlobalTransform = GlobalTransform;
+			dropTime += spawnTime;
 		}
-
-		if (currentState != GameManager.FuncState.None)
+	}
+	public override void _PhysicsProcess(double delta)
+	{
+		if (GameManager.Paused)
 			return;
 
 		if (modelController.Model == null)
@@ -118,10 +115,11 @@ public partial class GibsController : RigidBody3D
 			if (Hit == null)
 				return;
 
+			//Don't spawn more blood
+			SetProcess(false);
+
 			if (CheckIfCanMark(SpaceState, Hit, Collision) == false)
 				return;
-
-			spawnBlood = false;
 
 			SpriteController DecalMark = (SpriteController)ThingsManager.thingsPrefabs[decalMark[GD.RandRange(0, decalMark.Length - 1)]].Instantiate();
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(DecalMark);
@@ -161,7 +159,7 @@ public partial class GibsController : RigidBody3D
 			ThingsManager.AddGibsShapes(Name, shape);
 		}
 		collisionShape.Shape = shape;
-		currentState = GameManager.FuncState.Start;
+		SetPhysicsProcess(false);
 	}
 
 	public bool CheckIfCanMark(PhysicsDirectSpaceState3D SpaceState, CollisionObject3D collider, Vector3 collision)
