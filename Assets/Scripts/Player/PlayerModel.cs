@@ -550,7 +550,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		}
 		modelColliderShape.Points = modelPoints.ToArray();
 		collisionShape.Shape = modelColliderShape;
-		//JOLTS need Node to be added after all the shapes have been adeed:
+		//JOLT require Node to be added after all the shapes have been adeed:
 		AddChild(collisionShape);
 
 		playerControls.playerThing.CollisionLayer = (1 << GameManager.NoCollisionLayer);

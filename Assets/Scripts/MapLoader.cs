@@ -440,7 +440,7 @@ public static class MapLoader
 				}
 			}
 		}
-		//JOLTS need Node (ColliderGroup) to be added after all the shapes have been adeed:
+		//JOLT require Node (ColliderGroup) to be added after all the shapes have been adeed:
 		//"Manipulating a body's shape(s) after it has entered a scene tree can be costly"
 		GameManager.Instance.AddChild(ColliderGroup);
 		System.GC.Collect(2, System.GCCollectionMode.Forced);

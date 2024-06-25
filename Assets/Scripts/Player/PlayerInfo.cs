@@ -125,9 +125,5 @@ public partial class PlayerInfo : Node3D
 			return;
 
 		ClusterPVSManager.CheckPVS(viewLayer, playerCamera.CurrentCamera.GlobalPosition);
-
-		//if camera is thirdperson, need to make sure at all that it can see 
-//		if (playerCamera.currentThirdPerson)
-//			ClusterPVSManager.CheckPVS(viewLayer, GlobalPosition);
 	}
 }

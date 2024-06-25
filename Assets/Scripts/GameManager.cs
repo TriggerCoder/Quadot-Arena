@@ -487,8 +487,13 @@ public partial class GameManager : Node
 			break;
 			case MusicType.Random:
 				AdaptativeMusicManager.Instance.StopMusic();
-				if (GD.RandRange(0, 1) > 0)
-					StaticMusicPlayer.Play();
+				if (StaticMusicPlayer.Stream != null)
+				{
+					if (GD.RandRange(0, 1) > 0)
+						StaticMusicPlayer.Play();
+					else
+						AdaptativeMusicManager.Instance.StartMusic();
+				}
 				else
 					AdaptativeMusicManager.Instance.StartMusic();
 			break;
@@ -560,6 +565,8 @@ public partial class GameManager : Node
 		player.Name = "Player "+ playerNum;
 		player.playerViewPort = (PlayerViewPort)viewPortPrefab.Instantiate();
 		AddChild(player);
+		if (playerNum == 0)
+			player.playerInfo.playerPostProcessing.ViewPortCamera.Current = true;
 		player.playerInfo.SetPlayer(playerNum);
 		player.playerControls.Init(controllerNum);
 		player.InitPlayer();

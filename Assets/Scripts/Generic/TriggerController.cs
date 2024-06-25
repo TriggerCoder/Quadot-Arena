@@ -53,6 +53,7 @@ public partial class TriggerController : Node3D
 	{
 		if (currentState == GameManager.FuncState.Start)
 			return;
+
 		waitTime = time;
 		delayActivator = playerThing;
 		currentState = GameManager.FuncState.Start;
