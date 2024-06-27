@@ -19,7 +19,7 @@ public static class MapLoader
 	public static List<QNode> nodes;
 	public static List<QLeaf> leafs;
 	public static List<int> leafsSurfaces;
-	public static int[] leafRenderFrameLayer;
+	public static uint[] leafRenderFrameLayer;
 	public static List<QModel> models;
 	public static List<QBrush> brushes;
 	public static List<int> leafsBrushes;
@@ -158,7 +158,7 @@ public static class MapLoader
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.LeafSurfaces].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.LeafSurfaces].Length / 4;
 			leafsSurfaces = new List<int>(num);
-			leafRenderFrameLayer = new int[num];
+			leafRenderFrameLayer = new uint[num];
 			GameManager.Print("leafsSurfaces " + num);
 			for (int i = 0; i < num; i++)
 			{

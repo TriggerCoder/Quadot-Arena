@@ -148,7 +148,7 @@ public partial class GameManager : Node
 	[Export]
 	public SoundData[] OverrideSounds;
 
-	private Dictionary<int, PlayerThing> Players = new Dictionary<int, PlayerThing>();
+	public Dictionary<int, PlayerThing> Players = new Dictionary<int, PlayerThing>();
 
 	public Camera3D interMissionCamera = null;
 	public List<int> controllerWantToJoin = new List<int>();

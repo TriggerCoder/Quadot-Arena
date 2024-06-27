@@ -54,7 +54,7 @@ public partial class PlayerInfo : Node3D
 	[Export]
 	public PackedScene[] WeaponPrefabs = new PackedScene[9];
 
-	public int viewLayer;
+	public uint viewLayer;
 	public uint playerLayer;
 	public uint uiLayer;
 	public int localPlayerNum;
@@ -62,13 +62,13 @@ public partial class PlayerInfo : Node3D
 	public void SetPlayer(int playerNum)
 	{
 		localPlayerNum = playerNum;
-		viewLayer = (1 << (GameManager.Player1ViewLayer + localPlayerNum));
+		viewLayer = (uint)(1 << (GameManager.Player1ViewLayer + localPlayerNum));
 		playerLayer = (uint)(1 << (GameManager.Player1Layer + localPlayerNum));
 		playerThing.CollisionLayer = playerLayer;
 		uiLayer = (uint)(1 << (GameManager.Player1UIViewLayer + localPlayerNum));
-		playerCamera.ViewCamera.CullMask = (uint)viewLayer | uiLayer;
-		playerCamera.ThirdPerson.CullMask = (uint)viewLayer;
-		playerCamera.playerPostProcessing.ViewMask = (uint)viewLayer;
+		playerCamera.ViewCamera.CullMask = viewLayer | uiLayer;
+		playerCamera.ThirdPerson.CullMask = viewLayer;
+		playerCamera.playerPostProcessing.ViewMask = viewLayer;
 		playerCamera.playerPostProcessing.UIMask = uiLayer;
 		playerCamera.playerPostProcessing.InitPost(this);
 		for (int i = 0; i < Weapon.Length; i++)
@@ -118,12 +118,5 @@ public partial class PlayerInfo : Node3D
 			if (Weapon[i])
 				playerPostProcessing.playerHUD.AddWeapon(i);
 		}
-	}
-	public override void _Process(double delta)
-	{
-		if (GameManager.CurrentState != GameManager.FuncState.Start)
-			return;
-
-		ClusterPVSManager.CheckPVS(viewLayer, playerCamera.CurrentCamera.GlobalPosition);
 	}
 }

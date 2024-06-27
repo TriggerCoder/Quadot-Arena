@@ -4,44 +4,43 @@ using System.Collections.Generic;
 public partial class ClusterPVSManager : Node
 {
 	public static ClusterPVSManager Instance;
-	private List<GeometryInstance3D> AllClusters;
 	private GeometryInstance3D[] SurfaceToCluster;
-	private Dictionary<GeometryInstance3D, uint> ActivatedSurfaces = new Dictionary<GeometryInstance3D, uint>();
-	public const int RenderFrameMask = (0xFFFF << GameManager.MaxLocalPlayers);
+	private Dictionary<GeometryInstance3D, uint> AllClusters = new Dictionary<GeometryInstance3D, uint>();
+	private const int RenderFrameMask = (0xFFFF << GameManager.MaxLocalPlayers);
+	private const uint NoRenderLayer = (1 << GameManager.NotVisibleLayer);
+	private static uint currentFrame = 0;
 	public void ResetClusterList(int count)
 	{
-		AllClusters = new List<GeometryInstance3D>();
+		AllClusters = new Dictionary<GeometryInstance3D, uint>();
 		SurfaceToCluster = new GeometryInstance3D[count];
 	}
 	public override void _Ready()
 	{
 		Instance = this;
 		RenderingServer.FramePreDraw += () => OnPreRender();
-		RenderingServer.FramePostDraw += () => OnPostRender();
 	}
 
 	public void OnPreRender()
 	{
-		foreach (var surfaceToActivate in ActivatedSurfaces)
-			surfaceToActivate.Key.Layers = surfaceToActivate.Value;
+		foreach (var (cluster, layer) in AllClusters)
+		{
+			if ((layer & RenderFrameMask) == currentFrame)
+				cluster.Layers = (layer & 0xFF);
+			else
+				cluster.Layers = NoRenderLayer;
+		}	
 	}
 
-	public void OnPostRender()
-	{
-		for (int i = 0; i < AllClusters.Count; i++) 
-			AllClusters[i].Layers = (1 << GameManager.NotVisibleLayer);
-		ActivatedSurfaces.Clear();
-	}
 	public void RegisterClusterAndSurface(GeometryInstance3D cluster, QSurface surface)
 	{
 		SurfaceToCluster[surface.surfaceId] = cluster;
-		AllClusters.Add(cluster);
+		AllClusters.Add(cluster, 0);
 	}
 	public void RegisterClusterAndSurfaces(GeometryInstance3D cluster, QSurface[] surfaces)
 	{
 		for (int i = 0; i < surfaces.Length; i++)
 			SurfaceToCluster[surfaces[i].surfaceId] = cluster;
-		AllClusters.Add(cluster);
+		AllClusters.Add(cluster, 0);
 	}
 
 	public void ActivateClusterBySurface(int surface, uint layer)
@@ -51,10 +50,11 @@ public partial class ClusterPVSManager : Node
 		if (cluster == null)
 			return;
 
-		if (ActivatedSurfaces.TryGetValue(cluster, out currentLayer))
-			ActivatedSurfaces[cluster] = currentLayer | layer;
+		currentLayer = AllClusters[cluster];
+		if ((currentLayer & RenderFrameMask) == currentFrame)
+			AllClusters[cluster] = currentLayer | layer;
 		else
-			ActivatedSurfaces.Add(cluster, layer);
+			AllClusters[cluster] = currentFrame | layer;
 	}
 	private static int FindCurrentLeaf(Vector3 currentPos)
 	{
@@ -105,9 +105,8 @@ public partial class ClusterPVSManager : Node
 		return visible;
 	}
 
-	public static void CheckPVS(int viewLayer, Vector3 currentPos)
+	public static void CheckPVS(uint viewLayer, Vector3 currentPos)
 	{
-		int currentFrame = (Engine.GetFramesDrawn() << GameManager.MaxLocalPlayers);
 		// Find the index of the current leaf
 		int leafIndex = FindCurrentLeaf(currentPos);
 
@@ -150,5 +149,16 @@ public partial class ClusterPVSManager : Node
 				Instance.ActivateClusterBySurface(surfaceId, (uint)viewLayer);
 			}
 		}
+	}
+
+	public override void _Process(double delta)
+	{
+		if (GameManager.CurrentState != GameManager.FuncState.Start)
+			return;
+
+		currentFrame = (uint)(Engine.GetFramesDrawn() << GameManager.MaxLocalPlayers);
+		foreach (var playerThing in GameManager.Instance.Players.Values)
+			CheckPVS(playerThing.playerInfo.viewLayer, playerThing.playerInfo.playerCamera.CurrentCamera.GlobalPosition);
+
 	}
 }
