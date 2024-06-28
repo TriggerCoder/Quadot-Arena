@@ -50,67 +50,6 @@ public class QNode
 		this.bb_Max = QuakeToGodot.Vect3(bb_Max);
 	}
 }
-public class QPlane
-{
-	public const float EPSILON = 0.00001f;
-
-	public Vector3 normal;              // Plane normal. 
-	public float distance;              // The plane distance from origin
-	public QPlane(Vector3 normal, float distance)
-	{
-		this.normal = QuakeToGodot.Vect3(normal, false);
-		this.distance = distance * GameManager.sizeDividor;
-	}
-	public bool GetSide(Vector3 vect, CheckPointPlane check = CheckPointPlane.IsOnOrFront)
-	{
-		float d = normal.Dot(vect) - distance;
-		switch (check)
-		{
-			default:
-			case CheckPointPlane.IsOnOrFront:
-				return (d >= 0);
-				break;
-			case CheckPointPlane.IsFront:
-				return (d > EPSILON);
-				break;
-			case CheckPointPlane.IsOn:
-				return (d == 0);
-				break;
-		}
-	}
-
-	public List<float> IntersectPlanes(QPlane p2, QPlane p3)
-	{
-		Vector3 m1 = new Vector3(normal.X, p2.normal.X, p3.normal.X);
-		Vector3 m2 = new Vector3(normal.Y, p2.normal.Y, p3.normal.Y);
-		Vector3 m3 = new Vector3(normal.Z, p2.normal.Z, p3.normal.Z);
-		Vector3 d  = new Vector3(distance, p2.distance, p3.distance);
-
-		Vector3 u = m2.Cross(m3);
-		Vector3 v = m1.Cross(d);
-
-		float denom = m1.Dot(u);
-		// Planes don't actually intersect in a point
-		if (Mathf.Abs(denom) < Mathf.Epsilon)
-			return null;
-
-		List<float> intersectPoint = new List<float>(3)
-		{
-			(d.Dot(u) / denom),
-			(m3.Dot(v) / denom),
-			(-m2.Dot(v) / denom)
-		};
-
-		return intersectPoint;
-	}
-
-	public enum CheckPointPlane
-	{
-		IsOnOrFront,
-		IsFront,
-		IsOn
-	}
-}
 public class QLeaf
 {
 	public int cluster;                 // The visibility cluster 

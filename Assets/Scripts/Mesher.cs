@@ -1396,17 +1396,17 @@ public static class Mesher
 			return 0;
 		}
 
-/*		if ((stype & SurfaceFlags.NonSolid) != 0)
-		{
-			GameManager.Print("brushes: " + indexId + " Is not solid, Surface Type is: " + stype);
-			return 0;
-		}
-*/
-
 		type |= extraContentFlag;
 
 		if (((type & ContentFlags.Water) != 0) || ((type & ContentFlags.Lava) != 0))
+		{
 			isWater = true;
+			if ((type & ContentFlags.Translucent) == 0)
+			{
+				GameManager.Print("brushes: " + indexId + " state it's liquid however it is not Translucent, Content Type is: " + type);
+				return 0;
+			}
+		}
 		else if ((type & MaskPlayerSolid) == 0)
 		{
 			GameManager.Print("brushes: " + indexId + " Is not solid, Content Type is: " + type);
@@ -1483,51 +1483,18 @@ public static class Mesher
 
 		return OwnerShapeId;
 	}
+
 	public static ConvexPolygonShape3D GenerateBrushCollider(QBrush brush)
 	{
-		List<Vector3> possibleIntersectPoint = new List<Vector3>();
+		var brushPlanes = new Godot.Collections.Array<Plane>();
 		List<Vector3> intersectPoint = new List<Vector3>();
 
 		for (int i = 0; i < brush.numOfBrushSides; i++)
 		{
 			int planeIndex = MapLoader.brushSides[brush.brushSide + i].plane;
-			QPlane p1 = MapLoader.planes[planeIndex];
-
-			for (int j = i + 1; j < brush.numOfBrushSides; j++)
-			{
-				planeIndex = MapLoader.brushSides[brush.brushSide + j].plane;
-				QPlane p2 = MapLoader.planes[planeIndex];
-				for (int k = j + 1; k < brush.numOfBrushSides; k++)
-				{
-					planeIndex = MapLoader.brushSides[brush.brushSide + k].plane;
-					QPlane p3 = MapLoader.planes[planeIndex];
-					List<float> intersect = p1.IntersectPlanes(p2, p3);
-					if (intersect != null)
-						possibleIntersectPoint.Add(new Vector3(intersect[0], intersect[1], intersect[2]));
-				}
-			}
+			brushPlanes.Add(MapLoader.planes[planeIndex]);
 		}
-
-		for (int i = 0; i < possibleIntersectPoint.Count; i++)
-		{
-			bool inside = true;
-			for (int j = 0; j < brush.numOfBrushSides; j++)
-			{
-				int planeIndex = MapLoader.brushSides[brush.brushSide + j].plane;
-				QPlane plane = MapLoader.planes[planeIndex];
-				if (plane.GetSide(possibleIntersectPoint[i], QPlane.CheckPointPlane.IsFront))
-				{
-					inside = false;
-					j = brush.numOfBrushSides;
-				}
-			}
-			if (inside)
-			{
-				if (!intersectPoint.Contains(possibleIntersectPoint[i]))
-					intersectPoint.Add(possibleIntersectPoint[i]);
-			}
-		}
-
+		intersectPoint.AddRange(Geometry3D.ComputeConvexMeshPoints(brushPlanes));
 		intersectPoint = RemoveDuplicatedVectors(intersectPoint);
 		Vector3 normal = Vector3.Zero;
 		if (!CanForm3DConvexHull(intersectPoint, ref normal))
@@ -1541,6 +1508,7 @@ public static class Mesher
 
 		return convexHull;
 	}
+
 	public static bool GenerateBrushCollider(QBrush brush, Node3D holder, CollisionObject3D objCollider = null, bool addRigidBody = false, uint extraContentFlag = 0)
 	{
 		bool isTrigger = false;
@@ -1553,48 +1521,15 @@ public static class Mesher
 			return false;
 		}
 
-		List<Vector3> possibleIntersectPoint = new List<Vector3>();
+		var brushPlanes = new Godot.Collections.Array<Plane>();
 		List<Vector3> intersectPoint = new List<Vector3>();
+
 		for (int i = 0; i < brush.numOfBrushSides; i++)
 		{
 			int planeIndex = MapLoader.brushSides[brush.brushSide + i].plane;
-			QPlane p1 = MapLoader.planes[planeIndex];
-
-			for (int j = i + 1; j < brush.numOfBrushSides; j++)
-			{
-				planeIndex = MapLoader.brushSides[brush.brushSide + j].plane;
-				QPlane p2 = MapLoader.planes[planeIndex];
-				for (int k = j + 1; k < brush.numOfBrushSides; k++)
-				{
-					planeIndex = MapLoader.brushSides[brush.brushSide + k].plane;
-					QPlane p3 = MapLoader.planes[planeIndex];
-					List<float> intersect = p1.IntersectPlanes(p2, p3);
-					if (intersect != null)
-						possibleIntersectPoint.Add(new Vector3(intersect[0], intersect[1], intersect[2]));
-				}
-			}
+			brushPlanes.Add(MapLoader.planes[planeIndex]);
 		}
-
-		for (int i = 0; i < possibleIntersectPoint.Count; i++)
-		{
-			bool inside = true;
-			for (int j = 0; j < brush.numOfBrushSides; j++)
-			{
-				int planeIndex = MapLoader.brushSides[brush.brushSide + j].plane;
-				QPlane plane = MapLoader.planes[planeIndex];
-				if (plane.GetSide(possibleIntersectPoint[i], QPlane.CheckPointPlane.IsFront))
-				{
-					inside = false;
-					j = brush.numOfBrushSides;
-				}
-			}
-			if (inside)
-			{
-				if (!intersectPoint.Contains(possibleIntersectPoint[i]))
-					intersectPoint.Add(possibleIntersectPoint[i]);
-			}
-		}
-
+		intersectPoint.AddRange(Geometry3D.ComputeConvexMeshPoints(brushPlanes));
 		intersectPoint = RemoveDuplicatedVectors(intersectPoint);
 		Vector3 normal = Vector3.Zero;
 		if (!CanForm3DConvexHull(intersectPoint, ref normal))
@@ -1730,7 +1665,7 @@ public static class Mesher
 
 		Aabb box = convexHull.GetDebugMesh().GetAabb();
 		Fog.Layers = GameManager.AllPlayerViewMask;
-		Fog.GlobalPosition = box.GetCenter();
+		Fog.Position = box.GetCenter();
 		Fog.Shape = RenderingServer.FogVolumeShape.Box;
 		Fog.Size = box.Size;
 		Fog.Material = QShaderManager.GetFog(textureName, Fog.Size.Y);

@@ -339,8 +339,12 @@ public partial class PlayerControls : InterpolatedNode3D
 						{
 							if (playerThing.waterLever == 1)
 								currentFootStep = PlayerThing.FootStepType.Splash;
+							else if (st.NoSteps)
+								currentFootStep = PlayerThing.FootStepType.None;
 							else if (st.MetalSteps)
 								currentFootStep = PlayerThing.FootStepType.Clank;
+							else if (st.Flesh)
+								currentFootStep = PlayerThing.FootStepType.Flesh;
 							else
 								currentFootStep = footStep;
 						}

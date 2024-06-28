@@ -64,10 +64,10 @@ public partial class ClusterPVSManager : Node
 		{
 			// Retrieve the node and slit Plane
 			QNode node = MapLoader.nodes[i];
-			QPlane slitPlane = MapLoader.planes[node.plane];
+			Plane slitPlane = MapLoader.planes[node.plane];
 
 			// Determine whether the current position is on the front or back side of this plane.
-			if (slitPlane.GetSide(currentPos))
+			if (slitPlane.IsPointOver(currentPos))
 			{
 				// If the current position is on the front side this is the index our new tree node
 				i = node.front;

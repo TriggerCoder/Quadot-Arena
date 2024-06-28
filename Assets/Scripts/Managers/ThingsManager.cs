@@ -410,7 +410,15 @@ public partial class ThingsManager : Node
 					tc.AutoReturnTime = wait;
 				}
 
+				//If this trigger is a target, then is useless to setup a dummy Area3D
 				string strWord;
+				if (entityData.TryGetValue("targetname", out strWord))
+				{
+					GameManager.Print("Skipping Area3D for " + entityData["classname"] + " as it's already targetted, targetName: " + strWord);
+					continue;
+				}
+
+
 				if (entityData.TryGetValue("model", out strWord))
 				{
 					int model = int.Parse(strWord.Trim('*'));

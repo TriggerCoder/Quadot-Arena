@@ -15,7 +15,7 @@ public static class MapLoader
 	public static List<ImageTexture> lightMaps;
 	public static List<QVertex> verts;
 	public static List<int> vertIndices;
-	public static List<QPlane> planes;
+	public static List<Plane> planes;
 	public static List<QNode> nodes;
 	public static List<QLeaf> leafs;
 	public static List<int> leafsSurfaces;
@@ -121,11 +121,11 @@ public static class MapLoader
 		{
 			BSPMap.BaseStream.Seek(header.Directory[LumpType.Planes].Offset, SeekOrigin.Begin);
 			int num = header.Directory[LumpType.Planes].Length / 16;
-			planes = new List<QPlane>(num);
+			planes = new List<Plane>(num);
 			GameManager.Print("planes " + num);
 			for (int i = 0; i < num; i++)
 			{
-				planes.Add(new QPlane(new Vector3(BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle()), BSPMap.ReadSingle()));
+				planes.Add(new Plane(QuakeToGodot.Vect3(new Vector3(BSPMap.ReadSingle(), BSPMap.ReadSingle(), BSPMap.ReadSingle()), false), BSPMap.ReadSingle() * GameManager.sizeDividor));
 			}
 		}
 
@@ -580,7 +580,7 @@ public static void LerpColorOnRepeatedVertex()
 
 		if (listBrushes.Count == 0)
 		{
-			GameManager.Print("brushes: " + num + " is empty", GameManager.PrintType.Info);
+			GameManager.Print("GenerateGeometricCollider brushes: " + num + " is empty", GameManager.PrintType.Info);
 			return 0;
 		}
 
