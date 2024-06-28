@@ -30,10 +30,8 @@ public partial class SpriteController : Node3D
 	private MeshProcessed sprite;
 
 	private GameManager.FuncState currentState = GameManager.FuncState.None;
-	private int indexFrame = 0;
 	public override void _Ready()
 	{
-		indexFrame = GD.RandRange(0, 9);
 		Init();
 	}
 
@@ -51,10 +49,9 @@ public partial class SpriteController : Node3D
 		if (!TextureLoader.HasTexture(spriteName))
 			TextureLoader.AddNewTexture(spriteName, isTransparent);
 
-		sprite = Mesher.GenerateSprite(spriteName, spriteRadius, spriteRadius, GameManager.AllPlayerViewMask, castShadows, this, isTransparent, ((useMultiMesh != MultiMeshType.NoMultiMesh) && !isTransparent), (useMultiMesh == MultiMeshType.LowCount), spriteData.alphaFade);
+		sprite = Mesher.GenerateSprite(spriteName + "_" + spriteRadius, spriteName, spriteRadius, spriteRadius, GameManager.AllPlayerViewMask, castShadows, spriteData.destroyTimer, this, isTransparent, ((useMultiMesh != MultiMeshType.NoMultiMesh) && !isTransparent), (useMultiMesh == MultiMeshType.LowCount));
 
 		spriteData.baseTime = spriteData.destroyTimer;
-		spriteData.refreshFrame = indexFrame;
 	}
 
 	public void Start()

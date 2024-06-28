@@ -7,7 +7,6 @@
 [sub_resource type="Resource" id="Resource_v4yxr"]
 resource_local_to_scene = true
 script = ExtResource("2_r2qf7")
-alphaFade = true
 destroyType = 1
 destroyTimer = 200.0
 Modulate = Color(0, 0, 0, 1)

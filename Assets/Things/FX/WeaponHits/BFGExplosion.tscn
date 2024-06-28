@@ -6,7 +6,6 @@
 [sub_resource type="Resource" id="Resource_gpk33"]
 resource_local_to_scene = true
 script = ExtResource("2_ix63g")
-alphaFade = false
 destroyType = 1
 destroyTimer = 0.45
 Modulate = Color(0, 0, 0, 1)

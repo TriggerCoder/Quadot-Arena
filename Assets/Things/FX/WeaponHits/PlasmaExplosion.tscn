@@ -6,7 +6,6 @@
 [sub_resource type="Resource" id="Resource_wtu2s"]
 resource_local_to_scene = true
 script = ExtResource("2_72dus")
-alphaFade = false
 destroyType = 1
 destroyTimer = 0.5
 Modulate = Color(0, 0, 0, 1)

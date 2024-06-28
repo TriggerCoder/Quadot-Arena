@@ -6,7 +6,7 @@ public partial class ClusterPVSManager : Node
 	public static ClusterPVSManager Instance;
 	private GeometryInstance3D[] SurfaceToCluster;
 	private Dictionary<GeometryInstance3D, uint> AllClusters = new Dictionary<GeometryInstance3D, uint>();
-	private const int RenderFrameMask = (0xFFFF << GameManager.MaxLocalPlayers);
+	private const int RenderFrameMask = (0xFFFFFF << GameManager.MaxLocalPlayers);
 	private const uint NoRenderLayer = (1 << GameManager.NotVisibleLayer);
 	private static uint currentFrame = 0;
 	public void ResetClusterList(int count)

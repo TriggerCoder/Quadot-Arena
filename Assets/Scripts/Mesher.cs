@@ -1159,10 +1159,10 @@ public static class Mesher
 		return meshProcessed;
 	}
 
-	public static MeshProcessed GenerateSprite(string spriteName, float width, float height, uint layer, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, bool useLowMultimeshes = true, bool useLightVol = false)
+	public static MeshProcessed GenerateSprite(string spriteName, string textureName, float width, float height, uint layer, bool castShadows, float destroyTimer, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, bool useLowMultimeshes = true)
 	{
 		if (ModelsManager.Sprites.ContainsKey(spriteName))
-			return FillSpriteFromProcessedData(spriteName, layer, castShadows, ownerObject, forceSkinAlpha, useCommon, useLightVol);
+			return FillSpriteFromProcessedData(spriteName, textureName, layer, castShadows, destroyTimer, ownerObject, forceSkinAlpha, useCommon);
 
 		if (ownerObject == null)
 		{
@@ -1180,7 +1180,7 @@ public static class Mesher
 		data.arrMesh =  GenerateQuadMesh(width, height, 0.5f, 0.5f);
 
 		bool currentTransparent = forceSkinAlpha;
-		ShaderMaterial material = MaterialManager.GetMaterials(spriteName, -1, ref currentTransparent);
+		ShaderMaterial material = MaterialManager.GetMaterials(textureName, -1, ref currentTransparent);
 
 		meshProcessed.data[0] = data;
 		data.isTransparent = currentTransparent;
@@ -1211,8 +1211,8 @@ public static class Mesher
 			if (!castShadows)
 				mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 			mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
-			if (useLightVol)
-				mesh.SetInstanceShaderParameter("UseLightVol", true);
+			if (destroyTimer > 0)
+				mesh.SetInstanceShaderParameter("LifeTime", destroyTimer);
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(mesh);
 			MultiMeshesInstances.Add(multiMesh, mesh);
 			GameManager.Print("Adding MultiMesh : " + mesh.Name);
@@ -1226,14 +1226,14 @@ public static class Mesher
 			if (!castShadows)
 				mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 			mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
-			if (useLightVol)
-				mesh.SetInstanceShaderParameter("UseLightVol", true);
+			if (destroyTimer > 0)
+				mesh.SetInstanceShaderParameter("LifeTime", destroyTimer);
 			ownerObject.AddChild(mesh);
 		}
 		ModelsManager.Sprites.Add(spriteName, data);
 		return meshProcessed;
 	}
-	public static MeshProcessed FillSpriteFromProcessedData(string spriteName, uint layer, bool castShadows, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, bool useLightVol = false)
+	public static MeshProcessed FillSpriteFromProcessedData(string spriteName, string textureName, uint layer, bool castShadows, float destroyTimer, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true)
 	{
 		if (ownerObject == null)
 		{
@@ -1250,7 +1250,7 @@ public static class Mesher
 		MeshProcessed.dataMeshes data = ModelsManager.Sprites[spriteName];
 		MultiMesh multiMesh = data.multiMesh;
 		bool currentTransparent = forceSkinAlpha;
-		ShaderMaterial material = MaterialManager.GetMaterials(spriteName, -1, ref currentTransparent);
+		ShaderMaterial material = MaterialManager.GetMaterials(textureName, -1, ref currentTransparent);
 		meshProcessed.data[0] = data;
 
 		if (useCommon && !currentTransparent)
@@ -1267,8 +1267,8 @@ public static class Mesher
 				MultiMeshesInstances.Add(multiMesh, mesh);
 				GameManager.Print("Adding MultiMesh : " + mesh.Name);
 				mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
-				if (useLightVol)
-					mesh.SetInstanceShaderParameter("UseLightVol", true);
+				if (destroyTimer > 0)
+					mesh.SetInstanceShaderParameter("LifeTime", destroyTimer);
 			}
 
 			if (!MultiMeshSprites.ContainsKey(multiMesh))
@@ -1286,8 +1286,8 @@ public static class Mesher
 			if (!castShadows)
 				mesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 			mesh.SetInstanceShaderParameter("OffSetTime", GameManager.CurrentTimeMsec);
-			if (useLightVol)
-				mesh.SetInstanceShaderParameter("UseLightVol", true);
+			if (destroyTimer > 0)
+				mesh.SetInstanceShaderParameter("LifeTime", destroyTimer);
 			ownerObject.AddChild(mesh);
 		}
 		return meshProcessed;

@@ -7,7 +7,6 @@
 [sub_resource type="Resource" id="Resource_kjs51"]
 resource_local_to_scene = true
 script = ExtResource("2_3p3to")
-alphaFade = true
 destroyType = 1
 destroyTimer = 5.0
 Modulate = Color(0, 0, 0, 1)
@@ -15,7 +14,7 @@ Modulate = Color(0, 0, 0, 1)
 [node name="PlasmaMark" type="Node3D"]
 script = ExtResource("1_3630b")
 spriteName = "gfx/damage/plasma_mrk"
-spriteRadius = 5.5
+spriteRadius = 3.5
 useMultiMesh = 2
 spriteData = SubResource("Resource_kjs51")
 

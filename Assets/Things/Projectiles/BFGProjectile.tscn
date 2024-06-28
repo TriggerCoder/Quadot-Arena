@@ -10,7 +10,6 @@
 [sub_resource type="Resource" id="Resource_ml10e"]
 resource_local_to_scene = true
 script = ExtResource("6_ynxl8")
-alphaFade = false
 destroyType = 0
 destroyTimer = 0.0
 Modulate = Color(0, 0, 0, 1)

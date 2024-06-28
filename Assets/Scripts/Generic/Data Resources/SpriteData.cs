@@ -4,15 +4,12 @@ using System.Collections.Generic;
 public partial class SpriteData : Resource
 {
 	[Export]
-	public bool alphaFade = false;
-	[Export]
 	public DestroyType destroyType = DestroyType.NoDestroy;
 	[Export]
 	public float destroyTimer = 0;
 	[Export]
 	public Color Modulate = Colors.Black;
 
-	public int refreshFrame = 0;
 	public List<Node> destroyNodes;
 	public enum DestroyType
 	{
@@ -39,6 +36,8 @@ public partial class SpriteData : Resource
 	public void SetMultiMeshData(MultiMeshData data)
 	{
 		multiMeshData = data;
+		//Set OffSetTime
+		Modulate.A = GameManager.CurrentTimeMsec;
 	}
 
 	public void SetReferenceNode(Node3D node)
@@ -82,23 +81,12 @@ public partial class SpriteData : Resource
 			lastGlobalBasis = GlobalBasis;
 			GlobalTransform = new Transform3D(GlobalBasis, GlobalPosition);
 		}
-		else if (alphaFade)
-		{
-			if ((Engine.GetFramesDrawn() % 10) == refreshFrame)
-				update = true;
-		}
-
 	}
 
 	public void Process(float deltaTime)
 	{
 		CheckReference();
 		UpdateMultiMesh();
-		if ((alphaFade) && (update))
-		{
-			float alphaValue = Mathf.Lerp(1.0f, 0.0f, destroyTimer / baseTime);
-			Modulate = new Color(alphaValue, alphaValue, alphaValue);
-		}
 		if (destroyType == DestroyType.NoDestroy)
 			return;
 
