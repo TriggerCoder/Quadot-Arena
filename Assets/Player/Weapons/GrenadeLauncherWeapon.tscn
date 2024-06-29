@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://h6jkwahjjxfk"]
+[gd_scene load_steps=11 format=3 uid="uid://h6jkwahjjxfk"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/GrenadeLauncherWeapon.cs" id="1_c2ugi"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_dhid1"]
@@ -11,7 +11,7 @@ tracks/0/enabled = true
 tracks/0/path = NodePath(".")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.25, 1, 0, 0, -0.131, 0.991, 1, 1, 0, 0, 0, 1)
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.3, 1, 0, 0, -0.131, 0.991, 1, 1, 0, 0, 0, 1)
 
 [sub_resource type="Animation" id="Animation_jenqq"]
 resource_name = "idle"
@@ -29,6 +29,8 @@ _data = {
 "idle": SubResource("Animation_jenqq")
 }
 
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_a46c4"]
+
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_j54x4"]
 animation = &"fire"
 
@@ -39,21 +41,23 @@ mix_mode = 1
 animation = &"idle"
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_ul8cb"]
-graph_offset = Vector2(-464.651, 3.43291)
-nodes/atacck/node = SubResource("AnimationNodeAnimation_j54x4")
-nodes/atacck/position = Vector2(-160, 220)
+graph_offset = Vector2(-512.7, 27.7)
+nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_a46c4")
+nodes/TimeScale/position = Vector2(-100, 200)
+nodes/attack/node = SubResource("AnimationNodeAnimation_j54x4")
+nodes/attack/position = Vector2(-260, 240)
 nodes/fire_shot/node = SubResource("AnimationNodeOneShot_jrkcu")
 nodes/fire_shot/position = Vector2(60, 100)
 nodes/idle/node = SubResource("AnimationNodeAnimation_cij11")
 nodes/idle/position = Vector2(-318.976, 109.718)
-node_connections = [&"fire_shot", 0, &"idle", &"fire_shot", 1, &"atacck", &"output", 0, &"fire_shot"]
+node_connections = [&"TimeScale", 0, &"attack", &"fire_shot", 0, &"idle", &"fire_shot", 1, &"TimeScale", &"output", 0, &"fire_shot"]
 
-[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("weaponAnimation", "animation", "audioStream", "muzzleLight")]
-transform = Transform3D(0.984856, 0.173376, 0, -0.173376, 0.984856, 0, 0, 0, 1, 0, 0, 0)
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("weaponAnimation", "audioStream", "muzzleLight")]
+transform = Transform3D(0.997546, 0.0700209, 0, -0.0700209, 0.997546, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("1_c2ugi")
 AttackProjectileName = "GrenadeProjectile"
 weaponAnimation = NodePath("AnimationTree")
-animation = NodePath("AnimationPlayer")
+animationSpeed = 2.0
 Offset = Vector3(0.2, -0.3, 0)
 audioStream = NodePath("WeaponAudioStream")
 _sounds = PackedStringArray("weapons/grenade/grenlf1a", "weapons/noammo", "weapons/change")
@@ -82,11 +86,9 @@ libraries = {
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
 active = false
-libraries = {
-"": SubResource("AnimationLibrary_1s830")
-}
 tree_root = SubResource("AnimationNodeBlendTree_ul8cb")
 anim_player = NodePath("../AnimationPlayer")
+parameters/TimeScale/scale = 1.0
 parameters/fire_shot/active = false
 parameters/fire_shot/internal_active = false
 parameters/fire_shot/request = 0

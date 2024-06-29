@@ -11,7 +11,8 @@ public partial class GrenadeLauncherWeapon : PlayerWeapon
 	[Export]
 	public AnimationTree weaponAnimation;
 	[Export]
-	public AnimationPlayer animation;
+	public float animationSpeed = 1;
+
 	public Vector3 spawnPos;
 	protected override void OnUpdate(float deltaTime)
 	{
@@ -35,9 +36,9 @@ public partial class GrenadeLauncherWeapon : PlayerWeapon
 		playerInfo.playerPostProcessing.playerHUD.UpdateAmmoType(PlayerInfo.grenadesAmmo);
 		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.grenadesAmmo]);
 
-		animation.SpeedScale = kickSpeed;
 		weaponAnimation.Active = true;
 		weaponAnimation.Set("parameters/fire_shot/active", true);
+		weaponAnimation.Set("parameters/TimeScale/scale", animationSpeed);
 	}
 	public override bool Fire()
 	{

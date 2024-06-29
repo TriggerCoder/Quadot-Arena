@@ -17,7 +17,9 @@ public enum DamageType
 	Bullet,
 	Pellet,
 	Melee,
-	Rail
+	Rail,
+	Land,
+	Fall,
 }
 
 public enum BloodType

@@ -12,7 +12,8 @@ public partial class PlayerControls : InterpolatedNode3D
 	public PlayerWeapon playerWeapon;
 	[Export]
 	public PlayerCamera playerCamera;
-
+	[Export]
+	public AnimationTree weaponPositionAnimation;
 	public SeparationRayShape3D feetRay;
 
 	public CapsuleShape3D	collider;
@@ -39,6 +40,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	public float runSpeed = 7.0f;                   // Run speed
 	public float swimSpeed = 7.0f;                  // Swim speed
 	private float oldSpeed = 0;                     // Previous move speed
+	public float fallSpeed = 0;						// Acumulated fallSpeed
 
 	public float moveSpeed;                         // Ground move speed
 	public float runAcceleration = 14.0f;           // Ground accel
@@ -147,6 +149,8 @@ public partial class PlayerControls : InterpolatedNode3D
 	{
 		moveSpeed = runSpeed;
 		currentMoveType = MoveType.Run;
+		weaponPositionAnimation.Active = true;
+		weaponPositionAnimation.Set("parameters/fall_shot/active", true);
 	}
 
 	public void Init(int contollerNum)
@@ -357,8 +361,6 @@ public partial class PlayerControls : InterpolatedNode3D
 				playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed, deltaTime);
 		}
 
-		controllerWasGrounded = controllerIsGrounded;
-
 		if ((GlobalPosition - lastGlobalPosition).LengthSquared() > .0001f)
 		{
 			bobActive = true;
@@ -398,6 +400,31 @@ public partial class PlayerControls : InterpolatedNode3D
 			CheckWeaponChangeByIndex();
 	}
 
+	public void CheckCrash()
+	{
+		if (fallSpeed > -20)
+		{
+			playerThing.PlayModelSound("land1", false, false);
+			fallSpeed = 0;
+			return;
+		}
+		if (fallSpeed > -30)
+		{
+			playerThing.Damage(5, DamageType.Land);
+			weaponPositionAnimation.Set("parameters/TimeScale/scale", 1.4f);
+			weaponPositionAnimation.Set("parameters/depth/add_amount", .75f);
+		}
+		else
+		{
+			playerThing.Damage(10, DamageType.Fall);
+			weaponPositionAnimation.Set("parameters/TimeScale/scale", 1f);
+			weaponPositionAnimation.Set("parameters/depth/add_amount", 1f);
+		}
+
+		weaponPositionAnimation.Set("parameters/fall_shot/request", (int)AnimationNodeOneShot.OneShotRequest.Fire);
+		fallSpeed = 0;
+	}
+
 	public override void _PhysicsProcess(double delta)
 	{
 		if (GameManager.Paused)
@@ -434,11 +461,16 @@ public partial class PlayerControls : InterpolatedNode3D
         if (doGoundChecks)
         {
 			if (controllerIsGrounded)
+			{
 				GroundMove(deltaTime);
+				if (!controllerWasGrounded)
+					CheckCrash();
+			}
 			else
 				AirMove(deltaTime);
 		}
 
+		controllerWasGrounded = controllerIsGrounded;
 		//apply move
 		ApplyMove(deltaTime);
 
@@ -446,8 +478,13 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (jumpPadVel.LengthSquared() > 0)
 		{
 			jumpPadVel.Y -= (GameManager.Instance.gravity * deltaTime);
-			if ((jumpPadVel.Y < 0) && (controllerIsGrounded))
-				jumpPadVel = Vector3.Zero;
+			if (jumpPadVel.Y < 0)
+			{
+				fallSpeed = jumpPadVel.Y;
+				if (controllerIsGrounded)
+					jumpPadVel = Vector3.Zero;
+			}
+				
 		}
 
 		if (wishFire)
@@ -724,7 +761,10 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (jumpPadVel.LengthSquared() > 0)
 			playerVelocity.Y = 0;
 		else
+		{
 			playerVelocity.Y -= GameManager.Instance.gravity * deltaTime;
+			fallSpeed = playerVelocity.Y;
+		}
 	}
 
 	private void AirControl(Vector3 wishdir, float wishspeed, float deltaTime)
@@ -766,8 +806,6 @@ public partial class PlayerControls : InterpolatedNode3D
 			playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.Land;
 		else
 			playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.LandBack;
-
-		playerThing.PlayModelSound("land1", false);
 	}
 
 	public void AnimateLegsOnJump()
@@ -779,7 +817,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 		playerThing.avatar.lowerAnimation = lastJumpIndex;
 		playerThing.avatar.enableOffset = false;
-		playerThing.PlayModelSound("jump1");
+		playerThing.PlayModelSound("jump1", true, false);
 	}
 	public bool TrySwapWeapon(int weapon)
 	{

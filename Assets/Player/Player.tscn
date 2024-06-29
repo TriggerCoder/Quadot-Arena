@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://xi3ybp7mrio2"]
+[gd_scene load_steps=29 format=3 uid="uid://xi3ybp7mrio2"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerThing.cs" id="1_da8o2"]
 [ext_resource type="Script" path="res://Assets/Scripts/Player/PlayerControls.cs" id="1_g37r6"]
@@ -17,6 +17,66 @@
 [ext_resource type="PackedScene" uid="uid://cuxddhbt7p0lt" path="res://Assets/Player/Weapons/BFG10KWeapon.tscn" id="9_sanay"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="10_h25w0"]
 [ext_resource type="PackedScene" uid="uid://qov23ls4iuhu" path="res://Assets/Player/PlayerPostProcessing.tscn" id="11_uirmt"]
+
+[sub_resource type="Animation" id="Animation_yomay"]
+resource_name = "idle"
+length = 0.6
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../PlayerInfo/InterpolatedTransform/ViewCamera/WeaponAnimation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0)
+
+[sub_resource type="Animation" id="Animation_yedjv"]
+resource_name = "fall"
+length = 0.6
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../PlayerInfo/InterpolatedTransform/ViewCamera/WeaponAnimation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 0.2, 1, 0, -0.15, 0, 0.6, 1, 0, 0, 0)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_isu5b"]
+_data = {
+"fall": SubResource("Animation_yedjv"),
+"idle": SubResource("Animation_yomay")
+}
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_yx8dx"]
+
+[sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_yopqq"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_vyihg"]
+animation = &"fall"
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_c054x"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_1dy3t"]
+animation = &"idle"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_sc16g"]
+animation = &"idle"
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_vxboy"]
+graph_offset = Vector2(-287.098, 73.4222)
+nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_yx8dx")
+nodes/TimeScale/position = Vector2(80, 360)
+nodes/depth/node = SubResource("AnimationNodeAdd2_yopqq")
+nodes/depth/position = Vector2(260, 260)
+nodes/fall/node = SubResource("AnimationNodeAnimation_vyihg")
+nodes/fall/position = Vector2(-80, 380)
+nodes/fall_shot/node = SubResource("AnimationNodeOneShot_c054x")
+nodes/fall_shot/position = Vector2(443, 105)
+nodes/idle/node = SubResource("AnimationNodeAnimation_sc16g")
+nodes/idle/position = Vector2(100, 220)
+"nodes/idle 2/node" = SubResource("AnimationNodeAnimation_1dy3t")
+"nodes/idle 2/position" = Vector2(180, 60)
+nodes/output/position = Vector2(760, 80)
+node_connections = [&"TimeScale", 0, &"fall", &"depth", 0, &"idle", &"depth", 1, &"TimeScale", &"fall_shot", 0, &"idle 2", &"fall_shot", 1, &"depth", &"output", 0, &"fall_shot"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_xhpms"]
 radius = 0.1
@@ -43,14 +103,31 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 [node name="Feet" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 
-[node name="PlayerControls" type="Node3D" parent="." node_paths=PackedStringArray("playerInfo", "playerThing", "playerCamera")]
+[node name="PlayerControls" type="Node3D" parent="." node_paths=PackedStringArray("playerInfo", "playerThing", "playerCamera", "weaponPositionAnimation")]
 script = ExtResource("1_g37r6")
 playerInfo = NodePath("../PlayerInfo")
 playerThing = NodePath("..")
 playerCamera = NodePath("../PlayerInfo/MainCameras")
+weaponPositionAnimation = NodePath("AnimationTree")
 
 [node name="PlayerModel" type="Node3D" parent="PlayerControls"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="PlayerControls"]
+deterministic = true
+libraries = {
+"": SubResource("AnimationLibrary_isu5b")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="PlayerControls"]
+active = false
+tree_root = SubResource("AnimationNodeBlendTree_vxboy")
+anim_player = NodePath("../AnimationPlayer")
+parameters/TimeScale/scale = 1.0
+parameters/depth/add_amount = 0.0
+parameters/fall_shot/active = false
+parameters/fall_shot/internal_active = false
+parameters/fall_shot/request = 0
 
 [node name="PlayerInfo" type="Node3D" parent="." node_paths=PackedStringArray("playerControls", "playerCamera", "audioStream", "playerThing", "playerPostProcessing", "WeaponHand")]
 script = ExtResource("2_jjym4")
@@ -59,7 +136,7 @@ playerCamera = NodePath("MainCameras")
 audioStream = NodePath("../PlayerVoiceAudioStream")
 playerThing = NodePath("..")
 playerPostProcessing = NodePath("InterpolatedTransform/PostProcessing")
-WeaponHand = NodePath("InterpolatedTransform/ViewCamera/WeaponHand")
+WeaponHand = NodePath("InterpolatedTransform/ViewCamera/WeaponAnimation/WeaponHand")
 WeaponPrefabs = [ExtResource("4_o2814"), ExtResource("4_4obu3"), ExtResource("5_mrmdb"), ExtResource("6_mcduy"), ExtResource("5_jwttf"), ExtResource("7_vw7rq"), ExtResource("8_cbubn"), ExtResource("6_yhj32"), ExtResource("9_sanay")]
 
 [node name="MainCameras" type="Node3D" parent="PlayerInfo" node_paths=PackedStringArray("playerControls", "ThirdPerson", "ViewCamera", "playerPostProcessing")]
@@ -84,7 +161,9 @@ fov = 90.0
 near = 0.1
 far = 300.0
 
-[node name="WeaponHand" type="Node3D" parent="PlayerInfo/InterpolatedTransform/ViewCamera"]
+[node name="WeaponAnimation" type="Node3D" parent="PlayerInfo/InterpolatedTransform/ViewCamera"]
+
+[node name="WeaponHand" type="Node3D" parent="PlayerInfo/InterpolatedTransform/ViewCamera/WeaponAnimation"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 
 [node name="SpringArm3D" type="SpringArm3D" parent="PlayerInfo/InterpolatedTransform"]

@@ -168,8 +168,11 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.playerCamera.ChangeThirdPersonCamera(false);
 		currentState = GameManager.FuncState.Ready;
 	}
-	public void PlayModelSound(string soundName, bool byModel = true)
+	public void PlayModelSound(string soundName, bool byModel = true, bool overWriteSound = true)
 	{
+		if ((!overWriteSound) && (audioStream.Playing))
+			return;
+
 		if (byModel)
 			soundName = "player/" + modelName + "/" + soundName;
 		else
@@ -329,14 +332,21 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(drowningSound + GD.RandRange(1, 2)));
 		else if (painTime <= 0f)
 		{
-			if (hitpoints > 75)
+			if (damageType == DamageType.Land)
 				PlayModelSound("pain100_1");
-			else if (hitpoints > 50)
-				PlayModelSound("pain75_1");
-			else if (hitpoints > 25)
-				PlayModelSound("pain50_1");
+			else if (damageType == DamageType.Fall)
+				PlayModelSound("fall1");
 			else
-				PlayModelSound("pain25_1");
+			{
+				if (hitpoints > 75)
+					PlayModelSound("pain100_1");
+				else if (hitpoints > 50)
+					PlayModelSound("pain75_1");
+				else if (hitpoints > 25)
+					PlayModelSound("pain50_1");
+				else
+					PlayModelSound("pain25_1");
+			}
 
 			painTime = 1f;
 			avatar.Scale = Vector3.One * 1.1f;
@@ -382,6 +392,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.jumpPadVel = horizontalVelocity;
 		playerControls.jumpPadVel.Y = verticalVelocity;
 		playerControls.playerVelocity = Vector3.Zero;
+		playerControls.fallSpeed = 0;
 		playerControls.AnimateLegsOnJump();
 	}
 

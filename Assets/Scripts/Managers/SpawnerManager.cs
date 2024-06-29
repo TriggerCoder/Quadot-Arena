@@ -30,6 +30,7 @@ public static class SpawnerManager
 		player.playerControls.viewDirection.Y = target.angle;
 		player.playerControls.impulseVector = Vector3.Zero;
 		player.playerControls.playerVelocity = Vector3.Zero;
+		player.playerControls.fallSpeed = 0;
 		player.playerControls.jumpPadVel = Vector3.Zero;
 		player.Impulse(Quaternion.FromEuler(new Vector3(0, Mathf.DegToRad(target.angle), 0)) * Vector3.Forward, 1500);
 
