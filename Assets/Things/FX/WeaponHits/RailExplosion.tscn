@@ -7,7 +7,7 @@
 resource_local_to_scene = true
 script = ExtResource("2_ily8l")
 destroyType = 1
-destroyTimer = 1.0
+destroyTimer = 0.95
 Modulate = Color(0, 0, 0, 1)
 
 [node name="RailExplosion" type="Node3D"]

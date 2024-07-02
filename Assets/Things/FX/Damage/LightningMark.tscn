@@ -13,6 +13,6 @@ Modulate = Color(0, 0, 0, 1)
 [node name="LightningMark" type="Node3D"]
 script = ExtResource("1_x3l04")
 spriteName = "gfx/damage/hole_lg_mrk"
-spriteRadius = 1.2
+spriteRadius = 0.75
 useMultiMesh = 2
 spriteData = SubResource("Resource_vvmha")

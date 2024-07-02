@@ -13,7 +13,7 @@ public partial class BFG10KWeapon : PlayerWeapon
 	public MultiAudioStream humStream;
 	[Export]
 	public string[] _humSounds;
-	public AudioStreamWav[] humSounds;
+	public AudioStream[] humSounds;
 
 	private float chargeDelay = 0;
 	protected override void OnUpdate(float deltaTime)
@@ -105,7 +105,7 @@ public partial class BFG10KWeapon : PlayerWeapon
 		playerInfo.playerPostProcessing.playerHUD.UpdateAmmoType(PlayerInfo.bfgAmmo);
 		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.bfgAmmo]);
 
-		humSounds = new AudioStreamWav[_humSounds.Length];
+		humSounds = new AudioStream[_humSounds.Length];
 		for (int i = 0; i < _humSounds.Length; i++)
 			humSounds[i] = SoundManager.LoadSound(_humSounds[i], true);
 

@@ -4,7 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 public static class SoundManager
 {
-	public static Dictionary<string, AudioStreamWav> Sounds = new Dictionary<string, AudioStreamWav>();
+	public static Dictionary<string, AudioStream> Sounds = new Dictionary<string, AudioStream>();
 
 	public static void AddSounds(SoundData[] sounds)
 	{
@@ -15,9 +15,9 @@ public static class SoundManager
 			Sounds.Add(sound.name, sound.sound);
 	}
 
-	public static AudioStreamWav LoadSound(string soundName, bool loop = false, bool music = false)
+	public static AudioStream LoadSound(string soundName, bool loop = false, bool music = false)
 	{
-		AudioStreamWav clip;
+		AudioStream clip;
 		if (Sounds.TryGetValue(soundName, out clip))
 			return clip;
 
@@ -29,21 +29,34 @@ public static class SoundManager
 		byte[] WavSoudFile;
 		string path = Directory.GetCurrentDirectory() + "/StreamingAssets/"+ dir + soundName + ".wav";
 		if (File.Exists(path))
+		{
 			WavSoudFile = File.ReadAllBytes(path);
+			string[] soundFileName = path.Split('/');
+			clip = ToAudioStream(WavSoudFile, 0, soundFileName[soundFileName.Length - 1], loop);
+		}
 		else if (PakManager.ZipFiles.TryGetValue(path = (dir + soundName + ".wav").ToUpper(), out FileName))
 		{
 			var reader = new ZipReader();
 			reader.Open(FileName);
 			WavSoudFile = reader.ReadFile(path, false);
+			string[] soundFileName = path.Split('/');
+			clip = ToAudioStream(WavSoudFile, 0, soundFileName[soundFileName.Length - 1], loop);
 		}
 		else
 		{
-			GameManager.Print("LoadSound: " + path + " not found", GameManager.PrintType.Warning);
-			return null;
+			if (PakManager.ZipFiles.TryGetValue(path = (dir + soundName + ".ogg").ToUpper(), out FileName))
+			{
+				var reader = new ZipReader();
+				reader.Open(FileName);
+				WavSoudFile = reader.ReadFile(path, false);
+				clip = AudioStreamOggVorbis.LoadFromBuffer(WavSoudFile);
+			}
+			else
+			{
+				GameManager.Print("LoadSound: " + path + " not found", GameManager.PrintType.Warning);
+				return null;
+			}
 		}
-
-		string[] soundFileName = path.Split('/');
-		clip = ToAudioStream(WavSoudFile, 0, soundFileName[soundFileName.Length - 1], loop);
 
 		if (clip == null)
 			return null;

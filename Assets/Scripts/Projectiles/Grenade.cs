@@ -38,14 +38,14 @@ public partial class Grenade : RigidBody3D
 	[Export]
 	public float destroyTimer = 2.5f;
 
-	public AudioStreamWav[] Sounds = new AudioStreamWav[0];
+	public AudioStream[] Sounds = new AudioStream[0];
 	public bool inWater = false;
 
-	public AudioStreamWav waterSound;
+	public AudioStream waterSound;
 	private GameManager.FuncState currentState = GameManager.FuncState.None;
 	public override void _Ready()
 	{
-		Sounds = new AudioStreamWav[_sounds.Length];
+		Sounds = new AudioStream[_sounds.Length];
 		for (int i = 0; i < _sounds.Length; i++)
 			Sounds[i] = SoundManager.LoadSound(_sounds[i]);
 		BodyEntered += OnBodyEntered;
@@ -76,7 +76,7 @@ public partial class Grenade : RigidBody3D
 				Explode();
 	}
 
-	public void ChangeWater(bool inside, AudioStreamWav sound)
+	public void ChangeWater(bool inside, AudioStream sound)
 	{
 		inWater = inside;
 		waterSound = sound;

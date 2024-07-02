@@ -32,7 +32,6 @@ public partial class PortalSurface : Area3D
 		BodyEntered += OnBodyEntered;
 		BodyExited += OnBodyExit;
 		radiusSquared = radius * radius;
-		RenderingServer.FramePreDraw += () => OnPreRender();
 	}
 
 	private Transform3D MirrorTransform3D(Vector3 n, Vector3 d)
@@ -45,7 +44,7 @@ public partial class PortalSurface : Area3D
 		return new Transform3D(new Basis(BasisX, BasisY, BasisZ), offset);
 	}
 
-	public void OnPreRender()
+	public override void _Process(double delta)
 	{
 		for (int i = 0; i < currentPlayers.Count; i++) 
 		{
@@ -329,10 +328,5 @@ public partial class PortalSurface : Area3D
 //				GameManager.Print("Finally " + other.Name + " got scared of my dominion " + Name);
 			}
 		}
-	}
-
-	public override void _PhysicsProcess(double delta)
-	{
-		
 	}
 }

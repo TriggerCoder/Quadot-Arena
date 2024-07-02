@@ -12,7 +12,8 @@ public static class TextureLoader
 	public enum ImageFormat
 	{
 		JPG,
-		TGA
+		TGA,
+		PNG
 	}
 
 	public static Dictionary<string, ImageTexture> Textures = new Dictionary<string, ImageTexture>();
@@ -39,6 +40,7 @@ public static class TextureLoader
 		};
 		LoadTextures(list, false);
 		LoadTextures(list, false , ImageFormat.TGA);
+		LoadTextures(list, false, ImageFormat.PNG);
 	}
 	public static bool HasTextureOrAddTexture(string textureName, bool forceAlpha)
 	{
@@ -177,8 +179,10 @@ public static class TextureLoader
 
 			if (imageFormat == ImageFormat.TGA)
 				path += ".TGA";
-			else
+			else if (imageFormat == ImageFormat.JPG)
 				path += ".JPG";
+			else
+				path += ".PNG";
 
 			if (Textures.ContainsKey(tex.name))
 			{
@@ -201,8 +205,10 @@ public static class TextureLoader
 				if (imageFormat == ImageFormat.TGA)
 //					baseTex.LoadTgaFromBuffer(imageBytes);
 					LoadTGA(baseTex, imageBytes);
-				else
+				else if (imageFormat == ImageFormat.JPG)
 					baseTex.LoadJpgFromBuffer(imageBytes);
+				else
+					baseTex.LoadPngFromBuffer(imageBytes);
 
 				int width = baseTex.GetWidth();
 				int height = baseTex.GetHeight();

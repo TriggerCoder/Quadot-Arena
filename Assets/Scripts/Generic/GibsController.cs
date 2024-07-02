@@ -11,7 +11,7 @@ public partial class GibsController : RigidBody3D
 	public ModelController modelController;
 
 	public string[] decalMark = { "BloodMark1", "BloodMark2", "BloodMark3", "BloodMark4", "BloodMark5", "BloodMark6", "BloodMark7", "BloodMark8" };
-	public AudioStreamWav[] Sounds = new AudioStreamWav[0];
+	public AudioStream[] Sounds = new AudioStream[0];
 	public float spawnTime = .1f;
 
 	private Rid Sphere;
@@ -23,7 +23,7 @@ public partial class GibsController : RigidBody3D
 	private float dropTime;
 	public override void _Ready()
 	{
-		Sounds = new AudioStreamWav[_sounds.Length];
+		Sounds = new AudioStream[_sounds.Length];
 		for (int i = 0; i < _sounds.Length; i++)
 			Sounds[i] = SoundManager.LoadSound(_sounds[i]);
 		BodyEntered += OnBodyEntered;
@@ -100,6 +100,9 @@ public partial class GibsController : RigidBody3D
 		Vector3 Collision = Vector3.Zero;
 		Vector3 Normal = Vector3.Zero;
 
+		//Don't spawn more blood
+		SetProcess(false);
+
 		//check for collision on surfaces
 		{
 			SphereCast.CollisionMask = (1 << GameManager.ColliderLayer);
@@ -114,9 +117,6 @@ public partial class GibsController : RigidBody3D
 
 			if (Hit == null)
 				return;
-
-			//Don't spawn more blood
-			SetProcess(false);
 
 			if (CheckIfCanMark(SpaceState, Hit, Collision) == false)
 				return;

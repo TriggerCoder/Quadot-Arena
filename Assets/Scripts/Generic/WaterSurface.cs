@@ -11,10 +11,10 @@ public partial class WaterSurface : Area3D
 	public string waterOut = "player/watr_out";
 	public string waterUnder = "player/watr_un";
 	public string zap = "world/button_zap";
-	private AudioStreamWav inSound;
-	private AudioStreamWav outSound;
-	private AudioStreamWav underSound;
-	private AudioStreamWav zapSound;
+	private AudioStream inSound;
+	private AudioStream outSound;
+	private AudioStream underSound;
+	private AudioStream zapSound;
 	public bool isLava = false;
 	public override void _Ready()
 	{

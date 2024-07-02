@@ -59,7 +59,7 @@ public partial class BFGBall : InterpolatedNode3D
 	public string _onDeathSound;
 	[Export]
 	public MultiAudioStream audioStream;
-	public AudioStreamWav[] humSounds;
+	public AudioStream[] humSounds;
 
 	public uint ignoreSelfLayer = 0;
 
@@ -79,7 +79,7 @@ public partial class BFGBall : InterpolatedNode3D
 	private CurrentHum currentHum = CurrentHum.None;
 	public override void _Ready()
 	{
-		humSounds = new AudioStreamWav[_humSounds.Length];
+		humSounds = new AudioStream[_humSounds.Length];
 		for (int i = 0; i < _humSounds.Length; i++)
 			humSounds[i] = SoundManager.LoadSound(_humSounds[i], true);
 

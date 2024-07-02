@@ -15,7 +15,7 @@ public partial class PlayerWeapon : Node3D
 	[Export]
 	public string[] _sounds = new string[0];
 
-	public AudioStreamWav[] Sounds = new AudioStreamWav[0];
+	public AudioStream[] Sounds = new AudioStream[0];
 
 	public Node3D muzzleObject = null;
 	public Node3D barrelObject = null;
@@ -91,7 +91,7 @@ public partial class PlayerWeapon : Node3D
 	public bool hasQuad = false;
 	public override void _Ready()
 	{
-		Sounds = new AudioStreamWav[_sounds.Length];
+		Sounds = new AudioStream[_sounds.Length];
 		for (int i = 0; i < _sounds.Length; i++)
 			Sounds[i] = SoundManager.LoadSound(_sounds[i]);
 

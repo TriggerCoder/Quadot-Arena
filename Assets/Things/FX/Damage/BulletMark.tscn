@@ -13,6 +13,6 @@ Modulate = Color(0, 0, 0, 1)
 [node name="BulletMark" type="Node3D"]
 script = ExtResource("1_wo12j")
 spriteName = "gfx/damage/bullet_mrk"
-spriteRadius = 0.375
+spriteRadius = 0.5
 useMultiMesh = 2
 spriteData = SubResource("Resource_g4jpt")

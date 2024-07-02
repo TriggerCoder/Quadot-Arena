@@ -6,5 +6,5 @@ public partial class SoundData : Resource
 	[Export]
 	public string name;
 	[Export]
-	public AudioStreamWav sound;
+	public AudioStream sound;
 }
