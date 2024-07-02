@@ -21,13 +21,19 @@ public partial class ScoreBoard : Node3D
 	private static readonly string medalImpressive = "MENU/MEDALS/MEDAL_IMPRESSIVE";
 	private static readonly string medalGauntlet = "MENU/MEDALS/MEDAL_GAUNTLET";
 	private static readonly string medalExcellent = "MENU/MEDALS/MEDAL_EXCELLENT";
-
+	//Fixed Medal Size
+	private static int defaultMedalSize = 64;
 	public override void _Ready()
 	{
 		Instance = this;
 		medalImpressiveIcon.Texture = TextureLoader.GetTextureOrAddTexture(medalImpressive, false);
+		TextureLoader.AdjustIconSize(medalImpressiveIcon, defaultMedalSize);
+
 		medalGauntletIcon.Texture = TextureLoader.GetTextureOrAddTexture(medalGauntlet, false);
+		TextureLoader.AdjustIconSize(medalGauntletIcon, defaultMedalSize);
+
 		medalExcellentIcon.Texture = TextureLoader.GetTextureOrAddTexture(medalExcellent, false);
+		TextureLoader.AdjustIconSize(medalExcellentIcon, defaultMedalSize);
 	}
 
 	public void AddPlayer(PlayerThing player)

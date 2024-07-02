@@ -36,6 +36,8 @@ public partial class ItemPickup : Area3D
 	[Export]
 	public string PickupSound;
 	[Export]
+	public string SecondaryPickupSound;
+	[Export]
 	public string PickupIcon;
 	[Export]
 	public string PickupText;
@@ -239,7 +241,13 @@ public partial class ItemPickup : Area3D
 			if (disableCollider)
 				thingController.DisableThing();
 			if (!string.IsNullOrEmpty(PickupSound))
-				SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(PickupSound));
+			{
+				AudioStream sound = SoundManager.LoadSound(PickupSound);
+				if ((sound == null) && (!string.IsNullOrEmpty(SecondaryPickupSound)))
+					sound = SoundManager.LoadSound(GameManager.Instance.announcer + SecondaryPickupSound);
+				if (sound != null)
+					SoundManager.Create3DSound(GlobalPosition, sound);
+			}
 			if (!string.IsNullOrEmpty(PickupText))
 				if (showItemPickUp)
 					player.playerInfo.playerPostProcessing.playerHUD.ItemPickUp(PickupIcon, PickupText);

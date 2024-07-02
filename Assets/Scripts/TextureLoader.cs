@@ -9,6 +9,7 @@ public static class TextureLoader
 {
 	public static ImageTexture illegal;
 	public static readonly string FlareTexture = "GFX/MISC/FLARE";
+	private static float defaultPixelSize = .01f;
 	public enum ImageFormat
 	{
 		JPG,
@@ -276,6 +277,17 @@ public static class TextureLoader
 			}
 			else
 				GameManager.Print("Image not found " + tex.name + "." + imageFormat);
+		}
+	}
+
+	public static void AdjustIconSize(Sprite3D sprite, int size)
+	{
+		Vector2 Size = sprite.Texture.GetSize();
+		int maxSize = (int)Mathf.Max(Size.X, Size.Y);
+		if (maxSize != size)
+		{
+			float ratio = maxSize / size;
+			sprite.PixelSize = defaultPixelSize / ratio;
 		}
 	}
 

@@ -55,6 +55,7 @@ itemType = 11
 amount = 30
 bonus = true
 PickupSound = "items/quaddamage"
+SecondaryPickupSound = "quad_damage"
 PickupIcon = "icons/quad"
 PickupText = "Quad Damage"
 

@@ -42,21 +42,17 @@ public static class SoundManager
 			string[] soundFileName = path.Split('/');
 			clip = ToAudioStream(WavSoudFile, 0, soundFileName[soundFileName.Length - 1], loop);
 		}
-		else
+		else if (PakManager.ZipFiles.TryGetValue(path = (dir + soundName + ".ogg").ToUpper(), out FileName))
 		{
-			if (PakManager.ZipFiles.TryGetValue(path = (dir + soundName + ".ogg").ToUpper(), out FileName))
-			{
-				var reader = new ZipReader();
-				reader.Open(FileName);
-				WavSoudFile = reader.ReadFile(path, false);
-				clip = AudioStreamOggVorbis.LoadFromBuffer(WavSoudFile);
-			}
-			else
-			{
-				GameManager.Print("LoadSound: " + path + " not found", GameManager.PrintType.Warning);
-				return null;
-			}
+			var reader = new ZipReader();
+			reader.Open(FileName);
+			WavSoudFile = reader.ReadFile(path, false);
+			AudioStreamOggVorbis audio = AudioStreamOggVorbis.LoadFromBuffer(WavSoudFile);
+			audio.Loop = loop;
+			clip = audio;
 		}
+		else
+			GameManager.Print("LoadSound: " + path + " not found", GameManager.PrintType.Warning);
 
 		if (clip == null)
 			return null;

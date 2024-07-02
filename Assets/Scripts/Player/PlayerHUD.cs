@@ -85,6 +85,8 @@ public partial class PlayerHUD : MeshInstance3D
 	private static readonly string[] powerUpsSprites = { "ICONS/QUAD", "ICONS/HASTE", "ICONS/INVIS", "ICONS/REGEN", "ICONS/ENVIROSUIT", "ICONS/FLIGHT" };
 	private static readonly string[] holdableItemsSprites = { "ICONS/TELEPORTER", "ICONS/MEDKIT" };
 
+	//Fixed Icon Size
+	private static int defaultIconSize = 32;
 	public enum NumColor
 	{
 		Yellow,
@@ -181,6 +183,7 @@ public partial class PlayerHUD : MeshInstance3D
 		selectIcon.NoDepthTest = true;
 		selectIcon.Layers = Layers;
 		selectIcon.Texture = TextureLoader.GetTextureOrAddTexture(selectSprite, false);
+		TextureLoader.AdjustIconSize(selectIcon, defaultIconSize);
 		selectIcon.Hide();
 
 		noAmmoIcon = new Sprite3D[weaponIcon.Length];
@@ -194,6 +197,7 @@ public partial class PlayerHUD : MeshInstance3D
 			noAmmoIcon[i].NoDepthTest = true;
 			noAmmoIcon[i].Layers = Layers;
 			noAmmoIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(noAmmoSprite, false);
+			TextureLoader.AdjustIconSize(noAmmoIcon[i], defaultIconSize);
 			noAmmoIcon[i].Hide();
 		}
 	}
@@ -354,6 +358,7 @@ public partial class PlayerHUD : MeshInstance3D
 		for (i = 0; i < currentPowerUps.Count; i++)
 		{
 			powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsSprites[(int)currentPowerUps[i].type], false);
+			TextureLoader.AdjustIconSize(powerUpIcon[i], defaultIconSize);
 			powerUpText[i].Text = "" + currentPowerUps[i].displayTime;
 		}
 
@@ -396,7 +401,10 @@ public partial class PlayerHUD : MeshInstance3D
 			if (powerUpText[i].Visible == false)
 				powerUpText[i].Show();
 			if (!found)
+			{
 				powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsSprites[(int)currentPowerUps[i].type], false);
+				TextureLoader.AdjustIconSize(powerUpIcon[i], defaultIconSize);
+			}
 			powerUpText[i].Text = "" + currentPowerUps[i].displayTime;
 		}
 	}
@@ -411,6 +419,7 @@ public partial class PlayerHUD : MeshInstance3D
 			break;
 			case PlayerThing.HoldableItem.Teleporter:
 				holdableItemIcon.Texture = TextureLoader.GetTextureOrAddTexture(holdableItemsSprites[(int)HoldableItemType.Teleporter], false);
+				TextureLoader.AdjustIconSize(holdableItemIcon, defaultIconSize);
 			break;
 		}
 		holdableItemIcon.Show();
@@ -447,7 +456,9 @@ public partial class PlayerHUD : MeshInstance3D
 				selectIcon.Position = weaponIcon[i].Position;
 				weaponLabel.Text = weaponNames[weapon];
 			}
+
 			weaponIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(weaponSprites[currentWeapons[i]], false);
+			TextureLoader.AdjustIconSize(weaponIcon[i], defaultIconSize);
 		}
 		//In order to get near the screen
 		selectIcon.Position += Vector3.Back * .001f;
@@ -638,6 +649,7 @@ public partial class PlayerHUD : MeshInstance3D
 	public void ItemPickUp(string icon, string text)
 	{
 		pickUpIcon.Texture = TextureLoader.GetTextureOrAddTexture(icon, false);
+		TextureLoader.AdjustIconSize(pickUpIcon, defaultIconSize);
 		pickUpText.Text = text;
 		pickUpTime = 1.5f;
 		pickUpIcon.Show();

@@ -55,6 +55,7 @@ itemType = 13
 amount = 30
 bonus = true
 PickupSound = "items/regeneration"
+SecondaryPickupSound = "regeneration"
 PickupIcon = "icons/regen"
 PickupText = "Regeneration"
 

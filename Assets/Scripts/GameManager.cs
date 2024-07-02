@@ -160,6 +160,7 @@ public partial class GameManager : Node
 
 	public AudioStreamPlayer AnnouncerStream;
 	public AudioStreamPlayer StaticMusicPlayer = null;
+	public string announcer = Announcer.Quake;
 
 	private static readonly string FiveMinutes = "feedback/5_minute";
 	private static readonly string OneMinute = "feedback/1_minute";
@@ -167,6 +168,12 @@ public partial class GameManager : Node
 	private static readonly string[] FragsLeft = { "feedback/1_frag", "feedback/2_frags", "feedback/3_frags" };
 	private int second = 0;
 	private int currentDeathCount = 0;
+	public static class Announcer
+	{
+		public const string Male = "vo/";
+		public const string Quake = "vo_evil/";
+		public const string Female = "vo_female/";
+	}
 	public enum FuncState
 	{
 		None,
@@ -423,7 +430,14 @@ public partial class GameManager : Node
 
 	public void PlayAnnouncer(string sound)
 	{
-		AnnouncerStream.Stream = SoundManager.LoadSound(sound);
+		AudioStream audio = SoundManager.LoadSound(sound);
+		if (audio == null)
+			audio = SoundManager.LoadSound(sound.Replace("feedback/", announcer));
+
+		if (audio == null)
+			return;
+
+		AnnouncerStream.Stream = audio;
 		AnnouncerStream.Play();
 	}
 
