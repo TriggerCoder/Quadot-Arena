@@ -58,6 +58,7 @@ public partial class SpriteData : Resource
 		if (!IsInstanceValid(referenceNode))
 		{
 			readyToDestroy = true;
+			GlobalPosition = MapLoader.mapMinCoord * 2f;
 			return;
 		}
 			
@@ -92,13 +93,16 @@ public partial class SpriteData : Resource
 
 		destroyTimer -= deltaTime;
 		if (destroyTimer < 0)
+		{
 			readyToDestroy = true;
+			GlobalPosition = MapLoader.mapMinCoord * 2f;
+		}
 	}
 
 	public void Destroy()
 	{
 		MultiMesh multiMesh = multiMeshData.multiMesh;
-		HashSet<SpriteData> multiMeshSet;
+		List<SpriteData> multiMeshSet;
 		if (Mesher.MultiMeshSprites.TryGetValue(multiMesh, out multiMeshSet))
 		{
 			if (multiMeshSet.Contains(this))

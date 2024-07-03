@@ -9,6 +9,8 @@ public partial class SpriteController : Node3D
 	[Export]
 	public float spriteRadius = 2;
 	[Export]
+	public Vector2 spriteSize = Vector2.Zero;
+	[Export]
 	public BaseMaterial3D.BillboardModeEnum billboard = BaseMaterial3D.BillboardModeEnum.Disabled;
 	[Export]
 	public bool isTransparent = false;
@@ -49,7 +51,12 @@ public partial class SpriteController : Node3D
 		if (!TextureLoader.HasTexture(spriteName))
 			TextureLoader.AddNewTexture(spriteName, isTransparent);
 
-		sprite = Mesher.GenerateSprite(spriteName + "_" + spriteRadius, spriteName, spriteRadius, spriteRadius, GameManager.AllPlayerViewMask, castShadows, spriteData.destroyTimer, this, isTransparent, ((useMultiMesh != MultiMeshType.NoMultiMesh) && !isTransparent), (useMultiMesh == MultiMeshType.LowCount));
+		if (spriteSize.X == 0)
+			spriteSize.X = spriteRadius;
+		if (spriteSize.Y == 0)
+			spriteSize.Y = spriteRadius;
+
+		sprite = Mesher.GenerateSprite(spriteName + "_" + spriteRadius, spriteName, spriteSize.X, spriteSize.Y, GameManager.AllPlayerViewMask, castShadows, spriteData.destroyTimer, this, isTransparent, ((useMultiMesh != MultiMeshType.NoMultiMesh) && !isTransparent), (useMultiMesh == MultiMeshType.LowCount));
 
 		spriteData.baseTime = spriteData.destroyTimer;
 	}
@@ -73,6 +80,7 @@ public partial class SpriteController : Node3D
 
 		if (Mesher.MultiMeshSprites.ContainsKey(sprite.data[0].multiMesh))
 		{
+			currentState = GameManager.FuncState.None;
 			MultiMeshData multiMeshData = new MultiMeshData();
 			multiMeshData.multiMesh = sprite.data[0].multiMesh;
 			spriteData.GlobalTransform = GlobalTransform;

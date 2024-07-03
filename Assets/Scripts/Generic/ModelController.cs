@@ -25,8 +25,6 @@ public partial class ModelController : Node3D
 	[Export]
 	public float modelAnimationFPS = 0;
 	[Export]
-	public float textureAnimationFPS = 0;
-	[Export]
 	public DestroyType destroyType;
 	[Export]
 	public float destroyTimer = 0;
@@ -34,20 +32,14 @@ public partial class ModelController : Node3D
 	private List<MultiMeshData> multiMeshDataList = new List<MultiMeshData>();
 	private List<Node3D> destroyNodes = new List<Node3D>();
 	private List<int> modelAnim = new List<int>();
-	private List<int> textureAnim = new List<int>();
-	private Dictionary<int, ShaderMaterial[]> materials = new Dictionary<int, ShaderMaterial[]>();
 
 	private int modelCurrentFrame;
-	private List<int> textureCurrentFrame = new List<int>();
 
 	private Vector3 currentOrigin;
 	private float height;
 
 	private float ModelLerpTime = 0;
 	private float ModelCurrentLerpTime = 0;
-
-	private float TextureLerpTime = 0;
-	private float TextureCurrentLerpTime = 0;
 
 	private GameManager.FuncState currentState = GameManager.FuncState.None;
 
@@ -57,8 +49,7 @@ public partial class ModelController : Node3D
 	{
 		NoDestroy,
 		DestroyAfterTime,
-		DestroyAfterModelLastFrame,
-		DestroyAfterTextureLastFrame
+		DestroyAfterModelLastFrame
 	}
 
 	private Vector3 lastGlobalPosition = new Vector3(0, 0, 0);
@@ -105,29 +96,6 @@ public partial class ModelController : Node3D
 			var modelMesh = md3Model.meshes[i];
 			if (modelMesh.numFrames > 1)
 				modelAnim.Add(i);
-
-			if (!string.IsNullOrEmpty(shaderName))
-				continue;
-
-			if (modelMesh.numSkins > 1)
-			{
-				ShaderMaterial[] frames = new ShaderMaterial[modelMesh.numSkins];
-				for (int j = 0; j < modelMesh.numSkins; j++)
-				{
-					string texName = modelMesh.skins[j].name;
-					bool currentTransparent = isTransparent;
-					if (TextureLoader.HasTexture(texName))
-						frames[j] = MaterialManager.GetMaterials(texName, -1, ref currentTransparent);
-					else
-					{
-						TextureLoader.AddNewTexture(texName, isTransparent);
-						frames[j] = MaterialManager.GetMaterials(texName, -1, ref currentTransparent);
-					}
-				}
-				textureAnim.Add(i);
-				textureCurrentFrame.Add(0);
-				materials.Add(i, frames);
-			}
 		}
 
 		modelCurrentFrame = 0;
@@ -176,43 +144,6 @@ public partial class ModelController : Node3D
 			ModelCurrentLerpTime -= 1.0f;
 			modelCurrentFrame = nextFrame;
 		}
-	}
-	void AnimateTexture(float deltaTime)
-	{
-		if (textureAnimationFPS == 0)
-			return;
-
-		TextureLerpTime = textureAnimationFPS * deltaTime;
-		TextureCurrentLerpTime += TextureLerpTime;
-
-		for (int i = 0; i < textureAnim.Count; i++)
-		{
-			MD3Mesh currentMesh = md3Model.meshes[textureAnim[i]];
-
-			int currentFrame = textureCurrentFrame[i];
-			int nextFrame = currentFrame + 1;
-
-			if (nextFrame >= currentMesh.numSkins)
-				nextFrame = 0;
-			if ((nextFrame == 0) && (destroyType == DestroyType.DestroyAfterTextureLastFrame))
-			{
-				QueueFree();
-				return;
-			}
-
-			if (currentFrame == nextFrame)
-				continue;
-
-			if (TextureCurrentLerpTime >= 1.0f)
-			{
-				model.data[currentMesh.meshNum].meshDataTool.SetMaterial(materials[i][nextFrame]);
-				model.data[currentMesh.meshNum].arrMesh.SurfaceSetMaterial(0, materials[i][nextFrame]);
-				textureCurrentFrame[i] = nextFrame;
-			}
-		}
-
-		if (TextureCurrentLerpTime >= 1.0f)
-			TextureCurrentLerpTime -= 1.0f;
 	}
 	public void Start()
 	{
@@ -289,6 +220,9 @@ public partial class ModelController : Node3D
 		{
 			MultiMesh multiMesh = multiMeshDataList[i].multiMesh;
 			Dictionary<Node3D, int> multiMeshSet;
+
+			multiMeshDataList[i].owner.Hide();
+			Mesher.UpdateInstanceMultiMesh(multiMesh, multiMeshDataList[i].owner);
 			if (Mesher.MultiMeshes.TryGetValue(multiMesh, out multiMeshSet))
 			{
 				if (multiMeshSet.ContainsKey(multiMeshDataList[i].owner))
@@ -325,7 +259,6 @@ public partial class ModelController : Node3D
 		}
 
 		AnimateModel(deltaTime);
-		AnimateTexture(deltaTime);
 		UpdateMultiMesh();
 		if (alphaFade)
 		{

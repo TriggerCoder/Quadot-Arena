@@ -31,6 +31,11 @@ public partial class GameManager : Node
 	[Export]
 	public SubViewport IntermissionViewPort;
 	[Export]
+	public SubViewport AdvertisementViewPort;
+	[Export]
+	public VideoStreamPlayer AdvertisementVideo;
+
+	[Export]
 	public PackedScene viewPortPrefab;
 	[Export]
 	public PackedScene scoreBoard;
@@ -315,6 +320,7 @@ public partial class GameManager : Node
 					paused = false;
 					Input.MouseMode = Input.MouseModeEnum.Captured;
 				}
+				AdvertisementVideo.Paused = paused;
 			}
 		}
 		else if (paused)
@@ -324,6 +330,7 @@ public partial class GameManager : Node
 				if (Input.IsActionJustPressed("Action_Fire_0"))
 				{
 					paused = false;
+					AdvertisementVideo.Paused = paused;
 					Input.MouseMode = Input.MouseModeEnum.Captured;
 				}
 			}

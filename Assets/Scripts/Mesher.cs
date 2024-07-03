@@ -37,7 +37,8 @@ public static class Mesher
 	public const uint NoMarks = SurfaceFlags.NoImpact | SurfaceFlags.NoMarks;
 
 	public static Dictionary<MultiMesh, Dictionary<Node3D, int>> MultiMeshes = new Dictionary<MultiMesh, Dictionary<Node3D, int>>();
-	public static Dictionary<MultiMesh, HashSet<SpriteData>> MultiMeshSprites = new Dictionary<MultiMesh, HashSet<SpriteData>>();
+	public static HashSet<MultiMesh> MultiMeshesChanged = new HashSet<MultiMesh>();
+	public static Dictionary<MultiMesh, List<SpriteData>> MultiMeshSprites = new Dictionary<MultiMesh, List<SpriteData>>();
 	public static Dictionary<MultiMesh, MultiMeshInstance3D> MultiMeshesInstances = new Dictionary<MultiMesh, MultiMeshInstance3D>();
 	
 	public static void ClearMesherCache()
@@ -1162,7 +1163,7 @@ public static class Mesher
 	public static MeshProcessed GenerateSprite(string spriteName, string textureName, float width, float height, uint layer, bool castShadows, float destroyTimer, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true, bool useLowMultimeshes = true)
 	{
 		if (ModelsManager.Sprites.ContainsKey(spriteName))
-			return FillSpriteFromProcessedData(spriteName, textureName, layer, castShadows, destroyTimer, ownerObject, forceSkinAlpha, useCommon);
+			return FillSpriteFromProcessedData(spriteName, layer, castShadows, destroyTimer, ownerObject, forceSkinAlpha, useCommon);
 
 		if (ownerObject == null)
 		{
@@ -1195,10 +1196,11 @@ public static class Mesher
 			multiMesh.InstanceCount = LOW_USE_MULTIMESHES;
 		else
 			multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
+		multiMesh.VisibleInstanceCount = 0;
 
 		if (!MultiMeshSprites.ContainsKey(multiMesh))
 		{
-			HashSet<SpriteData> Set = new HashSet<SpriteData>();
+			List<SpriteData> Set = new List<SpriteData>();
 			MultiMeshSprites.Add(multiMesh, Set);
 		}
 
@@ -1233,7 +1235,7 @@ public static class Mesher
 		ModelsManager.Sprites.Add(spriteName, data);
 		return meshProcessed;
 	}
-	public static MeshProcessed FillSpriteFromProcessedData(string spriteName, string textureName, uint layer, bool castShadows, float destroyTimer, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true)
+	public static MeshProcessed FillSpriteFromProcessedData(string spriteName, uint layer, bool castShadows, float destroyTimer, Node3D ownerObject = null, bool forceSkinAlpha = false, bool useCommon = true)
 	{
 		if (ownerObject == null)
 		{
@@ -1250,7 +1252,6 @@ public static class Mesher
 		MeshProcessed.dataMeshes data = ModelsManager.Sprites[spriteName];
 		MultiMesh multiMesh = data.multiMesh;
 		bool currentTransparent = forceSkinAlpha;
-		ShaderMaterial material = MaterialManager.GetMaterials(textureName, -1, ref currentTransparent);
 		meshProcessed.data[0] = data;
 
 		if (useCommon && !currentTransparent)
@@ -1273,7 +1274,7 @@ public static class Mesher
 
 			if (!MultiMeshSprites.ContainsKey(multiMesh))
 			{
-				HashSet<SpriteData> Set = new HashSet<SpriteData>();
+				List<SpriteData> Set = new List<SpriteData>();
 				MultiMeshSprites.Add(multiMesh, Set);
 			}
 		}
@@ -1806,29 +1807,30 @@ public static class Mesher
 
 	public static void AddSpriteToMultiMeshes(MultiMesh multiMesh, SpriteData sprite, Color color)
 	{
-		HashSet<SpriteData> multiMeshSprites;
+		List<SpriteData> spriteDataList;
 		int instanceNum;
-		if (MultiMeshSprites.TryGetValue(multiMesh, out multiMeshSprites))
+		if (MultiMeshSprites.TryGetValue(multiMesh, out spriteDataList))
 		{
-			instanceNum = multiMeshSprites.Count;
+			instanceNum = spriteDataList.Count;
 			int threshold = (multiMesh.InstanceCount >> 1);
 			if (instanceNum > threshold)
 			{
-				foreach (SpriteData spriteToDestroy in multiMeshSprites)
+				foreach (SpriteData spriteToDestroy in spriteDataList)
 				{
 					if (spriteToDestroy.readyToDestroy)
 						continue;
 
 					spriteToDestroy.readyToDestroy = true;
+					spriteToDestroy.GlobalPosition = MapLoader.mapMinCoord * 2f;
 					break;
 				}
 			}
 
-			multiMeshSprites.Add(sprite);
+			spriteDataList.Add(sprite);
+			multiMesh.VisibleInstanceCount = instanceNum + 1;
 			if (multiMesh.UseColors)
 				multiMesh.SetInstanceColor(instanceNum, color);
 			multiMesh.SetInstanceTransform(instanceNum, sprite.GlobalTransform);
-			multiMesh.VisibleInstanceCount = instanceNum + 1;
 		}
 	}
 	public static void AddNodeToMultiMeshes(MultiMesh multiMesh, Node3D owner, Color color)
@@ -1932,58 +1934,75 @@ public static class Mesher
 	}
 	public static void MultiMeshUpdateInstances(MultiMesh multiMesh)
 	{
-		Dictionary<Node3D, int> multiMeshSet;
-		if (MultiMeshes.TryGetValue(multiMesh, out multiMeshSet))
+		if (MultiMeshesChanged.Contains(multiMesh))
+			return;
+		MultiMeshesChanged.Add(multiMesh);
+	}
+
+	public static void UpdateChangedMultiMeshes()
+	{
+		foreach(MultiMesh multiMesh in MultiMeshesChanged)
 		{
-			multiMesh.VisibleInstanceCount = multiMeshSet.Count;
-			int i = 0;
-			foreach (var instance in multiMeshSet)
+			Dictionary<Node3D, int> multiMeshSet;
+			if (MultiMeshes.TryGetValue(multiMesh, out multiMeshSet))
 			{
-				Node3D node = instance.Key;
-				multiMeshSet[node] = i;
-				if (node.IsVisibleInTree())
-					multiMesh.SetInstanceTransform(i, node.GlobalTransform);
-				else
+				multiMesh.VisibleInstanceCount = multiMeshSet.Count;
+				int i = 0;
+				foreach (var instance in multiMeshSet)
 				{
-					Transform3D min = new Transform3D(node.Basis, MapLoader.mapMinCoord * 2f);
-					multiMesh.SetInstanceTransform(i, min);
+					Node3D node = instance.Key;
+					multiMeshSet[node] = i;
+					if (node.IsVisibleInTree())
+						multiMesh.SetInstanceTransform(i, node.GlobalTransform);
+					else
+					{
+						Transform3D min = new Transform3D(node.Basis, MapLoader.mapMinCoord * 2f);
+						multiMesh.SetInstanceTransform(i, min);
+					}
+					i++;
 				}
-				i++;
 			}
 		}
+		MultiMeshesChanged.Clear();
 	}
+
 
 	public static void ProcessSprites(float deltaTime)
 	{
+		bool destroyTime = ((Engine.GetFramesDrawn() % 300) == 0);
+		List<SpriteData> detroyDataList = new List<SpriteData>();
+		int i = 0;
 		foreach (var keyValuePair in MultiMeshSprites)
 		{
 			MultiMesh multiMesh = keyValuePair.Key;
-			HashSet<SpriteData> spriteDataList = keyValuePair.Value;
-			List<SpriteData> detroyDataList = new List<SpriteData>();
+			List<SpriteData> spriteDataList = keyValuePair.Value;
+			detroyDataList.Clear();
 			int oldCount = spriteDataList.Count;
-			foreach (SpriteData spriteData in spriteDataList)
+			for(i = 0; i < oldCount; i++)
 			{
-				spriteData.Process(deltaTime);
-				if (spriteData.readyToDestroy)
-					detroyDataList.Add(spriteData);
+				spriteDataList[i].Process(deltaTime);
+				if ((destroyTime) && (spriteDataList[i].readyToDestroy))
+					detroyDataList.Add(spriteDataList[i]);
+			}
+			bool forceUpdate = false;
+			if (destroyTime)
+			{
+				for (i = 0; i < detroyDataList.Count; i++)
+					detroyDataList[i].Destroy();
+
+				multiMesh.VisibleInstanceCount = spriteDataList.Count;
+				forceUpdate = (oldCount != multiMesh.VisibleInstanceCount);
 			}
 
-			for (int i = 0; i < detroyDataList.Count; i++)
-				detroyDataList[i].Destroy();
-
-			multiMesh.VisibleInstanceCount = spriteDataList.Count;
-			bool forceUpdate = oldCount != multiMesh.VisibleInstanceCount;
-			int index = 0;
-			foreach (SpriteData spriteData in spriteDataList)
+			for (i = 0; i < spriteDataList.Count; i++)
 			{
-				if ((forceUpdate) || (spriteData.update))
+				if ((forceUpdate) || (spriteDataList[i].update))
 				{
-					if (spriteData.update)
-						spriteData.update = false;
-					multiMesh.SetInstanceColor(index, spriteData.Modulate);
-					multiMesh.SetInstanceTransform(index, spriteData.GlobalTransform);
+					if (spriteDataList[i].update)
+						spriteDataList[i].update = false;
+					multiMesh.SetInstanceColor(i, spriteDataList[i].Modulate);
+					multiMesh.SetInstanceTransform(i, spriteDataList[i].GlobalTransform);
 				}
-				index++;
 			}
 		}
 	}

@@ -1405,6 +1405,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		{
 			MultiMesh multiMesh = multiMeshDataList[i].multiMesh;
 			Dictionary<Node3D, int> multiMeshSet;
+
+			multiMeshDataList[i].owner.Hide();
+			Mesher.UpdateInstanceMultiMesh(multiMesh, multiMeshDataList[i].owner);
 			if (Mesher.MultiMeshes.TryGetValue(multiMesh, out multiMeshSet))
 			{
 				if (multiMeshSet.ContainsKey(multiMeshDataList[i].owner))

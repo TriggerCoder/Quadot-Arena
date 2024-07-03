@@ -173,6 +173,8 @@ public partial class ThingsManager : Node
 
 		ModelsManager.FrameProcessModels(deltaTime);
 		Mesher.ProcessSprites(deltaTime);
+		if ((Engine.GetFramesDrawn() % 360) == 0)
+			Mesher.UpdateChangedMultiMeshes();
 	}
 	public static void AddGibsShapes(string name, ConvexPolygonShape3D shape3D)
 	{
@@ -358,6 +360,7 @@ public partial class ThingsManager : Node
 			thingObject.Name = "Trigger " + target;
 			TriggerController tc = new TriggerController();
 			thingObject.AddChild(tc);
+			string gameType;
 
 			foreach (Dictionary<string, string> entityData in entityDataList)
 			{
@@ -366,28 +369,113 @@ public partial class ThingsManager : Node
 					default:
 						break;
 					case GameManager.GameType.FreeForAll:
+					{
+						if (entityData.ContainsKey("notfree"))
+							continue;
+						if (entityData.TryGetValue("gametype", out gameType))
+						{
+							if (!gameType.Contains("ffa"))
+								continue;
+						}
+						else if (entityData.TryGetValue("not_gametype", out gameType))
+						{
+							if (gameType.Contains("ffa"))
+								continue;
+						}
+					}
+					break;
 					case GameManager.GameType.Tournament:
-					case GameManager.GameType.OneFlagCTF:
-						{
-							if (entityData.ContainsKey("notfree"))
-								continue;
-						}
-						break;
+					{
+						if (entityData.ContainsKey("notfree"))
+							continue;
+					}
+					break;
 					case GameManager.GameType.TeamDeathmatch:
+					{
+						if (entityData.ContainsKey("notteam"))
+							continue;
+						if (entityData.TryGetValue("gametype", out gameType))
+						{
+							if (!gameType.Contains("tdm"))
+								continue;
+						}
+						else if (entityData.TryGetValue("not_gametype", out gameType))
+						{
+							if (gameType.Contains("tdm"))
+								continue;
+						}
+					}
+					break;
+					case GameManager.GameType.OneFlagCTF:
+					{
+						if (entityData.ContainsKey("notfree"))
+							continue;
+						if (entityData.TryGetValue("gametype", out gameType))
+						{
+							if (!gameType.Contains("1f"))
+								continue;
+						}
+						else if (entityData.TryGetValue("not_gametype", out gameType))
+						{
+							if (gameType.Contains("1f"))
+								continue;
+						}
+					}
+					break;
 					case GameManager.GameType.CaptureTheFlag:
+					{
+						if (entityData.ContainsKey("notteam"))
+							continue;
+						if (entityData.TryGetValue("gametype", out gameType))
+						{
+							if (!gameType.Contains("ctf"))
+								continue;
+						}
+						else if (entityData.TryGetValue("not_gametype", out gameType))
+						{
+							if (gameType.Contains("ctf"))
+								continue;
+						}
+					}
+					break;
 					case GameManager.GameType.Overload:
+					{
+						if (entityData.ContainsKey("notteam"))
+							continue;
+						if (entityData.TryGetValue("gametype", out gameType))
+						{
+							if (!gameType.Contains("ob"))
+								continue;
+						}
+						else if (entityData.TryGetValue("not_gametype", out gameType))
+						{
+							if (gameType.Contains("ob"))
+								continue;
+						}
+					}
+					break;
 					case GameManager.GameType.Harvester:
+					{
+						if (entityData.ContainsKey("notteam"))
+							continue;
+						if (entityData.TryGetValue("gametype", out gameType))
 						{
-							if (entityData.ContainsKey("notteam"))
+							if (!gameType.Contains("har"))
 								continue;
 						}
-						break;
+						else if (entityData.TryGetValue("not_gametype", out gameType))
+						{
+							if (gameType.Contains("har"))
+								continue;
+						}
+					}
+					break;
 					case GameManager.GameType.SinglePlayer:
-						{
-							if (entityData.ContainsKey("notsingle"))
-								continue;
-						}
-						break;
+					{
+						if (entityData.ContainsKey("notsingle"))
+							continue;
+					}
+					break;
 				}
 
 
@@ -468,20 +556,105 @@ public partial class ThingsManager : Node
 				default:
 				break;
 				case GameManager.GameType.FreeForAll:
+				{
+					if (entity.entityData.ContainsKey("notfree"))
+						continue;
+					if (entity.entityData.TryGetValue("gametype", out strWord))
+					{
+						if (!strWord.Contains("ffa"))
+							continue;
+					}
+					else if (entity.entityData.TryGetValue("not_gametype", out strWord))
+					{
+						if (strWord.Contains("ffa"))
+							continue;
+					}
+				}
+				break;
 				case GameManager.GameType.Tournament:
-				case GameManager.GameType.OneFlagCTF:
 				{
 					if (entity.entityData.ContainsKey("notfree"))
 						continue;
 				}
 				break;
 				case GameManager.GameType.TeamDeathmatch:
+				{
+					if (entity.entityData.ContainsKey("notteam"))
+						continue;
+					if (entity.entityData.TryGetValue("gametype", out strWord))
+					{
+						if (!strWord.Contains("tdm"))
+							continue;
+					}
+					else if (entity.entityData.TryGetValue("not_gametype", out strWord))
+					{
+						if (strWord.Contains("tdm"))
+							continue;
+					}
+				}
+				break;
+				case GameManager.GameType.OneFlagCTF:
+				{
+					if (entity.entityData.ContainsKey("notfree"))
+						continue;
+					if (entity.entityData.TryGetValue("gametype", out strWord))
+					{
+						if (!strWord.Contains("1f"))
+							continue;
+					}
+					else if (entity.entityData.TryGetValue("not_gametype", out strWord))
+					{
+						if (strWord.Contains("1f"))
+							continue;
+					}
+				}
+				break;
 				case GameManager.GameType.CaptureTheFlag:
+				{
+					if (entity.entityData.ContainsKey("notteam"))
+						continue;
+					if (entity.entityData.TryGetValue("gametype", out strWord))
+					{
+						if (!strWord.Contains("ctf"))
+							continue;
+					}
+					else if (entity.entityData.TryGetValue("not_gametype", out strWord))
+					{
+						if (strWord.Contains("ctf"))
+							continue;
+					}
+				}
+				break;
 				case GameManager.GameType.Overload:
+				{
+					if (entity.entityData.ContainsKey("notteam"))
+						continue;
+					if (entity.entityData.TryGetValue("gametype", out strWord))
+					{
+						if (!strWord.Contains("ob"))
+							continue;
+					}
+					else if (entity.entityData.TryGetValue("not_gametype", out strWord))
+					{
+						if (strWord.Contains("ob"))
+							continue;
+					}
+				}
+				break;
 				case GameManager.GameType.Harvester:
 				{
 					if (entity.entityData.ContainsKey("notteam"))
 						continue;
+					if (entity.entityData.TryGetValue("gametype", out strWord))
+					{
+						if (!strWord.Contains("har"))
+							continue;
+					}
+					else if (entity.entityData.TryGetValue("not_gametype", out strWord))
+					{
+						if (strWord.Contains("har"))
+							continue;
+					}
 				}
 				break;
 				case GameManager.GameType.SinglePlayer:
@@ -1245,6 +1418,17 @@ public partial class ThingsManager : Node
 					}
 					else if (entity.entityData.ContainsKey("random"))
 						AddRandomTimeToSound(thingObject, entity.entityData, audioStream2D, audioStream, isAudio3d);
+				}
+				break;
+				//Advertisement
+				case "advertisement":
+				{
+					if (entity.entityData.TryGetValue("model", out strWord))
+					{
+						int model = int.Parse(strWord.Trim('*'));
+						MapLoader.GenerateGeometricSurface(thingObject, model);
+						MapLoader.GenerateGeometricCollider(thingObject, null, model, 0, false);
+					}
 				}
 				break;
 				//Worldspawn

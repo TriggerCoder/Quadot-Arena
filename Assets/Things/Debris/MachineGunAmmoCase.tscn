@@ -16,7 +16,7 @@ mass = 0.1
 
 [node name="Destroy" type="Node" parent="."]
 script = ExtResource("1_3ij0q")
-destroyTimer = 200.0
+destroyTimer = 30.0
 
 [node name="SourceCase" type="Node3D" parent="."]
 

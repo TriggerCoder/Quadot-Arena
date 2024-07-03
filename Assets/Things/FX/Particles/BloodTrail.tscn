@@ -11,7 +11,6 @@ radius = 0.2
 [sub_resource type="Resource" id="Resource_ko1dw"]
 resource_local_to_scene = true
 script = ExtResource("4_k526t")
-alphaFade = false
 destroyType = 1
 destroyTimer = 1.5
 Modulate = Color(0.627451, 0.117647, 0.196078, 1)

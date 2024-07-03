@@ -1,4 +1,4 @@
-[gd_scene load_steps=157 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=159 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
@@ -140,8 +140,10 @@
 [ext_resource type="AudioStream" uid="uid://c5bky7v2phnu8" path="res://Assets/Music/Blends/Lond_Sweep_Drone.ogg" id="108_f8x07"]
 [ext_resource type="AudioStream" uid="uid://bw3em04hny83e" path="res://Assets/Music/Blends/Low_Drone_Wubs.ogg" id="109_0k0k0"]
 [ext_resource type="AudioStream" uid="uid://2qggc1hkygq8" path="res://Assets/Music/Blends/Sweep_Drop_Off.ogg" id="110_dxybh"]
+[ext_resource type="PackedScene" uid="uid://ct0tajbntnq7m" path="res://Assets/Things/GamePlay/advertisement.tscn" id="110_ltt47"]
 [ext_resource type="AudioStream" uid="uid://kk5q33151ba3" path="res://Assets/Music/Blends/Wubs.ogg" id="111_2dxqd"]
 [ext_resource type="AudioStream" uid="uid://ddb8765t61kdp" path="res://Assets/Music/Blends/Drum_Fill_Intro.ogg" id="112_ouf8h"]
+[ext_resource type="VideoStream" path="res://Assets/Videos/QuakeLive.ogv" id="143_abt02"]
 
 [sub_resource type="Environment" id="Environment_rcj1l"]
 background_mode = 2
@@ -250,7 +252,7 @@ hasOutro = false
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_rcj1l")
 
-[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "Sun", "Root", "SplitScreen", "IntermissionContainer", "IntermissionViewPort")]
+[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "Sun", "Root", "SplitScreen", "IntermissionContainer", "IntermissionViewPort", "AdvertisementViewPort", "AdvertisementVideo")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
 Sun = NodePath("../SunLight")
@@ -260,6 +262,8 @@ tessellations = 10
 SplitScreen = [NodePath("SplitScreenContainer/TopRow"), NodePath("SplitScreenContainer/MiddleRow"), NodePath("SplitScreenContainer/BtmRow")]
 IntermissionContainer = NodePath("IntermissionContainer")
 IntermissionViewPort = NodePath("IntermissionContainer/IntermissionViewPort")
+AdvertisementViewPort = NodePath("AdvertisementViewPort")
+AdvertisementVideo = NodePath("AdvertisementViewPort/VideoStreamPlayer")
 viewPortPrefab = ExtResource("13_tu0mj")
 scoreBoard = ExtResource("3_hqlfm")
 playerPrefab = ExtResource("7_rdgk2")
@@ -297,7 +301,7 @@ _healthsPrefabs = Array[PackedScene]([ExtResource("27_5pqil"), ExtResource("28_d
 _armorPrefabs = Array[PackedScene]([ExtResource("29_slqlw"), ExtResource("30_8nwr7"), ExtResource("32_pviff")])
 _powerUpsPrefabs = Array[PackedScene]([ExtResource("37_60yxr"), ExtResource("42_lo0q4"), ExtResource("43_0nxgr"), ExtResource("44_nb564")])
 _funcPrefabs = Array[PackedScene]([ExtResource("39_63dug"), ExtResource("38_2vxeb"), ExtResource("47_g2dqw"), ExtResource("40_xap66"), ExtResource("34_nkc1v"), ExtResource("76_lanxu")])
-_infoPrefabs = Array[PackedScene]([ExtResource("46_6njgx"), ExtResource("33_epjyi"), ExtResource("44_er3mv"), ExtResource("74_1t76s")])
+_infoPrefabs = Array[PackedScene]([ExtResource("46_6njgx"), ExtResource("33_epjyi"), ExtResource("44_er3mv"), ExtResource("74_1t76s"), ExtResource("110_ltt47")])
 _miscPrefabs = Array[PackedScene]([ExtResource("48_uv6co"), ExtResource("49_gicjp"), ExtResource("37_kkxgn")])
 _targetPrefabs = Array[PackedScene]([ExtResource("32_b20ey"), ExtResource("31_tr8jk"), ExtResource("49_mb0ac"), ExtResource("79_dvn2g"), ExtResource("80_bwsan"), ExtResource("88_nvs58")])
 _triggerPrefabs = Array[PackedScene]([ExtResource("45_ge4jt"), ExtResource("40_yfkkd"), ExtResource("35_1ytnq"), ExtResource("36_7m5u6"), ExtResource("83_a6fcd")])
@@ -351,6 +355,24 @@ positional_shadow_atlas_quad_3 = 0
 size = Vector2i(1280, 720)
 render_target_clear_mode = 1
 render_target_update_mode = 0
+
+[node name="AdvertisementViewPort" type="SubViewport" parent="Quadot Arena"]
+handle_input_locally = false
+positional_shadow_atlas_size = 0
+positional_shadow_atlas_16_bits = false
+positional_shadow_atlas_quad_0 = 0
+positional_shadow_atlas_quad_1 = 0
+positional_shadow_atlas_quad_2 = 0
+positional_shadow_atlas_quad_3 = 0
+size = Vector2i(1280, 720)
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="Quadot Arena/AdvertisementViewPort"]
+offset_right = 40.0
+offset_bottom = 40.0
+stream = ExtResource("143_abt02")
+autoplay = true
+loop = true
+buffering_msec = 1000
 
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)

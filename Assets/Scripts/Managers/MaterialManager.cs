@@ -48,12 +48,14 @@ public partial class MaterialManager : Node
 	public static string normalDepthTexture = "normal_depth_texture";
 	public static string painTexure = "pain_texture";
 	public static string pickUpTexture = "pick_up_texture";
+	public static string advertisementTexture = "TEXTURES/AD_CONTENT/AD2X1";
 
 	public static List<string> Decals = new List<string>();
 	public static List<string> FogShaders = new List<string>();
 	public static HashSet<string> HasBillBoard = new HashSet<string>() { "FLARESHADER" };
 	public static List<string> PortalMaterials = new List<string>();
 	public static List<ShaderMaterial> AllMaterials = new List<ShaderMaterial>();
+	public static HashSet<string> AdsMaterials = new HashSet<string>();
 	public static Dictionary<string, ShaderMaterial> Materials = new Dictionary<string, ShaderMaterial>();
 	public static Dictionary<string, ShaderMaterial> MirrorMaterials = new Dictionary<string, ShaderMaterial>();
 	public static Dictionary<string, QShader> AditionalTextures = new Dictionary<string, QShader>();
@@ -204,7 +206,6 @@ public partial class MaterialManager : Node
 			}
 			else
 				mat = sourceMat;
-
 			return mat;
 		}
 
@@ -251,7 +252,9 @@ public partial class MaterialManager : Node
 		else if (lm_index >= 0 && Instance.applyLightmaps)
 			mat.Set(lightMapProperty, lmap);
 
-		Materials.Add(textureName, mat);
+		//Don't reuse Quake Live Ads Materials
+		if (!AdsMaterials.Contains(textureName))
+			Materials.Add(textureName, mat);
 		return mat;
 	}
 	public static ShaderMaterial GetMirrorMaterial(string shaderName)

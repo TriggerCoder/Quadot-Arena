@@ -34,3 +34,10 @@ bloodExplosion
 		blendfunc GL_SRC_ALPHA GL_ZERO
 	}
 }
+
+models/gibs/gibs
+{
+	{
+		map models/gibs/gibs.tga
+	}
+}

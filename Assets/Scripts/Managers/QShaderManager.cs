@@ -524,8 +524,18 @@ public static class QShaderManager
 				needLightMap = true;
 			else
 			{
-				tex = TextureLoader.GetTextureOrAddTexture(textures[i], alphaIsTransparent);
-				shaderMaterial.SetShaderParameter("Tex_" + i, tex);
+				//Check for Quake Live Ads
+				if (textures[i] == MaterialManager.advertisementTexture)
+				{
+					shaderMaterial.SetShaderParameter("Tex_" + i, GameManager.Instance.AdvertisementViewPort.GetTexture());
+					if (!MaterialManager.AdsMaterials.Contains(shaderName))
+						MaterialManager.AdsMaterials.Add(shaderName);
+				}
+				else
+				{
+					tex = TextureLoader.GetTextureOrAddTexture(textures[i], alphaIsTransparent);
+					shaderMaterial.SetShaderParameter("Tex_" + i, tex);
+				}
 			}
 		}
 
