@@ -35,8 +35,12 @@ public partial class ThingController : Node3D
 	[Export]
 	public ItemPickup itemPickup = null;
 
-	public void SpawnCheck()
+	public string itemName;
+	//Only 1 per Map according to GameType
+	public bool uniqueItem = false;
+	public void SpawnCheck(string name)
 	{
+		itemName = name;
 		if (initDisabled)
 		{
 			DisableThing();
@@ -72,6 +76,10 @@ public partial class ThingController : Node3D
 	{
 		respawnTime = waitTime;
 	}
+	public void RespawnNow()
+	{
+		remainingTime = 0;
+	}
 
 	public void DisableThing()
 	{
@@ -87,5 +95,23 @@ public partial class ThingController : Node3D
 		remainingTime = (float)GD.RandRange(respawnTime - randomTime, respawnTime + randomTime);
 		Visible = false;
 		_disabled = true;
+	}
+
+	public override void _Notification(int what)
+	{
+		if (what == NotificationPredelete)
+			CheckDestroy();
+	}
+	public void CheckDestroy()
+	{
+		if (disabled)
+			return;
+
+		//GameType
+		if (uniqueItem)
+		{
+			if (ThingsManager.uniqueThingsOnMap.TryGetValue(itemName, out ThingController masterThing))
+				masterThing.RespawnNow();
+		}
 	}
 }

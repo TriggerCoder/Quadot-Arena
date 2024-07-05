@@ -299,7 +299,20 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
 
 			if (hitpoints <= GameManager.Instance.gibHealth)
+			{
+				float deathRatio = GameManager.Instance.currentDeathRatio;
+				if (GameManager.currentMusic != GameManager.MusicType.Dynamic)
+				{
+					GameManager.Instance.GetDeathRatioAndReset(true);
+					deathRatio = GameManager.Instance.currentDeathRatio;
+				}
+				if ((deathRatio > 1) || (damageType == DamageType.Telefrag))
+				{
+					if (damageType != DamageType.Generic)
+						GameManager.Instance.PlayAnnouncer(GameManager.Instance.announcer + "holy_shit");
+				}
 				avatar.Gib();
+			}
 			else
 			{
 				if (damageType == DamageType.Drown)
@@ -474,10 +487,24 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
 					thingObject.GlobalPosition = ThingsManager.ItemLocationDropToFloor(GlobalPosition + Vector3.Up);
 				}
+				thingObject.itemName = currentItem;
 				thingObject.SetRespawnTime(-1);
 				int ammount;
 				if (itemQuantity.TryGetValue(currentItem, out ammount))
 					thingObject.itemPickup.amount = ammount;
+
+				for (int j = 0; j < ThingsManager.uniqueGamePlayThings.Count; j++)
+				{
+					if (currentItem == ThingsManager.uniqueGamePlayThings[j])
+					{
+						thingObject.uniqueItem = true;
+						if (itemQuantity.ContainsKey(currentItem))
+						{
+							if (ThingsManager.uniqueThingsOnMap.TryGetValue(currentItem, out ThingController masterThing))
+								thingObject.itemPickup.amount = masterThing.itemPickup.amount;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -538,6 +565,11 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			quadTime = 0;
 			playerInfo.quadDamage = false;
 			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Quad);
+			if (GameManager.Instance.gameType == GameManager.GameType.QuadHog)
+			{
+				if (ThingsManager.uniqueThingsOnMap.TryGetValue("item_quad", out ThingController masterThing))
+					masterThing.RespawnNow();
+			}
 		}
 
 		//Haste

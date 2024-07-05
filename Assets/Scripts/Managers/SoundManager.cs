@@ -54,9 +54,7 @@ public static class SoundManager
 		else
 			GameManager.Print("LoadSound: " + path + " not found", GameManager.PrintType.Warning);
 
-		if (clip == null)
-			return null;
-
+		//If clip is null we are also adding it so we don't have to check again
 		Sounds.Add(soundName, clip);
 		return clip;
 	}

@@ -120,6 +120,7 @@ public partial class GameManager : Node
 	public static float CurrentTimeMsec { get { return Instance.timeMs; } }
 
 	public static FuncState CurrentState { get { return Instance.currentState; } }
+	public static MusicType currentMusic = MusicType.None;
 
 	private bool timeToSync = false;
 	public static bool NewTickSeconds { get { return Instance.timeToSync; } }
@@ -162,6 +163,7 @@ public partial class GameManager : Node
 
 	private int mapNum = 0;
 	private float mapLeftTime = 0;
+	public float currentDeathRatio = 0;
 
 	public AudioStreamPlayer AnnouncerStream;
 	public AudioStreamPlayer StaticMusicPlayer = null;
@@ -204,6 +206,7 @@ public partial class GameManager : Node
 	{
 		SinglePlayer,
 		FreeForAll,
+		QuadHog,
 		Tournament,
 		TeamDeathmatch,
 		CaptureTheFlag,
@@ -279,6 +282,18 @@ public partial class GameManager : Node
 		QShaderManager.ProcessShaders();
 		MaterialManager.LoadFXShaders();
 		MaterialManager.SetAmbient();
+
+		//SetGameType
+		switch (gameType)
+		{
+			default:
+			break;
+			case GameType.QuadHog:
+				ThingsManager.uniqueGamePlayThings.Add("item_quad");
+			break;
+		}
+
+
 		if (MapLoader.Load(mapRotation[0]))
 		{
 			ClusterPVSManager.Instance.ResetClusterList(MapLoader.surfaces.Count);
@@ -465,11 +480,12 @@ public partial class GameManager : Node
 		currentDeathCount++;
 	}
 
-	public float GetDeathRatioAndReset()
+	public float GetDeathRatioAndReset(bool reset = true)
 	{
-		float deathRatio = (currentDeathCount / Players.Count);
-		currentDeathCount = 0;
-		return deathRatio;
+		currentDeathRatio = (currentDeathCount / Players.Count);
+		if (reset)
+			currentDeathCount = 0;
+		return currentDeathRatio;
 	}
 
 	public void AddAllPlayer()
@@ -498,25 +514,39 @@ public partial class GameManager : Node
 		switch (musicType)
 		{
 			default:
+				currentMusic = MusicType.None;
 			break;
 			case MusicType.Static:
+				StaticMusicPlayer.Stop();
 				StaticMusicPlayer.Play();
+				currentMusic = MusicType.Static;
 			break;
 			case MusicType.Dynamic:
 				AdaptativeMusicManager.Instance.StopMusic();
 				AdaptativeMusicManager.Instance.StartMusic();
+				currentMusic = MusicType.Dynamic;
 			break;
 			case MusicType.Random:
 				AdaptativeMusicManager.Instance.StopMusic();
 				if (StaticMusicPlayer.Stream != null)
 				{
+					StaticMusicPlayer.Stop();
 					if (GD.RandRange(0, 1) > 0)
+					{
 						StaticMusicPlayer.Play();
+						currentMusic = MusicType.Static;
+					}
 					else
+					{
 						AdaptativeMusicManager.Instance.StartMusic();
+						currentMusic = MusicType.Dynamic;
+					}
 				}
 				else
+				{
 					AdaptativeMusicManager.Instance.StartMusic();
+					currentMusic = MusicType.Dynamic;
+				}
 			break;
 		}
 	}

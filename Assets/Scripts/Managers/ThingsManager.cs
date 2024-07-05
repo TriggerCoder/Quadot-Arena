@@ -46,6 +46,12 @@ public partial class ThingsManager : Node
 	public static Dictionary<string, List<Dictionary<string, string>>> triggersOnMap = new Dictionary<string, List<Dictionary<string, string>>>();
 	public static Dictionary<string, ItemPickup> giveItemPickup = new Dictionary<string, ItemPickup>();
 	public static Dictionary<string, ConvexPolygonShape3D> gibsShapes = new Dictionary<string, ConvexPolygonShape3D>();
+	public static Dictionary<string, ThingController> uniqueThingsOnMap = new Dictionary<string, ThingController>();
+	public static Dictionary<string, ThingController> potentialuniqueThingsOnMap = new Dictionary<string, ThingController>();
+	public static List<string> uniqueGamePlayThings = new List<string>();
+
+	public static readonly string[] quadHogReplacement = { "item_haste", "item_regen", "item_flight", "item_invis", "item_enviro", "item_health_mega", "item_armor_body", "item_armor_combat" };
+
 	public static readonly string[] gibsParts = { "GibSkull", "GibBrain", "GibAbdomen", "GibArm", "GibChest", "GibFist", "GibFoot", "GibForearm", "GibIntestine", "GibLeg", "GibLeg" };
 	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group", "info_null", "info_spectator_start", "info_firstplace", "info_secondplace", "info_thirdplace" };
 	public static readonly string[] triggerThings = { "func_timer", "trigger_always", "trigger_multiple", "target_relay" , "target_delay", "target_give" };
@@ -329,6 +335,8 @@ public partial class ThingsManager : Node
 		triggersOnMap = new Dictionary<string, List<Dictionary<string, string>>>();
 		giveItemPickup = new Dictionary<string, ItemPickup>();
 		portalsOnMap = new List<Portal>();
+		uniqueThingsOnMap = new Dictionary<string, ThingController>();
+		potentialuniqueThingsOnMap = new Dictionary<string, ThingController>();
 	}
 
 	public static void AddThingsToMap()
@@ -369,6 +377,7 @@ public partial class ThingsManager : Node
 					default:
 						break;
 					case GameManager.GameType.FreeForAll:
+					case GameManager.GameType.QuadHog:
 					{
 						if (entityData.ContainsKey("notfree"))
 							continue;
@@ -388,6 +397,16 @@ public partial class ThingsManager : Node
 					{
 						if (entityData.ContainsKey("notfree"))
 							continue;
+						if (entityData.TryGetValue("gametype", out gameType))
+						{
+							if (!gameType.Contains("duel"))
+								continue;
+						}
+						else if (entityData.TryGetValue("not_gametype", out gameType))
+						{
+							if (gameType.Contains("duel"))
+								continue;
+						}
 					}
 					break;
 					case GameManager.GameType.TeamDeathmatch:
@@ -556,6 +575,7 @@ public partial class ThingsManager : Node
 				default:
 				break;
 				case GameManager.GameType.FreeForAll:
+				case GameManager.GameType.QuadHog:
 				{
 					if (entity.entityData.ContainsKey("notfree"))
 						continue;
@@ -575,6 +595,16 @@ public partial class ThingsManager : Node
 				{
 					if (entity.entityData.ContainsKey("notfree"))
 						continue;
+					if (entity.entityData.TryGetValue("gametype", out strWord))
+					{
+						if (!strWord.Contains("duel"))
+							continue;
+					}
+					else if (entity.entityData.TryGetValue("not_gametype", out strWord))
+					{
+						if (strWord.Contains("duel"))
+							continue;
+					}
 				}
 				break;
 				case GameManager.GameType.TeamDeathmatch:
@@ -668,8 +698,43 @@ public partial class ThingsManager : Node
 			ThingController thingObject = (ThingController)thingsPrefabs[entity.name].Instantiate();
 			if (thingObject == null)
 				continue;
-				
-			thingObject.SpawnCheck();
+
+			//Check for Unique Things according to GamePlay rules
+			bool skip = false;
+			for (int i = 0; i < uniqueGamePlayThings.Count; i++)
+			{
+				if (entity.name == uniqueGamePlayThings[i])
+				{
+					thingObject.initDisabled = false;
+					thingObject.uniqueItem = true;
+					if (uniqueThingsOnMap.ContainsKey(entity.name))
+						skip = true;
+					else
+						uniqueThingsOnMap.Add(entity.name, thingObject);
+				}
+				if (uniqueThingsOnMap.Count != uniqueGamePlayThings.Count)
+				{
+					switch (GameManager.Instance.gameType)
+					{
+						default:
+						break;
+						case GameManager.GameType.QuadHog:
+						{
+							if (quadHogReplacement.Any(s => s == entity.name))
+								potentialuniqueThingsOnMap[entity.name] = thingObject;
+						}
+						break;
+					}
+				}
+			}
+			if (skip)
+			{
+				thingObject.QueueFree();
+				continue;
+			}
+
+
+			thingObject.SpawnCheck(entity.name);
 
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
 			thingObject.Name = entity.name;
@@ -715,8 +780,14 @@ public partial class ThingsManager : Node
 					if (itemPickup == null)
 						break;
 
-					if (entity.entityData.TryGetNumValue("count", out num))
-						itemPickup.amount =(int)num;
+					//GamePlay Rules:
+					if ((GameManager.Instance.gameType == GameManager.GameType.QuadHog) && (thingObject.uniqueItem))
+					{
+						itemPickup.amount = 60;
+						thingObject.SetRespawnTime(float.MaxValue);
+					}
+					else if (entity.entityData.TryGetNumValue("count", out num))
+						itemPickup.amount = (int)num;
 
 					string target;
 					if (entity.entityData.TryGetValue("targetname", out target))
@@ -1454,6 +1525,45 @@ public partial class ThingsManager : Node
 						GameManager.Print("Gravity : " + strWord);
 						int gravity = int.Parse(strWord);
 						GameManager.Instance.gravity = gravity * GameManager.sizeDividor;
+					}
+				}
+				break;
+			}
+		}
+		//Unique GameType stuff
+		//Check if all uniqueThings are on the map
+		if (uniqueThingsOnMap.Count != uniqueGamePlayThings.Count)
+		{
+			switch (GameManager.Instance.gameType)
+			{
+				default:
+				break;
+				case GameManager.GameType.QuadHog:
+				{
+					for (int i = 0; i < uniqueGamePlayThings.Count; i++)
+					{
+						string uniqueItem = uniqueGamePlayThings[i];
+						for (int j = 0; j < quadHogReplacement.Length; j++)
+						{
+							string searchItem = quadHogReplacement[j];
+							if (potentialuniqueThingsOnMap.TryGetValue(searchItem, out ThingController thing))
+							{
+								ThingController uniqueObject = (ThingController)thingsPrefabs[uniqueItem].Instantiate();
+								GameManager.Instance.TemporaryObjectsHolder.AddChild(uniqueObject);
+								uniqueObject.GlobalPosition = thing.GlobalPosition;
+								uniqueObject.initDisabled = false;
+								uniqueObject.uniqueItem = true;
+								uniqueObject.SpawnCheck(uniqueItem);
+								uniqueObject.Name = uniqueItem;
+								ItemPickup itemPickup = uniqueObject.itemPickup;
+								itemPickup.amount = 60;
+								uniqueObject.SetRespawnTime(float.MaxValue);
+								thing.SetRespawnTime(float.MaxValue);
+								thing.DisableThing();
+								uniqueThingsOnMap.Add(uniqueItem, uniqueObject);
+								break;
+							}
+						}
 					}
 				}
 				break;
