@@ -154,6 +154,7 @@ public partial class GameManager : Node
 	[Export]
 	public SoundData[] OverrideSounds;
 
+	public BasePak basePak = BasePak.None;
 	public Dictionary<int, PlayerThing> Players = new Dictionary<int, PlayerThing>();
 
 	public Camera3D interMissionCamera = null;
@@ -180,6 +181,14 @@ public partial class GameManager : Node
 		public const string Male = "vo/";
 		public const string Quake = "vo_evil/";
 		public const string Female = "vo_female/";
+	}
+	public enum BasePak
+	{
+		None,
+		Demo,
+		Quake3,
+		TeamArena,
+		QuakeLive
 	}
 	public enum FuncState
 	{

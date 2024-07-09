@@ -35,24 +35,25 @@ public partial class PlayerControls : InterpolatedNode3D
 	public float impulseDampening = 4f;
 
 	// Movement stuff
-	public float crouchSpeed = 3.0f;                // Crouch speed
-	public float walkSpeed = 5.0f;                  // Walk speed
-	public float runSpeed = 7.0f;                   // Run speed
-	public float swimSpeed = 7.0f;                  // Swim speed
-	private float oldSpeed = 0;                     // Previous move speed
-	public float fallSpeed = 0;						// Acumulated fallSpeed
+	public const float crouchSpeed = 3.0f;					// Crouch speed
+	public const float walkSpeed = 5.0f;					// Walk speed
+	public const float runSpeed = 7.0f;						// Run speed
+	public const float swimSpeed = 7.0f;					// Swim speed
+	private float oldSpeed = 0;								// Previous move speed
+	public float fallSpeed = 0;								// Acumulated fallSpeed
 
-	public float moveSpeed;                         // Ground move speed
-	public float runAcceleration = 14.0f;           // Ground accel
-	public float runDeacceleration = 10.0f;         // Deacceleration that occurs when running on the ground
-	public float waterAcceleration = 8.0f;          // Water accel
-	public float airAcceleration = 2.0f;            // Air accel
-	public float airDecceleration = 2.0f;           // Deacceleration experienced when ooposite strafing
-	public float airControl = 0.3f;                 // How precise air control is
-	public float sideStrafeAcceleration = 50.0f;    // How fast acceleration occurs to get up to sideStrafeSpeed when
-	public float sideStrafeSpeed = 1.0f;            // What the max speed to generate when side strafing
-	public float jumpSpeed = 8.0f;                  // The speed at which the character's up axis gains when hitting jump
-	public bool holdJumpToBhop = false;             // When enabled allows player to just hold jump button to keep on bhopping perfectly. Beware: smells like casual.
+	public float moveSpeed;									// Ground move speed
+	public const float runAcceleration = 14.0f;				// Ground accel
+	public const float runDeacceleration = 10.0f;			// Deacceleration that occurs when running on the ground
+	public const float waterAcceleration = 8.0f;			// Water accel
+	public const float airAcceleration = 2.0f;				// Air accel
+	public const float airDecceleration = 2.0f;				// Deacceleration experienced when ooposite strafing
+	public const float airControl = 0.3f;					// How precise air control is
+	public const float sideStrafeAcceleration = 50.0f;		// How fast acceleration occurs to get up to sideStrafeSpeed when
+	public const float sideStrafeSpeed = 1.0f;				// What the max speed to generate when side strafing
+	public const float jumpSpeed = 8.0f;					// The speed at which the character's up axis gains when hitting jump
+	public const float fallSpeedLimit = -22f;				// The max fallSpeed without taking damage, modified to Quake Live value
+	public bool holdJumpToBhop = false;						// Allows player to just hold jump button to keep on bhopping perfectly.
 
 	public Vector3 playerVelocity = Vector3.Zero;
 	private bool wishJump = false;
@@ -62,13 +63,13 @@ public partial class PlayerControls : InterpolatedNode3D
 	private bool controllerIsGrounded = true;
 	private bool controllerWasGrounded = true;
 	private float deathTime = 0;
-	private float respawnDelay = 1.7f;
+	private const float respawnDelay = 1.7f;
 
 	private int lastJumpIndex = PlayerModel.LowerAnimation.Jump;
 
 	//Head/Weapon Bob
-	public float vBob = .005f;
-	public float hBob = .05f;
+	public const float vBob = .005f;
+	public const float hBob = .05f;
 	public bool bobActive;
 	public Vector2 currentBob = Vector2.Zero;
 
@@ -402,7 +403,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 	public void CheckCrash()
 	{
-		if (fallSpeed > -20)
+		if (fallSpeed > fallSpeedLimit)
 		{
 			playerThing.PlayModelSound("land1", false, false);
 			fallSpeed = 0;

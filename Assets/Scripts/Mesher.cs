@@ -1033,6 +1033,12 @@ public static class Mesher
 				if (useCommon && !useTransparent)
 				{
 					meshProcessed.data[model.meshes[i].meshNum].multiMesh = surfaceData.commonMesh;
+					if (!MultiMeshes.ContainsKey(surfaceData.commonMesh))
+					{
+						Dictionary<Node3D, int> Set = new Dictionary<Node3D, int>();
+						MultiMeshes.Add(surfaceData.commonMesh, Set);
+					}
+
 					if (!MultiMeshesInstances.ContainsKey(surfaceData.commonMesh))
 					{
 						MultiMeshInstance3D mesh = new MultiMeshInstance3D();
@@ -1200,7 +1206,7 @@ public static class Mesher
 
 		if (!MultiMeshSprites.ContainsKey(multiMesh))
 		{
-			List<SpriteData> Set = new List<SpriteData>();
+			List<SpriteData> Set = new List<SpriteData>(multiMesh.InstanceCount);
 			MultiMeshSprites.Add(multiMesh, Set);
 		}
 
@@ -1274,7 +1280,7 @@ public static class Mesher
 
 			if (!MultiMeshSprites.ContainsKey(multiMesh))
 			{
-				List<SpriteData> Set = new List<SpriteData>();
+				List<SpriteData> Set = new List<SpriteData>(multiMesh.InstanceCount);
 				MultiMeshSprites.Add(multiMesh, Set);
 			}
 		}
@@ -1861,29 +1867,11 @@ public static class Mesher
 						}
 						parent = child;
 					}
-//This is slow but correct
-/*
-					bool foundDestroy = false;
-					var Childrens = GameManager.GetAllChildrens(parent);
-					DestroyAfterTime destroy = null;
-					foreach (var child in Childrens)
-					{
-						if (child is DestroyAfterTime d)
-						{
-							destroy = d;
-							foundDestroy = true;
-							break;
-						}
-					}
-					if (!foundDestroy)
-					{
-*/						DestroyAfterTime destroy = new DestroyAfterTime();
-						parent.AddChild(destroy);
-						destroy.Start();
-/*					}
-					else
-						destroy.destroyTimer = 3;
-*/					node3D.SetMeta("destroying", true);
+		
+					DestroyAfterTime destroy = new DestroyAfterTime();
+					parent.AddChild(destroy);
+					destroy.Start();
+					node3D.SetMeta("destroying", true);
 					break;
 				}
 			}

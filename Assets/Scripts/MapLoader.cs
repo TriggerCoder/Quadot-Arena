@@ -339,6 +339,7 @@ public static class MapLoader
 		SpawnerManager.deathMatchSpawner = new List<Target>();
 		ModelsManager.ClearModels();
 		ClusterPVSManager.Instance.ResetClusterList(1);
+		Mesher.MultiMeshes = new Dictionary<MultiMesh, Dictionary<Node3D, int>>();
 		Mesher.MultiMeshesInstances = new Dictionary<MultiMesh, MultiMeshInstance3D>();
 		Mesher.MultiMeshSprites = new Dictionary<MultiMesh, List<SpriteData>>();
 		Mesher.MultiMeshesChanged = new HashSet<MultiMesh>();

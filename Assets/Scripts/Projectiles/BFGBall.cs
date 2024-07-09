@@ -189,7 +189,7 @@ public partial class BFGBall : InterpolatedNode3D
 
 				if (posibleCollider is Damageable)
 				{
-					Vector3 collision = posibleCollider.Position;
+					Vector3 collision = posibleCollider.GlobalPosition;
 					var RayCast = PhysicsRayQueryParameters3D.Create(GlobalPosition, collision, ((1 << GameManager.ColliderLayer) | (1 << GameManager.RagdollLayer) | GameManager.TakeDamageMask));
 					var check = SpaceState.IntersectRay(RayCast);
 					if (check.Count > 0)
