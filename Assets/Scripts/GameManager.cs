@@ -11,6 +11,8 @@ public partial class GameManager : Node
 	[Export]
 	public Node3D Root;
 	[Export]
+	public BasePak gameSelect = BasePak.QuakeLive;
+	[Export]
 	public string[] mapRotation;
 	[Export]
 	public int timeLimit = 7;
@@ -154,7 +156,6 @@ public partial class GameManager : Node
 	[Export]
 	public SoundData[] OverrideSounds;
 
-	public BasePak basePak = BasePak.None;
 	public Dictionary<int, PlayerThing> Players = new Dictionary<int, PlayerThing>();
 
 	public Camera3D interMissionCamera = null;
@@ -184,11 +185,11 @@ public partial class GameManager : Node
 	}
 	public enum BasePak
 	{
-		None,
-		Demo,
-		Quake3,
-		TeamArena,
-		QuakeLive
+		All = 0,
+		QuakeLive = 4,
+		TeamArena = 3,
+		Quake3 = 2,
+		Demo = 1
 	}
 	public enum FuncState
 	{

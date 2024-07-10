@@ -39,9 +39,9 @@ public static class TextureLoader
 		{
 			new QShader(textureName, 0, 0, forceSkinAlpha)
 		};
+		LoadTextures(list, false, ImageFormat.PNG);
 		LoadTextures(list, false);
 		LoadTextures(list, false , ImageFormat.TGA);
-		LoadTextures(list, false, ImageFormat.PNG);
 	}
 	public static bool HasTextureOrAddTexture(string textureName, bool forceAlpha)
 	{
