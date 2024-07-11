@@ -73,10 +73,12 @@ public static class QShaderManager
 			return true;
 		return false;
 	}
-	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, ref bool alphaIsTransparent, ref bool hasPortal, List<int> multiPassList = null, bool forceView = false)
+	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, ref bool alphaIsTransparent, ref bool hasPortal, List<int> multiPassList = null, bool forceView = false, bool canvasShader = false)
 	{
 		string code = "";
 		string GSHeader = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, ";
+		if (canvasShader)
+			GSHeader = "shader_type canvas_item;\nrender_mode ";
 		string GSUniforms = "";
 		string GSLigtH = "void light()\n{ \n";
 		string GSVertexH = "void vertex()\n{ \n";
@@ -88,6 +90,8 @@ public static class QShaderManager
 		string GSFragmentTexs = "";
 		string GSLateFragmentTexs = "";
 		string GSFragmentRGBs = "\tvec4 vertx_color = COLOR;\n";
+		if (canvasShader)
+			GSFragmentRGBs = "\tvec4 vertx_color = vec4(1.0);\n";
 		string GSFragmentBlends = "";
 		string GSAnimation = "";
 
@@ -260,49 +264,78 @@ public static class QShaderManager
 			return passZeroMaterial;
 		}
 
-		switch (qShader.qShaderGlobal.sort)
+		if (canvasShader)
 		{
-			case QShaderGlobal.SortType.Opaque:
+			switch (qShader.qShaderGlobal.sort)
 			{
-				if (alphaIsTransparent)
-					GSHeader += "depth_prepass_alpha, ";
-				if ((depthWrite) || (forceAlpha))
-					GSHeader += "depth_draw_always, blend_mix, ";
-				else
-					GSHeader += "depth_draw_opaque, blend_mix, ";
+				case QShaderGlobal.SortType.Opaque:
+					GSHeader += "blend_mix";
+				break;
+				case QShaderGlobal.SortType.Additive:
+					GSHeader += "blend_add";
+				break;
+				case QShaderGlobal.SortType.Multiplicative:
+					GSHeader += "blend_mul";
+					qShader.qShaderGlobal.unShaded = true;
+				break;
 			}
-			break;
-			case QShaderGlobal.SortType.Additive:
-				if (depthWrite)
-					GSHeader += "depth_draw_always, blend_add, ";
-				else
-					GSHeader += "depth_draw_opaque, blend_add, ";
-			break;
-			case QShaderGlobal.SortType.Multiplicative:
-				if (depthWrite)
-					GSHeader += "depth_draw_always, blend_mul, ";
-				else
-					GSHeader += "depth_draw_opaque, blend_mul, ";
-				qShader.qShaderGlobal.unShaded = true;
-			break;
 		}
+		else
+		{
+			switch (qShader.qShaderGlobal.sort)
+			{
+				case QShaderGlobal.SortType.Opaque:
+					{
+						if (alphaIsTransparent)
+							GSHeader += "depth_prepass_alpha, ";
+						if ((depthWrite) || (forceAlpha))
+							GSHeader += "depth_draw_always, blend_mix, ";
+						else
+							GSHeader += "depth_draw_opaque, blend_mix, ";
+					}
+				break;
+				case QShaderGlobal.SortType.Additive:
+					if (depthWrite)
+						GSHeader += "depth_draw_always, blend_add, ";
+					else
+						GSHeader += "depth_draw_opaque, blend_add, ";
+				break;
+				case QShaderGlobal.SortType.Multiplicative:
+					if (depthWrite)
+						GSHeader += "depth_draw_always, blend_mul, ";
+					else
+						GSHeader += "depth_draw_opaque, blend_mul, ";
+					qShader.qShaderGlobal.unShaded = true;
+				break;
+			}
+		}
+
 
 		if ((qShader.qShaderGlobal.unShaded) || (qShader.qShaderGlobal.isSky))
-			GSHeader += "unshaded, ";
-
-		switch (qShader.qShaderGlobal.cullType)
 		{
-			case QShaderGlobal.CullType.Back:
-				GSHeader += "cull_back;\n \n";
-				break;
-			case QShaderGlobal.CullType.Front:
-				GSHeader += "cull_front;\n \n";
-				break;
-			case QShaderGlobal.CullType.Disable:
-				GSHeader += "cull_disabled;\n \n";
-				break;
+			if (canvasShader)
+				GSHeader += ", unshaded";
+			else
+				GSHeader += "unshaded, ";
 		}
 
+		if (canvasShader)
+			GSHeader += ";\n \n";
+		else
+		{
+			switch (qShader.qShaderGlobal.cullType)
+			{
+				case QShaderGlobal.CullType.Back:
+					GSHeader += "cull_back;\n \n";
+				break;
+				case QShaderGlobal.CullType.Front:
+					GSHeader += "cull_front;\n \n";
+				break;
+				case QShaderGlobal.CullType.Disable:
+					GSHeader += "cull_disabled;\n \n";
+				break;
+			}
+		}
 
 		int totalTex = textures.Count;
 		if (qShader.qShaderGlobal.trans)
@@ -378,14 +411,19 @@ public static class QShaderManager
 		code += "global uniform float MsTime;\n";
 		code += "global uniform vec4 AmbientColor: source_color;\n";
 		code += "global uniform float mixBrightness;\n";
-		code += "instance uniform float OffSetTime = 0.0;\n";
+		if (canvasShader)
+			code += "uniform float OffSetTime = 0.0;\n";
+		else
+			code += "instance uniform float OffSetTime = 0.0;\n";
 		if (entityColor)
 		{
 			code += "uniform bool UseModulation = true;\n";
-			code += "instance uniform vec4 modulate: source_color = vec4(1.0, 1.0, 1.0, 1.0);\n";
-
+			if (canvasShader)
+				code += "uniform vec4 modulate: source_color = vec4(1.0, 1.0, 1.0, 1.0);\n";
+			else
+				code += "instance uniform vec4 modulate: source_color = vec4(1.0, 1.0, 1.0, 1.0);\n";
 		}
-		if (multiPassList == null)
+		if ((multiPassList == null) && (canvasShader == false))
 		{
 			code += "instance uniform float ShadowIntensity : hint_range(0, 1) = 0.0;\n";
 			code += "instance uniform bool ViewModel = false;\n";
@@ -412,6 +450,7 @@ public static class QShaderManager
 			code += GSAnimation;
 
 		//Vertex
+		if (canvasShader == false)
 		{
 			code += GSVertexH;
 			if (multiPassList == null)
@@ -430,7 +469,7 @@ public static class QShaderManager
 		}
 
 		//Lightning
-		if ((multiPassList == null) && (qShader.qShaderGlobal.unShaded == false))
+		if ((multiPassList == null) && (qShader.qShaderGlobal.unShaded == false) && (canvasShader == false))
 		{
 			code += GSLigtH;
 			code += GetDiffuseLightning();
@@ -468,11 +507,21 @@ public static class QShaderManager
 
 		if (qShader.qShaderGlobal.isSky)
 		{
-			code += "\tALBEDO = (color.rgb * ambient);\n";
-			code += "\tEMISSION = ambient;\n";
+			if (canvasShader)
+				code += "\tCOLOR.rgb = (color.rgb * ambient);\n";
+			else
+			{
+				code += "\tALBEDO = (color.rgb * ambient);\n";
+				code += "\tEMISSION = ambient;\n";
+			}
 		}
 		else if (qShader.qShaderGlobal.sort == QShaderGlobal.SortType.Multiplicative)
-			code += "\tALBEDO = color.rgb;\n";
+		{
+			if (canvasShader)
+				code += "\tCOLOR.rgb = color.rgb;\n";
+			else
+				code += "\tALBEDO = color.rgb;\n";
+		}
 		else
 		{
 			code += "\tvec3 albedo = color.rgb * vertx_color.rgb;\n";
@@ -482,7 +531,7 @@ public static class QShaderManager
 			else
 			{
 				code += "\tvec3 defaultEmission = mix(emission * ambient, emission, mixBrightness);\n";
-				if (multiPassList == null)
+				if ((multiPassList == null) && (canvasShader == false))
 				{
 					code += "\tvec3 useLightVolEmission = emission * mix(ambientColor, emission, mixBrightness);\n";
 					code += "\temission = mix(defaultEmission, useLightVolEmission, float(UseLightVol));\n";
@@ -494,9 +543,13 @@ public static class QShaderManager
 			//FOG gets removed from sprites
 			if ((MaterialManager.HasBillBoard.Contains(qShader.Name)) && (qShader.qShaderGlobal.sort == QShaderGlobal.SortType.Additive))
 				code += "\talbedo -= FOG.rgb;\n";
-
-			code += "\tALBEDO = albedo;\n";
-			code += "\tEMISSION = emission;\n";
+			if (canvasShader)
+				code += "\tCOLOR.rgb = albedo;\n";
+			else
+			{
+				code += "\tALBEDO = albedo;\n";
+				code += "\tEMISSION = emission;\n";
+			}
 		}
 
 		if (qShader.qShaderGlobal.portal)
@@ -506,7 +559,12 @@ public static class QShaderManager
 		}
 
 		if (alphaIsTransparent)
-			code += "\tALPHA = color.a;\n";
+		{
+			if (canvasShader)
+				code += "\tCOLOR = COLOR.rgb + color.a;\n";
+			else
+				code += "\tALPHA = color.a;\n";
+		}
 		code += "}\n\n";
 
 //		if (shaderName.Contains("RAILGUN"))

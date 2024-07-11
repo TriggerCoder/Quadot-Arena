@@ -35,6 +35,8 @@ public partial class MaterialManager : Node
 	public static string quadFxShader = "powerups/quad";
 	public static ShaderMaterial quadWeaponFxMaterial;
 	public static string quadWeaponFxShader = "powerups/quadWeapon";
+	public static ShaderMaterial consoleMaterial;
+	public static string consoleShader = "console";
 	public static FogMaterial waterFogMaterial;
 	public static FogMaterial lavaFogMaterial;
 
@@ -117,9 +119,10 @@ public partial class MaterialManager : Node
 		};
 		quadFxShader = quadFxShader.ToUpper();
 		quadWeaponFxShader = quadWeaponFxShader.ToUpper();
-
+		consoleShader = consoleShader.ToUpper();
 		quadFxMaterial = QShaderManager.GetShadedMaterial(quadFxShader, -1, ref useAlpha, ref hasPortal, stage);
 		quadWeaponFxMaterial = QShaderManager.GetShadedMaterial(quadWeaponFxShader, -1, ref useAlpha, ref hasPortal, stage, true);
+		consoleMaterial = QShaderManager.GetShadedMaterial(consoleShader, -1, ref useAlpha, ref hasPortal, null, false, true);
 	}
 
 	public static void AddBillBoard(string shaderName)

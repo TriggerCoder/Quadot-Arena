@@ -12,18 +12,21 @@ public static class PakManager
 {
 	public static Dictionary<string, string> ZipFiles = new Dictionary<string, string>();
 	public static Dictionary<string, FileStream> QuakeFiles = new Dictionary<string, FileStream>();
-	private static readonly string[] basePaks = {	"0613b3d4ef05e613a2b470571498690f", //pak0.pk3 QUAKE 3 DEMO
-													"1197ca3df1e65f3c380f8abc10ca43bf", //pak0.pk3 QUAKE 3
-													"48911719d91be25adb957f2d325db4a0", //pak1.pk3 QUAKE 3
-													"d550ce896130c47166ca44b53f8a670a", //pak2.pk3 QUAKE 3
-													"968dfd0f30dad67056115c8e92344ddc", //pak3.pk3 QUAKE 3
-													"24bb1f4fcabd95f6e320c0e2f62f19ca", //pak4.pk3 QUAKE 3
-													"734dcd06d2cbc7a16432ff6697f1c5ba", //pak5.pk3 QUAKE 3
-													"873888a73055c023f6c38b8ca3f2ce05", //pak6.pk3 QUAKE 3
-													"8fd38c53ed814b64f6ab03b5290965e4", //pak7.pk3 QUAKE 3
-													"d8b96d429ca4a9c289071cb7e77e14d2", //pak8.pk3 QUAKE 3
-													"e8ba9e3bf06210930bc0e7fdbcdd01c2", //pak0.pk3 QUAKE 3 TEAM ARENA
-													"75aaae7c836b9ebdb1d4cfd53ba1c958"}; //pak00.pk3 QUAKE LIVE
+
+	private const string pak0Demo = "0613b3d4ef05e613a2b470571498690f";		//pak0.pk3 QUAKE 3 DEMO
+	private const string pak0Retail = "1197ca3df1e65f3c380f8abc10ca43bf";	//pak0.pk3 QUAKE 3
+	private const string pak1Patch = "48911719d91be25adb957f2d325db4a0";	//pak1.pk3 QUAKE 3
+	private const string pak2Patch = "d550ce896130c47166ca44b53f8a670a";	//pak2.pk3 QUAKE 3
+	private const string pak3Patch = "968dfd0f30dad67056115c8e92344ddc";	//pak3.pk3 QUAKE 3
+	private const string pak4Patch = "24bb1f4fcabd95f6e320c0e2f62f19ca";	//pak4.pk3 QUAKE 3
+	private const string pak5Patch = "734dcd06d2cbc7a16432ff6697f1c5ba";	//pak5.pk3 QUAKE 3
+	private const string pak6Patch = "873888a73055c023f6c38b8ca3f2ce05";	//pak6.pk3 QUAKE 3
+	private const string pak7Patch = "8fd38c53ed814b64f6ab03b5290965e4";	//pak7.pk3 QUAKE 3
+	private const string pak8Patch = "d8b96d429ca4a9c289071cb7e77e14d2";	//pak8.pk3 QUAKE 3
+	private const string pak0TA = "e8ba9e3bf06210930bc0e7fdbcdd01c2";		//pak0.pk3 QUAKE 3 TEAM ARENA
+	private const string pak00Live = "75aaae7c836b9ebdb1d4cfd53ba1c958";	//pak00.pk3 QUAKE LIVE
+
+	private static readonly string[] basePaks = { pak0Demo, pak0Retail, pak1Patch, pak2Patch, pak3Patch, pak4Patch, pak5Patch, pak6Patch, pak7Patch, pak8Patch, pak0TA, pak00Live};
 	public static GameManager.BasePak basePak = GameManager.BasePak.All;
 	public static void LoadPK3Files()
 	{
@@ -194,7 +197,7 @@ public static class PakManager
 				}
 			}
 			break;
-			case "75aaae7c836b9ebdb1d4cfd53ba1c958": //pak00.pk3
+			case pak00Live:
 			{
 				if (!QuakeFiles.ContainsKey(md5))
 				{
@@ -204,7 +207,7 @@ public static class PakManager
 				basePak = GameManager.BasePak.QuakeLive;
 			}
 			break;
-			case "1197ca3df1e65f3c380f8abc10ca43bf": //pak0.pk3
+			case pak0Retail:
 			{
 				if (!QuakeFiles.ContainsKey(md5))
 				{
@@ -215,15 +218,15 @@ public static class PakManager
 						basePak = GameManager.BasePak.Quake3;
 			}
 			break;
-			case "48911719d91be25adb957f2d325db4a0": //pak1.pk3
-			case "d550ce896130c47166ca44b53f8a670a": //pak2.pk3
-			case "968dfd0f30dad67056115c8e92344ddc": //pak3.pk3
-			case "24bb1f4fcabd95f6e320c0e2f62f19ca": //pak4.pk3
-			case "734dcd06d2cbc7a16432ff6697f1c5ba": //pak5.pk3
-			case "873888a73055c023f6c38b8ca3f2ce05": //pak6.pk3
-			case "8fd38c53ed814b64f6ab03b5290965e4": //pak7.pk3
-			case "d8b96d429ca4a9c289071cb7e77e14d2": //pak8.pk3
-			{
+			case pak1Patch:
+			case pak2Patch:
+			case pak3Patch:
+			case pak4Patch:
+			case pak5Patch:
+			case pak6Patch:
+			case pak7Patch:
+			case pak8Patch:
+				{
 				if (!QuakeFiles.ContainsKey(md5))
 				{
 					QuakeFiles.Add(md5, pak);
@@ -231,7 +234,7 @@ public static class PakManager
 				}
 			}
 			break;
-			case "e8ba9e3bf06210930bc0e7fdbcdd01c2": //pak0.pk3
+			case pak0TA:
 			{
 				if (!QuakeFiles.ContainsKey(md5))
 				{
@@ -243,7 +246,7 @@ public static class PakManager
 
 			}
 			break;
-			case "0613b3d4ef05e613a2b470571498690f": //pak0.pk3
+			case pak0Demo:
 			{
 				if (!QuakeFiles.ContainsKey(md5))
 				{

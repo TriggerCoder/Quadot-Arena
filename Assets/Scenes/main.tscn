@@ -1,4 +1,4 @@
-[gd_scene load_steps=159 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=160 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
@@ -144,6 +144,7 @@
 [ext_resource type="AudioStream" uid="uid://kk5q33151ba3" path="res://Assets/Music/Blends/Wubs.ogg" id="111_2dxqd"]
 [ext_resource type="AudioStream" uid="uid://ddb8765t61kdp" path="res://Assets/Music/Blends/Drum_Fill_Intro.ogg" id="112_ouf8h"]
 [ext_resource type="VideoStream" path="res://Assets/Videos/QuakeLive.ogv" id="143_abt02"]
+[ext_resource type="PackedScene" uid="uid://cx81ah4ytyb4s" path="res://Assets/Scenes/Console.tscn" id="145_ykqwb"]
 
 [sub_resource type="Environment" id="Environment_rcj1l"]
 background_mode = 2
@@ -376,6 +377,11 @@ stream = ExtResource("143_abt02")
 autoplay = true
 loop = true
 buffering_msec = 1000
+
+[node name="Console" parent="." instance=ExtResource("145_ykqwb")]
+visible = false
+offset_top = -360.0
+offset_bottom = -720.0
 
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)

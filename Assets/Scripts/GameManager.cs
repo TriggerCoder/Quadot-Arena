@@ -330,8 +330,14 @@ public partial class GameManager : Node
 
 		if (@event is InputEventKey)
 		{
-			if (Input.IsActionJustPressed("Start_0"))
-				controllerWantToJoin.Add(0);
+			if (Input.IsActionJustPressed("Console"))
+				ConsoleManager.Instance.ChangeConsole();
+
+			if (ConsoleManager.Instance.visible == false)
+			{
+				if (Input.IsActionJustPressed("Start_0"))
+					controllerWantToJoin.Add(0);
+			}
 
 			if (Input.IsActionJustPressed("Escape"))
 			{

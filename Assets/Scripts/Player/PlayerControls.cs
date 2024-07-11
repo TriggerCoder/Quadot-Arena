@@ -167,6 +167,9 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (playerInput.Device != GameManager.ControllerType.MouseKeyboard)
 			return;
 
+		if (ConsoleManager.Instance.visible)
+			return;
+
 		if (@event is InputEventMouseMotion eventMouseMotion)
 		{
 			Look = eventMouseMotion.Relative;
