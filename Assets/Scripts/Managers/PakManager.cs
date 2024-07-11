@@ -304,19 +304,12 @@ public static class PakManager
 
 	public static void AddPlayerSkin(string path)
 	{
-		string[] strword = path.Split('/');
-		if (strword.Length > 3)
-		{
-			string fullSkin = strword[3].StripExtension();
-			string[] split = fullSkin.Split("_");
-			if (split.Length > 0)
-			{
-				string skin = strword[0] + "/" + strword[1] + "/" + strword[2] + "/" + split[1];
-				if (!playerSkinList.Contains(skin))
-					playerSkinList.Add(skin);
-			}
-		}
+		if (!path.Contains("LOWER_"))
+			return;
 
+		string skin = path.StripExtension().Replace("LOWER_", "");
+		if (!playerSkinList.Contains(skin))
+			playerSkinList.Add(skin);
 	}
 
 }
