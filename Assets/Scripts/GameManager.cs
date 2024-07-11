@@ -11,6 +11,8 @@ public partial class GameManager : Node
 	[Export]
 	public Node3D Root;
 	[Export]
+	public ConsoleManager console;
+	[Export]
 	public BasePak gameSelect = BasePak.QuakeLive;
 	[Export]
 	public string[] mapRotation;
@@ -128,6 +130,8 @@ public partial class GameManager : Node
 	public static bool NewTickSeconds { get { return Instance.timeToSync; } }
 	public static int NumLocalPlayers { get { return Instance.Players.Count; } }
 
+	public static ConsoleManager Console { get { return Instance.console; } }
+
 	public float gravity = 25f;					//default 800 * sizeDividor
 	public float friction = 6f;
 	public float waterFriction = 12f;
@@ -157,6 +161,8 @@ public partial class GameManager : Node
 	public SoundData[] OverrideSounds;
 
 	public Dictionary<int, PlayerThing> Players = new Dictionary<int, PlayerThing>();
+	public string[] defaulModels = { "Doom", "Crash", "Ranger", "Visor", "Sarge", "Major", "Anarki", "Grunt" };
+	public string[] defaulSkins = { "default", "default", "default", "default", "default", "default", "default", "default" };
 
 	public Camera3D interMissionCamera = null;
 	public List<int> controllerWantToJoin = new List<int>();
@@ -177,6 +183,9 @@ public partial class GameManager : Node
 	private static readonly string[] FragsLeft = { "feedback/1_frag", "feedback/2_frags", "feedback/3_frags" };
 	private int second = 0;
 	private int currentDeathCount = 0;
+
+	private bool useCustomMap = false;
+	private string nextMapName;
 	public static class Announcer
 	{
 		public const string Male = "vo/";
@@ -273,6 +282,9 @@ public partial class GameManager : Node
 		ambientLightColor = environment.AmbientLightColor;
 		Instance = this;
 
+		//Init Console
+		console.Init();
+
 		//Load Sounds
 		SoundManager.AddSounds(OverrideSounds);
 
@@ -303,7 +315,7 @@ public partial class GameManager : Node
 			break;
 		}
 
-
+		PakManager.OrderLists();
 		if (MapLoader.Load(mapRotation[0]))
 		{
 			ClusterPVSManager.Instance.ResetClusterList(MapLoader.surfaces.Count);
@@ -331,9 +343,9 @@ public partial class GameManager : Node
 		if (@event is InputEventKey)
 		{
 			if (Input.IsActionJustPressed("Console"))
-				ConsoleManager.Instance.ChangeConsole();
+				console.ChangeConsole();
 
-			if (ConsoleManager.Instance.visible == false)
+			if (console.visible == false)
 			{
 				if (Input.IsActionJustPressed("Start_0"))
 					controllerWantToJoin.Add(0);
@@ -400,6 +412,8 @@ public partial class GameManager : Node
 						IntermissionContainer.Show();
 						if (limitReach == LimitReach.None)
 							limitReach = LimitReach.Time;
+						if (console.visible)
+							console.ChangeConsole(true);
 					}
 					else if (limitReach == LimitReach.None)
 						PlayAnnouncer(Seconds[second++]);
@@ -409,9 +423,13 @@ public partial class GameManager : Node
 		}
 		if (mapLeftTime < 0)
 		{
-			mapNum++;
-			if (mapNum >= mapRotation.Length)
-				mapNum = 0; 
+			if (!useCustomMap)
+			{
+				mapNum++;
+				if (mapNum >= mapRotation.Length)
+					mapNum = 0;
+				nextMapName = mapRotation[mapNum];
+			}
 			mapLeftTime = timeLimit * 60;
 			second = 0;
 			paused = true;
@@ -572,7 +590,7 @@ public partial class GameManager : Node
 		TemporaryObjectsHolder = new Node3D();
 		TemporaryObjectsHolder.Name = "TemporaryObjectsHolder";
 		AddChild(TemporaryObjectsHolder);
-		if (MapLoader.Load(mapRotation[mapNum]))
+		if (MapLoader.Load(nextMapName))
 		{
 			interMissionCamera = null;
 			ClusterPVSManager.Instance.ResetClusterList(MapLoader.surfaces.Count);
@@ -587,8 +605,18 @@ public partial class GameManager : Node
 		loading = true;
 	}
 
+	public void ChangeMap(string nextMap)
+	{
+		console.ChangeConsole(true);
+		useCustomMap = true;
+		nextMapName = nextMap;
+		limitReach = LimitReach.Time;
+		mapLeftTime = 1;		
+	}
+
 	public void ChangeMap()
 	{
+		useCustomMap = false;
 		MapLoader.UnloadMap();
 		skipFrames = 5;
 		currentState = FuncState.None;
@@ -634,6 +662,11 @@ public partial class GameManager : Node
 		AddChild(player);
 		if (playerNum == 0)
 			player.playerInfo.playerPostProcessing.ViewPortCamera.Current = true;
+
+		player.playerName = defaulModels[playerNum];
+		player.modelName = defaulModels[playerNum];
+		player.skinName = defaulSkins[playerNum];
+
 		player.playerInfo.SetPlayer(playerNum);
 		player.playerControls.Init(controllerNum);
 		player.InitPlayer();
@@ -835,6 +868,11 @@ public partial class GameManager : Node
 		if (type >= printType)
 		{
 			GD.Print(printLine + ": " + Message);
+
+			if (Instance == null)
+				return;
+
+			Console.AddToConsole(Message, type);
 			switch (type)
 			{
 				default:
@@ -859,4 +897,28 @@ public partial class GameManager : Node
 		}
 		return false;
 	}
+
+	public void ChangeTimeLimit(int limit)
+	{
+		if (limit < timeLimit)
+		{
+			mapLeftTime -= (timeLimit - limit) * 60;
+			if (mapLeftTime < 1)
+			{
+				limitReach = LimitReach.Time;
+				mapLeftTime = 1;
+			}
+		}
+		else
+			mapLeftTime += (limit - timeLimit) * 60;
+		timeLimit = limit;
+	}
+
+	public void ChangeFragLimit(int limit)
+	{
+		fragLimit = limit;
+		foreach (PlayerThing player in Players.Values)
+			CheckDeathCount(player.frags);
+	}
+
 }

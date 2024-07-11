@@ -167,7 +167,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (playerInput.Device != GameManager.ControllerType.MouseKeyboard)
 			return;
 
-		if (ConsoleManager.Instance.visible)
+		if (GameManager.Console.visible)
 			return;
 
 		if (@event is InputEventMouseMotion eventMouseMotion)
@@ -184,6 +184,7 @@ public partial class PlayerControls : InterpolatedNode3D
 			return;
 
 		float deltaTime = (float)delta;
+		bool consoleOpen = false;
 
 		if (playerThing.Dead)
 		{
@@ -221,6 +222,8 @@ public partial class PlayerControls : InterpolatedNode3D
 //			viewDirection.Y -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * GameOptions.GamePadSensitivity.X;
 //			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.TriggerLeft) * GameOptions.GamePadSensitivity.Y;
 		}
+		else if (GameManager.Console.visible)
+			consoleOpen = true;
 
 		if (viewDirection.Y < -180)
 			viewDirection.Y += 360;
@@ -239,14 +242,18 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (!playerThing.ready)
 			return;
 
+		controllerIsGrounded = playerThing.IsOnFloor();
+		playerThing.avatar.isGrounded = controllerIsGrounded;
+
+		if (consoleOpen)
+			return;
+
 		if (Input.IsActionJustPressed(playerInput.Action_CameraSwitch))
 			playerCamera.ChangeThirdPersonCamera(!playerCamera.currentThirdPerson);
 
 		playerThing.avatar.ChangeView(viewDirection, deltaTime);
 		playerThing.avatar.CheckLegTurn(playerCamera.GlobalTransform.ForwardVector());
 
-		controllerIsGrounded = playerThing.IsOnFloor();
-		playerThing.avatar.isGrounded = controllerIsGrounded;
 		//Player can only crounch if it is grounded
 		if ((Input.IsActionJustPressed(playerInput.Action_Crouch)) && (controllerIsGrounded))
 		{
@@ -540,6 +547,8 @@ public partial class PlayerControls : InterpolatedNode3D
 	private void SetMovementDir()
 	{
 		Vector2 Move = Input.GetVector(playerInput.Move_Left, playerInput.Move_Right, playerInput.Move_Forward, playerInput.Move_Back);
+		if ((GameManager.Console.visible) && (playerInput.Device == GameManager.ControllerType.MouseKeyboard))
+			Move = Vector2.Zero;
 
 		cMove.forwardSpeed = Move.Y;
 		cMove.sidewaysSpeed = Move.X;

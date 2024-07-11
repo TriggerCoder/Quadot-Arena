@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/ConsoleManager.cs" id="1_dyv2m"]
 
 [node name="Console" type="ColorRect" node_paths=PackedStringArray("commandLine", "history")]
+visible = false
 custom_minimum_size = Vector2(1280, 360)
 anchors_preset = 15
 anchor_right = 1.0
@@ -15,28 +16,22 @@ size_flags_vertical = 3
 mouse_filter = 2
 color = Color(1, 1, 1, 0.882353)
 script = ExtResource("1_dyv2m")
-commandLine = NodePath("Command")
+commandLine = NodePath("Contents/Command")
 history = NodePath("Contents/History")
 
 [node name="Contents" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="History" type="RichTextLabel" parent="Contents"]
-layout_mode = 2
-fit_content = true
-scroll_active = false
-
-[node name="Command" type="LineEdit" parent="."]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -31.0
 grow_horizontal = 2
 grow_vertical = 0
+
+[node name="History" type="RichTextLabel" parent="Contents"]
+layout_mode = 2
+scroll_active = false
+autowrap_mode = 0
+
+[node name="Command" type="LineEdit" parent="Contents"]
+layout_mode = 2

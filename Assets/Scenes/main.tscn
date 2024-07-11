@@ -253,11 +253,12 @@ hasOutro = false
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_rcj1l")
 
-[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "Sun", "Root", "SplitScreen", "IntermissionContainer", "IntermissionViewPort", "AdvertisementViewPort", "AdvertisementVideo")]
+[node name="Quadot Arena" type="Node" parent="." node_paths=PackedStringArray("worldEnvironment", "Sun", "Root", "console", "SplitScreen", "IntermissionContainer", "IntermissionViewPort", "AdvertisementViewPort", "AdvertisementVideo")]
 script = ExtResource("2_8g0sx")
 worldEnvironment = NodePath("../WorldEnvironment")
 Sun = NodePath("../SunLight")
 Root = NodePath("..")
+console = NodePath("../Console")
 mapRotation = PackedStringArray("q3dm1", "q3dm7", "q3tourney2", "q3dm17")
 tessellations = 10
 SplitScreen = [NodePath("SplitScreenContainer/TopRow"), NodePath("SplitScreenContainer/MiddleRow"), NodePath("SplitScreenContainer/BtmRow")]
@@ -379,7 +380,6 @@ loop = true
 buffering_msec = 1000
 
 [node name="Console" parent="." instance=ExtResource("145_ykqwb")]
-visible = false
 offset_top = -360.0
 offset_bottom = -720.0
 

@@ -7,11 +7,16 @@ using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using Microsoft.Win32;
+using ExtensionMethods;
 
 public static class PakManager
 {
 	public static Dictionary<string, string> ZipFiles = new Dictionary<string, string>();
 	public static Dictionary<string, FileStream> QuakeFiles = new Dictionary<string, FileStream>();
+
+	public static List<string> mapList = new List<string>();
+	public static List<string> playerModelList = new List<string>();
+	public static List<string> playerSkinList = new List<string>();
 
 	private const string pak0Demo = "0613b3d4ef05e613a2b470571498690f";		//pak0.pk3 QUAKE 3 DEMO
 	private const string pak0Retail = "1197ca3df1e65f3c380f8abc10ca43bf";	//pak0.pk3 QUAKE 3
@@ -162,6 +167,16 @@ public static class PakManager
 				//Add Shaders Files for processing
 				if (logName.Contains(".SHADER"))
 					QShaderManager.AddShaderFiles(logName);
+				else if (logName.Contains(".BSP"))
+					AddMapToList(logName);
+				else if (logName.Contains(".SKIN"))
+					AddPlayerSkin(logName);
+			}
+			else
+			{
+				string folderName = e.FullName.ToUpper();
+				if (folderName.Contains("MODELS/PLAYERS/"))
+					AddPlayerModels(folderName);
 			}
 		}
 		reader.Dispose();
@@ -259,4 +274,49 @@ public static class PakManager
 			break;
 		}
 	}
+
+	public static void AddMapToList(string mapName)
+	{
+		string[] fullPath = mapName.Split('/');
+		if (fullPath.Length > 1)
+			mapName = fullPath[1];
+		else
+			mapName = fullPath[0];
+		mapName = mapName.StripExtension();
+		mapList.Add(mapName);
+	}
+
+	public static void OrderLists()
+	{
+		mapList = mapList.OrderBy(mapName => mapName).ToList();
+		playerModelList = playerModelList.OrderBy(modelName => modelName).ToList();
+		playerSkinList = playerSkinList.OrderBy(skinName => skinName).ToList();
+	}
+	public static void AddPlayerModels(string path)
+	{
+		string[] strword = path.Split('/');
+		if (strword.Length > 3)
+		{
+			string model = strword[2];
+			playerModelList.Add(model);
+		}
+	}
+
+	public static void AddPlayerSkin(string path)
+	{
+		string[] strword = path.Split('/');
+		if (strword.Length > 3)
+		{
+			string fullSkin = strword[3].StripExtension();
+			string[] split = fullSkin.Split("_");
+			if (split.Length > 0)
+			{
+				string skin = strword[0] + "/" + strword[1] + "/" + strword[2] + "/" + split[1];
+				if (!playerSkinList.Contains(skin))
+					playerSkinList.Add(skin);
+			}
+		}
+
+	}
+
 }

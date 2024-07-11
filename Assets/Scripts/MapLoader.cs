@@ -348,6 +348,7 @@ public static class MapLoader
 		MapFlares.QueueFree();
 		ColliderGroup.QueueFree();
 		GameManager.Instance.TemporaryObjectsHolder.QueueFree();
+		GameManager.Console.ClearConsole();
 		System.GC.Collect(2, System.GCCollectionMode.Forced);
 	}
 
