@@ -74,6 +74,60 @@ public partial class ConsoleManager : Control
 			default:
 				AddToConsole("Unknown Command: " + command + " type HELP for a list of commands", GameManager.PrintType.Warning);
 			break;
+			case "COLOR":
+			{
+				if (args.Length < 2)
+				{
+					AddToConsole("Command: " + command + " missing color to change", GameManager.PrintType.Warning);
+					break;
+				}
+				int playerNum = 0;
+				string color = args[1];
+				if (args.Length > 2)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.Players.Count)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+						color = args[2];
+					}
+				}
+				
+				if (playerNum == GameManager.Instance.Players.Count)
+				{
+					AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+					break;
+				}
+				else
+				{
+					Color modulate = Colors.White;
+					bool failed = false;
+					try
+					{
+						modulate = new Color(color);
+					}
+					catch (Exception e)
+					{
+						AddToConsole("Command: " + args[0] + " failed: " + color + " is an invalid color", GameManager.PrintType.Warning);
+						failed = true;
+					}
+					if (!failed)
+					{
+						GameManager.Instance.Players[playerNum].modulate = modulate;
+						AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
+					}
+				}
+			}
+			break;
 			case "FRAGLIMIT":
 			{
 				if (args.Length < 2)
@@ -90,7 +144,7 @@ public partial class ConsoleManager : Control
 						break;
 					}
 					GameManager.Instance.ChangeFragLimit(value);
-					AddToConsole("Command: " + args[0] + " sucesfully changed to " + args[1], GameManager.PrintType.Log);
+					AddToConsole("Command: " + args[0] + " sucesfully changed to " + args[1], GameManager.PrintType.Success);
 				}
 				else
 					AddToConsole("Command: " + args[0] + " was not changed. " + args[1] + " is not an integer", GameManager.PrintType.Warning);
@@ -98,14 +152,17 @@ public partial class ConsoleManager : Control
 			break;
 			case "HELP":
 			{
-				AddToConsole("Command: " + command, GameManager.PrintType.Log);
+				AddToConsole("Command: " + command, GameManager.PrintType.Success);
 				AddToConsole("The following is a list of commands:", GameManager.PrintType.Log);
+				AddToConsole("COLOR [i]0:8[/i] [b]color[/b] -> Change the [b]color[/b] (color can be #hex or by name) for the [i]player[/i]", GameManager.PrintType.Log);
 				AddToConsole("FRAGLIMIT [b]limit[/b] -> Set the [b]fraglimit[/b] per map", GameManager.PrintType.Log);
+				AddToConsole("KILL [i]0:8[/i] -> Kill the [i]player[/i]", GameManager.PrintType.Log);
 				AddToConsole("LISTMAPS -> List all the posible maps that can be played", GameManager.PrintType.Log);
 				AddToConsole("LISTMODELS -> List all the posible player models that can be used", GameManager.PrintType.Log);
 				AddToConsole("LISTSKINS [i]0:8[/i] -> List all the posible skins for the current [i]player[/i] model", GameManager.PrintType.Log);
 				AddToConsole("MAP [b]mapName[/b] -> Change the map", GameManager.PrintType.Log);
 				AddToConsole("MODEL [i]0:8[/i] [b]modelName[/b] -> Change the [b]model[/b] for the [i]player[/i]", GameManager.PrintType.Log);
+				AddToConsole("PLAYERNAME [i]0:8[/i] [b]name[/b] -> Change the [b]name[/b] for the [i]player[/i]", GameManager.PrintType.Log);
 				AddToConsole("QUIT -> Quits the game", GameManager.PrintType.Log);
 				AddToConsole("SKIN [i]0:8[/i] [b]skinName[/b] -> Change the [b]skin[/b] for the [i]player[/i]", GameManager.PrintType.Log);
 				AddToConsole("TIMELIMIT [b]limit[/b] -> Set the [b]timelimit[/b] per map", GameManager.PrintType.Log);
@@ -113,9 +170,40 @@ public partial class ConsoleManager : Control
 				AddToConsole("[i]italic[/i] -> Denotes [i]Optional[/i]", GameManager.PrintType.Log);
 			}
 			break;
+			case "KILL":
+			{
+				int playerNum = 0;
+				if (args.Length > 1)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not applied. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.Players.Count)
+						{
+							AddToConsole("Command: " + args[0] + " was not applied. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+					}
+				}
+
+				if (playerNum == GameManager.Instance.Players.Count)
+				{
+					AddToConsole("Command: " + args[0] + " was not applied. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+					break;
+				}
+				else
+					GameManager.Instance.Players[playerNum].Damage(1000, DamageType.Telefrag);
+				AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
+			}
+			break;
 			case "LISTMAPS":
 			{
-				AddToConsole("Command: " + command, GameManager.PrintType.Log);
+				AddToConsole("Command: " + command, GameManager.PrintType.Success);
 				for (int i = 0; i < PakManager.mapList.Count; i++)
 				{
 					string mapName = PakManager.mapList[i];
@@ -125,7 +213,7 @@ public partial class ConsoleManager : Control
 			break;
 			case "LISTMODELS":
 			{
-				AddToConsole("Command: " + command, GameManager.PrintType.Log);
+				AddToConsole("Command: " + command, GameManager.PrintType.Success);
 				for (int i = 0; i < PakManager.playerModelList.Count; i++)
 				{
 					string modelName = PakManager.playerModelList[i];
@@ -135,7 +223,7 @@ public partial class ConsoleManager : Control
 			break;
 			case "LISTSKINS":
 			{
-				AddToConsole("Command: " + command, GameManager.PrintType.Log);
+				AddToConsole("Command: " + command, GameManager.PrintType.Success);
 				int playerNum = 0;
 
 				if (args.Length > 1)
@@ -226,7 +314,45 @@ public partial class ConsoleManager : Control
 					GameManager.Instance.defaulModels[playerNum] = model;
 				else
 					GameManager.Instance.Players[playerNum].modelName = model;
-				AddToConsole("Command: " + args[0] + " sucesfully changed to " + model + " for Player " + playerNum, GameManager.PrintType.Log);
+				AddToConsole("Command: " + args[0] + " sucesfully changed to " + model + " for Player " + playerNum, GameManager.PrintType.Success);
+			}
+			break;
+			case "PLAYERNAME":
+			{
+				if (args.Length < 2)
+				{
+					AddToConsole("Command: " + command + " missing name to change", GameManager.PrintType.Warning);
+					break;
+				}
+				int playerNum = 0;
+				string playerName = args[1];
+				if (args.Length > 2)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.Players.Count)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+						playerName = args[2];
+					}
+				}
+				
+				if (playerNum == GameManager.Instance.Players.Count)
+				{
+					AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+					break;
+				}
+				else
+					GameManager.Instance.Players[playerNum].playerName = playerName;
+				AddToConsole("Command: " + args[0] + " sucesfully changed to " + playerName + " for Player " + playerNum, GameManager.PrintType.Success);
 			}
 			break;
 			case "QUIT":
@@ -278,7 +404,7 @@ public partial class ConsoleManager : Control
 					GameManager.Instance.defaulSkins[playerNum] = skin;
 				else
 					GameManager.Instance.Players[playerNum].skinName = skin;
-				AddToConsole("Command: " + args[0] + " sucesfully changed to " + skin + " for Player " + playerNum, GameManager.PrintType.Log);
+				AddToConsole("Command: " + args[0] + " sucesfully changed to " + skin + " for Player " + playerNum, GameManager.PrintType.Success);
 			}
 			break;
 			case "TIMELIMIT":
@@ -298,7 +424,7 @@ public partial class ConsoleManager : Control
 					}
 
 					GameManager.Instance.ChangeTimeLimit(value);
-					AddToConsole("Command: " + args[0] + " sucesfully changed to " + args[1], GameManager.PrintType.Log);
+					AddToConsole("Command: " + args[0] + " sucesfully changed to " + args[1], GameManager.PrintType.Success);
 				}
 				else
 					AddToConsole("Command: " + args[0] + " was not changed. " + args[1] + " is not an integer", GameManager.PrintType.Warning);
@@ -316,13 +442,17 @@ public partial class ConsoleManager : Control
 		{
 			default:
 				history.AppendText(String + "\n");
-				break;
+			break;
 			case GameManager.PrintType.Warning:
 				history.AppendText("[color=\"yellow\"]" + String + "[/color]\n");
-				break;
+			break;
 			case GameManager.PrintType.Error:
 				history.AppendText("[color=\"red\"]" + String + "[/color]\n");
-				break;
+			break;
+			case GameManager.PrintType.Success:
+				history.AppendText("[color=\"lightskyblue\"]" + String + "[/color]\n");
+			break;
+
 		}
 		totalLines++;
 		focusLine++;

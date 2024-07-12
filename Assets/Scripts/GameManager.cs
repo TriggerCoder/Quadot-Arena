@@ -16,6 +16,7 @@ public partial class GameManager : Node
 	public BasePak gameSelect = BasePak.QuakeLive;
 	[Export]
 	public string[] mapRotation;
+	private List<string> _mapRotation = new List<string>();
 	[Export]
 	public int timeLimit = 7;
 	[Export]
@@ -212,7 +213,8 @@ public partial class GameManager : Node
 		Log,
 		Info,
 		Warning,
-		Error
+		Error,
+		Success
 	}
 	public enum MusicType
 	{
@@ -316,7 +318,17 @@ public partial class GameManager : Node
 		}
 
 		PakManager.OrderLists();
-		if (MapLoader.Load(mapRotation[0]))
+		for (int i = 0; i < mapRotation.Length; i++)
+		{
+			string mapName = mapRotation[i].ToUpper();
+			if (PakManager.mapList.Contains(mapName))
+				_mapRotation.Add(mapName);
+		}
+
+		if (_mapRotation.Count == 0)
+			_mapRotation.Add(PakManager.mapList[0]);
+
+		if (MapLoader.Load(_mapRotation[0]))
 		{
 			ClusterPVSManager.Instance.ResetClusterList(MapLoader.surfaces.Count);
 			MapLoader.GenerateMapCollider();
@@ -426,9 +438,9 @@ public partial class GameManager : Node
 			if (!useCustomMap)
 			{
 				mapNum++;
-				if (mapNum >= mapRotation.Length)
+				if (mapNum >= _mapRotation.Count)
 					mapNum = 0;
-				nextMapName = mapRotation[mapNum];
+				nextMapName = _mapRotation[mapNum];
 			}
 			mapLeftTime = timeLimit * 60;
 			second = 0;

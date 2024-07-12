@@ -5,7 +5,6 @@
 
 [node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("humStream", "audioStream", "muzzleLight")]
 script = ExtResource("1_r5wvs")
-modulate = Color(0.313726, 0.631373, 0.803922, 1)
 humStream = NodePath("HumAudioStream")
 _humSound = "weapons/railgun/rg_hum"
 pushForce = 500.0

@@ -293,7 +293,10 @@ public partial class PlayerModel : RigidBody3D, Damageable
 							break;
 						case LowerAnimation.Jump:
 						case LowerAnimation.JumpBack:
-							lowerAnimation = LowerAnimation.Idle;
+							if (isGrounded)
+								lowerAnimation = LowerAnimation.Idle;
+							else
+								lowerAnimation = LowerAnimation.Run;
 							enableOffset = true;
 							break;
 						case LowerAnimation.Land:
@@ -463,7 +466,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		if (angle != 0)
 		{
 			turnTo = dir;
-			if (lowerAnimation == LowerAnimation.Idle)
+			if ((lowerAnimation == LowerAnimation.Idle) && (isGrounded))
 				lowerAnimation = LowerAnimation.Turn;
 		}
 	}
@@ -703,9 +706,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			return;
 
 		if (sideMove > 0)
-			rotate = new Quaternion(playerModel.UpVector(), 30f);
+			rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(-30f));
 		else if (sideMove < 0)
-			rotate = new Quaternion(playerModel.UpVector(), -30f);
+			rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(30f));
 
 		lowerNode.Quaternion = lowerNode.Quaternion.Slerp(rotate, lowerRotationFPS * deltaTime);
 	}

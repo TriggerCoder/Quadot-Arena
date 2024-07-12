@@ -18,17 +18,6 @@
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="10_h25w0"]
 [ext_resource type="PackedScene" uid="uid://qov23ls4iuhu" path="res://Assets/Player/PlayerPostProcessing.tscn" id="11_uirmt"]
 
-[sub_resource type="Animation" id="Animation_yomay"]
-resource_name = "idle"
-length = 0.6
-tracks/0/type = "position_3d"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("../PlayerInfo/InterpolatedTransform/ViewCamera/WeaponAnimation")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0)
-
 [sub_resource type="Animation" id="Animation_yedjv"]
 resource_name = "fall"
 length = 0.6
@@ -39,6 +28,17 @@ tracks/0/path = NodePath("../PlayerInfo/InterpolatedTransform/ViewCamera/WeaponA
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 0.2, 1, 0, -0.15, 0, 0.6, 1, 0, 0, 0)
+
+[sub_resource type="Animation" id="Animation_yomay"]
+resource_name = "idle"
+length = 0.6
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../PlayerInfo/InterpolatedTransform/ViewCamera/WeaponAnimation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0)
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_isu5b"]
 _data = {
@@ -62,7 +62,6 @@ animation = &"idle"
 animation = &"idle"
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_vxboy"]
-graph_offset = Vector2(-287.098, 73.4222)
 nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_yx8dx")
 nodes/TimeScale/position = Vector2(80, 360)
 nodes/depth/node = SubResource("AnimationNodeAdd2_yopqq")
@@ -89,6 +88,7 @@ input_ray_pickable = false
 axis_lock_angular_x = true
 axis_lock_angular_z = true
 script = ExtResource("1_da8o2")
+modulate = Color(0.313726, 0.631373, 0.803922, 1)
 Torso = NodePath("Torso")
 Feet = NodePath("Feet")
 playerInfo = NodePath("PlayerInfo")

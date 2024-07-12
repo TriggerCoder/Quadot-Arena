@@ -5,6 +5,8 @@ using ExtensionMethods;
 public partial class PlayerThing : CharacterBody3D, Damageable
 {
 	[Export]
+	public Color modulate;
+	[Export]
 	public CollisionShape3D Torso;
 	[Export]
 	public CollisionShape3D Feet;
@@ -35,6 +37,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	private static readonly string[] fleshStep = { "player/footsteps/flesh1", "player/footsteps/flesh2", "player/footsteps/flesh3", "player/footsteps/flesh4" };
 	private static readonly string[] energyStep = { "player/footsteps/energy1", "player/footsteps/energy2", "player/footsteps/energy3", "player/footsteps/energy4" };
 
+	private string currentModel;
 	[Export]
 	public Node3D player;
 	public PlayerModel avatar;
@@ -154,7 +157,9 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 
 		avatar = new PlayerModel();
 		interpolatedTransform.AddChild(avatar);
+		playerControls.footStep = FootStepType.Normal;
 		avatar.LoadPlayer(ref modelName, ref skinName, (GameManager.AllPlayerViewMask & ~((uint)(playerInfo.viewLayer))), playerControls);
+		currentModel = modelName;
 
 		SpawnerManager.SpawnToLocation(this);
 		playerControls.ChangeHeight(true);
@@ -174,7 +179,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			return;
 
 		if (byModel)
-			soundName = "player/" + modelName + "/" + soundName;
+			soundName = "player/" + currentModel + "/" + soundName;
 		else
 			soundName = "player/" + soundName;
 		audioStream.Stream = SoundManager.LoadSound(soundName);

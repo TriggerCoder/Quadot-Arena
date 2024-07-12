@@ -12,7 +12,6 @@ public partial class RailgunWeapon : PlayerWeapon
 	public string decalMark = "RailMark";
 
 	public float maxRange = 400f;
-	[Export]
 	public Color modulate;
 	[Export]
 	public MultiAudioStream humStream;
@@ -58,6 +57,7 @@ public partial class RailgunWeapon : PlayerWeapon
 		humStream.Stream = SoundManager.LoadSound(_humSound, true);
 		humStream.Play();
 
+		modulate = playerInfo.playerThing.modulate;
 		playerInfo.playerPostProcessing.playerHUD.UpdateAmmoType(PlayerInfo.slugAmmo);
 		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.slugAmmo]);
 

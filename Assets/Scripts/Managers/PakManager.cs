@@ -172,12 +172,6 @@ public static class PakManager
 				else if (logName.Contains(".SKIN"))
 					AddPlayerSkin(logName);
 			}
-			else
-			{
-				string folderName = e.FullName.ToUpper();
-				if (folderName.Contains("MODELS/PLAYERS/"))
-					AddPlayerModels(folderName);
-			}
 		}
 		reader.Dispose();
 	}
@@ -298,7 +292,8 @@ public static class PakManager
 		if (strword.Length > 3)
 		{
 			string model = strword[2];
-			playerModelList.Add(model);
+			if (!playerModelList.Contains(model))
+				playerModelList.Add(model);
 		}
 	}
 
@@ -310,6 +305,8 @@ public static class PakManager
 		string skin = path.StripExtension().Replace("LOWER_", "");
 		if (!playerSkinList.Contains(skin))
 			playerSkinList.Add(skin);
+
+		AddPlayerModels(skin);
 	}
 
 }
