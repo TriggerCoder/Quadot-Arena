@@ -55,6 +55,10 @@ public partial class PlayerControls : InterpolatedNode3D
 	public const float fallSpeedLimit = -22f;				// The max fallSpeed without taking damage, modified to Quake Live value
 	public bool holdJumpToBhop = false;						// Allows player to just hold jump button to keep on bhopping perfectly.
 
+	//Player custom settings
+	public Vector2 MouseSensitivity = new Vector2(.5f, .5f);
+	public Vector2 StickSensitivity = new Vector2(4f, 3f);
+
 	public Vector3 playerVelocity = Vector3.Zero;
 	private bool wishJump = false;
 	private bool wishSink = false;
@@ -173,8 +177,8 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (@event is InputEventMouseMotion eventMouseMotion)
 		{
 			Look = eventMouseMotion.Relative;
-			viewDirection.Y -= Look.X * GameOptions.MouseSensitivity.X;
-			viewDirection.X -= Look.Y * GameOptions.MouseSensitivity.Y;
+			viewDirection.Y -= Look.X * MouseSensitivity.X;
+			viewDirection.X -= Look.Y * MouseSensitivity.Y;
 		}
 	}
 
@@ -216,8 +220,8 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (playerInput.Device != GameManager.ControllerType.MouseKeyboard)
 		{
 			int Joy = playerInput.Device - 1;
-			viewDirection.Y -= Input.GetJoyAxis(Joy, JoyAxis.RightX) * GameOptions.GamePadSensitivity.X;
-			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * GameOptions.GamePadSensitivity.Y;
+			viewDirection.Y -= Input.GetJoyAxis(Joy, JoyAxis.RightX) * StickSensitivity.X;
+			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * StickSensitivity.Y;
 
 //			viewDirection.Y -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * GameOptions.GamePadSensitivity.X;
 //			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.TriggerLeft) * GameOptions.GamePadSensitivity.Y;

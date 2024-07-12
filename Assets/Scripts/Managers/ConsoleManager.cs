@@ -1,6 +1,6 @@
 using Godot;
 using System;
-
+using ExtensionMethods;
 public partial class ConsoleManager : Control
 {
 	[Export]
@@ -122,6 +122,9 @@ public partial class ConsoleManager : Control
 					}
 					if (!failed)
 					{
+						modulate.R = Mathf.Max(0.1f, modulate.R);
+						modulate.G = Mathf.Max(0.1f, modulate.G);
+						modulate.B = Mathf.Max(0.1f, modulate.B);
 						GameManager.Instance.Players[playerNum].modulate = modulate;
 						AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
 					}
@@ -154,17 +157,19 @@ public partial class ConsoleManager : Control
 			{
 				AddToConsole("Command: " + command, GameManager.PrintType.Success);
 				AddToConsole("The following is a list of commands:", GameManager.PrintType.Log);
-				AddToConsole("COLOR [i]0:8[/i] [b]color[/b] -> Change the [b]color[/b] (color can be #hex or by name) for the [i]player[/i]", GameManager.PrintType.Log);
+				AddToConsole("COLOR [i]0-8[/i] [b]color[/b] -> Change the [b]color[/b] (color can be #hex or by name) for the [i]player[/i]", GameManager.PrintType.Log);
 				AddToConsole("FRAGLIMIT [b]limit[/b] -> Set the [b]fraglimit[/b] per map", GameManager.PrintType.Log);
-				AddToConsole("KILL [i]0:8[/i] -> Kill the [i]player[/i]", GameManager.PrintType.Log);
+				AddToConsole("KILL [i]0-8[/i] -> Kill the [i]player[/i]", GameManager.PrintType.Log);
 				AddToConsole("LISTMAPS -> List all the posible maps that can be played", GameManager.PrintType.Log);
 				AddToConsole("LISTMODELS -> List all the posible player models that can be used", GameManager.PrintType.Log);
-				AddToConsole("LISTSKINS [i]0:8[/i] -> List all the posible skins for the current [i]player[/i] model", GameManager.PrintType.Log);
+				AddToConsole("LISTSKINS [i]0-8[/i] -> List all the posible skins for the current [i]player[/i] model", GameManager.PrintType.Log);
 				AddToConsole("MAP [b]mapName[/b] -> Change the map", GameManager.PrintType.Log);
-				AddToConsole("MODEL [i]0:8[/i] [b]modelName[/b] -> Change the [b]model[/b] for the [i]player[/i]", GameManager.PrintType.Log);
-				AddToConsole("PLAYERNAME [i]0:8[/i] [b]name[/b] -> Change the [b]name[/b] for the [i]player[/i]", GameManager.PrintType.Log);
+				AddToConsole("MODEL [i]0-8[/i] [b]modelName[/b] -> Change the [b]model[/b] for the [i]player[/i]", GameManager.PrintType.Log);
+				AddToConsole("MOUSESENSITIVITY [i]0-8[/i] [b]X,Y[/b] -> Change the mouse sensitivity [b]X,Y[/b] for the [i]player[/i], default: [b].5,.5[/b]", GameManager.PrintType.Log);
+				AddToConsole("PLAYERNAME [i]0-8[/i] [b]name[/b] -> Change the [b]name[/b] for the [i]player[/i]", GameManager.PrintType.Log);
 				AddToConsole("QUIT -> Quits the game", GameManager.PrintType.Log);
-				AddToConsole("SKIN [i]0:8[/i] [b]skinName[/b] -> Change the [b]skin[/b] for the [i]player[/i]", GameManager.PrintType.Log);
+				AddToConsole("SKIN [i]0-8[/i] [b]skinName[/b] -> Change the [b]skin[/b] for the [i]player[/i]", GameManager.PrintType.Log);
+				AddToConsole("STICKSENSITIVITY [i]0-8[/i] [b]X,Y[/b] -> Change the controller sticks sensitivity [b]X,Y[/b] for the [i]player[/i], default: [b]4,3[/b]", GameManager.PrintType.Log);
 				AddToConsole("TIMELIMIT [b]limit[/b] -> Set the [b]timelimit[/b] per map", GameManager.PrintType.Log);
 				AddToConsole("[b]bold[/b] -> Denotes [b]Obligatory[/b]", GameManager.PrintType.Log);
 				AddToConsole("[i]italic[/i] -> Denotes [i]Optional[/i]", GameManager.PrintType.Log);
@@ -235,7 +240,7 @@ public partial class ConsoleManager : Control
 							AddToConsole("Command: " + args[0] + " . Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
 							break;
 						}
-						if (value > GameManager.Instance.defaulModels.Length)
+						if (value > GameManager.Instance.defaultModels.Length)
 						{
 							AddToConsole("Command: " + args[0] + " . Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
 							break;
@@ -244,7 +249,7 @@ public partial class ConsoleManager : Control
 					}
 				}
 
-				string currentModel = "MODELS/PLAYERS/" + GameManager.Instance.defaulModels[playerNum].ToUpper() + "/";
+				string currentModel = "MODELS/PLAYERS/" + GameManager.Instance.defaultModels[playerNum].ToUpper() + "/";
 				if (playerNum < GameManager.Instance.Players.Count)
 					currentModel = "MODELS/PLAYERS/" + GameManager.Instance.Players[playerNum].modelName.ToUpper() + "/";
 
@@ -294,7 +299,7 @@ public partial class ConsoleManager : Control
 							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
 							break;
 						}
-						if (value > GameManager.Instance.defaulModels.Length)
+						if (value > GameManager.Instance.defaultModels.Length)
 						{
 							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
 							break;
@@ -311,10 +316,84 @@ public partial class ConsoleManager : Control
 				}
 
 				if (playerNum >= GameManager.Instance.Players.Count)
-					GameManager.Instance.defaulModels[playerNum] = model;
+					GameManager.Instance.defaultModels[playerNum] = model;
 				else
 					GameManager.Instance.Players[playerNum].modelName = model;
 				AddToConsole("Command: " + args[0] + " sucesfully changed to " + model + " for Player " + playerNum, GameManager.PrintType.Success);
+			}
+			break;
+			case "MOUSESENSITIVITY":
+			{
+				if (args.Length < 2)
+				{
+					AddToConsole("Command: " + command + " missing sensitivity value to change", GameManager.PrintType.Warning);
+					break;
+				}
+				int playerNum = 0;
+				string sensitivity = args[1];
+				if (args.Length > 2)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.defaultModels.Length)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+						sensitivity = args[2];
+					}
+				}
+				
+				if (!sensitivity.Contains(','))
+				{
+					AddToConsole("Command: " + command + " sensitivity is not in correct format [b]X,Y[/b]", GameManager.PrintType.Warning);
+					break;
+				}
+
+
+				string[] check = sensitivity.Split(',');
+				if (check.Length != 2)
+				{
+					AddToConsole("Command: " + command + " sensitivity is not in correct format [b]X,Y[/b]", GameManager.PrintType.Warning);
+					break;
+				}
+
+				bool failed = false;
+				string[] sens = new string[2];
+				for (int i = 0; i < check.Length; i++)
+				{
+					sens[i] = "";
+					if (failed)
+						break;
+					for (int j = 0; j < check[i].Length; j++)
+					{
+						if (char.IsDigit(check[i][j]))
+							sens[i] += check[i][j];
+						else if (check[i][j] == '.')
+							sens[i] += check[i][j];
+						else
+						{
+							failed = true;
+							break;
+						}
+					}
+				}
+
+				if (failed)
+				{
+					AddToConsole("Command: " + command + " sensitivity is not in correct format [b]X,Y[/b]", GameManager.PrintType.Warning);
+					break;
+				}
+
+				Vector2 Sensitivity = new Vector2(sens[0].GetNumValue(), sens[1].GetNumValue());
+				GameManager.Instance.Players[playerNum].playerControls.MouseSensitivity = Sensitivity;
+				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
 			}
 			break;
 			case "PLAYERNAME":
@@ -380,7 +459,7 @@ public partial class ConsoleManager : Control
 							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
 							break;
 						}
-						if (value > GameManager.Instance.defaulModels.Length)
+						if (value > GameManager.Instance.defaultModels.Length)
 						{
 							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
 							break;
@@ -390,7 +469,7 @@ public partial class ConsoleManager : Control
 					}
 				}
 				
-				string pathSkin = "MODELS/PLAYERS/" + GameManager.Instance.defaulModels[playerNum].ToUpper() + "/" + skin;
+				string pathSkin = "MODELS/PLAYERS/" + GameManager.Instance.defaultModels[playerNum].ToUpper() + "/" + skin;
 				if (playerNum < GameManager.Instance.Players.Count)
 					pathSkin = "MODELS/PLAYERS/" + GameManager.Instance.Players[playerNum].modelName.ToUpper() + "/" + skin;
 
@@ -401,10 +480,84 @@ public partial class ConsoleManager : Control
 				}
 
 				if (playerNum >= GameManager.Instance.Players.Count)
-					GameManager.Instance.defaulSkins[playerNum] = skin;
+					GameManager.Instance.defaultSkins[playerNum] = skin;
 				else
 					GameManager.Instance.Players[playerNum].skinName = skin;
 				AddToConsole("Command: " + args[0] + " sucesfully changed to " + skin + " for Player " + playerNum, GameManager.PrintType.Success);
+			}
+			break;
+			case "STICKSENSITIVITY":
+			{
+				if (args.Length < 2)
+				{
+					AddToConsole("Command: " + command + " missing sensitivity value to change", GameManager.PrintType.Warning);
+					break;
+				}
+				int playerNum = 0;
+				string sensitivity = args[1];
+				if (args.Length > 2)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.defaultModels.Length)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+						sensitivity = args[2];
+					}
+				}
+				
+				if (!sensitivity.Contains(','))
+				{
+					AddToConsole("Command: " + command + " sensitivity is not in correct format [b]X,Y[/b]", GameManager.PrintType.Warning);
+					break;
+				}
+
+
+				string[] check = sensitivity.Split(',');
+				if (check.Length != 2)
+				{
+					AddToConsole("Command: " + command + " sensitivity is not in correct format [b]X,Y[/b]", GameManager.PrintType.Warning);
+					break;
+				}
+
+				bool failed = false;
+				string[] sens = new string[2];
+				for (int i = 0; i < check.Length; i++)
+				{
+					sens[i] = "";
+					if (failed)
+						break;
+					for (int j = 0; j < check[i].Length; j++)
+					{
+						if (char.IsDigit(check[i][j]))
+							sens[i] += check[i][j];
+						else if (check[i][j] == '.')
+							sens[i] += check[i][j];
+						else
+						{
+							failed = true;
+							break;
+						}
+					}
+				}
+
+				if (failed)
+				{
+					AddToConsole("Command: " + command + " sensitivity is not in correct format [b]X,Y[/b]", GameManager.PrintType.Warning);
+					break;
+				}
+
+				Vector2 Sensitivity = new Vector2(sens[0].GetNumValue(), sens[1].GetNumValue());
+				GameManager.Instance.Players[playerNum].playerControls.StickSensitivity = Sensitivity;
+				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
 			}
 			break;
 			case "TIMELIMIT":

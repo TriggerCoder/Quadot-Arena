@@ -1166,7 +1166,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		int torsoOffset = 0;
 		int legsOffset = LowerAnimation.WalkCR + 1;
 		char[] separators = new char[2] { '\t', '(' };
-		while (!animFile.EndOfStream)
+		while ((!animFile.EndOfStream) && (currentAnim < 25))
 		{
 			strWord = animFile.ReadLine();
 
@@ -1262,6 +1262,10 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			}
 			currentAnim++;
 		}
+
+		//Set currentAnim back
+		currentAnim = 24;
+
 		//Add Walk Crounched Back 
 		animations[currentAnim] = new ModelAnimation(LowerAnimation.WalkCRBack);
 		animations[currentAnim].startFrame = lowerAnim[LowerAnimation.WalkCR].endFrame - 1;

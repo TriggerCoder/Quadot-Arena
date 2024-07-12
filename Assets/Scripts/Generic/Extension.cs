@@ -142,6 +142,16 @@ namespace ExtensionMethods
 
 			return name;
 		}
+		public static float GetNumValue(this string String)
+		{
+			int inum = 0;
+			float num = 0;
+			if (int.TryParse(String, out inum))
+				num = inum;
+			else
+				num = float.Parse(String);
+			return num;
+		}
 	}
 
 	public static class Vector3Extension

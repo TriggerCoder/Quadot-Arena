@@ -162,8 +162,8 @@ public partial class GameManager : Node
 	public SoundData[] OverrideSounds;
 
 	public Dictionary<int, PlayerThing> Players = new Dictionary<int, PlayerThing>();
-	public string[] defaulModels = { "Doom", "Crash", "Ranger", "Visor", "Sarge", "Major", "Anarki", "Grunt" };
-	public string[] defaulSkins = { "default", "default", "default", "default", "default", "default", "default", "default" };
+	public string[] defaultModels = { "Doom", "Crash", "Ranger", "Visor", "Sarge", "Major", "Anarki", "Grunt" };
+	public string[] defaultSkins = { "default", "default", "default", "default", "default", "default", "default", "default" };
 
 	public Camera3D interMissionCamera = null;
 	public List<int> controllerWantToJoin = new List<int>();
@@ -374,6 +374,8 @@ public partial class GameManager : Node
 				{
 					paused = false;
 					Input.MouseMode = Input.MouseModeEnum.Captured;
+					if (console.visible)
+						console.commandLine.GrabFocus();
 				}
 				AdvertisementVideo.Paused = paused;
 			}
@@ -387,6 +389,8 @@ public partial class GameManager : Node
 					paused = false;
 					AdvertisementVideo.Paused = paused;
 					Input.MouseMode = Input.MouseModeEnum.Captured;
+					if (console.visible)
+						console.commandLine.GrabFocus();
 				}
 			}
 		}
@@ -675,9 +679,9 @@ public partial class GameManager : Node
 		if (playerNum == 0)
 			player.playerInfo.playerPostProcessing.ViewPortCamera.Current = true;
 
-		player.playerName = defaulModels[playerNum];
-		player.modelName = defaulModels[playerNum];
-		player.skinName = defaulSkins[playerNum];
+		player.playerName = defaultModels[playerNum];
+		player.modelName = defaultModels[playerNum];
+		player.skinName = defaultSkins[playerNum];
 
 		player.playerInfo.SetPlayer(playerNum);
 		player.playerControls.Init(controllerNum);
