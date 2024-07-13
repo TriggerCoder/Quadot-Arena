@@ -779,6 +779,7 @@ public static class Mesher
 					multiMesh.InstanceCount = LOW_USE_MULTIMESHES;
 				else
 					multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
+				multiMesh.VisibleInstanceCount = 0;
 
 				SurfaceData surfaceData = new SurfaceData();
 				surfaceData.skinName = skinName;
@@ -909,6 +910,7 @@ public static class Mesher
 						multiMesh.InstanceCount = LOW_USE_MULTIMESHES;
 					else
 						multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
+					multiMesh.VisibleInstanceCount = 0;
 
 					SurfaceData surfaceData = new SurfaceData();
 					surfaceData.skinName = skinName;
@@ -1114,6 +1116,8 @@ public static class Mesher
 					multiMesh.InstanceCount = LOW_USE_MULTIMESHES;
 				else
 					multiMesh.InstanceCount = HIGH_USE_MULTIMESHES;
+				multiMesh.VisibleInstanceCount = 0;
+
 				surfaceData.commonMesh = multiMesh;
 				surfaceData.useTransparent = useTransparent;
 				surfaceData.readyMaterials = material;
@@ -1765,7 +1769,7 @@ public static class Mesher
 	public static Vector3[] GetExtrudedVerticesFromPoints(Vector3[] points, Vector3 normal)
 	{
 		Vector3[] vertices = new Vector3[points.Length * 2];
-		float depth = 0.001f;
+		float depth = 0.0015f;
 
 		for (int i = 0; i < points.Length; i++)
 		{

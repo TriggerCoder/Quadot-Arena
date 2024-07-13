@@ -345,6 +345,23 @@ public partial class ThingsManager : Node
 		AddEntitiesToMap();
 		AddTimersToMap();
 		AddPortalsToMap();
+		//Map Creator didn't put an intermission point
+		if (GameManager.Instance.interMissionCamera == null)
+			CreateInterMission();
+
+	}
+	public static void CreateInterMission()
+	{
+		Target target = SpawnerManager.deathMatchSpawner[GD.RandRange(0, SpawnerManager.deathMatchSpawner.Count - 1)];
+		Camera3D camera = new Camera3D();
+		camera.Position = target.destination;
+		GameManager.Instance.TemporaryObjectsHolder.AddChild(camera);
+		camera.CullMask = GameManager.AllPlayerViewMask | (1 << GameManager.NotVisibleLayer);
+		ScoreBoard scoreBoard = (ScoreBoard)GameManager.Instance.scoreBoard.Instantiate();
+		camera.AddChild(scoreBoard);
+		camera.Quaternion = Quaternion.FromEuler(new Vector3(0, Mathf.DegToRad(target.angle), 0));
+		GameManager.Instance.interMissionCamera = camera;
+		GameManager.Instance.SetViewPortToCamera(camera, GameManager.Instance.IntermissionViewPort);
 	}
 
 	public static void AddPortalToMap(Portal portal)
@@ -1037,20 +1054,38 @@ public partial class ThingsManager : Node
 					float speed = 4, phase = 0;
 					string noise;
 
-					PlatformController platform = new PlatformController();
-					thingObject.AddChild(platform);
-
+					ModelController modelController = null;
 					if (entity.entityData.TryGetValue("model", out strWord))
 						model = int.Parse(strWord.Trim('*'));
 					if (entity.entityData.TryGetValue("model2", out strWord))
 					{
 						model = -1;
-						ModelController modelController = new ModelController();
-						platform.AddChild(modelController);
+						modelController = new ModelController();
 						modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
 						modelController.Init();
 						thingObject.GlobalPosition = entity.origin;
 					}
+
+					entity.entityData.TryGetNumValue("speed", out speed);
+					entity.entityData.TryGetNumValue("phase", out phase);
+
+					if (speed == 0)
+					{
+						if (model >= 0)
+						{
+							MapLoader.GenerateGeometricSurface(thingObject, model);
+							MapLoader.GenerateGeometricCollider(thingObject, null, model, 0, false);
+						}
+						else if (modelController != null)
+							thingObject.AddChild(modelController);
+						break;
+					}
+
+					PlatformController platform = new PlatformController();
+					thingObject.AddChild(platform);
+
+					if (modelController != null)
+						platform.AddChild(modelController);
 
 					Node3D SourceTransform = new Node3D();
 					platform.AddChild(SourceTransform);
@@ -1067,8 +1102,6 @@ public partial class ThingsManager : Node
 						spawnflags = int.Parse(strWord);
 					if (entity.entityData.TryGetValue("noise", out noise))
 						noise = GetSoundName(noise);
-					entity.entityData.TryGetNumValue("speed", out speed);
-					entity.entityData.TryGetNumValue("phase", out phase);
 
 					Vector3 direction = Vector3.Up;
 					if ((spawnflags & 1) != 0)
