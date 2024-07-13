@@ -335,7 +335,6 @@ public static class MapLoader
 
 	public static void UnloadMap()
 	{
-		GameManager.SetPause();
 		SpawnerManager.deathMatchSpawner = new List<Target>();
 		ModelsManager.ClearModels();
 		ClusterPVSManager.Instance.ResetClusterList(1);

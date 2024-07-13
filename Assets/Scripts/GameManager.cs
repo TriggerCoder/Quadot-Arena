@@ -475,7 +475,8 @@ public partial class GameManager : Node
 					{
 						if (loading)
 						{
-							AddAllPlayer();
+							if (Players.Count > 0)
+								AddAllPlayer();
 							loading = false;
 						}
 						else
@@ -636,11 +637,6 @@ public partial class GameManager : Node
 		MapLoader.UnloadMap();
 		skipFrames = 5;
 		currentState = FuncState.None;
-	}
-
-	public static void SetPause ()
-	{ 
-		Instance.paused = true;
 	}
 
 	public void CheckNumPlayerAdded(int playerNum)
