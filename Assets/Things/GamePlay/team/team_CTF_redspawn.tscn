@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://vl5qwu3ral8w"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/SpawnPosition.cs" id="1_y3k3i"]
+
+[node name="team_CTF_redspawn" type="Node3D"]
+script = ExtResource("1_y3k3i")
+respawnSound = ""
+thingType = 3

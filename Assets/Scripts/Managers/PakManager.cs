@@ -1,4 +1,3 @@
-using Godot;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -100,7 +99,11 @@ public static class PakManager
 			switch (basePak)
 			{
 				default:
-					GameManager.Print("NO CORRECT PAK0.PK3 FOUND");
+				{
+					LogError("NO CORRECT PAK0.PK3 FOUND IN " + filePath);
+					GameManager.QuitGame();
+					return;
+				}
 				break;
 				case GameManager.BasePak.Demo:
 					end = 1;
@@ -141,7 +144,7 @@ public static class PakManager
 		{
 			string FileName = path + zipfile.Name;
 
-			FileStream file = new FileStream(FileName, FileMode.Open);
+			FileStream file = File.Open(FileName, FileMode.Open, FileAccess.Read);
 			AddPK3(file);
 		}
 	}
@@ -307,6 +310,80 @@ public static class PakManager
 			playerSkinList.Add(skin);
 
 		AddPlayerModels(skin);
+	}
+
+	public static void LogError(string error)
+	{
+		string errorFileName = Directory.GetCurrentDirectory() + "/error.log";
+		FileStream errorFile = File.Open(errorFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+		errorFile.Seek(0, SeekOrigin.End);
+		byte[] writeError = System.Text.Encoding.UTF8.GetBytes(DateTime.Now.ToString() + " : " + error + "\n").ToArray();
+		errorFile.Write(writeError);
+		errorFile.Close();
+	}
+
+	public static List<string> LoadMapRotation()
+	{
+		string FileName = "/";
+		switch(basePak)
+		{
+			default:
+			case GameManager.BasePak.Demo:
+				return new List<string>();
+			break;
+			case GameManager.BasePak.Quake3:
+				FileName += "q3_";
+			break;
+			case GameManager.BasePak.TeamArena:
+				FileName += "ta_";
+			break;
+			case GameManager.BasePak.QuakeLive:
+				FileName += "ql_";
+			break;
+		}
+		switch (GameManager.Instance.gameType)
+		{
+			default:
+			case GameManager.GameType.FreeForAll:
+			case GameManager.GameType.QuadHog:
+				FileName += "ffa.txt";
+			break;
+			case GameManager.GameType.Tournament:
+			case GameManager.GameType.SinglePlayer:
+				FileName += "duel.txt";
+			break;
+			case GameManager.GameType.TeamDeathmatch:
+				FileName += "tdm.txt";
+			break;
+			case GameManager.GameType.CaptureTheFlag:
+			case GameManager.GameType.OneFlagCTF:
+			case GameManager.GameType.Overload:
+			case GameManager.GameType.Harvester:
+				FileName += "ctf.txt";
+			break;
+		}
+		string rotationFileName = Directory.GetCurrentDirectory() + FileName;
+
+		if (!File.Exists(rotationFileName))
+			return new List<string>();
+
+		FileStream rotationFile = File.Open(rotationFileName, FileMode.Open, FileAccess.Read);
+		StreamReader stream = new StreamReader(rotationFile);
+		string mapName;
+
+		List<string> mapRotation = new List<string>();
+		stream.BaseStream.Seek(0, SeekOrigin.Begin);
+
+		while (!stream.EndOfStream)
+		{
+			mapName = stream.ReadLine().Split('|')[0].ToUpper();
+			if (mapList.Contains(mapName))
+				mapRotation.Add(mapName);
+		}
+		stream.Close();
+		rotationFile.Close();
+
+		return mapRotation;
 	}
 
 }

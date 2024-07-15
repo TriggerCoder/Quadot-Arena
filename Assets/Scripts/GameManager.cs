@@ -318,13 +318,18 @@ public partial class GameManager : Node
 		}
 
 		PakManager.OrderLists();
-		for (int i = 0; i < mapRotation.Length; i++)
-		{
-			string mapName = mapRotation[i].ToUpper();
-			if (PakManager.mapList.Contains(mapName))
-				_mapRotation.Add(mapName);
-		}
+		if (gameSelect != BasePak.Demo)
+			_mapRotation = PakManager.LoadMapRotation();
 
+		if (_mapRotation.Count == 0)
+		{
+			for (int i = 0; i < mapRotation.Length; i++)
+			{
+				string mapName = mapRotation[i].ToUpper();
+				if (PakManager.mapList.Contains(mapName))
+					_mapRotation.Add(mapName);
+			}
+		}
 		if (_mapRotation.Count == 0)
 			_mapRotation.Add(PakManager.mapList[0]);
 
@@ -336,6 +341,7 @@ public partial class GameManager : Node
 			MapLoader.GenerateSurfaces();
 			MapLoader.SetLightVolData();
 			ThingsManager.AddThingsToMap();
+			SpawnerManager.CheckSpawnLocations();
 			mapLeftTime = timeLimit * 60;
 		}
 		currentState = FuncState.Ready;
@@ -616,6 +622,7 @@ public partial class GameManager : Node
 			MapLoader.GenerateSurfaces();
 			MapLoader.SetLightVolData();
 			ThingsManager.AddThingsToMap();
+			SpawnerManager.CheckSpawnLocations();
 		}
 		limitReach = LimitReach.None;
 		skipFrames = 5;
@@ -624,9 +631,12 @@ public partial class GameManager : Node
 
 	public void ChangeMap(string nextMap)
 	{
+		if (!string.IsNullOrEmpty(nextMap))
+		{
+			useCustomMap = true;
+			nextMapName = nextMap;
+		}
 		console.ChangeConsole(true);
-		useCustomMap = true;
-		nextMapName = nextMap;
 		limitReach = LimitReach.Time;
 		mapLeftTime = 1;		
 	}
@@ -673,7 +683,10 @@ public partial class GameManager : Node
 		player.playerViewPort = (PlayerViewPort)viewPortPrefab.Instantiate();
 		AddChild(player);
 		if (playerNum == 0)
+		{
 			player.playerInfo.playerPostProcessing.ViewPortCamera.Current = true;
+			IntermissionContainer.Hide();
+		}
 
 		player.playerName = defaultModels[playerNum];
 		player.modelName = defaultModels[playerNum];
@@ -931,6 +944,13 @@ public partial class GameManager : Node
 		fragLimit = limit;
 		foreach (PlayerThing player in Players.Values)
 			CheckDeathCount(player.frags);
+	}
+
+	public static void QuitGame()
+	{
+		SceneTree main = Instance.GetTree();
+		main.Root.PropagateNotification((int)NotificationWMCloseRequest);
+		main.Quit();
 	}
 
 }

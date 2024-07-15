@@ -824,8 +824,7 @@ public partial class ThingsManager : Node
 					}
 				}
 				break;
-
-				//Teleporter
+				//Deathmatch spawning  location
 				case "info_player_deathmatch":
 				{
 					thingObject.GlobalPosition = entity.origin;
@@ -840,7 +839,36 @@ public partial class ThingsManager : Node
 					spawnPosition.Init((int)angle, entity.entityData);
 				}
 				break;
+				//Red Team spawning  location
+				case "team_CTF_redspawn":
+				{
+					thingObject.GlobalPosition = entity.origin;
 
+					if (entity.entityData.ContainsKey("nohumans"))
+						continue;
+
+					float angle = 0;
+					entity.entityData.TryGetNumValue("angle", out angle);
+
+					SpawnPosition spawnPosition = (SpawnPosition)thingObject;
+					spawnPosition.Init((int)angle, entity.entityData, SpawnPosition.SpawnType.Red);
+				}
+				break;
+				//Blue Team spawning  location
+				case "team_CTF_bluespawn":
+				{
+					thingObject.GlobalPosition = entity.origin;
+
+					if (entity.entityData.ContainsKey("nohumans"))
+						continue;
+
+					float angle = 0;
+					entity.entityData.TryGetNumValue("angle", out angle);
+
+					SpawnPosition spawnPosition = (SpawnPosition)thingObject;
+					spawnPosition.Init((int)angle, entity.entityData, SpawnPosition.SpawnType.Blue);
+				}
+				break;
 				// Solid Model
 				case "func_static":
 				{

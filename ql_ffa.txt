@@ -1,0 +1,10 @@
+campgrounds|ffa
+hydra|ffa
+verticalvengeance|ffa
+retribution|ffa
+provinggrounds|ffa
+spillway|ffa
+beyondreality|ffa
+longestyard|ffa
+powerstation|ffa
+grimdungeons|ffa

@@ -166,6 +166,7 @@ public partial class ConsoleManager : Control
 				AddToConsole("MAP [b]mapName[/b] -> Change the map", GameManager.PrintType.Log);
 				AddToConsole("MODEL [i]0-8[/i] [b]modelName[/b] -> Change the [b]model[/b] for the [i]player[/i]", GameManager.PrintType.Log);
 				AddToConsole("MOUSESENSITIVITY [i]0-8[/i] [b]X,Y[/b] -> Change the mouse sensitivity [b]X,Y[/b] for the [i]player[/i], default: [b].5,.5[/b]", GameManager.PrintType.Log);
+				AddToConsole("NEXTMAP -> Change to the next map in the map rotation list", GameManager.PrintType.Log);
 				AddToConsole("PLAYERNAME [i]0-8[/i] [b]name[/b] -> Change the [b]name[/b] for the [i]player[/i]", GameManager.PrintType.Log);
 				AddToConsole("QUIT -> Quits the game", GameManager.PrintType.Log);
 				AddToConsole("SKIN [i]0-8[/i] [b]skinName[/b] -> Change the [b]skin[/b] for the [i]player[/i]", GameManager.PrintType.Log);
@@ -396,6 +397,9 @@ public partial class ConsoleManager : Control
 				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
 			}
 			break;
+			case "NEXTMAP":
+				GameManager.Instance.ChangeMap("");
+			break;
 			case "PLAYERNAME":
 			{
 				if (args.Length < 2)
@@ -435,11 +439,7 @@ public partial class ConsoleManager : Control
 			}
 			break;
 			case "QUIT":
-			{
-				SceneTree main = GetTree();
-				main.Root.PropagateNotification((int)NotificationWMCloseRequest);
-				main.Quit();
-			}
+				GameManager.QuitGame();
 			break;
 			case "SKIN":
 			{

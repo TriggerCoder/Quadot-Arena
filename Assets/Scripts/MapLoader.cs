@@ -335,7 +335,7 @@ public static class MapLoader
 
 	public static void UnloadMap()
 	{
-		SpawnerManager.deathMatchSpawner = new List<Target>();
+		SpawnerManager.ClearLists();
 		ModelsManager.ClearModels();
 		ClusterPVSManager.Instance.ResetClusterList(1);
 		Mesher.MultiMeshes = new Dictionary<MultiMesh, Dictionary<Node3D, int>>();
