@@ -60,7 +60,7 @@ public partial class Grenade : RigidBody3D
 		damageMin *= GameManager.Instance.QuadMul;
 		damageMax *= GameManager.Instance.QuadMul;
 		blastDamage *= GameManager.Instance.QuadMul;
-		pushForce *= GameManager.Instance.QuadMul;
+		pushForce *= GameManager.Instance.QuadMul * .5f;
 	}
 	void OnBodyEntered(Node other)
 	{

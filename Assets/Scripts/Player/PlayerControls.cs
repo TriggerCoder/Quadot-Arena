@@ -497,7 +497,6 @@ public partial class PlayerControls : InterpolatedNode3D
 				if (controllerIsGrounded)
 					jumpPadVel = Vector3.Zero;
 			}
-				
 		}
 
 		if (wishFire)
@@ -536,6 +535,12 @@ public partial class PlayerControls : InterpolatedNode3D
 	{
 		if (impulseVector.LengthSquared() > 0)
 		{
+			if ((controllerIsGrounded) && (impulseVector.Y > 0))
+			{
+				impulseVector.Y -= -GameManager.Instance.gravity * deltaTime;
+				if (impulseVector.Y < 0)
+					impulseVector.Y = 0;
+			}
 			playerVelocity += impulseVector;
 			impulseVector = Vector3.Zero;
 		}

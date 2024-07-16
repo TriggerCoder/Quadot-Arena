@@ -109,7 +109,7 @@ public partial class BFGBall : InterpolatedNode3D
 		electricDamageMin *= GameManager.Instance.QuadMul;
 		electricDamageMax *= GameManager.Instance.QuadMul;
 		blastDamage *= GameManager.Instance.QuadMul;
-		pushForce *= GameManager.Instance.QuadMul;
+		pushForce *= GameManager.Instance.QuadMul * .5f;
 	}
 	public override void _PhysicsProcess(double delta)
 	{

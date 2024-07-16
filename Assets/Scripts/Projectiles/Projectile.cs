@@ -80,7 +80,7 @@ public partial class Projectile : InterpolatedNode3D
 		damageMin *= GameManager.Instance.QuadMul;
 		damageMax *= GameManager.Instance.QuadMul;
 		blastDamage *= GameManager.Instance.QuadMul;
-		pushForce *= GameManager.Instance.QuadMul;
+		pushForce *= GameManager.Instance.QuadMul * .5f;
 	}
 	public override void _PhysicsProcess(double delta)
 	{
