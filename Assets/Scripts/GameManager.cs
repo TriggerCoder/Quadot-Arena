@@ -317,9 +317,11 @@ public partial class GameManager : Node
 			break;
 		}
 
-		PakManager.OrderLists();
 		if (gameSelect != BasePak.Demo)
+		{
+			PakManager.OrderLists();
 			_mapRotation = PakManager.LoadMapRotation();
+		}
 
 		if (_mapRotation.Count == 0)
 		{
@@ -332,6 +334,9 @@ public partial class GameManager : Node
 		}
 		if (_mapRotation.Count == 0)
 			_mapRotation.Add(PakManager.mapList[0]);
+
+		if (gameSelect == BasePak.Demo)
+			PakManager.KeepDemoList(_mapRotation);
 
 		if (MapLoader.Load(_mapRotation[0]))
 		{

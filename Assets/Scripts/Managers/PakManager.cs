@@ -289,6 +289,12 @@ public static class PakManager
 		playerModelList = playerModelList.OrderBy(modelName => modelName).ToList();
 		playerSkinList = playerSkinList.OrderBy(skinName => skinName).ToList();
 	}
+
+	public static void KeepDemoList(List<string> demoList)
+	{
+		mapList = demoList.OrderBy(mapName => mapName).ToList();
+	}
+
 	public static void AddPlayerModels(string path)
 	{
 		string[] strword = path.Split('/');

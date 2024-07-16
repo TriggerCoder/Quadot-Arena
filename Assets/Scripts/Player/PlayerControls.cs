@@ -32,12 +32,10 @@ public partial class PlayerControls : InterpolatedNode3D
 
 	public Vector3 jumpPadVel = Vector3.Zero;
 
-	public float impulseDampening = 4f;
-
 	// Movement stuff
 	public const float crouchSpeed = 3.0f;					// Crouch speed
 	public const float walkSpeed = 5.0f;					// Walk speed
-	public const float runSpeed = 7.0f;						// Run speed
+	public const float runSpeed = 10.0f;					// Run speed
 	public const float swimSpeed = 7.0f;					// Swim speed
 	private float oldSpeed = 0;								// Previous move speed
 	public float fallSpeed = 0;								// Acumulated fallSpeed
@@ -536,17 +534,15 @@ public partial class PlayerControls : InterpolatedNode3D
 
 	void ApplyMove(float deltaTime)
 	{
-		playerThing.Velocity = (playerVelocity + impulseVector + jumpPadVel);
-		lastGlobalPosition = GlobalPosition;
-		playerThing.MoveAndSlide();
-
-		//dampen impulse
 		if (impulseVector.LengthSquared() > 0)
 		{
-			impulseVector = impulseVector.Lerp(Vector3.Zero, impulseDampening * deltaTime);
-			if (impulseVector.LengthSquared() < 1f)
-				impulseVector = Vector3.Zero;
+			playerVelocity += impulseVector;
+			impulseVector = Vector3.Zero;
 		}
+
+		playerThing.Velocity = (playerVelocity + jumpPadVel);
+		lastGlobalPosition = GlobalPosition;
+		playerThing.MoveAndSlide();
 	}
 	private void SetMovementDir()
 	{
@@ -637,7 +633,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 		//Check if Haste
 		if (playerInfo.haste)
-			wishspeed *= 1.5f;
+			wishspeed *= 1.3f;
 
 		curreAcel = Accelerate(wishdir, wishspeed, waterAcceleration, deltaTime);
 		playerVelocity.Y += curreAcel * wishdir.Y;
@@ -670,7 +666,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 		//Check if Haste
 		if (playerInfo.haste)
-			wishspeed *= 1.5f;
+			wishspeed *= 1.3f;
 
 		Accelerate(wishdir, wishspeed, runAcceleration, deltaTime, runSpeed);
 
@@ -754,7 +750,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 		//Check if Haste
 		if (playerInfo.haste)
-			wishspeed *= 1.5f;
+			wishspeed *= 1.3f;
 
 		//Aircontrol
 		float wishspeed2 = wishspeed;
