@@ -1,4 +1,4 @@
-[gd_scene load_steps=162 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=163 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
@@ -59,6 +59,7 @@
 [ext_resource type="PackedScene" uid="uid://1aju6wu5vmtu" path="res://Assets/Things/Pickups/Health/item_health.tscn" id="27_5pqil"]
 [ext_resource type="Image" uid="uid://dqgr0oxudhmhd" path="res://Assets/Textures/Blood/blood8.tga" id="27_m0ak5"]
 [ext_resource type="PackedScene" uid="uid://ccfka8e12un61" path="res://Assets/Things/FX/WeaponHits/BFGTracerExplosion.tscn" id="28_5ibyp"]
+[ext_resource type="Image" uid="uid://bbwddum3oixla" path="res://Assets/Textures/plasma_mark.tga" id="28_240q0"]
 [ext_resource type="PackedScene" uid="uid://00qa1h4uy2f7" path="res://Assets/Things/Pickups/Health/item_health_large.tscn" id="28_dpe7f"]
 [ext_resource type="PackedScene" uid="uid://4xiwipor4bi8" path="res://Assets/Things/FX/Damage/BFGMark.tscn" id="29_l1cqu"]
 [ext_resource type="PackedScene" uid="uid://dx8ra3pfwg8c" path="res://Assets/Things/Pickups/Armor/item_armor_body.tscn" id="29_slqlw"]
@@ -286,8 +287,8 @@ defaultTransparentLightMapMaterial = ExtResource("7_wtcy7")
 decalsMapMaterial = ExtResource("9_xagb5")
 baseCameraMaterial = ExtResource("11_1vb85")
 underWaterMaterial = ExtResource("12_8i4o0")
-_extraTextures = Array[Resource]([ExtResource("16_clfgu"), ExtResource("17_07kil"), ExtResource("18_7vq48"), ExtResource("20_aerov"), ExtResource("21_q6y6v"), ExtResource("22_axq7l"), ExtResource("23_17lpe"), ExtResource("24_npn2v"), ExtResource("25_5aknc"), ExtResource("26_61pdm"), ExtResource("27_m0ak5")])
-_decalsNames = PackedStringArray("gfx/damage/burn_med_mrk", "gfx/damage/bullet_mrk", "gfx/damage/plasma_mrk", "gfx/damage/hole_lg_mrk", "res/assets/textures/blood/blood1", "res/assets/textures/blood/blood2", "res/assets/textures/blood/blood3", "res/assets/textures/blood/blood4", "res/assets/textures/blood/blood5", "res/assets/textures/blood/blood6", "res/assets/textures/blood/blood7", "res/assets/textures/blood/blood8")
+_extraTextures = Array[Resource]([ExtResource("16_clfgu"), ExtResource("17_07kil"), ExtResource("18_7vq48"), ExtResource("20_aerov"), ExtResource("21_q6y6v"), ExtResource("22_axq7l"), ExtResource("23_17lpe"), ExtResource("24_npn2v"), ExtResource("25_5aknc"), ExtResource("26_61pdm"), ExtResource("27_m0ak5"), ExtResource("28_240q0")])
+_decalsNames = PackedStringArray("gfx/damage/burn_med_mrk", "gfx/damage/bullet_mrk", "gfx/damage/plasma_mrk", "gfx/damage/hole_lg_mrk", "res/assets/textures/blood/blood1", "res/assets/textures/blood/blood2", "res/assets/textures/blood/blood3", "res/assets/textures/blood/blood4", "res/assets/textures/blood/blood5", "res/assets/textures/blood/blood6", "res/assets/textures/blood/blood7", "res/assets/textures/blood/blood8", "res/assets/textures/plasma_mark")
 _extraQShaders = PackedStringArray("res://Assets/QShaders/auxQShaders.txt")
 
 [node name="ClusterPVSManager" type="Node" parent="Quadot Arena"]
@@ -350,6 +351,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+stretch = true
 
 [node name="IntermissionViewPort" type="SubViewport" parent="Quadot Arena/IntermissionContainer"]
 handle_input_locally = false

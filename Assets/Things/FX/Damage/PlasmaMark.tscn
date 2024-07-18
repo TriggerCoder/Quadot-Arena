@@ -13,8 +13,8 @@ Modulate = Color(0, 0, 0, 1)
 
 [node name="PlasmaMark" type="Node3D"]
 script = ExtResource("1_3630b")
-spriteName = "gfx/damage/plasma_mrk"
-spriteRadius = 3.5
+spriteName = "res/Assets/Textures/plasma_mark"
+spriteRadius = 1.0
 useMultiMesh = 2
 spriteData = SubResource("Resource_kjs51")
 

@@ -157,8 +157,8 @@ public partial class ClusterPVSManager : Node
 			return;
 
 		currentFrame = (uint)(Engine.GetFramesDrawn() << GameManager.MaxLocalPlayers);
-		foreach (var playerThing in GameManager.Instance.Players.Values)
-			CheckPVS(playerThing.playerInfo.viewLayer, playerThing.playerInfo.playerCamera.CurrentCamera.GlobalPosition);
+		foreach (PlayerThing player in GameManager.Instance.Players)
+			CheckPVS(player.playerInfo.viewLayer, player.playerInfo.playerCamera.CurrentCamera.GlobalPosition);
 
 	}
 }

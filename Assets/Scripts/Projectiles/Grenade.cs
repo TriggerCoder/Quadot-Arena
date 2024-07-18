@@ -129,8 +129,8 @@ public partial class Grenade : RigidBody3D
 				float lenght;
 				Vector3 impulseDir = Distance.GetLenghtAndNormalize(out lenght);
 
-				damageable.Damage(Mathf.CeilToInt(Mathf.Lerp(blastDamage, 1, lenght / explosionRadius)), DamageType.Explosion, owner);
 				damageable.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, lenght / explosionRadius));
+				damageable.Damage(Mathf.CeilToInt(Mathf.Lerp(blastDamage, 1, lenght / explosionRadius)), DamageType.Explosion, owner);
 			}
 		}
 

@@ -568,7 +568,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 		Reparent(GameManager.Instance.TemporaryObjectsHolder);
 		Freeze = false;
-		LinearVelocity = playerControls.playerVelocity * .8f;
+		LinearVelocity = playerControls.impulseVector * .8f;
 		SetPhysicsProcess(false);
 
 	}

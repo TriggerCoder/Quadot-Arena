@@ -150,8 +150,9 @@ public partial class RailgunWeapon : PlayerWeapon
 					Damage += Mathf.CeilToInt(Mathf.Lerp(0, DamageMax, lenght / maxRange));
 					if (hasQuad)
 						Damage *= GameManager.Instance.QuadMul;
-					damageable.Damage(Damage, DamageType.Rail, playerInfo.playerThing);
+
 					damageable.Impulse(impulseDir, pushForce);
+					damageable.Damage(Damage, DamageType.Rail, playerInfo.playerThing);
 
 					if (damageable.Bleed)
 					{

@@ -161,7 +161,8 @@ public partial class GameManager : Node
 	[Export]
 	public SoundData[] OverrideSounds;
 
-	public Dictionary<int, PlayerThing> Players = new Dictionary<int, PlayerThing>();
+	public List<int> playerController = new List<int>();
+	public List<PlayerThing> Players = new List<PlayerThing>();
 	public string[] defaultModels = { "Doom", "Crash", "Ranger", "Visor", "Sarge", "Major", "Anarki", "Grunt" };
 	public string[] defaultSkins = { "default", "default", "default", "default", "default", "default", "default", "default" };
 
@@ -501,7 +502,7 @@ public partial class GameManager : Node
 				for(int i = 0;  i < controllerWantToJoin.Count; i++) 
 				{
 					int controller = controllerWantToJoin[i];
-					if (Players.ContainsKey(controller))
+					if (playerController.Contains(controller))
 						continue;
 					int playerNum = Players.Count;
 					SetupNewPlayer(playerNum, controller);
@@ -552,9 +553,8 @@ public partial class GameManager : Node
 
 	public void AddAllPlayer()
 	{
-		foreach (var dic in Players)
+		foreach (PlayerThing player in Players)
 		{
-			PlayerThing player = dic.Value;
 			if (player.playerControls.playerWeapon != null)
 			{
 				player.playerControls.playerWeapon.QueueFree();
@@ -700,7 +700,8 @@ public partial class GameManager : Node
 		player.playerInfo.SetPlayer(playerNum);
 		player.playerControls.Init(controllerNum);
 		player.InitPlayer();
-		Players.Add(controllerNum, player);
+		Players.Add(player);
+		playerController.Add(controllerNum);
 		switch (Players.Count)
 		{
 			default:
@@ -743,9 +744,8 @@ public partial class GameManager : Node
 	{
 		Vector2I Size = DisplayServer.WindowGetSize();
 		int i = 0;
-		foreach (var dic in Players) 
+		foreach (PlayerThing player in Players) 
 		{
-			PlayerThing player = dic.Value;
 			Vector2I size = Size;
 			switch (Players.Count)
 			{
@@ -947,7 +947,7 @@ public partial class GameManager : Node
 	public void ChangeFragLimit(int limit)
 	{
 		fragLimit = limit;
-		foreach (PlayerThing player in Players.Values)
+		foreach (PlayerThing player in Players)
 			CheckDeathCount(player.frags);
 	}
 

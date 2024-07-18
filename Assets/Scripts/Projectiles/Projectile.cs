@@ -135,12 +135,12 @@ public partial class Projectile : InterpolatedNode3D
 								switch (damageType)
 								{
 									case DamageType.BFGBall:
-										damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
 										damageable.Impulse(impulseDir, pushForce);
+										damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
 										break;
 									default:
-										damageable.Damage(GD.RandRange(damageMin, damageMax), damageType, owner);
 										damageable.Impulse(impulseDir, pushForce);
+										damageable.Damage(GD.RandRange(damageMin, damageMax), damageType, owner);
 										break;
 								}
 							}
@@ -185,8 +185,8 @@ public partial class Projectile : InterpolatedNode3D
 								//in order to enable rocket jump
 								if (collider == owner)
 									damage = Mathf.CeilToInt(damage / 3);
-								damageable.Damage(Mathf.CeilToInt(Mathf.Lerp(damage, 1, lenght / explosionRadius)), DamageType.Explosion, owner);
 								damageable.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, lenght / explosionRadius));
+								damageable.Damage(Mathf.CeilToInt(Mathf.Lerp(damage, 1, lenght / explosionRadius)), DamageType.Explosion, owner);
 								break;
 							case DamageType.Plasma:
 								if (collider == owner) //Plasma never does self damage
@@ -201,8 +201,8 @@ public partial class Projectile : InterpolatedNode3D
 									damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
 								break;
 							case DamageType.Telefrag:
-								damageable.Damage(blastDamage, DamageType.Telefrag, owner);
 								damageable.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, lenght / explosionRadius));
+								damageable.Damage(blastDamage, DamageType.Telefrag, owner);
 								break;
 							default:
 								damageable.Damage(GD.RandRange(damageMin, damageMax), damageType, owner);

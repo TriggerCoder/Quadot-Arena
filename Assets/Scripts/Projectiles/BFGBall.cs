@@ -161,8 +161,8 @@ public partial class BFGBall : InterpolatedNode3D
 
 						if (Hit is Damageable damageable)
 						{
-							damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
 							damageable.Impulse(impulseDir, pushForce);
+							damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
 						}
 					}
 				}
@@ -334,8 +334,8 @@ public partial class BFGBall : InterpolatedNode3D
 						{
 							while ((damageable.Dead == false) && (numRay < 40))
 							{
-								damageable.Damage(GD.RandRange(49, 88), DamageType.BFGBlast, owner);
 								damageable.Impulse(dir, pushForce);
+								damageable.Damage(GD.RandRange(49, 88), DamageType.BFGBlast, owner);
 								numRay++;
 							}
 							if (!string.IsNullOrEmpty(SecondaryOnDeathSpawn))

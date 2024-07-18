@@ -533,7 +533,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 	void ApplyMove(float deltaTime)
 	{
-		if (impulseVector.LengthSquared() > 0)
+		if ((playerThing.Dead == false) && (impulseVector.LengthSquared() > 0))
 		{
 			if ((controllerIsGrounded) && (impulseVector.Y > 0))
 			{
