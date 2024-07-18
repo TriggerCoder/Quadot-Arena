@@ -78,6 +78,35 @@ public partial class PlayerInfo : Node3D
 		}
 	}
 
+	public void UpdatePlayer(int playerNum)
+	{
+		localPlayerNum = playerNum;
+		viewLayer = (uint)(1 << (GameManager.Player1ViewLayer + localPlayerNum));
+		playerLayer = (uint)(1 << (GameManager.Player1Layer + localPlayerNum));
+		playerThing.CollisionLayer = playerLayer;
+		uiLayer = (uint)(1 << (GameManager.Player1UIViewLayer + localPlayerNum));
+		playerCamera.ViewCamera.CullMask = viewLayer | uiLayer;
+		playerCamera.ThirdPerson.CullMask = viewLayer;
+		playerCamera.playerPostProcessing.ViewMask = viewLayer;
+		playerCamera.playerPostProcessing.UIMask = uiLayer;
+		playerCamera.playerPostProcessing.UpdateLayersPost();
+		//Change UI Weapon Layer
+		var Childrens = GameManager.GetAllChildrens(WeaponHand);
+		foreach (var child in Childrens)
+		{
+			if (child is MeshInstance3D mesh)
+				mesh.Layers = uiLayer;
+		}
+
+		if (playerThing.avatar == null)
+			return;
+
+		if (playerCamera.currentThirdPerson)
+			playerControls.playerThing.avatar.ChangeLayer(GameManager.AllPlayerViewMask);
+		else
+			playerControls.playerThing.avatar.ChangeLayer(GameManager.AllPlayerViewMask & ~((uint)(playerControls.playerInfo.viewLayer)));
+	}
+
 	public void Reset()
 	{
 		Ammo = new int[8] { 100, 0, 0, 0, 0, 0, 0, 0 };

@@ -48,6 +48,15 @@ public partial class ScoreBoard : Node3D
 		RefreshScore();
 	}
 
+	public void RemovePlayer(int playerNum)
+	{
+		int scoreCount = ScoreList.Count();
+		ScoreList[scoreCount - 1].QueueFree();
+		ScoreList.RemoveAt(scoreCount - 1);
+		playerDatas.RemoveAt(playerNum);
+		RefreshScore();
+	}
+
 	public void RefreshScore()
 	{
 		for (int i = 0; i < playerDatas.Count; i++)

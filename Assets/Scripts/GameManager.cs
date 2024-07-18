@@ -740,6 +740,132 @@ public partial class GameManager : Node
 			ScoreBoard.Instance.AddPlayer(player);
 	}
 
+	public void RemovePlayer(int playerNum)
+	{
+		if (playerNum >= Players.Count)
+			return;
+
+		if (Players.Count == 7)
+		{
+			IntermissionContainer.Reparent(this);
+			IntermissionContainer.Hide();
+		}
+			
+		Players[playerNum].Damage(1000, DamageType.Telefrag);
+		Players[playerNum].playerViewPort.QueueFree();
+		Players[playerNum].QueueFree();
+		Players.RemoveAt(playerNum);
+		playerController.RemoveAt(playerNum);
+		ScoreBoard.Instance.RemovePlayer(playerNum);
+		for(int i = 0; i < Players.Count; i++)
+		{
+			PlayerThing player = Players[i];
+			player.playerInfo.UpdatePlayer(i);
+			switch (Players.Count)
+			{
+				default:
+					break;
+				case 1:
+					player.playerViewPort.Reparent(SplitScreen[0]);
+					break;
+				case 2:
+				{
+					switch (i)
+					{
+						default:
+							player.playerViewPort.Reparent(SplitScreen[0]);
+						break;
+						case 1:
+							player.playerViewPort.Reparent(SplitScreen[1]);
+						break;
+					}
+				}
+				break;
+				case 3:
+				{
+					switch (i)
+					{
+						case 0:
+							player.playerViewPort.Reparent(SplitScreen[0]);
+						break;
+						default:
+							player.playerViewPort.Reparent(SplitScreen[1]);
+						break;
+					}
+				}
+				break;
+				case 4:
+				{
+					switch (i)
+					{
+						case 0:
+						case 3:
+							player.playerViewPort.Reparent(SplitScreen[0]);
+						break;
+						default:
+							player.playerViewPort.Reparent(SplitScreen[1]);
+						break;
+					}
+				}
+				break;
+				case 5:
+				{
+					switch (i)
+					{
+						case 0:
+						case 3:
+							player.playerViewPort.Reparent(SplitScreen[0]);
+						break;
+						default:
+							player.playerViewPort.Reparent(SplitScreen[1]);
+						break;
+					}
+				}
+				break;
+				case 6:
+				{
+					switch (i)
+					{
+						case 0:
+						case 3:
+						case 5:
+							player.playerViewPort.Reparent(SplitScreen[0]);
+						break;
+						default:
+							player.playerViewPort.Reparent(SplitScreen[1]);
+						break;
+					}
+				}
+				break;
+				case 7:
+				{
+					switch (i)
+					{
+						case 0:
+						case 3:
+						case 5:
+							player.playerViewPort.Reparent(SplitScreen[0]);
+						break;
+						case 2:
+							player.playerViewPort.Reparent(SplitScreen[2]);
+						break;
+						case 6:
+							player.playerViewPort.Reparent(SplitScreen[2]);
+							IntermissionContainer.Reparent(SplitScreen[1]);
+							SplitScreen[1].MoveChild(IntermissionContainer, 1);
+							IntermissionContainer.Show();
+						break;
+						default:
+							player.playerViewPort.Reparent(SplitScreen[1]);
+						break;
+					}
+				}
+				break;
+			}
+		}
+		ArrangeSplitScreen();
+	}
+
 	public void ArrangeSplitScreen()
 	{
 		Vector2I Size = DisplayServer.WindowGetSize();

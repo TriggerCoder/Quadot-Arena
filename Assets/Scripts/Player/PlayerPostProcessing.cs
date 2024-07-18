@@ -28,6 +28,14 @@ public partial class PlayerPostProcessing : Node3D
 		playerHUD.Init(p);
 	}
 
+	public void UpdateLayersPost()
+	{
+		ViewPortCamera.CullMask = UIMask;
+		NormalDepthCamera.CullMask = ViewMask | UIMask | (1 << GameManager.PlayerNormalDepthLayer);
+		playerHUD.Layers = UIMask;
+		playerHUD.UpdateLayersHud();
+	}
+
 	public void SetWaterEffect()
 	{
 		playerHUD.SetCameraReplacementeMaterial(MaterialManager.Instance.underWaterMaterial);

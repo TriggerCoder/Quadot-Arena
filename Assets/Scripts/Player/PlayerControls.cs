@@ -51,11 +51,12 @@ public partial class PlayerControls : InterpolatedNode3D
 	public const float sideStrafeSpeed = 1.0f;				// What the max speed to generate when side strafing
 	public const float jumpSpeed = 8.0f;					// The speed at which the character's up axis gains when hitting jump
 	public const float fallSpeedLimit = -22f;				// The max fallSpeed without taking damage, modified to Quake Live value
-	public bool holdJumpToBhop = false;						// Allows player to just hold jump button to keep on bhopping perfectly.
 
 	//Player custom settings
 	public Vector2 MouseSensitivity = new Vector2(.5f, .5f);
 	public Vector2 StickSensitivity = new Vector2(4f, 3f);
+	public bool InvertView = false;
+	public bool AutoHop = false;							// Allows player to just hold jump button to keep on bhopping perfectly.
 
 	public Vector3 playerVelocity = Vector3.Zero;
 	private bool wishJump = false;
@@ -176,7 +177,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		{
 			Look = eventMouseMotion.Relative;
 			viewDirection.Y -= Look.X * MouseSensitivity.X;
-			viewDirection.X -= Look.Y * MouseSensitivity.Y;
+			viewDirection.X -= Look.Y * MouseSensitivity.Y * (InvertView? -1: 1);
 		}
 	}
 
@@ -219,7 +220,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		{
 			int Joy = playerInput.Device - 1;
 			viewDirection.Y -= Input.GetJoyAxis(Joy, JoyAxis.RightX) * StickSensitivity.X;
-			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * StickSensitivity.Y;
+			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * StickSensitivity.Y* (InvertView? -1: 1);
 
 //			viewDirection.Y -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * GameOptions.GamePadSensitivity.X;
 //			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.TriggerLeft) * GameOptions.GamePadSensitivity.Y;
@@ -584,7 +585,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 	private void QueueJump()
 	{
-		if (holdJumpToBhop)
+		if (AutoHop)
 		{
 			wishJump = Input.IsActionPressed(playerInput.Action_Jump);
 			return;
@@ -724,16 +725,22 @@ public partial class PlayerControls : InterpolatedNode3D
 		float addspeed;
 		float accelspeed;
 		float currentspeed;
-
+		bool autohop = false;
 		currentspeed = playerVelocity.Dot(wishdir);
 		addspeed = wishspeed - currentspeed;
 		if (addspeed <= 0)
 			return 0;
 		if (wishaccel == 0)
 			wishaccel = wishspeed;
+		else if (AutoHop && wishJump)
+			autohop = true;
+
 		accelspeed = accel * deltaTime * wishaccel;
 		if (accelspeed > addspeed)
 			accelspeed = addspeed;
+
+		if (autohop)
+			accelspeed *= .9f;
 
 		playerVelocity.X += accelspeed * wishdir.X;
 		playerVelocity.Z += accelspeed * wishdir.Z;

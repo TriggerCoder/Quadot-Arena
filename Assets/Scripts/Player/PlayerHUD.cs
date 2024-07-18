@@ -202,6 +202,53 @@ public partial class PlayerHUD : MeshInstance3D
 		}
 	}
 
+	public void UpdateLayersHud()
+	{
+		//Set Layers
+		healthLabel.Layers = Layers;
+		armorLabel.Layers = Layers;
+		ammoLabel.Layers = Layers;
+		crossHair.Layers = Layers;
+		pickUpIcon.Layers = Layers;
+		pickUpText.Layers = Layers;
+		weaponLabel.Layers = Layers;
+		holdableItemIcon.Layers = Layers;
+		playerName.Layers = Layers;
+		deathsText.Layers = Layers;
+		fragsText.Layers = Layers;
+
+		for (int i = 0; i < powerUpIcon.Length; i++)
+			powerUpIcon[i].Layers = Layers;
+		for (int i = 0; i < powerUpText.Length; i++)
+			powerUpText[i].Layers = Layers;
+
+		selectIcon.Layers = Layers;
+		for (int i = 0; i < weaponIcon.Length; i++)
+		{
+			weaponIcon[i].Layers = Layers;
+			noAmmoIcon[i].Layers = Layers;
+		}
+
+		foreach (var child in NodeList)
+		{
+			if (child is MeshInstance3D mesh)
+				mesh.Layers = Layers;
+		}
+		var Childrens = GameManager.GetAllChildrens(ArmorContainer);
+		foreach (var child in Childrens)
+		{
+			if (child is MeshInstance3D mesh)
+				mesh.Layers = Layers;
+		}
+		Childrens = GameManager.GetAllChildrens(AmmoContainer);
+		foreach (var child in Childrens)
+		{
+			if (child is MeshInstance3D mesh)
+				mesh.Layers = Layers;
+		}
+	}
+
+
 	public void InitHUD(MD3 headModel, Dictionary<string, string> meshToSkin)
 	{
 		if (NodeList.Count > 0)
