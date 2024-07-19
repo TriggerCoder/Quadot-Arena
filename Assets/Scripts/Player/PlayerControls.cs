@@ -53,10 +53,11 @@ public partial class PlayerControls : InterpolatedNode3D
 	public const float fallSpeedLimit = -22f;				// The max fallSpeed without taking damage, modified to Quake Live value
 
 	//Player custom settings
-	public Vector2 MouseSensitivity = new Vector2(.5f, .5f);
-	public Vector2 StickSensitivity = new Vector2(4f, 3f);
-	public bool InvertView = false;
-	public bool AutoHop = false;							// Allows player to just hold jump button to keep on bhopping perfectly.
+	public Vector2 MouseSensitivity = new Vector2(.5f, .5f);// Mouse Sensitivity.
+	public Vector2 StickSensitivity = new Vector2(4f, 3f);  // Controller Stick Sensitivity.
+	public bool InvertView = false;							// Y Axis View Invert Controls.
+	public bool AutoHop = false;                            // Allows player to just hold jump button to keep on bhopping perfectly.
+	public bool BloodScreen = true;                         // Show Visible Pain Feedback.
 
 	public Vector3 playerVelocity = Vector3.Zero;
 	private bool wishJump = false;

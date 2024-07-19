@@ -94,6 +94,7 @@ public partial class GameManager : Node
 	public const short Player8UIViewLayer = 15;
 	public const short PlayerNormalDepthLayer = 16;
 	public const short NotVisibleLayer = 17;
+	public const short UINotVisibleLayer = 17;
 
 	//Physic Masks
 	public const uint TakeDamageMask = ((1 << DamageablesLayer) | 

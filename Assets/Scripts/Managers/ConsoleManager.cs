@@ -141,7 +141,7 @@ public partial class ConsoleManager : Control
 							break;
 						}
 						playerNum = value;
-							autohop = args[2];
+						autohop = args[2];
 					}
 				}
 				
@@ -162,6 +162,56 @@ public partial class ConsoleManager : Control
 
 					if (failed)
 						AddToConsole("Command: " + args[0] + " failed: " + autohop + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
+					else
+						AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
+				}
+			}
+			break;
+			case "BLOODSCREEN":
+			{
+				if (args.Length < 2)
+				{
+					AddToConsole("Command: " + command + " missing [b]true/false[/b] to change", GameManager.PrintType.Warning);
+					break;
+				}
+				int playerNum = 0;
+				string bloodscreen = args[1];
+				if (args.Length > 2)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.Players.Count)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+						bloodscreen = args[2];
+					}
+				}
+				
+				if (playerNum == GameManager.Instance.Players.Count)
+				{
+					AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+					break;
+				}
+				else
+				{
+					bool failed = false;
+					if (bloodscreen == "TRUE")
+						GameManager.Instance.Players[playerNum].playerControls.BloodScreen = true;
+					else if (bloodscreen == "FALSE")
+						GameManager.Instance.Players[playerNum].playerControls.BloodScreen = false;
+					else
+						failed = true;
+
+					if (failed)
+						AddToConsole("Command: " + args[0] + " failed: " + bloodscreen + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
 					else
 						AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
 				}
@@ -250,15 +300,19 @@ public partial class ConsoleManager : Control
 			{
 				AddToConsole("Command: " + command, GameManager.PrintType.Success);
 				AddToConsole("The following is a list of commands:", GameManager.PrintType.Log);
-				AddToConsole("AUTOHOP [i]0-7[/i] [b]true/false[/b] -> Set AutoHop [b]true/false[/b] for the [i]player[/i], default: false", GameManager.PrintType.Log);
-				AddToConsole("COLOR [i]0-7[/i] [b]color[/b] -> Change the [b]color[/b] (color can be #hex or by name) for the [i]player[/i]", GameManager.PrintType.Log);
-				AddToConsole("FRAGLIMIT [b]limit[/b] -> Set the [b]fraglimit[/b] per map", GameManager.PrintType.Log);
-				AddToConsole("INVERTVIEW [i]0-7[/i] [b]true/false[/b] -> Set Invert view control [b]true/false[/b] for the [i]player[/i], default: false", GameManager.PrintType.Log);
+				AddToConsole("AUTOHOP [i]0-7[/i] [b]true/false[/b] -> Set AutoHop [b]true/false[/b] for the [i]player[/i], default: [b]false[/b]", GameManager.PrintType.Log);
+				AddToConsole("BLOODSCREEN [i]0-7[/i] [b]true/false[/b] -> Set pain visual feedback [b]true/false[/b] for the [i]player[/i], default: [b]true[/b]", GameManager.PrintType.Log);
+				AddToConsole("COLOR [i]0-7[/i] [b]color[/b] -> Change the [b]color[/b] (color can be #hex or by name) for the [i]player[/i], default: [b]#50a1cd[/b]", GameManager.PrintType.Log);
+				AddToConsole("FRAGLIMIT [b]limit[/b] -> Set the [b]fraglimit[/b] per map, default: [b]15[/b]", GameManager.PrintType.Log);
+				AddToConsole("HUD2DSCALE [i]0-7[/i] [b]10-100[/b] -> Set 2D HUD Elemenst [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
+				AddToConsole("HUD3DSCALE [i]0-7[/i] [b]10-100[/b] -> Set 3D HUD Elemenst [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
+				AddToConsole("HUDSHOW [i]0-7[/i] [b]true/false[/b] -> Set HUD Visibility [b]true/false[/b] for the [i]player[/i], default: [b]true[/b]", GameManager.PrintType.Log);
+				AddToConsole("INVERTVIEW [i]0-7[/i] [b]true/false[/b] -> Set Invert view control [b]true/false[/b] for the [i]player[/i], default: [b]false[/b]", GameManager.PrintType.Log);
 				AddToConsole("KILL [i]0-7[/i] -> Kill the [i]player[/i]", GameManager.PrintType.Log);
 				AddToConsole("LISTMAPS -> List all the posible maps that can be played", GameManager.PrintType.Log);
 				AddToConsole("LISTMODELS -> List all the posible player models that can be used", GameManager.PrintType.Log);
 				AddToConsole("LISTSKINS [i]0-7[/i] -> List all the posible skins for the current [i]player[/i] model", GameManager.PrintType.Log);
-				AddToConsole("MAP [b]mapName[/b] -> Change the map", GameManager.PrintType.Log);
+				AddToConsole("MAP [b]mapName[/b] -> Loads [b]map[/b]", GameManager.PrintType.Log);
 				AddToConsole("MODEL [i]0-7[/i] [b]modelName[/b] -> Change the [b]model[/b] for the [i]player[/i]", GameManager.PrintType.Log);
 				AddToConsole("MOUSESENSITIVITY [i]0-7[/i] [b]X,Y[/b] -> Change the mouse sensitivity [b]X,Y[/b] for the [i]player[/i], default: [b].5,.5[/b]", GameManager.PrintType.Log);
 				AddToConsole("NEXTMAP -> Change to the next map in the map rotation list", GameManager.PrintType.Log);
@@ -267,9 +321,143 @@ public partial class ConsoleManager : Control
 				AddToConsole("REMOVEPLAYER [i]0-7[/i] -> Remove the [i]player[/i] from the game", GameManager.PrintType.Log);
 				AddToConsole("SKIN [i]0-7[/i] [b]skinName[/b] -> Change the [b]skin[/b] for the [i]player[/i]", GameManager.PrintType.Log);
 				AddToConsole("STICKSENSITIVITY [i]0-7[/i] [b]X,Y[/b] -> Change the controller sticks sensitivity [b]X,Y[/b] for the [i]player[/i], default: [b]4,3[/b]", GameManager.PrintType.Log);
-				AddToConsole("TIMELIMIT [b]limit[/b] -> Set the [b]timelimit[/b] per map", GameManager.PrintType.Log);
+				AddToConsole("TIMELIMIT [b]limit[/b] -> Set the [b]timelimit[/b] per map, default: [b]7[/b]", GameManager.PrintType.Log);
 				AddToConsole("[b]bold[/b] -> Denotes [b]Obligatory[/b]", GameManager.PrintType.Log);
 				AddToConsole("[i]italic[/i] -> Denotes [i]Optional[/i]", GameManager.PrintType.Log);
+			}
+			break;
+			case "HUD2DSCALE":
+			{
+				if (args.Length < 2)
+				{
+					AddToConsole("Command: " + command + " missing scale value to change", GameManager.PrintType.Warning);
+					break;
+				}
+				int playerNum = 0;
+				string scale = args[1];
+				if (args.Length > 2)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.defaultModels.Length)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+						scale = args[2];
+					}
+				}
+				
+				bool failed = true;
+				int Scale = 0;
+				if (int.TryParse(scale, out Scale))
+					failed = false;
+
+				if ((failed) || (Scale < 10) || (Scale > 100))
+				{
+					AddToConsole("Command: " + command + " scale is not in correct format [b]10-100[/b]", GameManager.PrintType.Warning);
+					break;
+				}
+				GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.ChangeSpriteScale(Scale);
+				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
+			}
+			break;
+			case "HUD3DSCALE":
+			{
+				if (args.Length < 2)
+				{
+					AddToConsole("Command: " + command + " missing scale value to change", GameManager.PrintType.Warning);
+					break;
+				}
+				int playerNum = 0;
+				string scale = args[1];
+				if (args.Length > 2)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.defaultModels.Length)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+						scale = args[2];
+					}
+				}
+				
+				bool failed = true;
+				int Scale = 0;
+				if (int.TryParse(scale, out Scale))
+					failed = false;
+
+				if ((failed) || (Scale < 10) || (Scale > 100))
+				{
+					AddToConsole("Command: " + command + " scale is not in correct format [b]10-100[/b]", GameManager.PrintType.Warning);
+					break;
+				}
+				GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.ChangeModelScale(Scale);
+				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
+			}
+			break;			
+			case "HUDSHOW":
+			{
+				if (args.Length < 2)
+				{
+					AddToConsole("Command: " + command + " missing [b]true/false[/b] to change", GameManager.PrintType.Warning);
+					break;
+				}
+				int playerNum = 0;
+				string hudshow = args[1];
+				if (args.Length > 2)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.Players.Count)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+						hudshow = args[2];
+					}
+				}
+				
+				if (playerNum == GameManager.Instance.Players.Count)
+				{
+					AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+					break;
+				}
+				else
+				{
+					bool failed = false;
+					if (hudshow == "TRUE")
+						GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.UpdateLayersHud(GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.UIMask);
+					else if (hudshow == "FALSE")
+						GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.UpdateLayersHud(1 << GameManager.UINotVisibleLayer);
+					else
+						failed = true;
+
+					if (failed)
+						AddToConsole("Command: " + args[0] + " failed: " + hudshow + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
+					else
+						AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
+				}
 			}
 			break;
 			case "INVERTVIEW":

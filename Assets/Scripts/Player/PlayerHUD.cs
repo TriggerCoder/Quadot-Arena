@@ -202,52 +202,89 @@ public partial class PlayerHUD : MeshInstance3D
 		}
 	}
 
-	public void UpdateLayersHud()
+	public void UpdateLayersHud(uint layers)
 	{
 		//Set Layers
-		healthLabel.Layers = Layers;
-		armorLabel.Layers = Layers;
-		ammoLabel.Layers = Layers;
-		crossHair.Layers = Layers;
-		pickUpIcon.Layers = Layers;
-		pickUpText.Layers = Layers;
-		weaponLabel.Layers = Layers;
-		holdableItemIcon.Layers = Layers;
-		playerName.Layers = Layers;
-		deathsText.Layers = Layers;
-		fragsText.Layers = Layers;
+		healthLabel.Layers = layers;
+		armorLabel.Layers = layers;
+		ammoLabel.Layers = layers;
+		crossHair.Layers = layers;
+		pickUpIcon.Layers = layers;
+		pickUpText.Layers = layers;
+		weaponLabel.Layers = layers;
+		holdableItemIcon.Layers = layers;
+		playerName.Layers = layers;
+		deathsText.Layers = layers;
+		fragsText.Layers = layers;
 
 		for (int i = 0; i < powerUpIcon.Length; i++)
-			powerUpIcon[i].Layers = Layers;
+			powerUpIcon[i].Layers = layers;
 		for (int i = 0; i < powerUpText.Length; i++)
-			powerUpText[i].Layers = Layers;
+			powerUpText[i].Layers = layers;
 
-		selectIcon.Layers = Layers;
+		selectIcon.Layers = layers;
 		for (int i = 0; i < weaponIcon.Length; i++)
 		{
-			weaponIcon[i].Layers = Layers;
-			noAmmoIcon[i].Layers = Layers;
+			weaponIcon[i].Layers = layers;
+			noAmmoIcon[i].Layers = layers;
 		}
 
 		foreach (var child in NodeList)
 		{
 			if (child is MeshInstance3D mesh)
-				mesh.Layers = Layers;
+				mesh.Layers = layers;
 		}
 		var Childrens = GameManager.GetAllChildrens(ArmorContainer);
 		foreach (var child in Childrens)
 		{
 			if (child is MeshInstance3D mesh)
-				mesh.Layers = Layers;
+				mesh.Layers = layers;
 		}
 		Childrens = GameManager.GetAllChildrens(AmmoContainer);
 		foreach (var child in Childrens)
 		{
 			if (child is MeshInstance3D mesh)
-				mesh.Layers = Layers;
+				mesh.Layers = layers;
 		}
 	}
 
+	public void ChangeModelScale(int scale)
+	{
+		float modelValue = (Mathf.Lerp(.4f, 1.0f, scale / 100.0f));
+		Vector3 Scale = Vector3.One * modelValue;
+		viewHeadContainer.Scale = Scale;
+		ArmorContainer.Scale = Scale;
+		AmmoContainer.Scale = Scale;
+	}
+
+	public void ChangeSpriteScale(int scale)
+	{
+		float spriteValue = (Mathf.Lerp(.4f, 1.0f, scale / 100.0f));
+		Vector3 Scale = new Vector3(spriteValue, spriteValue, 1);
+		WeaponContainer.Scale = Scale;
+		crossHair.Scale = Scale;
+		pickUpIcon.Scale = Scale;
+		holdableItemIcon.Scale = Scale;
+
+		for (int i = 0; i < powerUpIcon.Length; i++)
+			powerUpIcon[i].Scale = Scale;
+
+		int textValue = Mathf.CeilToInt(Mathf.Lerp(40f, 120f, scale / 100.0f));
+		healthLabel.FontSize = textValue;
+		armorLabel.FontSize = textValue;
+		ammoLabel.FontSize = textValue;
+
+		textValue = Mathf.CeilToInt(Mathf.Lerp(15f, 50f, scale / 100.0f));
+		pickUpText.FontSize = textValue;
+		weaponLabel.FontSize = textValue;
+		playerName.FontSize = textValue;
+		deathsText.FontSize = textValue;
+		fragsText.FontSize = textValue;
+
+		for (int i = 0; i < powerUpText.Length; i++)
+			powerUpText[i].FontSize = textValue;
+
+	}
 
 	public void InitHUD(MD3 headModel, Dictionary<string, string> meshToSkin)
 	{

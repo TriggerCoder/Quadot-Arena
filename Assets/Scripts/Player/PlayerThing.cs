@@ -289,7 +289,9 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		if (attacker == this)
 			painFlash /= 2;
 
-		playerInfo.playerPostProcessing.playerHUD.painFlashTime(painFlash);
+		if (playerControls.BloodScreen)
+			playerInfo.playerPostProcessing.playerHUD.painFlashTime(painFlash);
+
 		if (hitpoints <= 0)
 		{
 			CollisionLayer = (1 << GameManager.RagdollLayer);
