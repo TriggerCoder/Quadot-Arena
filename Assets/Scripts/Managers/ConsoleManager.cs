@@ -296,6 +296,48 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + args[0] + " was not changed. " + args[1] + " is not an integer", GameManager.PrintType.Warning);
 			}
 			break;
+			case "FOV":
+			{
+				if (args.Length < 2)
+				{
+					AddToConsole("Command: " + command + " missing scale value to change", GameManager.PrintType.Warning);
+					break;
+				}
+				int playerNum = 0;
+				string fov = args[1];
+				if (args.Length > 2)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.defaultModels.Length)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+						fov = args[2];
+					}
+				}
+				
+				bool failed = true;
+				int Fov = 0;
+				if (int.TryParse(fov, out Fov))
+					failed = false;
+
+				if ((failed) || (Fov < 30) || (Fov > 130))
+				{
+					AddToConsole("Command: " + command + " FOV is not in correct format [b]30-130[/b]", GameManager.PrintType.Warning);
+					break;
+				}
+				GameManager.Instance.Players[playerNum].playerInfo.playerCamera.ViewCamera.Fov = Fov;
+				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
+			}
+			break;
 			case "HELP":
 			{
 				AddToConsole("Command: " + command, GameManager.PrintType.Success);
@@ -304,6 +346,7 @@ public partial class ConsoleManager : Control
 				AddToConsole("BLOODSCREEN [i]0-7[/i] [b]true/false[/b] -> Set pain visual feedback [b]true/false[/b] for the [i]player[/i], default: [b]true[/b]", GameManager.PrintType.Log);
 				AddToConsole("COLOR [i]0-7[/i] [b]color[/b] -> Change the [b]color[/b] (color can be #hex or by name) for the [i]player[/i], default: [b]#50a1cd[/b]", GameManager.PrintType.Log);
 				AddToConsole("FRAGLIMIT [b]limit[/b] -> Set the [b]fraglimit[/b] per map, default: [b]15[/b]", GameManager.PrintType.Log);
+				AddToConsole("FOV [i]0-7[/i] [b]30-130[/b] -> Set [b]Fov[/b] for the [i]player[/i], default: [b]90[/b]", GameManager.PrintType.Log);
 				AddToConsole("HUD2DSCALE [i]0-7[/i] [b]10-100[/b] -> Set 2D HUD Elemenst [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
 				AddToConsole("HUD3DSCALE [i]0-7[/i] [b]10-100[/b] -> Set 3D HUD Elemenst [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
 				AddToConsole("HUDSHOW [i]0-7[/i] [b]true/false[/b] -> Set HUD Visibility [b]true/false[/b] for the [i]player[/i], default: [b]true[/b]", GameManager.PrintType.Log);

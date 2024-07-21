@@ -1137,6 +1137,16 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	{
 		StreamReader animFile;
 		string FileName;
+
+		ModelsManager.ModelAnimationData animationData = ModelsManager.GetAnimationData(file);
+		if (animationData != null)
+		{
+			upper.AddRange(animationData.Upper);
+			lower.AddRange(animationData.Lower);
+			playerControls.footStep = animationData.FootSteps;
+			return true;
+		}
+
 		string path = Directory.GetCurrentDirectory() + "/StreamingAssets/models/" + file + ".cfg";
 		if (File.Exists(path))
 			animFile = new StreamReader(File.Open(path, FileMode.Open));
@@ -1301,12 +1311,27 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		lower.Add(animations[currentAnim]);
 
 		animFile.Close();
+
+		ModelsManager.AddAnimationData(file, upper, lower, playerControls.footStep);
 		return true;
 	}
 	public bool LoadSkin(MD3 model, string skinName)
 	{
 		StreamReader SkinFile;
 		string FileName;
+
+		Dictionary<string, string> MeshToSkin = ModelsManager.GetSkinData(skinName);
+		if (MeshToSkin != null)
+		{
+			foreach (var value in MeshToSkin)
+			{
+				if (!meshToSkin.ContainsKey(value.Key))
+					meshToSkin.Add(value.Key, value.Value);
+			}
+			return true;
+		}
+
+		MeshToSkin = new Dictionary<string, string>();
 		string path = Directory.GetCurrentDirectory() + "/StreamingAssets/models/" + skinName + ".skin";
 		if (File.Exists(path))
 			SkinFile = new StreamReader(File.Open(path, FileMode.Open));
@@ -1359,12 +1384,18 @@ public partial class PlayerModel : RigidBody3D, Damageable
 						GameManager.Print("Skin: " + fullName[0]);
 						TextureLoader.AddNewTexture(fullName[0], false);
 					}
-					if (!meshToSkin.ContainsKey(model.meshes[i].name))
-						meshToSkin.Add(model.meshes[i].name, fullName[0]);
+					if (!MeshToSkin.ContainsKey(model.meshes[i].name))
+						MeshToSkin.Add(model.meshes[i].name, fullName[0]);
 				}
 			}
 		}
 		SkinFile.Close();
+		ModelsManager.AddSkinData(skinName, MeshToSkin);
+		foreach (var value in MeshToSkin)
+		{
+			if (!meshToSkin.ContainsKey(value.Key))
+				meshToSkin.Add(value.Key, value.Value);
+		}
 		return true;
 	}
 

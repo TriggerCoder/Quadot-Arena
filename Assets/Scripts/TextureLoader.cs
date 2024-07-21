@@ -246,6 +246,8 @@ public static class TextureLoader
 				luminance /= (width * height);
 				luminance = Mathf.Clamp(luminance, 0f, .35f);
 				baseTex.ResizeToPo2(false, Interpolation.Lanczos);
+				baseTex.GenerateMipmaps();
+				baseTex.Compress(CompressMode.S3Tc, CompressSource.Srgb);
 				ImageTexture readyTex = ImageTexture.CreateFromImage(baseTex);
 				readyTex.SetMeta("luminance", luminance);
 //				readyTex.ResourceName = Convert.ToBase64String(BitConverter.GetBytes(luminance));
