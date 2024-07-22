@@ -274,6 +274,245 @@ public partial class ConsoleManager : Control
 				}
 			}
 			break;
+			case "CROSSHAIR":
+			{
+				if (args.Length < 2)
+				{
+					AddToConsole("Command: " + command + " missing weapon and crosshair type to change", GameManager.PrintType.Warning);
+					break;
+				}
+				if (args.Length < 3)
+				{
+					AddToConsole("Command: " + command + " missing crosshair type to change", GameManager.PrintType.Warning);
+					break;
+				}
+
+				int playerNum = 0;
+				string weapon = args[1];
+				string crosshair = args[2];
+				if (args.Length > 3)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.defaultModels.Length)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+						weapon = args[2];
+						crosshair = args[3];
+					}
+				}
+
+				bool failed = false;
+				int weaponNum = 0;
+				switch(weapon)
+				{
+					default:
+						AddToConsole("Command: " + args[0] + " was not changed. Weapon " + weapon + " doesn't exist", GameManager.PrintType.Warning);
+						failed = true;
+					break;
+					case "ALL":
+						weaponNum = -1;
+					break;
+					case "GAUNTLET":
+						weaponNum = 0;
+					break;
+					case "MACHINEGUN":
+						weaponNum = 1;
+					break;
+					case "SHOTGUN":
+						weaponNum = 2;
+					break;
+					case "GRENADE":
+					case "GRENADELAUNCHER":
+						weaponNum = 3;
+					break;
+					case "ROCKET":
+					case "ROCKETLAUNCHER":
+						weaponNum = 4;
+					break;
+					case "LIGHTNING":
+					case "LIGHTNINGGUN":
+						weaponNum = 5;
+					break;
+					case "RAIL":
+					case "RAILGUN":
+						weaponNum = 6;
+					break;
+					case "PLASMA":
+					case "PLASMAGUN":
+						weaponNum = 7;
+					break;
+					case "BFG":
+					case "BFG10K":
+						weaponNum = 8;
+					break;						
+				}
+				if (failed)
+					break;
+
+				string[] type = crosshair.Split('_');
+				if (type.Length < 2)
+				{
+					AddToConsole("Command: " + command + " invalid crosshair type", GameManager.PrintType.Warning);
+					break;
+				}
+				
+				failed = false;
+				int CrossHair = 0;
+				switch (type[0])
+				{
+					default:
+						AddToConsole("Command: " + command + " invalid crosshair type", GameManager.PrintType.Warning); 
+						failed = true;
+					break;
+					case "SMALL":
+					{
+						if (int.TryParse(type[1], out CrossHair))
+						{
+							if (CrossHair > 50)
+							{
+								AddToConsole("Command: " + command + " invalid crosshair type", GameManager.PrintType.Warning);
+								failed = true;
+							}
+						}
+						else
+						{
+							AddToConsole("Command: " + command + " invalid crosshair type", GameManager.PrintType.Warning);
+							failed = true;
+						}
+					}
+					break;
+					case "LARGE":
+					{
+						if (int.TryParse(type[1], out CrossHair))
+						{
+							if (CrossHair > 50)
+							{
+								AddToConsole("Command: " + command + " invalid crosshair type", GameManager.PrintType.Warning);
+								failed = true;
+							}
+							else
+								CrossHair += 100;
+						}
+						else
+						{
+							AddToConsole("Command: " + command + " invalid crosshair type", GameManager.PrintType.Warning);
+							failed = true;
+						}
+					}
+					break;
+				}
+				if (failed)
+					break;
+
+				int[] CroosHairs = GameManager.Instance.Players[playerNum].playerControls.CroosHair;
+				if (weaponNum < 0)
+				{
+					for (int i = 0; i < CroosHairs.Length; i++)
+						CroosHairs[i] = CrossHair;
+					GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.ChangeCrossHair(CrossHair);
+				}
+				else
+				{
+					CroosHairs[weaponNum] = CrossHair;
+					if (weaponNum == GameManager.Instance.Players[playerNum].playerControls.CurrentWeapon)
+						GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.ChangeCrossHair(CrossHair);
+				}
+				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
+			}
+			break;
+			case "CROSSHAIRALPHA":
+			{
+				if (args.Length < 2)
+				{
+					AddToConsole("Command: " + command + " missing alpha value to change", GameManager.PrintType.Warning);
+					break;
+				}
+				int playerNum = 0;
+				string alpha = args[1];
+				if (args.Length > 2)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.defaultModels.Length)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+						alpha = args[2];
+					}
+				}
+				
+				bool failed = true;
+				int Alpha = 0;
+				if (int.TryParse(alpha, out Alpha))
+					failed = false;
+
+				if ((failed) || (Alpha < 0) || (Alpha > 100))
+				{
+					AddToConsole("Command: " + command + " alpha is not in correct format [b]0-100[/b]", GameManager.PrintType.Warning);
+					break;
+				}
+				GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.ChangeCrossHairAlpha(Alpha);
+				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
+			}
+			break;
+			case "CROSSHAIRSCALE":
+			{
+				if (args.Length < 2)
+				{
+					AddToConsole("Command: " + command + " missing scale value to change", GameManager.PrintType.Warning);
+					break;
+				}
+				int playerNum = 0;
+				string scale = args[1];
+				if (args.Length > 2)
+				{
+					if (int.TryParse(args[1], out int value))
+					{
+						if (value < 0)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+							break;
+						}
+						if (value > GameManager.Instance.defaultModels.Length)
+						{
+							AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+							break;
+						}
+						playerNum = value;
+						scale = args[2];
+					}
+				}
+				
+				bool failed = true;
+				int Scale = 0;
+				if (int.TryParse(scale, out Scale))
+					failed = false;
+
+				if ((failed) || (Scale < 10) || (Scale > 100))
+				{
+					AddToConsole("Command: " + command + " scale is not in correct format [b]10-100[/b]", GameManager.PrintType.Warning);
+					break;
+				}
+				GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.ChangeCrossHairScale(Scale);
+				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
+			}
+			break;
 			case "FRAGLIMIT":
 			{
 				if (args.Length < 2)
@@ -344,11 +583,14 @@ public partial class ConsoleManager : Control
 				AddToConsole("The following is a list of commands:", GameManager.PrintType.Log);
 				AddToConsole("AUTOHOP [i]0-7[/i] [b]true/false[/b] -> Set AutoHop [b]true/false[/b] for the [i]player[/i], default: [b]false[/b]", GameManager.PrintType.Log);
 				AddToConsole("BLOODSCREEN [i]0-7[/i] [b]true/false[/b] -> Set pain visual feedback [b]true/false[/b] for the [i]player[/i], default: [b]true[/b]", GameManager.PrintType.Log);
+				AddToConsole("CROSSHAIR [i]0-7[/i] [b]gauntlet-bfg10k/all[/b] [b]small_/large_1-50[/b] -> Set Crosshair for the [i]player[/i], default: [b]all small_5, railgun large_7[/b]", GameManager.PrintType.Log);
+				AddToConsole("CROSSHAIRALPHA [i]0-7[/i] [b]0-100[/b] -> Set CrossHair [b]Transparency[/b] for the [i]player[/i], default: [b]25[/b]", GameManager.PrintType.Log);
+				AddToConsole("CROSSHAIRSCALE [i]0-7[/i] [b]10-100[/b] -> Set 2D CrossHair [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
 				AddToConsole("COLOR [i]0-7[/i] [b]color[/b] -> Change the [b]color[/b] (color can be #hex or by name) for the [i]player[/i], default: [b]#50a1cd[/b]", GameManager.PrintType.Log);
 				AddToConsole("FRAGLIMIT [b]limit[/b] -> Set the [b]fraglimit[/b] per map, default: [b]15[/b]", GameManager.PrintType.Log);
 				AddToConsole("FOV [i]0-7[/i] [b]30-130[/b] -> Set [b]Fov[/b] for the [i]player[/i], default: [b]90[/b]", GameManager.PrintType.Log);
-				AddToConsole("HUD2DSCALE [i]0-7[/i] [b]10-100[/b] -> Set 2D HUD Elemenst [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
-				AddToConsole("HUD3DSCALE [i]0-7[/i] [b]10-100[/b] -> Set 3D HUD Elemenst [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
+				AddToConsole("HUD2DSCALE [i]0-7[/i] [b]10-100[/b] -> Set 2D HUD Elements [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
+				AddToConsole("HUD3DSCALE [i]0-7[/i] [b]10-100[/b] -> Set 3D HUD Elements [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
 				AddToConsole("HUDSHOW [i]0-7[/i] [b]true/false[/b] -> Set HUD Visibility [b]true/false[/b] for the [i]player[/i], default: [b]true[/b]", GameManager.PrintType.Log);
 				AddToConsole("INVERTVIEW [i]0-7[/i] [b]true/false[/b] -> Set Invert view control [b]true/false[/b] for the [i]player[/i], default: [b]false[/b]", GameManager.PrintType.Log);
 				AddToConsole("KILL [i]0-7[/i] -> Kill the [i]player[/i]", GameManager.PrintType.Log);

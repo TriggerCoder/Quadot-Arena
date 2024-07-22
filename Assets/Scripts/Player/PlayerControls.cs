@@ -58,6 +58,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	public bool InvertView = false;							// Y Axis View Invert Controls.
 	public bool AutoHop = false;                            // Allows player to just hold jump button to keep on bhopping perfectly.
 	public bool BloodScreen = true;                         // Show Visible Pain Feedback.
+	public int[] CroosHair = new int[9] { 5, 5, 5, 5, 5, 5, 107, 5, 5 }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k
 
 	public Vector3 playerVelocity = Vector3.Zero;
 	private bool wishJump = false;

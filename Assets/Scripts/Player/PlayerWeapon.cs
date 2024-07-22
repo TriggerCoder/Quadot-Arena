@@ -200,6 +200,29 @@ public partial class PlayerWeapon : Node3D
 			}
 		}
 
+		if (useCrosshair)
+		{
+			Texture2D crossHair;
+			int weaponIndex = p.playerControls.CurrentWeapon;
+			int crossHairIndex = p.playerControls.CroosHair[weaponIndex];
+			if (crossHairIndex > 100)
+			{
+				crossHairIndex -= 100;
+				if (crossHairIndex < ThingsManager.largeCrosshairs.Count)
+					crossHair = ThingsManager.largeCrosshairs[crossHairIndex];
+				else
+					crossHair = ThingsManager.defaultCrosshair;
+			}
+			else if (crossHairIndex < ThingsManager.smallCrosshairs.Count)
+				crossHair = ThingsManager.smallCrosshairs[crossHairIndex];
+			else
+				crossHair = ThingsManager.defaultCrosshair;
+			p.playerPostProcessing.playerHUD.crossHair.Texture = crossHair;
+			p.playerPostProcessing.playerHUD.crossHair.Show();
+		}
+		else
+			p.playerPostProcessing.playerHUD.crossHair.Hide();
+
 		OnInit();
 	}
 	public override void _Process(double delta)

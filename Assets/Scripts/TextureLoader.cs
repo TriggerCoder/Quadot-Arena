@@ -33,15 +33,15 @@ public static class TextureLoader
 		Textures.Add("$WHITEIMAGE", whiteTex);
 	}
 
-	public static void AddNewTexture(string textureName, bool forceSkinAlpha)
+	public static void AddNewTexture(string textureName, bool forceSkinAlpha, bool useMipMaps = true)
 	{
 		List<QShader> list = new List<QShader>
 		{
 			new QShader(textureName, 0, 0, forceSkinAlpha)
 		};
-		LoadTextures(list, false, ImageFormat.PNG);
-		LoadTextures(list, false);
-		LoadTextures(list, false , ImageFormat.TGA);
+		LoadTextures(list, false, ImageFormat.PNG, useMipMaps);
+		LoadTextures(list, false, ImageFormat.JPG, useMipMaps);
+		LoadTextures(list, false , ImageFormat.TGA, useMipMaps);
 	}
 	public static bool HasTextureOrAddTexture(string textureName, bool forceAlpha)
 	{
@@ -59,7 +59,7 @@ public static class TextureLoader
 			return true;
 		return false;
 	}
-	public static ImageTexture GetTextureOrAddTexture(string textureName, bool forceAlpha)
+	public static ImageTexture GetTextureOrAddTexture(string textureName, bool forceAlpha, bool useMipMaps = true)
 	{
 		ImageTexture texture;
 		if (forceAlpha)
@@ -71,7 +71,7 @@ public static class TextureLoader
 			return texture;
 
 		GameManager.Print("GetTextureOrAddTexture: No texture \"" + textureName + "\"");
-		AddNewTexture(textureName, forceAlpha);
+		AddNewTexture(textureName, forceAlpha, useMipMaps);
 		return GetTexture(textureName, forceAlpha);
 	}
 	public static bool HasTexture(string textureName)
@@ -167,7 +167,7 @@ public static class TextureLoader
 		}
 	}
 
-	public static void LoadTextures(List<QShader> mapTextures, bool ignoreShaders, ImageFormat imageFormat = ImageFormat.JPG)
+	public static void LoadTextures(List<QShader> mapTextures, bool ignoreShaders, ImageFormat imageFormat, bool useMipMaps = true)
 	{
 		foreach (QShader tex in mapTextures)
 		{
@@ -246,8 +246,12 @@ public static class TextureLoader
 				luminance /= (width * height);
 				luminance = Mathf.Clamp(luminance, 0f, .35f);
 				baseTex.ResizeToPo2(false, Interpolation.Lanczos);
-				baseTex.GenerateMipmaps();
-				baseTex.Compress(CompressMode.S3Tc, CompressSource.Srgb);
+				if (useMipMaps)
+					baseTex.GenerateMipmaps();
+				if ((tex.addAlpha) || (baseTex.DetectAlpha() != AlphaMode.None))
+					baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgba);
+				else
+					baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgb);
 				ImageTexture readyTex = ImageTexture.CreateFromImage(baseTex);
 				readyTex.SetMeta("luminance", luminance);
 //				readyTex.ResourceName = Convert.ToBase64String(BitConverter.GetBytes(luminance));

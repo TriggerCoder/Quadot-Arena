@@ -612,7 +612,7 @@ public static void LerpColorOnRepeatedVertex()
 	public static void GetMapTextures()
 	{
 		TextureLoader.LoadTextures(mapTextures, true, TextureLoader.ImageFormat.PNG);
-		TextureLoader.LoadTextures(mapTextures, true);
+		TextureLoader.LoadTextures(mapTextures, true, TextureLoader.ImageFormat.JPG);
 		TextureLoader.LoadTextures(mapTextures, true, TextureLoader.ImageFormat.TGA);
 	}
 }

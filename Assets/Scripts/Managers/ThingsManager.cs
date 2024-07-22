@@ -35,6 +35,10 @@ public partial class ThingsManager : Node
 	public PackedScene[] _targetPrefabs;
 	[Export]
 	public PackedScene[] _triggerPrefabs;
+	[Export]
+	public Texture2D[] _smallCrosshairs;
+	[Export]
+	public Texture2D[] _largeCrosshairs;
 
 	public static Dictionary<string, PackedScene> thingsPrefabs = new Dictionary<string, PackedScene>();
 	public static List<Entity> entitiesOnMap = new List<Entity>();
@@ -49,7 +53,9 @@ public partial class ThingsManager : Node
 	public static Dictionary<string, ThingController> uniqueThingsOnMap = new Dictionary<string, ThingController>();
 	public static Dictionary<string, ThingController> potentialuniqueThingsOnMap = new Dictionary<string, ThingController>();
 	public static List<string> uniqueGamePlayThings = new List<string>();
-
+	public static List<Texture2D> smallCrosshairs = new List<Texture2D>();
+	public static List<Texture2D> largeCrosshairs = new List<Texture2D>();
+	public static Texture2D defaultCrosshair;
 	public static readonly string[] quadHogReplacement = { "item_haste", "item_regen", "item_flight", "item_invis", "item_enviro", "item_health_mega", "item_armor_body", "item_armor_combat" };
 
 	public static readonly string[] gibsParts = { "GibSkull", "GibBrain", "GibAbdomen", "GibArm", "GibChest", "GibFist", "GibFoot", "GibForearm", "GibIntestine", "GibLeg", "GibLeg" };
@@ -167,6 +173,11 @@ public partial class ThingsManager : Node
 			GameManager.Print("Trigger : " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
 		}
+		foreach (var crosshair in _smallCrosshairs)
+			smallCrosshairs.Add(crosshair);
+		foreach (var crosshair in _largeCrosshairs)
+			largeCrosshairs.Add(crosshair);
+		defaultCrosshair = smallCrosshairs[5];
 		BFGTracers.SetTracers();
 	}
 

@@ -14,6 +14,7 @@ _sounds = PackedStringArray("weapons/melee/fstatck", "weapons/noammo", "weapons/
 ModelName = "weapons2/gauntlet/gauntlet"
 BarrelModelName = "weapons2/gauntlet/gauntlet_barrel"
 MuzzleModelName = "weapons2/gauntlet/gauntlet_flash"
+useCrosshair = false
 isMelee = true
 DamageMin = 40
 DamageMax = 60

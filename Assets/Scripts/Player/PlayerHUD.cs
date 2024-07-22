@@ -182,7 +182,7 @@ public partial class PlayerHUD : MeshInstance3D
 		selectIcon.DoubleSided = false;
 		selectIcon.NoDepthTest = true;
 		selectIcon.Layers = Layers;
-		selectIcon.Texture = TextureLoader.GetTextureOrAddTexture(selectSprite, false);
+		selectIcon.Texture = TextureLoader.GetTextureOrAddTexture(selectSprite, false, false);
 		TextureLoader.AdjustIconSize(selectIcon, defaultIconSize);
 		selectIcon.Hide();
 
@@ -196,7 +196,7 @@ public partial class PlayerHUD : MeshInstance3D
 			noAmmoIcon[i].DoubleSided = false;
 			noAmmoIcon[i].NoDepthTest = true;
 			noAmmoIcon[i].Layers = Layers;
-			noAmmoIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(noAmmoSprite, false);
+			noAmmoIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(noAmmoSprite, false, false);
 			TextureLoader.AdjustIconSize(noAmmoIcon[i], defaultIconSize);
 			noAmmoIcon[i].Hide();
 		}
@@ -248,6 +248,34 @@ public partial class PlayerHUD : MeshInstance3D
 		}
 	}
 
+	public void ChangeCrossHairScale(int scale)
+	{
+		float spriteValue = (Mathf.Lerp(.4f, 1.0f, scale / 100.0f));
+		Vector3 Scale = new Vector3(spriteValue, spriteValue, 1);
+		crossHair.Scale = Scale;
+	}
+
+	public void ChangeCrossHairAlpha(int alpha)
+	{
+		crossHair.Modulate = new Color(1, 1, 1, alpha / 100f);
+	}
+
+	public void ChangeCrossHair(int crossHairIndex)
+	{
+		if (crossHairIndex > 100)
+		{
+			crossHairIndex -= 100;
+			if (crossHairIndex < ThingsManager.largeCrosshairs.Count)
+				crossHair.Texture = ThingsManager.largeCrosshairs[crossHairIndex];
+			else
+				crossHair.Texture = ThingsManager.defaultCrosshair;
+		}
+		else if (crossHairIndex < ThingsManager.smallCrosshairs.Count)
+			crossHair.Texture = ThingsManager.smallCrosshairs[crossHairIndex];
+		else
+			crossHair.Texture = ThingsManager.defaultCrosshair;
+	}
+
 	public void ChangeModelScale(int scale)
 	{
 		float modelValue = (Mathf.Lerp(.4f, 1.0f, scale / 100.0f));
@@ -262,7 +290,6 @@ public partial class PlayerHUD : MeshInstance3D
 		float spriteValue = (Mathf.Lerp(.4f, 1.0f, scale / 100.0f));
 		Vector3 Scale = new Vector3(spriteValue, spriteValue, 1);
 		WeaponContainer.Scale = Scale;
-		crossHair.Scale = Scale;
 		pickUpIcon.Scale = Scale;
 		holdableItemIcon.Scale = Scale;
 
@@ -274,16 +301,15 @@ public partial class PlayerHUD : MeshInstance3D
 		armorLabel.FontSize = textValue;
 		ammoLabel.FontSize = textValue;
 
+		for (int i = 0; i < powerUpIcon.Length; i++)
+			powerUpText[i].FontSize = textValue;
+
 		textValue = Mathf.CeilToInt(Mathf.Lerp(15f, 50f, scale / 100.0f));
 		pickUpText.FontSize = textValue;
 		weaponLabel.FontSize = textValue;
 		playerName.FontSize = textValue;
 		deathsText.FontSize = textValue;
 		fragsText.FontSize = textValue;
-
-		for (int i = 0; i < powerUpText.Length; i++)
-			powerUpText[i].FontSize = textValue;
-
 	}
 
 	public void InitHUD(MD3 headModel, Dictionary<string, string> meshToSkin)
@@ -441,7 +467,7 @@ public partial class PlayerHUD : MeshInstance3D
 
 		for (i = 0; i < currentPowerUps.Count; i++)
 		{
-			powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsSprites[(int)currentPowerUps[i].type], false);
+			powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsSprites[(int)currentPowerUps[i].type], false, false);
 			TextureLoader.AdjustIconSize(powerUpIcon[i], defaultIconSize);
 			powerUpText[i].Text = "" + currentPowerUps[i].displayTime;
 		}
@@ -486,7 +512,7 @@ public partial class PlayerHUD : MeshInstance3D
 				powerUpText[i].Show();
 			if (!found)
 			{
-				powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsSprites[(int)currentPowerUps[i].type], false);
+				powerUpIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(powerUpsSprites[(int)currentPowerUps[i].type], false, false);
 				TextureLoader.AdjustIconSize(powerUpIcon[i], defaultIconSize);
 			}
 			powerUpText[i].Text = "" + currentPowerUps[i].displayTime;
@@ -502,7 +528,7 @@ public partial class PlayerHUD : MeshInstance3D
 				return;
 			break;
 			case PlayerThing.HoldableItem.Teleporter:
-				holdableItemIcon.Texture = TextureLoader.GetTextureOrAddTexture(holdableItemsSprites[(int)HoldableItemType.Teleporter], false);
+				holdableItemIcon.Texture = TextureLoader.GetTextureOrAddTexture(holdableItemsSprites[(int)HoldableItemType.Teleporter], false, false);
 				TextureLoader.AdjustIconSize(holdableItemIcon, defaultIconSize);
 			break;
 		}
@@ -541,7 +567,7 @@ public partial class PlayerHUD : MeshInstance3D
 				weaponLabel.Text = weaponNames[weapon];
 			}
 
-			weaponIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(weaponSprites[currentWeapons[i]], false);
+			weaponIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(weaponSprites[currentWeapons[i]], false, false);
 			TextureLoader.AdjustIconSize(weaponIcon[i], defaultIconSize);
 		}
 		//In order to get near the screen
@@ -732,7 +758,7 @@ public partial class PlayerHUD : MeshInstance3D
 
 	public void ItemPickUp(string icon, string text)
 	{
-		pickUpIcon.Texture = TextureLoader.GetTextureOrAddTexture(icon, false);
+		pickUpIcon.Texture = TextureLoader.GetTextureOrAddTexture(icon, false, false);
 		TextureLoader.AdjustIconSize(pickUpIcon, defaultIconSize);
 		pickUpText.Text = text;
 		pickUpTime = 1.5f;

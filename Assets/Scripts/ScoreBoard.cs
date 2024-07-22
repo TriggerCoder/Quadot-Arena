@@ -26,13 +26,13 @@ public partial class ScoreBoard : Node3D
 	public override void _Ready()
 	{
 		Instance = this;
-		medalImpressiveIcon.Texture = TextureLoader.GetTextureOrAddTexture(medalImpressive, false);
+		medalImpressiveIcon.Texture = TextureLoader.GetTextureOrAddTexture(medalImpressive, false, false);
 		TextureLoader.AdjustIconSize(medalImpressiveIcon, defaultMedalSize);
 
-		medalGauntletIcon.Texture = TextureLoader.GetTextureOrAddTexture(medalGauntlet, false);
+		medalGauntletIcon.Texture = TextureLoader.GetTextureOrAddTexture(medalGauntlet, false, false);
 		TextureLoader.AdjustIconSize(medalGauntletIcon, defaultMedalSize);
 
-		medalExcellentIcon.Texture = TextureLoader.GetTextureOrAddTexture(medalExcellent, false);
+		medalExcellentIcon.Texture = TextureLoader.GetTextureOrAddTexture(medalExcellent, false, false);
 		TextureLoader.AdjustIconSize(medalExcellentIcon, defaultMedalSize);
 	}
 
