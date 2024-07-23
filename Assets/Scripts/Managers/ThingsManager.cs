@@ -2,6 +2,7 @@ using Godot;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using ExtensionMethods;
 
 public partial class ThingsManager : Node
 {
@@ -66,6 +67,10 @@ public partial class ThingsManager : Node
 	public static readonly string ItemDrop = "ItemDrop";
 	public static readonly string Blood = "Blood";
 	public static readonly string BloodTrail = "BloodTrail";
+
+	//Drop To Floor
+	private static Rid Sphere;
+	private static PhysicsShapeQueryParameters3D SphereCast;
 	public override void _Ready()
 	{
 		foreach (var thing in _fxPrefabs)
@@ -179,6 +184,12 @@ public partial class ThingsManager : Node
 			largeCrosshairs.Add(crosshair);
 		defaultCrosshair = smallCrosshairs[5];
 		BFGTracers.SetTracers();
+
+		Sphere = PhysicsServer3D.SphereShapeCreate();
+		SphereCast = new PhysicsShapeQueryParameters3D();
+		SphereCast.ShapeRid = Sphere;
+		PhysicsServer3D.ShapeSetData(Sphere, .2f);
+
 	}
 
 	public override void _Process(double delta)
@@ -250,7 +261,7 @@ public partial class ThingsManager : Node
 					bool lastDigit = true;
 					for (int i = 0, j = 0; i < strWord.Length; i++)
 					{
-						if ((char.IsDigit(strWord[i])) || (strWord[i] == '-'))
+						if ((char.IsDigit(strWord[i])) || (strWord[i] == '-') || (strWord[i] == '.'))
 						{
 							if (lastDigit)
 								values[j] += strWord[i];
@@ -266,9 +277,9 @@ public partial class ThingsManager : Node
 						if ((j == 2) && (!lastDigit))
 							break;
 					}
-					int x = int.Parse(values[0]);
-					int y = int.Parse(values[1]);
-					int z = int.Parse(values[2]);
+					float x = values[0].GetNumValue();
+					float y = values[1].GetNumValue();
+					float z = values[2].GetNumValue();
 					origin = new Vector3(-x, z, y);
 					origin *= GameManager.sizeDividor;
 				}
@@ -595,7 +606,7 @@ public partial class ThingsManager : Node
 	public static void AddEntitiesToMap()
 	{
 		string strWord;
-
+		List<ThingController> thingsDroppedToFloor = new List<ThingController>();
 		foreach (Entity entity in entitiesOnMap)
 		{
 			switch (GameManager.Instance.gameType)
@@ -761,7 +772,6 @@ public partial class ThingsManager : Node
 				continue;
 			}
 
-
 			thingObject.SpawnCheck(entity.name);
 
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
@@ -772,28 +782,16 @@ public partial class ThingsManager : Node
 				default:
 				{
 					float num;
-					CollisionObject3D collider = null;
+					thingObject.GlobalPosition = entity.origin;
 					if (entity.entityData.TryGetValue("spawnflags", out strWord))
 					{
 						int spawnflags = int.Parse(strWord);
 						//Suspended
-						if ((spawnflags & 1) != 0)
-							thingObject.GlobalPosition = entity.origin;
-						else
-							thingObject.GlobalPosition = ItemLocationDropToFloor(entity.origin, ref collider);
+						if ((spawnflags & 1) == 0)
+							thingsDroppedToFloor.Add(thingObject);
 					}
 					else
-						thingObject.GlobalPosition = ItemLocationDropToFloor(entity.origin, ref collider);
-
-					if (collider != null)
-						thingObject.Reparent(collider);
-
-					if (entity.name.Contains("func_bobbing"))
-					{
-						GameManager.Print("func_bobbing");
-						foreach (var data in entity.entityData)
-							GameManager.Print("Key: " + data.Key + " Value: " + data.Value);
-					}
+						thingsDroppedToFloor.Add(thingObject);
 
 					if (entity.entityData.TryGetNumValue("wait", out num))
 						thingObject.SetRespawnTime(num);
@@ -1641,6 +1639,17 @@ public partial class ThingsManager : Node
 				break;
 			}
 		}
+
+		for(int i = 0; i < thingsDroppedToFloor.Count; i++)
+		{
+			ThingController thing = thingsDroppedToFloor[i];
+			CollisionObject3D collider = null;
+			thing.GlobalPosition = ItemLocationDropToFloor(thing.GlobalPosition, ref collider);
+
+			if (collider != null)
+				thing.Reparent(collider);
+		}
+
 	}
 
 	public static Vector3 ItemLocationDropToFloor(Vector3 Origin)
@@ -1651,19 +1660,29 @@ public partial class ThingsManager : Node
 
 	public static Vector3 ItemLocationDropToFloor(Vector3 Origin, ref CollisionObject3D collider)
 	{
-		float maxRange = 400f;
+		float maxRange = 100f;
 		Vector3 collision = Origin;
 		Vector3 End = Origin + Vector3.Down * maxRange;
-		var RayCast = PhysicsRayQueryParameters3D.Create(Origin, End, ((1 << GameManager.ColliderLayer) | (1 << GameManager.InvisibleBlockerLayer)));
-		var SpaceState = GameManager.Instance.Root.GetWorld3D().DirectSpaceState;
-		var hit = SpaceState.IntersectRay(RayCast);
-		if (hit.Count > 0)
+
+		SphereCast.CollisionMask = ((1 << GameManager.ColliderLayer) | (1 << GameManager.InvisibleBlockerLayer));
+		SphereCast.Motion = End - Origin;
+		SphereCast.Transform = new Transform3D(Basis.Identity, Origin);
+		var SpaceState = GameManager.Instance.TemporaryObjectsHolder.GetWorld3D().DirectSpaceState;
+		var result = SpaceState.CastMotion(SphereCast);
+
+		if (result[1] < 1)
 		{
-			collision = (Vector3)hit["position"] + Vector3.Up * .6f;
-			collider = (CollisionObject3D)hit["collider"];
+			SphereCast.Transform = new Transform3D(Basis.Identity, Origin + (SphereCast.Motion * result[1]));
+			var hit = SpaceState.GetRestInfo(SphereCast);
+			if (hit.Count > 0)
+			{
+				collision = (Vector3)hit["point"] + Vector3.Up * .6f;
+				collider = (CollisionObject3D)InstanceFromId((ulong)hit["collider_id"]);
+			}
 		}
 		return collision;
 	}
+
 	public static void AddPortalsToMap()
 	{
 		for (int n = 0; n < portalSurfaces.Count; n++)

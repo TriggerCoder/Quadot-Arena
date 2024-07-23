@@ -292,9 +292,6 @@ public partial class GameManager : Node
 		//Load Sounds
 		SoundManager.AddSounds(OverrideSounds);
 
-		TemporaryObjectsHolder = new Node3D();
-		TemporaryObjectsHolder.Name = "TemporaryObjectsHolder";
-		AddChild(TemporaryObjectsHolder);
 		if ((musicType == MusicType.Static) || (musicType == MusicType.Random))
 		{
 			StaticMusicPlayer = new AudioStreamPlayer();
@@ -340,18 +337,8 @@ public partial class GameManager : Node
 		if (gameSelect == BasePak.Demo)
 			PakManager.KeepDemoList(_mapRotation);
 
-		if (MapLoader.Load(_mapRotation[0]))
-		{
-			ClusterPVSManager.Instance.ResetClusterList(MapLoader.surfaces.Count);
-			MapLoader.GenerateMapCollider();
-			MapLoader.GenerateMapFog();
-			MapLoader.GenerateSurfaces();
-			MapLoader.SetLightVolData();
-			ThingsManager.AddThingsToMap();
-			SpawnerManager.CheckSpawnLocations();
-			mapLeftTime = timeLimit * 60;
-		}
-		currentState = FuncState.Ready;
+		mapLeftTime = timeLimit * 60;
+		nextMapName = _mapRotation[0];
 	}
 
 	public override void _Input(InputEvent @event)
@@ -464,8 +451,11 @@ public partial class GameManager : Node
 			paused = true;
 			CallDeferred("ChangeMap");
 		}
+	}
 
-		switch(currentState)
+	public override void _PhysicsProcess(double delta)
+	{
+		switch (currentState)
 		{
 			default:
 			break;
@@ -479,7 +469,7 @@ public partial class GameManager : Node
 						currentState = FuncState.Ready;
 					}
 				}
-				break;
+			break;
 			case FuncState.Ready:
 				if (skipFrames > 0)
 				{
@@ -500,7 +490,7 @@ public partial class GameManager : Node
 				}
 			break;
 			case FuncState.Start:
-				for(int i = 0;  i < controllerWantToJoin.Count; i++) 
+				for(int i = 0; i < controllerWantToJoin.Count; i++)
 				{
 					int controller = controllerWantToJoin[i];
 					if (playerController.Contains(controller))
@@ -513,7 +503,6 @@ public partial class GameManager : Node
 			break;
 		}
 	}
-
 	public void PlayAnnouncer(string sound)
 	{
 		AudioStream audio = SoundManager.LoadSound(sound);
