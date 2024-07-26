@@ -59,6 +59,8 @@ public partial class PlayerHUD : MeshInstance3D
 	public Dictionary<ShaderMaterial, ViewMaterial> ReplacementMaterial = new Dictionary<ShaderMaterial, ViewMaterial>();
 	public List<Node> NodeList = new List<Node>();
 
+	private uint currentLayer;
+
 	private bool hasQuad = false;
 	private bool swapColors = false;
 	private bool faceAttack = false;
@@ -139,13 +141,14 @@ public partial class PlayerHUD : MeshInstance3D
 		baseCamera.SetShaderParameter(MaterialManager.screenTexure, baseViewPortTexture);
 		baseCamera.SetShaderParameter(MaterialManager.painTexure, painEffect);
 		baseCamera.SetShaderParameter(MaterialManager.pickUpTexture, pickupEffect);
+		currentLayer = Layers;
 		currentMaterial = baseCamera;
 		playerInfo = p;
 		headAnimation.Active = true;
 		//Load HUD Models
 		MD3 model = ModelsManager.GetModel(armorModel, false);
 		if (model != null)
-			Mesher.GenerateModelFromMeshes(model, Layers, false, false, ArmorContainer, false, false, null, true, false, true, false);
+			Mesher.GenerateModelFromMeshes(model, currentLayer, false, false, ArmorContainer, false, false, null, true, false, true, false);
 
 		for (int i = 0; i < ammoModels.Length; i++)
 		{
@@ -154,34 +157,34 @@ public partial class PlayerHUD : MeshInstance3D
 			AmmoContainer.AddChild(container);
 			model = ModelsManager.GetModel(ammoModelPath + ammoModels[i], false);
 			if (model != null)
-				Mesher.GenerateModelFromMeshes(model, Layers, false, false, container, false, false, null, true, false, true, false);
+				Mesher.GenerateModelFromMeshes(model, currentLayer, false, false, container, false, false, null, true, false, true, false);
 			container.Hide();
 			ammoContainers.Add(container);
 		}
 
 		//Set Layers
-		healthLabel.Layers = Layers;
-		armorLabel.Layers = Layers;
-		ammoLabel.Layers = Layers;
-		crossHair.Layers = Layers;
-		pickUpIcon.Layers = Layers;
-		pickUpText.Layers = Layers;
-		weaponLabel.Layers = Layers;
-		holdableItemIcon.Layers = Layers;
-		playerName.Layers = Layers;
-		deathsText.Layers = Layers;
-		fragsText.Layers = Layers;
+		healthLabel.Layers = currentLayer;
+		armorLabel.Layers = currentLayer;
+		ammoLabel.Layers = currentLayer;
+		crossHair.Layers = currentLayer;
+		pickUpIcon.Layers = currentLayer;
+		pickUpText.Layers = currentLayer;
+		weaponLabel.Layers = currentLayer;
+		holdableItemIcon.Layers = currentLayer;
+		playerName.Layers = currentLayer;
+		deathsText.Layers = currentLayer;
+		fragsText.Layers = currentLayer;
 
 		for (int i = 0; i < powerUpIcon.Length; i++)
-			powerUpIcon[i].Layers = Layers;
+			powerUpIcon[i].Layers = currentLayer;
 		for (int i = 0; i < powerUpText.Length; i++)
-			powerUpText[i].Layers = Layers;
+			powerUpText[i].Layers = currentLayer;
 
 		selectIcon = new Sprite3D();
 		WeaponContainer.AddChild(selectIcon);
 		selectIcon.DoubleSided = false;
 		selectIcon.NoDepthTest = true;
-		selectIcon.Layers = Layers;
+		selectIcon.Layers = currentLayer;
 		selectIcon.Texture = TextureLoader.GetTextureOrAddTexture(selectSprite, false, false);
 		TextureLoader.AdjustIconSize(selectIcon, defaultIconSize);
 		selectIcon.Hide();
@@ -189,13 +192,13 @@ public partial class PlayerHUD : MeshInstance3D
 		noAmmoIcon = new Sprite3D[weaponIcon.Length];
 		for (int i = 0; i < weaponIcon.Length; i++)
 		{
-			weaponIcon[i].Layers = Layers;
+			weaponIcon[i].Layers = currentLayer;
 			noAmmoIcon[i] = new Sprite3D();
 			weaponIcon[i].AddChild(noAmmoIcon[i]);
 			noAmmoIcon[i].Position += Vector3.Back * .001f;
 			noAmmoIcon[i].DoubleSided = false;
 			noAmmoIcon[i].NoDepthTest = true;
-			noAmmoIcon[i].Layers = Layers;
+			noAmmoIcon[i].Layers = currentLayer;
 			noAmmoIcon[i].Texture = TextureLoader.GetTextureOrAddTexture(noAmmoSprite, false, false);
 			TextureLoader.AdjustIconSize(noAmmoIcon[i], defaultIconSize);
 			noAmmoIcon[i].Hide();
@@ -205,6 +208,7 @@ public partial class PlayerHUD : MeshInstance3D
 	public void UpdateLayersHud(uint layers)
 	{
 		//Set Layers
+		currentLayer = layers;
 		healthLabel.Layers = layers;
 		armorLabel.Layers = layers;
 		ammoLabel.Layers = layers;
@@ -322,7 +326,7 @@ public partial class PlayerHUD : MeshInstance3D
 		NodeList.Clear();
 
 		if (headModel != null)
-			Mesher.GenerateModelFromMeshes(headModel, Layers, false, false, viewHead, false, false, meshToSkin, true, false, true, false);
+			Mesher.GenerateModelFromMeshes(headModel, currentLayer, false, false, viewHead, false, false, meshToSkin, true, false, true, false);
 
 		fxMeshes = GameManager.CreateFXMeshInstance3D(viewHeadContainer);
 		NodeList = GameManager.GetAllChildrens(viewHead);
@@ -540,7 +544,7 @@ public partial class PlayerHUD : MeshInstance3D
 		holdableItemIcon.Hide();
 	}
 
-	public void AddWeapon(int weapon)
+	public void AddWeapon(int weapon, int current = -1)
 	{
 		if (currentWeapons.Contains(weapon))
 			return;
@@ -561,9 +565,12 @@ public partial class PlayerHUD : MeshInstance3D
 
 			noAmmoIcon[i].Visible = !HasAmmo(currentWeapons[i]);
 
+			if (currentWeapons[i] == current)
+				selectIcon.Position = weaponIcon[i].Position;
 			if (currentWeapons[i] == weapon)
 			{
-				selectIcon.Position = weaponIcon[i].Position;
+				if (current < 0)
+					selectIcon.Position = weaponIcon[i].Position;
 				weaponLabel.Text = weaponNames[weapon];
 			}
 

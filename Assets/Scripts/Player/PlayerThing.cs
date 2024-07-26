@@ -38,6 +38,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	private static readonly string[] energyStep = { "player/footsteps/energy1", "player/footsteps/energy2", "player/footsteps/energy3", "player/footsteps/energy4" };
 
 	private string currentModel;
+	private string currentSkin;
 	[Export]
 	public Node3D player;
 	public PlayerModel avatar;
@@ -159,8 +160,14 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		interpolatedTransform.AddChild(avatar);
 		playerControls.footStep = FootStepType.Normal;
 		avatar.LoadPlayer(ref modelName, ref skinName, (GameManager.AllPlayerViewMask & ~((uint)(playerInfo.viewLayer))), playerControls);
+		if ((currentModel != modelName) || (currentSkin != skinName))
+		{
+			playerInfo.saveData.ModelName = modelName;
+			playerInfo.saveData.SkinName = skinName;
+			playerInfo.SaveConfigData();
+		}
 		currentModel = modelName;
-
+		currentSkin = skinName;
 		SpawnerManager.SpawnToLocation(this);
 		playerControls.ChangeHeight(true);
 		playerControls.feetRay.Length = .8f;
@@ -289,7 +296,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		if (attacker == this)
 			painFlash /= 2;
 
-		if (playerControls.BloodScreen)
+		if (playerInfo.saveData.BloodScreen)
 			playerInfo.playerPostProcessing.playerHUD.painFlashTime(painFlash);
 
 		if (hitpoints <= 0)

@@ -1,5 +1,8 @@
 using Godot;
 using System;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 public partial class PlayerInfo : Node3D
 {
 	[Export]
@@ -59,6 +62,33 @@ public partial class PlayerInfo : Node3D
 	public uint uiLayer;
 	public int localPlayerNum;
 
+	public SaveData saveData = new SaveData();
+	public class SaveData
+	{
+		public string ModelName { get; set; } = "crash";										// Model Name.
+		public string SkinName { get; set; } = "default";										// Skin Name.
+		public int FOV { get; set; } = 90;														// View Camera FOV.
+		public float[] MouseSensitivity { get; set; } = new float[2] { .5f, .5f };				// Mouse Sensitivity.
+		public float[] StickSensitivity { get; set; } = new float[2] { 4f, 3f };				// Controller Stick Sensitivity.
+		public bool InvertView { get; set; } = false;											// Y Axis View Invert Controls.
+		public bool AutoHop { get; set; } = false;												// Allows player to just hold jump button to keep on bhopping perfectly.
+		public bool BloodScreen { get; set; } = true;											// Show Visible Pain Feedback.
+		public int[] CroosHair { get; set; } = new int[9] { 5, 5, 5, 5, 5, 5, 107, 5, 5 };		//gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k
+		public int CroosHairAlpha { get; set; } = 25;											// CrossHair Alpha Value.
+		public int CroosHairScale { get; set; } = 100;											// CrossHair Scale Value.
+		public string ModulateColor { get; set; } = "#50a1cd";                                  // Modulate Color.
+		public bool AutoSwap { get; set; } = true;												// Auto Swap if new weapon is picked
+		public bool SafeSwap { get; set; } = true;												// When out of ammo always swap to safe weapon
+		public int HUD2DScale { get; set; } = 100;												// HUD's Sprites Scale.
+		public int HUD3DScale  { get; set; } = 100;												// HUD's Models Scale.
+		public bool HUDShow { get; set; } = true;												// Show Hud.
+	}
+
+	[JsonSourceGenerationOptions(WriteIndented = true)]
+	[JsonSerializable(typeof(SaveData))]
+	internal partial class SourceGenerationContext : JsonSerializerContext
+	{
+	}
 	public void SetPlayer(int playerNum)
 	{
 		localPlayerNum = playerNum;
@@ -76,6 +106,7 @@ public partial class PlayerInfo : Node3D
 			if (Weapon[i])
 				playerPostProcessing.playerHUD.AddWeapon(i);
 		}
+		LoadSavedConfigData();
 	}
 
 	public void UpdatePlayer(int playerNum)
@@ -146,6 +177,63 @@ public partial class PlayerInfo : Node3D
 		{
 			if (Weapon[i])
 				playerPostProcessing.playerHUD.AddWeapon(i);
+		}
+	}
+
+	public void LoadSavedConfigData()
+	{
+		string configFile = Directory.GetCurrentDirectory() + "/PlayersConfigs/" + playerThing.playerName + ".cfg";
+		if (File.Exists(configFile))
+		{
+			string jsonString = File.ReadAllText(configFile);
+			bool loaded = false;
+			try
+			{
+				saveData = JsonSerializer.Deserialize(jsonString, SourceGenerationContext.Default.SaveData);
+				loaded = true;
+			}
+			catch (JsonException)
+			{
+				saveData = new SaveData();
+			}
+			if (loaded)
+			{
+				playerThing.modelName = saveData.ModelName;
+				playerThing.skinName = saveData.SkinName;
+				Color modulate;
+				try
+				{
+					modulate = new Color(saveData.ModulateColor);
+				}
+				catch (Exception e)
+				{
+					modulate = new Color("#50a1cd");
+				}
+				modulate.R = Mathf.Max(0.1f, modulate.R);
+				modulate.G = Mathf.Max(0.1f, modulate.G);
+				modulate.B = Mathf.Max(0.1f, modulate.B);
+				playerThing.skinName = saveData.SkinName;
+				playerThing.modulate = modulate;
+				playerPostProcessing.playerHUD.ChangeCrossHairAlpha(saveData.CroosHairAlpha);
+				playerPostProcessing.playerHUD.ChangeCrossHairScale(saveData.CroosHairScale);
+				playerCamera.ViewCamera.Fov = saveData.FOV;
+				playerPostProcessing.playerHUD.ChangeSpriteScale(saveData.HUD2DScale);
+				playerPostProcessing.playerHUD.ChangeModelScale(saveData.HUD3DScale);
+				if (!saveData.HUDShow)
+					playerPostProcessing.playerHUD.UpdateLayersHud(1 << GameManager.UINotVisibleLayer);
+			}
+		}
+	}
+	public void SaveConfigData()
+	{
+		string configFile = Directory.GetCurrentDirectory() + "/PlayersConfigs/" + playerThing.playerName + ".cfg";
+		FileStream errorFile = File.Open(configFile, FileMode.Create, System.IO.FileAccess.ReadWrite);
+		if (File.Exists(configFile))
+		{
+			errorFile.Seek(0, SeekOrigin.Begin);
+			byte[] writeData = JsonSerializer.SerializeToUtf8Bytes(saveData, SourceGenerationContext.Default.SaveData);
+			errorFile.Write(writeData);
+			errorFile.Close();
 		}
 	}
 }

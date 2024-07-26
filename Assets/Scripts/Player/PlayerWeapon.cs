@@ -204,7 +204,7 @@ public partial class PlayerWeapon : Node3D
 		{
 			Texture2D crossHair;
 			int weaponIndex = p.playerControls.CurrentWeapon;
-			int crossHairIndex = p.playerControls.CroosHair[weaponIndex];
+			int crossHairIndex = p.saveData.CroosHair[weaponIndex];
 			if (crossHairIndex > 100)
 			{
 				crossHairIndex -= 100;

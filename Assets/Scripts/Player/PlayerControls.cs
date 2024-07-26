@@ -52,14 +52,6 @@ public partial class PlayerControls : InterpolatedNode3D
 	public const float jumpSpeed = 8.0f;					// The speed at which the character's up axis gains when hitting jump
 	public const float fallSpeedLimit = -22f;				// The max fallSpeed without taking damage, modified to Quake Live value
 
-	//Player custom settings
-	public Vector2 MouseSensitivity = new Vector2(.5f, .5f);// Mouse Sensitivity.
-	public Vector2 StickSensitivity = new Vector2(4f, 3f);  // Controller Stick Sensitivity.
-	public bool InvertView = false;							// Y Axis View Invert Controls.
-	public bool AutoHop = false;                            // Allows player to just hold jump button to keep on bhopping perfectly.
-	public bool BloodScreen = true;                         // Show Visible Pain Feedback.
-	public int[] CroosHair = new int[9] { 5, 5, 5, 5, 5, 5, 107, 5, 5 }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k
-
 	public Vector3 playerVelocity = Vector3.Zero;
 	private bool wishJump = false;
 	private bool wishSink = false;
@@ -178,8 +170,8 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (@event is InputEventMouseMotion eventMouseMotion)
 		{
 			Look = eventMouseMotion.Relative;
-			viewDirection.Y -= Look.X * MouseSensitivity.X;
-			viewDirection.X -= Look.Y * MouseSensitivity.Y * (InvertView? -1: 1);
+			viewDirection.Y -= Look.X * playerInfo.saveData.MouseSensitivity[0];
+			viewDirection.X -= Look.Y * playerInfo.saveData.MouseSensitivity[1] * (playerInfo.saveData.InvertView ? -1: 1);
 		}
 	}
 
@@ -221,8 +213,18 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (playerInput.Device != GameManager.ControllerType.MouseKeyboard)
 		{
 			int Joy = playerInput.Device - 1;
-			viewDirection.Y -= Input.GetJoyAxis(Joy, JoyAxis.RightX) * StickSensitivity.X;
-			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * StickSensitivity.Y* (InvertView? -1: 1);
+/*			float Y = Input.GetJoyAxis(Joy, JoyAxis.RightX);
+			float X = Input.GetJoyAxis(Joy, JoyAxis.RightY);
+			if (Mathf.Abs(Y) > deadZone.Y)
+				Y = Y - Mathf.Sign(Y) * deadZone.Y;
+			else
+				Y = 0;
+			if (Mathf.Abs(X) > deadZone.X)
+				X = X - Mathf.Sign(X) * deadZone.X;
+			else
+				X = 0;
+*/			viewDirection.Y -= (Input.GetJoyAxis(Joy, JoyAxis.RightX)) * playerInfo.saveData.StickSensitivity[0];
+			viewDirection.X -= (Input.GetJoyAxis(Joy, JoyAxis.RightY)) * playerInfo.saveData.StickSensitivity[1] * (playerInfo.saveData.InvertView ? -1: 1);
 
 //			viewDirection.Y -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * GameOptions.GamePadSensitivity.X;
 //			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.TriggerLeft) * GameOptions.GamePadSensitivity.Y;
@@ -398,7 +400,12 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (playerWeapon == null)
 		{
 			if (SwapWeapon == -1)
-				SwapToBestSafeWeapon();
+			{
+				if (playerInfo.saveData.SafeSwap)
+					SwapToBestSafeWeapon();
+				else
+					SwapToBestWeapon();
+			}
 
 			if (SwapWeapon > -1)
 			{
@@ -587,7 +594,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 	private void QueueJump()
 	{
-		if (AutoHop)
+		if (playerInfo.saveData.AutoHop)
 		{
 			wishJump = Input.IsActionPressed(playerInput.Action_Jump);
 			return;
@@ -734,7 +741,7 @@ public partial class PlayerControls : InterpolatedNode3D
 			return 0;
 		if (wishaccel == 0)
 			wishaccel = wishspeed;
-		else if (AutoHop && wishJump)
+		else if (playerInfo.saveData.AutoHop && wishJump)
 			autohop = true;
 
 		accelspeed = accel * deltaTime * wishaccel;
