@@ -51,7 +51,7 @@ public static class SpawnerManager
 
 	public static void CheckSpawnLocations()
 	{
-		switch (GameManager.Instance.gameType)
+		switch (GameManager.Instance.gameConfig.GameType)
 		{
 			default:
 			break;

@@ -228,7 +228,7 @@ public partial class ItemPickup : Area3D
 				{
 					player.playerInfo.Weapon[givesWeapon] = true;
 
-					if (player.playerInfo.saveData.AutoSwap)
+					if (player.playerInfo.configData.AutoSwap)
 					{
 						player.playerInfo.playerPostProcessing.playerHUD.AddWeapon(givesWeapon);
 						player.playerControls.TrySwapWeapon(givesWeapon);

@@ -162,8 +162,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		avatar.LoadPlayer(ref modelName, ref skinName, (GameManager.AllPlayerViewMask & ~((uint)(playerInfo.viewLayer))), playerControls);
 		if ((currentModel != modelName) || (currentSkin != skinName))
 		{
-			playerInfo.saveData.ModelName = modelName;
-			playerInfo.saveData.SkinName = skinName;
+			playerInfo.configData.ModelName = modelName;
+			playerInfo.configData.SkinName = skinName;
 			playerInfo.SaveConfigData();
 		}
 		currentModel = modelName;
@@ -296,7 +296,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		if (attacker == this)
 			painFlash /= 2;
 
-		if (playerInfo.saveData.BloodScreen)
+		if (playerInfo.configData.BloodScreen)
 			playerInfo.playerPostProcessing.playerHUD.painFlashTime(painFlash);
 
 		if (hitpoints <= 0)
@@ -579,7 +579,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			quadTime = 0;
 			playerInfo.quadDamage = false;
 			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Quad);
-			if (GameManager.Instance.gameType == GameManager.GameType.QuadHog)
+			if (GameManager.Instance.gameConfig.GameType == GameManager.GameType.QuadHog)
 			{
 				if (ThingsManager.uniqueThingsOnMap.TryGetValue("item_quad", out ThingController masterThing))
 					masterThing.RespawnNow();

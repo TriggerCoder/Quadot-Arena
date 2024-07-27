@@ -1,6 +1,6 @@
 using Godot;
-using System;
 using System.IO;
+using System.Text.Json.Serialization;
 public class BSPHeader
 {
 	private const int LumpCount = 17;
@@ -96,4 +96,11 @@ public class BSPDirectoryEntry
 			return true;
 		return false;
 	}
+}
+
+[JsonSourceGenerationOptions(WriteIndented = true)]
+[JsonSerializable(typeof(PlayerInfo.PlayerConfigData))]
+[JsonSerializable(typeof(GameManager.GameConfigData))]
+internal partial class SourceGenerationContext : JsonSerializerContext
+{
 }

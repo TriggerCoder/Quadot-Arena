@@ -89,12 +89,12 @@ public static class PakManager
 
 		int start = 0;
 		int end = basePaks.Length;
-		if (GameManager.Instance.gameSelect != GameManager.BasePak.All)
+		if (GameManager.Instance.gameConfig.GameSelect != GameManager.BasePak.All)
 		{
-			if (GameManager.Instance.gameSelect > basePak)
-				GameManager.Instance.gameSelect = basePak;
+			if (GameManager.Instance.gameConfig.GameSelect > basePak)
+				GameManager.Instance.gameConfig.GameSelect = basePak;
 			else
-				basePak = GameManager.Instance.gameSelect;
+				basePak = GameManager.Instance.gameConfig.GameSelect;
 
 			switch (basePak)
 			{
@@ -347,7 +347,7 @@ public static class PakManager
 				FileName += "ql_";
 			break;
 		}
-		switch (GameManager.Instance.gameType)
+		switch (GameManager.Instance.gameConfig.GameType)
 		{
 			default:
 			case GameManager.GameType.FreeForAll:

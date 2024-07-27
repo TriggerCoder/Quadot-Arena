@@ -1,7 +1,8 @@
 using Godot;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Text.Json;
 public partial class GameManager : Node
 {
 	[Export]
@@ -263,6 +264,18 @@ public partial class GameManager : Node
 	private static PrintType printType = PrintType.Log;
 	private static int printLine = 0;
 	private bool loading = false;
+
+	public class GameConfigData
+	{
+		public BasePak GameSelect { get; set; } = BasePak.QuakeLive;
+		public GameType GameType  { get; set; } = GameType.QuadHog;
+		public MusicType MusicType { get; set; } = MusicType.Random;
+		public int TimeLimit { get; set; } = 7;
+		public int FragLimit { get; set; } = 15;
+		public string[] Players { get; set; } = new string[8] { "Doom", "Crash", "Ranger", "Visor", "Sarge", "Major", "Anarki", "Grunt" };
+	}
+
+	public GameConfigData gameConfig = new GameConfigData();
 	public override void _Ready()
 	{
 		//Disable Physics Jitter Fix
@@ -289,10 +302,13 @@ public partial class GameManager : Node
 		//Init Console
 		console.Init();
 
+		//Load Config
+		LoadGameConfigData();
+
 		//Load Sounds
 		SoundManager.AddSounds(OverrideSounds);
 
-		if ((musicType == MusicType.Static) || (musicType == MusicType.Random))
+		if ((gameConfig.MusicType == MusicType.Static) || (gameConfig.MusicType == MusicType.Random))
 		{
 			StaticMusicPlayer = new AudioStreamPlayer();
 			AddChild(StaticMusicPlayer);
@@ -307,7 +323,7 @@ public partial class GameManager : Node
 		MaterialManager.SetAmbient();
 
 		//SetGameType
-		switch (gameType)
+		switch (gameConfig.GameType)
 		{
 			default:
 			break;
@@ -316,7 +332,7 @@ public partial class GameManager : Node
 			break;
 		}
 
-		if (gameSelect != BasePak.Demo)
+		if (gameConfig.GameSelect != BasePak.Demo)
 		{
 			PakManager.OrderLists();
 			_mapRotation = PakManager.LoadMapRotation();
@@ -334,11 +350,71 @@ public partial class GameManager : Node
 		if (_mapRotation.Count == 0)
 			_mapRotation.Add(PakManager.mapList[0]);
 
-		if (gameSelect == BasePak.Demo)
+		if (gameConfig.GameSelect == BasePak.Demo)
 			PakManager.KeepDemoList(_mapRotation);
 
-		mapLeftTime = timeLimit * 60;
+		mapLeftTime = gameConfig.TimeLimit * 60;
 		nextMapName = _mapRotation[0];
+
+		SaveGameData();
+	}
+
+	public void LoadGameConfigData()
+	{
+		bool loaded = false;
+		string configFile = Directory.GetCurrentDirectory() + "/qa_game.cfg";
+		if (File.Exists(configFile))
+		{
+			string jsonString = File.ReadAllText(configFile);
+			try
+			{
+				gameConfig = JsonSerializer.Deserialize(jsonString, SourceGenerationContext.Default.GameConfigData);
+				loaded = true;
+			}
+			catch (JsonException)
+			{
+				gameConfig = new GameConfigData();
+			}
+		}
+		if (loaded)
+		{
+			if (gameConfig.GameSelect > BasePak.QuakeLive)
+				gameConfig.GameSelect = gameSelect;
+
+			if (gameConfig.GameType > GameType.Harvester)
+				gameConfig.GameType = gameType;
+
+			if (gameConfig.MusicType > MusicType.Random)
+				gameConfig.MusicType = musicType;
+
+			if (gameConfig.TimeLimit < 1)
+				gameConfig.TimeLimit = timeLimit;
+
+			if (gameConfig.FragLimit < 1)
+				gameConfig.FragLimit = fragLimit;
+
+			return;
+		}
+
+		gameConfig.GameSelect = gameSelect;
+		gameConfig.GameType = gameType;
+		gameConfig.MusicType = musicType;
+		gameConfig.TimeLimit = timeLimit;
+		gameConfig.FragLimit = fragLimit;
+		for (int i = 0; i < gameConfig.Players.Length; i++)
+			gameConfig.Players[i] = defaultModels[i];
+	}
+	public void SaveGameData()
+	{
+		string configFile = Directory.GetCurrentDirectory() + "/qa_game.cfg";
+		FileStream errorFile = File.Open(configFile, FileMode.Create, System.IO.FileAccess.ReadWrite);
+		if (File.Exists(configFile))
+		{
+			errorFile.Seek(0, SeekOrigin.Begin);
+			byte[] writeData = JsonSerializer.SerializeToUtf8Bytes(gameConfig, SourceGenerationContext.Default.GameConfigData);
+			errorFile.Write(writeData);
+			errorFile.Close();
+		}
 	}
 
 	public override void _Input(InputEvent @event)
@@ -446,7 +522,7 @@ public partial class GameManager : Node
 					mapNum = 0;
 				nextMapName = _mapRotation[mapNum];
 			}
-			mapLeftTime = timeLimit * 60;
+			mapLeftTime = gameConfig.TimeLimit * 60;
 			second = 0;
 			paused = true;
 			CallDeferred("ChangeMap");
@@ -518,7 +594,7 @@ public partial class GameManager : Node
 
 	public void CheckDeathCount(int frags)
 	{
-		int left = fragLimit - frags;
+		int left = gameConfig.FragLimit - frags;
 		if (left > 0)
 		{
 			left--;
@@ -563,7 +639,7 @@ public partial class GameManager : Node
 				ScoreBoard.Instance.AddPlayer(player);
 		}
 		IntermissionContainer.Hide();
-		switch (musicType)
+		switch (gameConfig.MusicType)
 		{
 			default:
 				currentMusic = MusicType.None;
@@ -652,7 +728,7 @@ public partial class GameManager : Node
 			return;
 		}
 
-		switch (musicType)
+		switch (gameConfig.MusicType)
 		{
 			default:
 			break;
@@ -683,7 +759,7 @@ public partial class GameManager : Node
 			IntermissionContainer.Hide();
 		}
 
-		player.playerName = defaultModels[playerNum];
+		player.playerName = gameConfig.Players[playerNum];
 		player.modelName = defaultModels[playerNum];
 		player.skinName = defaultSkins[playerNum];
 
@@ -1046,9 +1122,9 @@ public partial class GameManager : Node
 
 	public void ChangeTimeLimit(int limit)
 	{
-		if (limit < timeLimit)
+		if (limit < gameConfig.TimeLimit)
 		{
-			mapLeftTime -= (timeLimit - limit) * 60;
+			mapLeftTime -= (gameConfig.TimeLimit - limit) * 60;
 			if (mapLeftTime < 1)
 			{
 				limitReach = LimitReach.Time;
@@ -1056,15 +1132,27 @@ public partial class GameManager : Node
 			}
 		}
 		else
-			mapLeftTime += (limit - timeLimit) * 60;
-		timeLimit = limit;
+			mapLeftTime += (limit - gameConfig.TimeLimit) * 60;
+		gameConfig.TimeLimit = limit;
+		SaveGameData();
 	}
 
 	public void ChangeFragLimit(int limit)
 	{
-		fragLimit = limit;
+		gameConfig.FragLimit = limit;
 		foreach (PlayerThing player in Players)
 			CheckDeathCount(player.frags);
+		SaveGameData();
+	}
+
+	public void ChangePlayerName(int playerNum, string playerName)
+	{
+		gameConfig.Players[playerNum] = playerName;
+		SaveGameData();
+
+		Players[playerNum].playerName = playerName;
+		if (!Players[playerNum].playerInfo.LoadSavedConfigData())
+			Players[playerNum].playerInfo.SaveConfigData();
 	}
 
 	public static void QuitGame()

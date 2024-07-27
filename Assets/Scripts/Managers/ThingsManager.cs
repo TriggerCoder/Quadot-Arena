@@ -411,7 +411,7 @@ public partial class ThingsManager : Node
 
 			foreach (Dictionary<string, string> entityData in entityDataList)
 			{
-				switch (GameManager.Instance.gameType)
+				switch (GameManager.Instance.gameConfig.GameType)
 				{
 					default:
 						break;
@@ -609,7 +609,7 @@ public partial class ThingsManager : Node
 		List<ThingController> thingsDroppedToFloor = new List<ThingController>();
 		foreach (Entity entity in entitiesOnMap)
 		{
-			switch (GameManager.Instance.gameType)
+			switch (GameManager.Instance.gameConfig.GameType)
 			{
 				default:
 				break;
@@ -753,7 +753,7 @@ public partial class ThingsManager : Node
 				}
 				if (uniqueThingsOnMap.Count != uniqueGamePlayThings.Count)
 				{
-					switch (GameManager.Instance.gameType)
+					switch (GameManager.Instance.gameConfig.GameType)
 					{
 						default:
 						break;
@@ -807,7 +807,7 @@ public partial class ThingsManager : Node
 						break;
 
 					//GamePlay Rules:
-					if ((GameManager.Instance.gameType == GameManager.GameType.QuadHog) && (thingObject.uniqueItem))
+					if ((GameManager.Instance.gameConfig.GameType == GameManager.GameType.QuadHog) && (thingObject.uniqueItem))
 					{
 						itemPickup.amount = 60;
 						thingObject.SetRespawnTime(float.MaxValue);
@@ -1579,7 +1579,7 @@ public partial class ThingsManager : Node
 						GameManager.Print("Map Message: " + strWord);
 					if (entity.entityData.TryGetValue("music", out strWord))
 					{
-						if ((GameManager.Instance.musicType == GameManager.MusicType.Static) || (GameManager.Instance.musicType == GameManager.MusicType.Random))
+						if ((GameManager.Instance.gameConfig.MusicType == GameManager.MusicType.Static) || (GameManager.Instance.gameConfig.MusicType == GameManager.MusicType.Random))
 						{
 							string[] keyValue = strWord.Split(' ');
 							if (keyValue.Length > 0)
@@ -1604,7 +1604,7 @@ public partial class ThingsManager : Node
 		//Check if all uniqueThings are on the map
 		if (uniqueThingsOnMap.Count != uniqueGamePlayThings.Count)
 		{
-			switch (GameManager.Instance.gameType)
+			switch (GameManager.Instance.gameConfig.GameType)
 			{
 				default:
 				break;

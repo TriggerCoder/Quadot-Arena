@@ -154,9 +154,9 @@ public partial class ConsoleManager : Control
 				{
 					bool failed = false;
 					if (autohop == "TRUE")
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.AutoHop = true;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.AutoHop = true;
 					else if (autohop == "FALSE")
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.AutoHop = false;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.AutoHop = false;
 					else
 						failed = true;
 
@@ -207,9 +207,9 @@ public partial class ConsoleManager : Control
 				{
 					bool failed = false;
 					if (autoSwap == "TRUE")
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.AutoSwap = true;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.AutoSwap = true;
 					else if (autoSwap == "FALSE")
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.AutoSwap = false;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.AutoSwap = false;
 					else
 						failed = true;
 
@@ -260,9 +260,9 @@ public partial class ConsoleManager : Control
 				{
 					bool failed = false;
 					if (bloodscreen == "TRUE")
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.BloodScreen = true;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.BloodScreen = true;
 					else if (bloodscreen == "FALSE")
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.BloodScreen = false;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.BloodScreen = false;
 					else
 						failed = true;
 
@@ -329,7 +329,7 @@ public partial class ConsoleManager : Control
 						modulate.B = Mathf.Max(0.1f, modulate.B);
 						GameManager.Instance.Players[playerNum].modulate = modulate;
 						AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.ModulateColor = color;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.ModulateColor = color;
 						GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
 					}
 				}
@@ -474,7 +474,7 @@ public partial class ConsoleManager : Control
 				if (failed)
 					break;
 
-				int[] CroosHairs = GameManager.Instance.Players[playerNum].playerInfo.saveData.CroosHair;
+				int[] CroosHairs = GameManager.Instance.Players[playerNum].playerInfo.configData.CroosHair;
 				if (weaponNum < 0)
 				{
 					for (int i = 0; i < CroosHairs.Length; i++)
@@ -529,7 +529,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + command + " alpha is not in correct format [b]0-100[/b]", GameManager.PrintType.Warning);
 					break;
 				}
-				GameManager.Instance.Players[playerNum].playerInfo.saveData.CroosHairAlpha = Alpha;
+				GameManager.Instance.Players[playerNum].playerInfo.configData.CroosHairAlpha = Alpha;
 				GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.ChangeCrossHairAlpha(Alpha);
 				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
 				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
@@ -573,7 +573,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + command + " scale is not in correct format [b]10-100[/b]", GameManager.PrintType.Warning);
 					break;
 				}
-				GameManager.Instance.Players[playerNum].playerInfo.saveData.CroosHairScale = Scale;
+				GameManager.Instance.Players[playerNum].playerInfo.configData.CroosHairScale = Scale;
 				GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.ChangeCrossHairScale(Scale);
 				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
 				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
@@ -589,7 +589,7 @@ public partial class ConsoleManager : Control
 				string limit = args[1];
 				if (int.TryParse(limit, out int value))
 				{
-					if (value < 0)
+					if (value < 1)
 					{
 						AddToConsole("Command: " + args[0] + " was not changed. " + args[1] + " must be positive", GameManager.PrintType.Warning);
 						break;
@@ -718,7 +718,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + command + " scale is not in correct format [b]10-100[/b]", GameManager.PrintType.Warning);
 					break;
 				}
-				GameManager.Instance.Players[playerNum].playerInfo.saveData.HUD2DScale = Scale;
+				GameManager.Instance.Players[playerNum].playerInfo.configData.HUD2DScale = Scale;
 				GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.ChangeSpriteScale(Scale);
 				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
 				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
@@ -762,7 +762,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + command + " scale is not in correct format [b]10-100[/b]", GameManager.PrintType.Warning);
 					break;
 				}
-				GameManager.Instance.Players[playerNum].playerInfo.saveData.HUD3DScale = Scale;
+				GameManager.Instance.Players[playerNum].playerInfo.configData.HUD3DScale = Scale;
 				GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.ChangeModelScale(Scale);
 				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
 				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
@@ -806,12 +806,12 @@ public partial class ConsoleManager : Control
 					bool failed = false;
 					if (hudshow == "TRUE")
 					{
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.HUDShow = true;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.HUDShow = true;
 						GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.UpdateLayersHud(GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.UIMask);
 					}
 					else if (hudshow == "FALSE")
 					{
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.HUDShow = false;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.HUDShow = false;
 						GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.UpdateLayersHud(1 << GameManager.UINotVisibleLayer);
 					}
 					else
@@ -864,9 +864,9 @@ public partial class ConsoleManager : Control
 				{
 					bool failed = false;
 					if (invert == "TRUE")
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.InvertView = true;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.InvertView = true;
 					else if (invert == "FALSE")
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.InvertView = false;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.InvertView = false;
 					else
 						failed = true;
 
@@ -1097,8 +1097,8 @@ public partial class ConsoleManager : Control
 				}
 
 				Vector2 Sensitivity = new Vector2(sens[0].GetNumValue(), sens[1].GetNumValue());
-				GameManager.Instance.Players[playerNum].playerInfo.saveData.MouseSensitivity[0] = Sensitivity.X;
-				GameManager.Instance.Players[playerNum].playerInfo.saveData.MouseSensitivity[1] = Sensitivity.Y;
+				GameManager.Instance.Players[playerNum].playerInfo.configData.MouseSensitivity[0] = Sensitivity.X;
+				GameManager.Instance.Players[playerNum].playerInfo.configData.MouseSensitivity[1] = Sensitivity.Y;
 				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
 				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
 			}
@@ -1140,7 +1140,7 @@ public partial class ConsoleManager : Control
 					break;
 				}
 				else
-					GameManager.Instance.Players[playerNum].playerName = playerName;
+					GameManager.Instance.ChangePlayerName(playerNum, playerName);
 				AddToConsole("Command: " + args[0] + " sucesfully changed to " + playerName + " for Player " + playerNum, GameManager.PrintType.Success);
 			}
 			break;
@@ -1215,9 +1215,9 @@ public partial class ConsoleManager : Control
 				{
 					bool failed = false;
 					if (safeSwap == "TRUE")
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.SafeSwap = true;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.SafeSwap = true;
 					else if (safeSwap == "FALSE")
-						GameManager.Instance.Players[playerNum].playerInfo.saveData.SafeSwap = false;
+						GameManager.Instance.Players[playerNum].playerInfo.configData.SafeSwap = false;
 					else
 						failed = true;
 
@@ -1346,8 +1346,8 @@ public partial class ConsoleManager : Control
 				}
 
 				Vector2 Sensitivity = new Vector2(sens[0].GetNumValue(), sens[1].GetNumValue());
-				GameManager.Instance.Players[playerNum].playerInfo.saveData.StickSensitivity[0] = Sensitivity.X;
-				GameManager.Instance.Players[playerNum].playerInfo.saveData.StickSensitivity[1] = Sensitivity.Y;
+				GameManager.Instance.Players[playerNum].playerInfo.configData.StickSensitivity[0] = Sensitivity.X;
+				GameManager.Instance.Players[playerNum].playerInfo.configData.StickSensitivity[1] = Sensitivity.Y;
 				AddToConsole("Command: " + args[0] + " sucesfully changed for Player " + playerNum, GameManager.PrintType.Success);
 				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
 			}
@@ -1362,7 +1362,7 @@ public partial class ConsoleManager : Control
 				string limit = args[1];
 				if (int.TryParse(limit, out int value))
 				{
-					if (value < 0)
+					if (value < 1)
 					{
 						AddToConsole("Command: " + args[0] + " was not changed. " + args[1] + " must be positive", GameManager.PrintType.Warning);
 						break;

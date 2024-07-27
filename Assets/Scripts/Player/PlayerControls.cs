@@ -170,8 +170,8 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (@event is InputEventMouseMotion eventMouseMotion)
 		{
 			Look = eventMouseMotion.Relative;
-			viewDirection.Y -= Look.X * playerInfo.saveData.MouseSensitivity[0];
-			viewDirection.X -= Look.Y * playerInfo.saveData.MouseSensitivity[1] * (playerInfo.saveData.InvertView ? -1: 1);
+			viewDirection.Y -= Look.X * playerInfo.configData.MouseSensitivity[0];
+			viewDirection.X -= Look.Y * playerInfo.configData.MouseSensitivity[1] * (playerInfo.configData.InvertView ? -1: 1);
 		}
 	}
 
@@ -223,8 +223,8 @@ public partial class PlayerControls : InterpolatedNode3D
 				X = X - Mathf.Sign(X) * deadZone.X;
 			else
 				X = 0;
-*/			viewDirection.Y -= (Input.GetJoyAxis(Joy, JoyAxis.RightX)) * playerInfo.saveData.StickSensitivity[0];
-			viewDirection.X -= (Input.GetJoyAxis(Joy, JoyAxis.RightY)) * playerInfo.saveData.StickSensitivity[1] * (playerInfo.saveData.InvertView ? -1: 1);
+*/			viewDirection.Y -= (Input.GetJoyAxis(Joy, JoyAxis.RightX)) * playerInfo.configData.StickSensitivity[0];
+			viewDirection.X -= (Input.GetJoyAxis(Joy, JoyAxis.RightY)) * playerInfo.configData.StickSensitivity[1] * (playerInfo.configData.InvertView ? -1: 1);
 
 //			viewDirection.Y -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * GameOptions.GamePadSensitivity.X;
 //			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.TriggerLeft) * GameOptions.GamePadSensitivity.Y;
@@ -401,7 +401,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		{
 			if (SwapWeapon == -1)
 			{
-				if (playerInfo.saveData.SafeSwap)
+				if (playerInfo.configData.SafeSwap)
 					SwapToBestSafeWeapon();
 				else
 					SwapToBestWeapon();
@@ -594,7 +594,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 	private void QueueJump()
 	{
-		if (playerInfo.saveData.AutoHop)
+		if (playerInfo.configData.AutoHop)
 		{
 			wishJump = Input.IsActionPressed(playerInput.Action_Jump);
 			return;
@@ -741,7 +741,7 @@ public partial class PlayerControls : InterpolatedNode3D
 			return 0;
 		if (wishaccel == 0)
 			wishaccel = wishspeed;
-		else if (playerInfo.saveData.AutoHop && wishJump)
+		else if (playerInfo.configData.AutoHop && wishJump)
 			autohop = true;
 
 		accelspeed = accel * deltaTime * wishaccel;
