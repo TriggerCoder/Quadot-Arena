@@ -1409,7 +1409,7 @@ public static class Mesher
 
 		type |= extraContentFlag;
 
-		if (((type & ContentFlags.Water) != 0) || ((type & ContentFlags.Lava) != 0))
+		if (((type & ContentFlags.Water) != 0) || ((type & ContentFlags.Lava) != 0) || ((type & ContentFlags.Slime) != 0))
 		{
 			isWater = true;
 			if ((type & ContentFlags.Translucent) == 0)
@@ -1433,7 +1433,9 @@ public static class Mesher
 			{
 				waterSurface = new WaterSurface();
 				if ((type & ContentFlags.Lava) != 0)
-					waterSurface.isLava = true;
+					waterSurface.damageable = WaterSurface.DamageableType.Lava;
+				else if ((type & ContentFlags.Slime) != 0)
+					waterSurface.damageable = WaterSurface.DamageableType.Slime;
 				objCollider = waterSurface;
 			}
 			else
@@ -1463,7 +1465,7 @@ public static class Mesher
 			if (isWater)
 			{
 				waterSurface.Boxes.Add(box);
-				GenerateWaterFog(indexId + "_" + i, holder, box, waterSurface.isLava);
+				GenerateWaterFog(indexId + "_" + i, holder, box, waterSurface.damageable);
 			}
 		}
 		
@@ -1637,7 +1639,7 @@ public static class Mesher
 		arrMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surfaceArray);
 		return arrMesh;
 	}
-	public static void GenerateWaterFog(string Name, Node3D holder, Aabb box, bool isLava)
+	public static void GenerateWaterFog(string Name, Node3D holder, Aabb box, WaterSurface.DamageableType type)
 	{
 		FogVolume Fog = new FogVolume();
 		Fog.Name = "FogVolume_" + Name;
@@ -1647,10 +1649,19 @@ public static class Mesher
 		Fog.Position = box.GetCenter();
 		Fog.Shape = RenderingServer.FogVolumeShape.Box;
 		Fog.Size = box.Size;
-		if (isLava)
-			Fog.Material = MaterialManager.lavaFogMaterial;
-		else
-			Fog.Material = MaterialManager.waterFogMaterial;
+		switch (type)
+		{
+			default:
+			case WaterSurface.DamageableType.None:
+				Fog.Material = MaterialManager.waterFogMaterial;
+				break;
+			case WaterSurface.DamageableType.Lava:
+				Fog.Material = MaterialManager.lavaFogMaterial;
+			break;
+			case WaterSurface.DamageableType.Slime:
+				Fog.Material = MaterialManager.slimeFogMaterial;
+			break;
+		}
 	}
 	public static void GenerateVolumetricFog(int index, QBrush brush, Node3D holder, string textureName)
 	{

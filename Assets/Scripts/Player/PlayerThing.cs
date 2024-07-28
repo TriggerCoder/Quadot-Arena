@@ -88,7 +88,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public int drownDamage = 0;
 
 	public bool underWater = false;
-	public bool inLava = false;
+	public WaterSurface.DamageableType inDamageable = WaterSurface.DamageableType.None;
 	public bool finished = false;
 	public bool invul = false;
 
@@ -634,12 +634,15 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Regen);
 		}
 
-		if (inLava)
+		if (inDamageable != WaterSurface.DamageableType.None)
 		{
 			environmentDamageTime -= deltaTime;
 			if (environmentDamageTime < 0f)
 			{
-				Damage(30, DamageType.Environment);
+				if (inDamageable == WaterSurface.DamageableType.Lava)
+					Damage(30, DamageType.Environment);
+				else
+					Damage(14, DamageType.Environment);
 				environmentDamageTime = 1;
 			}
 		}

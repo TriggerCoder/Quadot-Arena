@@ -53,6 +53,8 @@ public partial class PlayerControls : InterpolatedNode3D
 	public const float fallSpeedLimit = -22f;				// The max fallSpeed without taking damage, modified to Quake Live value
 
 	public Vector3 playerVelocity = Vector3.Zero;
+	private Vector2 deadZone = Vector2.Zero;
+
 	private bool wishJump = false;
 	private bool wishSink = false;
 	private bool wishFire = false;
@@ -98,6 +100,8 @@ public partial class PlayerControls : InterpolatedNode3D
 		private readonly int _Device;
 		public int Device { get { return _Device; } }
 
+		private readonly string _Start;
+		public string Start { get { return _Start; } }
 		private readonly string _Move_Forward;
 		public string Move_Forward { get { return _Move_Forward; } }
 
@@ -126,6 +130,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		public PlayerInput(int num)
 		{
 			_Device = num;
+			_Start = "Start_" + num;
 			_Move_Forward = "Move_Forward_" + num;
 			_Move_Back = "Move_Back_" + num;
 			_Move_Left = "Move_Left_" + num;
@@ -160,6 +165,15 @@ public partial class PlayerControls : InterpolatedNode3D
 	{
 		if (GameManager.Paused)
 			return;
+
+		if (@event is InputEventJoypadButton)
+		{
+			if (Input.IsActionJustPressed(playerInput.Start))
+			{
+				int Joy = playerInput.Device - 1;
+				deadZone = new Vector2(Input.GetJoyAxis(Joy, JoyAxis.RightY), Input.GetJoyAxis(Joy, JoyAxis.RightX));
+			}
+		}
 
 		if (playerInput.Device != GameManager.ControllerType.MouseKeyboard)
 			return;
@@ -213,7 +227,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (playerInput.Device != GameManager.ControllerType.MouseKeyboard)
 		{
 			int Joy = playerInput.Device - 1;
-/*			float Y = Input.GetJoyAxis(Joy, JoyAxis.RightX);
+			float Y = Input.GetJoyAxis(Joy, JoyAxis.RightX);
 			float X = Input.GetJoyAxis(Joy, JoyAxis.RightY);
 			if (Mathf.Abs(Y) > deadZone.Y)
 				Y = Y - Mathf.Sign(Y) * deadZone.Y;
@@ -223,11 +237,8 @@ public partial class PlayerControls : InterpolatedNode3D
 				X = X - Mathf.Sign(X) * deadZone.X;
 			else
 				X = 0;
-*/			viewDirection.Y -= (Input.GetJoyAxis(Joy, JoyAxis.RightX)) * playerInfo.configData.StickSensitivity[0];
-			viewDirection.X -= (Input.GetJoyAxis(Joy, JoyAxis.RightY)) * playerInfo.configData.StickSensitivity[1] * (playerInfo.configData.InvertView ? -1: 1);
-
-//			viewDirection.Y -= Input.GetJoyAxis(Joy, JoyAxis.RightY) * GameOptions.GamePadSensitivity.X;
-//			viewDirection.X -= Input.GetJoyAxis(Joy, JoyAxis.TriggerLeft) * GameOptions.GamePadSensitivity.Y;
+			viewDirection.Y -= (Y) * playerInfo.configData.StickSensitivity[0];
+			viewDirection.X -= (X) * playerInfo.configData.StickSensitivity[1] * (playerInfo.configData.InvertView ? -1: 1);
 		}
 		else if (GameManager.Console.visible)
 			consoleOpen = true;

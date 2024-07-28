@@ -98,7 +98,7 @@ public class BSPDirectoryEntry
 	}
 }
 
-[JsonSourceGenerationOptions(WriteIndented = true)]
+[JsonSourceGenerationOptions(WriteIndented = true, AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString, ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip)]
 [JsonSerializable(typeof(PlayerInfo.PlayerConfigData))]
 [JsonSerializable(typeof(GameManager.GameConfigData))]
 internal partial class SourceGenerationContext : JsonSerializerContext

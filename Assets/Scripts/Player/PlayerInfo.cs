@@ -147,7 +147,7 @@ public partial class PlayerInfo : Node3D
 		playerThing.currentWaterSurface = null;
 		playerThing.underWater = false;
 		playerThing.waterLever = 0;
-		playerThing.inLava = false;
+		playerThing.inDamageable = WaterSurface.DamageableType.None;
 		playerThing.hitpoints = 100;
 		playerThing.armor = 0;
 
@@ -194,6 +194,32 @@ public partial class PlayerInfo : Node3D
 			{
 				playerThing.modelName = configData.ModelName;
 				playerThing.skinName = configData.SkinName;
+
+				if ((configData.FOV < 30) || (configData.FOV > 130))
+					configData.FOV = 90;
+				playerCamera.ViewCamera.Fov = configData.FOV;
+
+				if (configData.CroosHair.Length < 9)
+					configData.CroosHair = new int[9] { 5, 5, 5, 5, 5, 5, 107, 5, 5 };
+
+				for (int i = 0; i < configData.CroosHair.Length; i++)
+				{
+					int CrossHair = configData.CroosHair[i];
+					if (CrossHair > 50)
+						CrossHair -= 100;
+
+					if ((CrossHair < 0) || (CrossHair > 50))
+						CrossHair = 5;
+				}
+
+				if ((configData.CroosHairAlpha < 0) || (configData.CroosHairAlpha > 100))
+					configData.CroosHairAlpha = 25;
+				playerPostProcessing.playerHUD.ChangeCrossHairAlpha(configData.CroosHairAlpha);
+
+				if ((configData.CroosHairScale < 10) || (configData.CroosHairScale > 100))
+					configData.CroosHairAlpha = 100;
+				playerPostProcessing.playerHUD.ChangeCrossHairScale(configData.CroosHairScale);
+
 				Color modulate;
 				try
 				{
@@ -206,13 +232,16 @@ public partial class PlayerInfo : Node3D
 				modulate.R = Mathf.Max(0.1f, modulate.R);
 				modulate.G = Mathf.Max(0.1f, modulate.G);
 				modulate.B = Mathf.Max(0.1f, modulate.B);
-				playerThing.skinName = configData.SkinName;
 				playerThing.modulate = modulate;
-				playerPostProcessing.playerHUD.ChangeCrossHairAlpha(configData.CroosHairAlpha);
-				playerPostProcessing.playerHUD.ChangeCrossHairScale(configData.CroosHairScale);
-				playerCamera.ViewCamera.Fov = configData.FOV;
+
+				if ((configData.HUD2DScale < 10) || (configData.HUD2DScale > 100))
+					configData.HUD2DScale = 100;
 				playerPostProcessing.playerHUD.ChangeSpriteScale(configData.HUD2DScale);
+
+				if ((configData.HUD3DScale < 10) || (configData.HUD3DScale > 100))
+					configData.HUD3DScale = 100;
 				playerPostProcessing.playerHUD.ChangeModelScale(configData.HUD3DScale);
+
 				if (!configData.HUDShow)
 					playerPostProcessing.playerHUD.UpdateLayersHud(1 << GameManager.UINotVisibleLayer);
 			}

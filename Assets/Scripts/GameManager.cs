@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 public partial class GameManager : Node
 {
 	[Export]
@@ -196,6 +197,8 @@ public partial class GameManager : Node
 		public const string Quake = "vo_evil/";
 		public const string Female = "vo_female/";
 	}
+
+	[JsonConverter(typeof(JsonStringEnumConverter<BasePak>))]
 	public enum BasePak
 	{
 		All = 0,
@@ -219,6 +222,8 @@ public partial class GameManager : Node
 		Error,
 		Success
 	}
+
+	[JsonConverter(typeof(JsonStringEnumConverter<MusicType>))]
 	public enum MusicType
 	{
 		None,
@@ -226,6 +231,8 @@ public partial class GameManager : Node
 		Dynamic,
 		Random
 	}
+
+	[JsonConverter(typeof(JsonStringEnumConverter<GameType>))]
 	public enum GameType
 	{
 		SinglePlayer,
@@ -393,6 +400,13 @@ public partial class GameManager : Node
 			if (gameConfig.FragLimit < 1)
 				gameConfig.FragLimit = fragLimit;
 
+			if (gameConfig.Players.Length < 8)
+			{
+				gameConfig.Players = new string[8];
+				for (int i = 0; i < gameConfig.Players.Length; i++)
+					gameConfig.Players[i] = defaultModels[i];
+			}
+
 			return;
 		}
 
@@ -406,14 +420,20 @@ public partial class GameManager : Node
 	}
 	public void SaveGameData()
 	{
-		string configFile = Directory.GetCurrentDirectory() + "/qa_game.cfg";
-		FileStream errorFile = File.Open(configFile, FileMode.Create, System.IO.FileAccess.ReadWrite);
-		if (File.Exists(configFile))
+		string configFilName = Directory.GetCurrentDirectory() + "/qa_game.cfg";
+		FileStream configFile = File.Open(configFilName, FileMode.Create, System.IO.FileAccess.ReadWrite);
+		if (File.Exists(configFilName))
 		{
-			errorFile.Seek(0, SeekOrigin.Begin);
+			configFile.Seek(0, SeekOrigin.Begin);
+			string commentData = "//Quadot-Arena Game Config File\n";
+			commentData += "//\"GameSelect\" posible values are: \"All\" , \"QuakeLive\" , \"TeamArena\" , \"Quake3\" , \"Demo\"\n";
+			commentData += "//\"GameType\" posible values are: \"FreeForAll\" , \"QuadHog\"\n";
+			commentData += "//\"MusicType\" posible values are: \"None\" , \"Static\", \"Dynamic\" , \"Random\"\n";
+			commentData += "//If any value is invalid, the whole file will be discarded and regenerated with default values\n";
+			configFile.Write(commentData.ToAsciiBuffer());
 			byte[] writeData = JsonSerializer.SerializeToUtf8Bytes(gameConfig, SourceGenerationContext.Default.GameConfigData);
-			errorFile.Write(writeData);
-			errorFile.Close();
+			configFile.Write(writeData);
+			configFile.Close();
 		}
 	}
 

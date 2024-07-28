@@ -39,6 +39,7 @@ public partial class MaterialManager : Node
 	public static string consoleShader = "console";
 	public static FogMaterial waterFogMaterial;
 	public static FogMaterial lavaFogMaterial;
+	public static FogMaterial slimeFogMaterial;
 
 	[Export]
 	public bool applyLightmaps = true;
@@ -83,6 +84,11 @@ public partial class MaterialManager : Node
 		lavaFogMaterial.Density = .3f;
 		lavaFogMaterial.Albedo = new Color(.91f, .18f, .18f);
 		lavaFogMaterial.Emission = new Color(.75f, .38f, .0f);
+
+		slimeFogMaterial = new FogMaterial();
+		slimeFogMaterial.Density = .3f;
+		slimeFogMaterial.Albedo = new Color(.12f, .45f, .25f);
+		slimeFogMaterial.Emission = new Color(.10f, .87f, .40f);
 
 		foreach (Resource res in _extraTextures)
 			TextureLoader.LoadTexturesFromResource(res);

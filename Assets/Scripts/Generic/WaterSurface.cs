@@ -6,7 +6,7 @@ public partial class WaterSurface : Area3D
 {
 	public List<Aabb> Boxes = new List<Aabb>();
 	private List<PlayerThing> currentPlayers = new List<PlayerThing>();
-	private HashSet<Node3D> CurrentColliders = new HashSet<Node3D>();
+	private Dictionary<Node3D, int> CurrentColliders = new Dictionary<Node3D, int>();
 	public string waterIn = "player/watr_in";
 	public string waterOut = "player/watr_out";
 	public string waterUnder = "player/watr_un";
@@ -15,7 +15,14 @@ public partial class WaterSurface : Area3D
 	private AudioStream outSound;
 	private AudioStream underSound;
 	private AudioStream zapSound;
-	public bool isLava = false;
+	public DamageableType damageable = DamageableType.None;
+
+	public enum DamageableType
+	{
+		None,
+		Lava,
+		Slime
+	}
 	public override void _Ready()
 	{
 		Gravity /= 2;
@@ -98,10 +105,21 @@ public partial class WaterSurface : Area3D
 		for (int i = 0; i < CurrentBodiesNum; i++)
 		{
 			Node3D CurrentBody = CurrentBodies[i];
-			if (CurrentColliders.Contains(CurrentBody))
+			if (CurrentColliders.ContainsKey(CurrentBody))
 			{
-				PlayerEnterIntoWater(CurrentBody as PlayerThing);
-				CurrentColliders.Remove(CurrentBody);
+				PlayerThing playerThing = CurrentBody as PlayerThing;
+				if ((!playerThing.ready) || (playerThing.Dead))
+				{
+					CurrentColliders.Remove(CurrentBody);
+					continue;
+				}
+				//We need antibounce
+				int value = CurrentColliders[CurrentBody]++;
+				if (value > 1)
+				{
+					PlayerEnterIntoWater(CurrentBody as PlayerThing);
+					CurrentColliders.Remove(CurrentBody);
+				}
 			}
 		}
 	}
@@ -163,8 +181,9 @@ public partial class WaterSurface : Area3D
 			if (player.currentState == GameManager.FuncState.Ready)
 				return;
 
-			if (!CurrentColliders.Contains(other))
-				CurrentColliders.Add(other);
+			//Will check everything back on the main thread
+			if (!CurrentColliders.ContainsKey(other))
+				CurrentColliders.Add(other, 0);
 		}
 	}
 
@@ -189,7 +208,7 @@ public partial class WaterSurface : Area3D
 				playerThing.underWater = false;
 				playerThing.waterLever = 0;
 				playerThing.currentWaterSurface = null;
-				playerThing.inLava = false;
+				playerThing.inDamageable = DamageableType.None;
 				playerThing.avatar.lowerAnimation = PlayerModel.LowerAnimation.Jump;
 				SoundManager.Create3DSound(playerThing.GlobalPosition, outSound);
 				currentPlayers.Remove(playerThing);
@@ -204,7 +223,7 @@ public partial class WaterSurface : Area3D
 		{
 			playerThing.waterLever = 1;
 			playerThing.currentWaterSurface = this;
-			playerThing.inLava = isLava;
+			playerThing.inDamageable = damageable;
 //			playerThing.playerInfo.playerPostProcessing.SetWaterEffect();
 			SoundManager.Create3DSound(playerThing.GlobalPosition, inSound);
 			currentPlayers.Add(playerThing);
