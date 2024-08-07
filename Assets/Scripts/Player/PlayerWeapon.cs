@@ -11,6 +11,8 @@ public partial class PlayerWeapon : Node3D
 	[Export]
 	public Vector3 MuzzleOffset = new Vector3(-0.5f, 0f, 0);
 	[Export]
+	public float ReadyHeight = 0.75f;
+	[Export]
 	public MultiAudioStream audioStream;
 	[Export]
 	public string[] _sounds = new string[0];
@@ -284,7 +286,7 @@ public partial class PlayerWeapon : Node3D
 		LowerAmount = Mathf.Clamp(LowerAmount, 0, 1);
 		if (!weaponReady)
 		{
-			if (LowerAmount < 0.01f)
+			if (LowerAmount < ReadyHeight)
 				weaponReady = true;
 		}
 

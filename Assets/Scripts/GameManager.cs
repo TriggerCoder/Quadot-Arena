@@ -285,6 +285,9 @@ public partial class GameManager : Node
 	public GameConfigData gameConfig = new GameConfigData();
 	public override void _Ready()
 	{
+		//Disable Resizeable
+		DisplayServer.WindowSetFlag(DisplayServer.WindowFlags.ResizeDisabled, true);
+
 		//Disable Physics Jitter Fix
 		Engine.PhysicsJitterFix = 0;
 

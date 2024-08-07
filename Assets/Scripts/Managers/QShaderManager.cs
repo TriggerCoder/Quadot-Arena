@@ -135,7 +135,30 @@ public static class QShaderManager
 
 			if (qShaderStage.map != null)
 			{
-				if (qShaderStage.animFreq > 0)
+				if (qShaderStage.skyMap)
+				{
+					animStages = true;
+					GSLateFragmentTexs += "\tvec4 Stage_" + currentStage + " = sky_" + currentStage + "(sky_index_"+ currentStage;
+					for (int j = 0; j < qShaderStage.map.Length; j++)
+						GSLateFragmentTexs += " , Anim_" + currentStage + "_" + j;
+					GSLateFragmentTexs += ");\n";
+					GSAnimation += "vec4 sky_" + currentStage + "(int currentFrame";
+					for (int j = 0; j < qShaderStage.map.Length; j++)
+						GSAnimation += " , vec4 frame_" + j;
+					GSAnimation += ")\n";
+					GSAnimation += "{\n";
+					GSAnimation += "\tvec4 frame[" + qShaderStage.map.Length + "] = { ";
+					for (int j = 0; j < qShaderStage.map.Length; j++)
+					{
+						if (j != 0)
+							GSAnimation += " , ";
+						GSAnimation += "frame_" + j;
+					}
+					GSAnimation += "};\n";
+					GSAnimation += "\treturn frame[currentFrame];\n";
+					GSAnimation += "}\n";
+				}
+				else if (qShaderStage.animFreq > 0)
 				{
 					animStages = true;
 					GSLateFragmentTexs += "\tvec4 Stage_" + currentStage + " = animation_" + currentStage + "(Time, ";
@@ -383,7 +406,7 @@ public static class QShaderManager
 				QShaderStage qShaderStage = qShader.qShaderStages[i];
 				if (qShaderStage.map != null)
 				{
-					if (qShaderStage.animFreq > 0)
+					if ((qShaderStage.skyMap) || (qShaderStage.animFreq > 0))
 					{
 						for (int j = 0; j < qShaderStage.map.Length; j++)
 						{
@@ -567,8 +590,8 @@ public static class QShaderManager
 		}
 		code += "}\n\n";
 
-//		if (shaderName.Contains("RAILGUN"))
-//			GameManager.Print(code);
+		if (shaderName.Contains("QZNEBULA3"))
+			GameManager.Print(code);
 
 		Shader shader = new Shader();
 		shader.Code = code;
@@ -885,11 +908,33 @@ public static class QShaderManager
 
 		if (qShader.qShaderGlobal.skyParms != null)
 		{
-//			int cloudheight = int.Parse(qShader.qShaderGlobal.skyParms[1]) / 5;
-			TcGen += "\tvec4 vot" + currentStage + "  = INV_VIEW_MATRIX * vec4(VERTEX, 0.0);\n";
-			TcGen += "\tvot" + currentStage + ".y = 6.0 * (vot" + currentStage + ".y );\n";
-			TcGen += "\tvot" + currentStage + " = normalize(vot" + currentStage + ");\n";
-			TcGen += "\tvec2 uv_" + currentStage + "= vec2(vot" + currentStage + ".x, vot" + currentStage + ".z);\n";
+			if (qShader.qShaderGlobal.skyParms[0] == "-")
+			{
+//				int cloudheight = int.Parse(qShader.qShaderGlobal.skyParms[1]) / 5;
+				TcGen += "\tvec4 vot" + currentStage + "  = INV_VIEW_MATRIX * vec4(VERTEX, 0.0);\n";
+				TcGen += "\tvot" + currentStage + ".y = 6.0 * (vot" + currentStage + ".y );\n";
+				TcGen += "\tvot" + currentStage + " = normalize(vot" + currentStage + ");\n";
+				TcGen += "\tvec2 uv_" + currentStage + "= vec2(vot" + currentStage + ".x, vot" + currentStage + ".z);\n";
+			}
+			else
+			{
+				TcGen += "\tvec4 vot" + currentStage + "  = INV_VIEW_MATRIX * vec4(VERTEX, 0.0);\n";
+				TcGen += "\tvot" + currentStage + " = normalize(vot" + currentStage + ");\n";
+				TcGen += "\tvec2 uv_" + currentStage + ";\n";
+				TcGen += "\tint sky_index_" + currentStage +";\n";
+				TcGen += "\tif (-vot" + currentStage + ".y >= abs(vot" + currentStage + ".x) && -vot" + currentStage + ".y >= abs(vot" + currentStage + ".z))\n\t{\n";
+				TcGen += "\t\tuv_" + currentStage + " = ((vec2(1.0) * vot" + currentStage + ".xz) / abs(vot" + currentStage + ".y) + 1.0) / 2.0;\n\t\tsky_index_" + currentStage + " = 0;\n\t}\n";
+				TcGen += "\tif (vot" + currentStage + ".y >= abs(vot" + currentStage + ".x) && vot" + currentStage + ".y >= abs(vot" + currentStage + ".z))\n\t{\n";
+				TcGen += "\t\tuv_" + currentStage + " = ((vec2(1.0, -1.0) * vot" + currentStage + ".xz) / abs(vot" + currentStage + ".y) + 1.0) / 2.0;\n\t\tsky_index_" + currentStage + " = 1;\n\t}\n";
+				TcGen += "\tif (vot" + currentStage + ".x >= abs(vot" + currentStage + ".y) && vot" + currentStage + ".x >= abs(vot" + currentStage + ".z))\n\t{\n";
+				TcGen += "\t\tuv_" + currentStage + " = ((vec2(1.0, -1.0) * vot" + currentStage + ".zy) / abs(vot" + currentStage + ".x) + 1.0) / 2.0;\n\t\tsky_index_" + currentStage + " = 2;\n\t}\n";
+				TcGen += "\tif (-vot" + currentStage + ".x >= abs(vot" + currentStage + ".y) && -vot" + currentStage + ".x >= abs(vot" + currentStage + ".z))\n\t{\n";
+				TcGen += "\t\tuv_" + currentStage + " = ((vec2(-1.0) * vot" + currentStage + ".zy) / abs(vot" + currentStage + ".x) + 1.0) / 2.0;\n\t\tsky_index_" + currentStage + " = 3;\n\t}\n";
+				TcGen += "\tif (vot" + currentStage + ".z >= abs(vot" + currentStage + ".x) && vot" + currentStage + ".z >= abs(vot" + currentStage + ".y))\n\t{\n";
+				TcGen += "\t\tuv_" + currentStage + " = ((vec2(-1.0) * vot" + currentStage + ".xy) / abs(vot" + currentStage + ".z) + 1.0) / 2.0;\n\t\tsky_index_" + currentStage + " = 4;\n\t}\n";
+				TcGen += "\tif (-vot" + currentStage + ".z >= abs(vot" + currentStage + ".x) && -vot" + currentStage + ".z >= abs(vot" + currentStage + ".y))\n\t{\n";
+				TcGen += "\t\tuv_" + currentStage + " = ((vec2(1.0, -1.0) * vot" + currentStage + ".xy) / abs(vot" + currentStage + ".z) + 1.0) / 2.0;\n\t\tsky_index_" + currentStage + " = 5;\n\t}\n";
+			}
 		}
 		else
 		{
@@ -1313,9 +1358,23 @@ public static class QShaderManager
 							}
 							else
 							{
+								if (qShaderData.qShaderGlobal.skyParms != null)
+								{
+									if (qShaderData.qShaderGlobal.skyParms[0] != "-")
+									{
+										string baseMap = qShaderData.qShaderGlobal.skyParms[0];
+										string cubeMap = baseMap + "_DN.TGA";
+										cubeMap += " " + baseMap + "_UP.TGA";
+										cubeMap += " " + baseMap + "_RT.TGA";
+										cubeMap += " " + baseMap + "_LF.TGA";
+										cubeMap += " " + baseMap + "_BK.TGA";
+										cubeMap += " " + baseMap + "_FT.TGA";
+										qShaderData.AddFirstStage("SKYMAP", cubeMap);
+									}
+								}
 								if (QShaders.ContainsKey(qShaderData.Name))
 								{
-									GameManager.Print("Shader already on the list: " + qShaderData.Name, GameManager.PrintType.Info);
+//									GameManager.Print("Shader already on the list: " + qShaderData.Name, GameManager.PrintType.Info);
 									QShaders[qShaderData.Name] = qShaderData;
 								}
 								else
@@ -1453,6 +1512,24 @@ public class QShaderData
 		qShaderGlobal.AddGlobal(Params, Value);
 	}
 
+	public void AddFirstStage(string Params, string Value)
+	{
+		QShaderStage qShaderStage;
+		qShaderStage = new QShaderStage();
+		qShaderStage.AddStageParams(Params, Value);
+		if (qShaderStages.Count == 0)
+			qShaderStages.Add(qShaderStage);
+		else
+		{
+			List<QShaderStage> shaderStages = new List<QShaderStage>()
+			{
+				qShaderStage
+			};
+			shaderStages.AddRange(qShaderStages);
+			qShaderStages = shaderStages;
+		}
+	}
+
 	public void AddStage(int currentStage, string Params, string Value)
 	{
 		QShaderStage qShaderStage;
@@ -1467,7 +1544,6 @@ public class QShaderData
 			qShaderStage = qShaderStages[currentStage-1];
 			qShaderStage.AddStageParams(Params, Value);
 		}
-
 	}
 }
 
@@ -1550,7 +1626,7 @@ public class QShaderGlobal
 			case "SKYPARMS":
 				if (skyParms == null)
 					skyParms = new List<string>();
-				skyParms.Add(Value);
+				skyParms.AddRange(Value.Split(' '));
 			break;
 			case "CULL":
 				switch (Value)
@@ -1654,6 +1730,7 @@ public class QShaderStage
 	public bool clamp = false;
 	public bool isLightmap = false;
 	public float animFreq = 0;
+	public bool skyMap = false;
 	public string[] blendFunc = null;
 	public string[] rgbGen = null;
 	public string[] alphaGen = null;
@@ -1684,6 +1761,19 @@ public class QShaderStage
 				map = new string[keyValue.Length - 1];
 				for (int i = 1; i < keyValue.Length; i++)
 					map[i-1] = keyValue[i].StripExtension();
+			}
+			break;
+			case "SKYMAP":
+			{
+				string[] keyValue = Value.Split(' ');
+				skyMap = true;
+				map = new string[keyValue.Length];
+				for (int i = 0; i < keyValue.Length; i++)
+				{
+					map[i] = keyValue[i].StripExtension();
+
+					TextureLoader.AddNewTexture(map[i], false, false);
+				}
 			}
 			break;
 			case "BLENDFUNC":
