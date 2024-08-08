@@ -323,7 +323,7 @@ public static class BezierMesh
 				{
 					if (normal.LengthSquared() == 0)
 					{
-						GameManager.Print("Cannot Form 2D/3D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time", GameManager.PrintType.Warning);
+						GameManager.Print("BezierColliderMesh: Cannot Form 2D/3D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time", GameManager.PrintType.Warning);
 						return;
 					}
 
@@ -390,7 +390,7 @@ public static class BezierMesh
 
 					if (!Mesher.CanForm2DConvexHull(vertex2d))
 					{
-						GameManager.Print("Cannot Form 2D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time", GameManager.PrintType.Warning);
+						GameManager.Print("BezierColliderMesh: Cannot Form 2D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time", GameManager.PrintType.Warning);
 						return;
 					}
 					else

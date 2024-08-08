@@ -1771,7 +1771,7 @@ public static class Mesher
 		float xWidth = Mathf.Abs(max.X - min.X);
 		float yWidth = Mathf.Abs(max.Y - min.Y);
 
-		if ((xWidth < EPSILON) || (yWidth < EPSILON))
+		if ((xWidth < EPSILON) && (yWidth < EPSILON))
 			return false;
 
 		return true;

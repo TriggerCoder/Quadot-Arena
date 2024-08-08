@@ -18,6 +18,7 @@ public static class TextureLoader
 	}
 
 	public static Dictionary<string, ImageTexture> Textures = new Dictionary<string, ImageTexture>();
+	public static Dictionary<string, Cubemap> CubeMaps = new Dictionary<string, Cubemap>();
 	public static Dictionary<string, ImageTexture> TransparentTextures = new Dictionary<string, ImageTexture>();
 	public static Dictionary<string, ImageTexture> ColorizeTextures = new Dictionary<string, ImageTexture>();
 
@@ -33,15 +34,15 @@ public static class TextureLoader
 		Textures.Add("$WHITEIMAGE", whiteTex);
 	}
 
-	public static void AddNewTexture(string textureName, bool forceSkinAlpha, bool useMipMaps = true)
+	public static void AddNewTexture(string textureName, bool forceSkinAlpha, bool compress = true)
 	{
 		List<QShader> list = new List<QShader>
 		{
 			new QShader(textureName, 0, 0, forceSkinAlpha)
 		};
-		LoadTextures(list, false, ImageFormat.PNG, useMipMaps);
-		LoadTextures(list, false, ImageFormat.JPG, useMipMaps);
-		LoadTextures(list, false , ImageFormat.TGA, useMipMaps);
+		LoadTextures(list, false, ImageFormat.PNG, compress);
+		LoadTextures(list, false, ImageFormat.JPG, compress);
+		LoadTextures(list, false , ImageFormat.TGA, compress);
 	}
 	public static bool HasTextureOrAddTexture(string textureName, bool forceAlpha)
 	{
@@ -59,7 +60,83 @@ public static class TextureLoader
 			return true;
 		return false;
 	}
-	public static ImageTexture GetTextureOrAddTexture(string textureName, bool forceAlpha, bool useMipMaps = true)
+	public static Cubemap GetCubeMap(string textureName)
+	{
+		if (CubeMaps.ContainsKey(textureName))
+			return CubeMaps[textureName];
+
+		GameManager.Print("GetCubeMap: No cubemap \"" + textureName + "\"");
+		Cubemap cubemap = new Cubemap();
+		Godot.Collections.Array<Image> cubeImages = new Godot.Collections.Array<Image>();
+		List<string> cubeTextures = new List<string>()
+		{
+			textureName + "_FT",
+			textureName + "_BK",
+			textureName + "_UP",
+			textureName + "_DN",
+			textureName + "_RT",
+			textureName + "_LF"
+		};
+		Vector2I size = Vector2I.Zero;
+		foreach (string text in cubeTextures)
+		{
+			string FileName;
+			for (int imageFormat = 0; imageFormat < 3; imageFormat++)
+			{
+				string path = text;
+				switch (imageFormat)
+				{
+					default:
+					case 0:
+						path += ".PNG";
+					break;
+					case 1:
+						path += ".JPG";
+					break;
+					case 2:
+						path += ".TGA";
+					break;
+				}
+					
+				if (PakManager.ZipFiles.TryGetValue(path, out FileName))
+				{
+					var reader = new ZipReader();
+					reader.Open(FileName);
+					byte[] imageBytes = reader.ReadFile(path, false);
+
+					Image baseTex = new Image();
+					switch (imageFormat)
+					{
+						default:
+						case 0:
+							baseTex.LoadPngFromBuffer(imageBytes);
+							break;
+						case 1:
+							baseTex.LoadJpgFromBuffer(imageBytes);
+							break;
+						case 2:
+							baseTex.LoadTgaFromBuffer(imageBytes);
+							break;
+					}
+					int width = baseTex.GetWidth();
+					int height = baseTex.GetHeight();
+					if (size.LengthSquared() == 0)
+						size = new Vector2I(width, height);
+					else if ((size.X != width) || (size.Y != height))
+						baseTex.Resize(size.X, size.Y, Interpolation.Lanczos);
+					baseTex.GenerateMipmaps();
+					baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgb);
+					cubeImages.Add(baseTex);
+					break;
+				}
+			}
+		}
+		cubemap.CreateFromImages(cubeImages);
+		CubeMaps.Add(textureName, cubemap);
+		GameManager.Print("Adding cubemap with name " + textureName);
+		return cubemap;
+	}
+	public static ImageTexture GetTextureOrAddTexture(string textureName, bool forceAlpha, bool compress = true)
 	{
 		ImageTexture texture;
 		if (forceAlpha)
@@ -71,7 +148,7 @@ public static class TextureLoader
 			return texture;
 
 		GameManager.Print("GetTextureOrAddTexture: No texture \"" + textureName + "\"");
-		AddNewTexture(textureName, forceAlpha, useMipMaps);
+		AddNewTexture(textureName, forceAlpha, compress);
 		return GetTexture(textureName, forceAlpha);
 	}
 	public static bool HasTexture(string textureName)
@@ -167,7 +244,7 @@ public static class TextureLoader
 		}
 	}
 
-	public static void LoadTextures(List<QShader> mapTextures, bool ignoreShaders, ImageFormat imageFormat, bool useMipMaps = true)
+	public static void LoadTextures(List<QShader> mapTextures, bool ignoreShaders, ImageFormat imageFormat, bool compress = true)
 	{
 		foreach (QShader tex in mapTextures)
 		{
@@ -245,13 +322,15 @@ public static class TextureLoader
 				}
 				luminance /= (width * height);
 				luminance = Mathf.Clamp(luminance, 0f, .35f);
-				baseTex.ResizeToPo2(false, Interpolation.Lanczos);
-				if (useMipMaps)
+				if (compress)
+				{
+					baseTex.ResizeToPo2(false, Interpolation.Lanczos);
 					baseTex.GenerateMipmaps();
-				if ((tex.addAlpha) || (baseTex.DetectAlpha() != AlphaMode.None))
-					baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgba);
-				else
-					baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgb);
+					if ((tex.addAlpha) || (baseTex.DetectAlpha() != AlphaMode.None))
+						baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgba);
+					else
+						baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgb);
+				}
 				ImageTexture readyTex = ImageTexture.CreateFromImage(baseTex);
 				readyTex.SetMeta("luminance", luminance);
 //				readyTex.ResourceName = Convert.ToBase64String(BitConverter.GetBytes(luminance));
@@ -441,6 +520,14 @@ public static class TextureLoader
 		
 		Color ambient, directional;
 		Vector3I Size = new Vector3I((int)(Mathf.Floor(mapMaxCoord.X / 64) - Mathf.Ceil(mapMinCoord.X / 64) + 1),(int)(Mathf.Floor(mapMaxCoord.Y / 64) - Mathf.Ceil(mapMinCoord.Y / 64) + 1),(int)(Mathf.Floor(mapMaxCoord.Z / 128) - Mathf.Ceil(mapMinCoord.Z / 128) + 1));
+		int clusterSize = Size.X * Size.Y * Size.Z * 8;
+		if (clusterSize != data.Length)
+		{
+			Normalize = Vector3.Zero;
+			OffSet = Vector3.Zero;
+			return (null, null);
+		}
+
 		OffSet = QuakeToGodot.Vect3(mapMinCoord);
 		Godot.Collections.Array<Image> AmbientImage = new Godot.Collections.Array<Image>();
 		Godot.Collections.Array<Image> DirectionalImage = new Godot.Collections.Array<Image>();
