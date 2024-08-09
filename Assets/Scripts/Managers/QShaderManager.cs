@@ -780,9 +780,8 @@ public static class QShaderManager
 		for (int i = 0; i < qShader.qShaderGlobal.deformVertexes.Count; i++)
 		{
 			string[] VertexFunc = qShader.qShaderGlobal.deformVertexes[i];
-			switch (VertexFunc[0])
 			{
-				case "WAVE":
+				if (VertexFunc[0] == "WAVE")
 				{
 					float div = TryToParseFloat(VertexFunc[1]) * GameManager.sizeDividor;
 					string DeformFunc = VertexFunc[2];
@@ -797,32 +796,36 @@ public static class QShaderManager
 						div = 100 * GameManager.sizeDividor;
 
 					Vars += "\tfloat OffSet_" + i + " = (VERTEX.x + VERTEX.y + VERTEX.z) * " + div.ToString("0.00") + ";\n";
-					switch (DeformFunc)
 					{
-						case "SIN":
+						if (DeformFunc == "SIN")
+						{
 							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
 							Verts += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") + " +  OffSet_" + i + "))  * " + amp.ToString("0.00") + "); \n";
-						break;
-						case "SQUARE":
+						}
+						else if (DeformFunc == "SQUARE")
+						{
 							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
 							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))); \n";
-						break;
-						case "TRIANGLE":
+						}
+						else if (DeformFunc == "TRIANGLE")
+						{
+
 							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
 							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))))); \n";
-						break;
-						case "SAWTOOTH":
+						}
+						else if (DeformFunc == "SAWTOOTH")
+						{
 							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
 							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))); \n";
-						break;
-						case "INVERSESAWTOOTH":
+						}
+						else if (DeformFunc == "INVERSESAWTOOTH")
+						{
 							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
 							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + ")))); \n";
-						break;
+						}
 					}
 				}
-				break;
-				case "MOVE":
+				else if (VertexFunc[0] == "MOVE")
 				{
 					Vector3 move = new Vector3(-1.0f * TryToParseFloat(VertexFunc[1]), TryToParseFloat(VertexFunc[3]), TryToParseFloat(VertexFunc[2])) * GameManager.sizeDividor;
 					string DeformFunc = VertexFunc[4];
@@ -832,33 +835,35 @@ public static class QShaderManager
 					float freq = TryToParseFloat(VertexFunc[8]);
 
 					Vars += "\tvec3 OffSet_" + i + " = vec3(" + move.X.ToString("0.00") + ", "+ move.Y.ToString("0.00") + ", " + move.Z.ToString("0.00") + ");\n";
-					switch (DeformFunc)
 					{
-						case "SIN":
+						if (DeformFunc == "SIN")
+						{
 							Verts += "\tVERTEX += OffSet_" + i + " * (";
 							Verts += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") +"))  * " + amp.ToString("0.00") + "); \n";
-						break;
-						case "SQUARE":
+						}
+						else if (DeformFunc == "SQUARE")
+						{
 							Verts += "\tVERTEX += OffSet_" + i + " * (";
 							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
-						break;
-						case "TRIANGLE":
+						}
+						else if (DeformFunc == "TRIANGLE")
+						{
 							Verts += "\tVERTEX += OffSet_" + i + " * (";
 							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
-						break;
-						case "SAWTOOTH":
+						}
+						else if (DeformFunc == "SAWTOOTH")
+						{
+
 							Verts += "\tVERTEX += OffSet_" + i + " * (";
 							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
-						break;
-						case "INVERSESAWTOOTH":
+						}
+						else if (DeformFunc == "INVERSESAWTOOTH")
+						{
 							Verts += "\tVERTEX += OffSet_" + i + " * (";
 							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + ")))); \n";
-						break;
 						}
 					}
-				break;
-				default:
-				break;
+				}
 			}
 		}
 		Vertex += Vars;
@@ -1056,28 +1061,32 @@ public static class QShaderManager
 			float amp = TryToParseFloat(GenFunc[3]);
 			float phase = TryToParseFloat(GenFunc[4]);
 			float freq = TryToParseFloat(GenFunc[5]);
-			switch (RGBFunc)
 			{
-				case "SIN":
+				if (RGBFunc == "SIN")
+				{
 					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
 					StageGen += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") + "))  * " + amp.ToString("0.00") + "); \n";
-				break;
-				case "SQUARE":
+				}
+				else if (RGBFunc == "SQUARE")
+				{
 					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
 					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
-				break;
-				case "TRIANGLE":
+				}
+				else if (RGBFunc == "TRIANGLE")
+				{
 					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
 					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
-				break;
-				case "SAWTOOTH":
+				}
+				else if (RGBFunc == "SAWTOOTH")
+				{
 					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
 					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
-				break;
-				case "INVERSESAWTOOTH":
+				}
+				else if (RGBFunc == "INVERSESAWTOOTH")
+				{
 					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
 					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + ")))); \n";
-				break;
+				}
 			}
 		}
 		else if (GenFunc.Length > 0)
@@ -1123,13 +1132,13 @@ public static class QShaderManager
 		if (qShader.qShaderStages[currentStage].blendFunc != null)
 		{
 			string BlendWhat = qShader.qShaderStages[currentStage].blendFunc[0];
-			if (BlendWhat.Contains("ADD"))
+			if (BlendWhat == "ADD")
 			{
 				Blend = "\tcolor = Stage_" + currentStage + " + color; \n";
 				if (currentStage == 0)
 					qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
 			}
-			else if (BlendWhat.Contains("FILTER"))
+			else if (BlendWhat == "FILTER")
 			{
 
 				Blend = "\tcolor = Stage_" + currentStage + " * color; \n";
@@ -1139,7 +1148,7 @@ public static class QShaderManager
 					qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
 				}
 			}
-			else if (BlendWhat.Contains("BLEND"))
+			else if (BlendWhat == "BLEND")
 			{
 				Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * Stage_" + currentStage + ".a + color.rgb * (1.0 - Stage_" + currentStage + ".a); \n";
 				Blend += "\tcolor.a = Stage_" + currentStage + ".a *   Stage_" + currentStage + ".a + color.a *  (1.0 -  Stage_" + currentStage + ".a); \n";
@@ -1158,136 +1167,156 @@ public static class QShaderManager
 				string adst = "";
 				string csrc = "";
 				string cdst = "";
-				switch (src)
+
+				//SOURCE
 				{
-					case "GL_ONE":
+					if (src == "GL_ONE")
+					{
 						csrc = " 1.0 ";
 						asrc = " 1.0 ";
-					break;
-					case "GL_ZERO":
+					}
+					else if (src == "GL_ZERO")
+					{
 						csrc = " 0.0 ";
 						asrc = " 0.0 ";
-					break;
-					case "GL_DST_COLOR":
+					}
+					else if (src == "GL_DST_COLOR")
+					{
 						csrc = " color.rgb ";
 						asrc = " color.a ";
-					break;
-					case "GL_ONE_MINUS_DST_COLOR":
+					}
+					else if (src == "GL_ONE_MINUS_DST_COLOR")
+					{
 						csrc = " 1.0 - color.rgb ";
 						asrc = " 1.0 - color.a ";
-					break;
-					case "GL_SRC_ALPHA":
+					}
+					else if (src == "GL_SRC_ALPHA")
+					{
 						csrc = "  Stage_" + currentStage + ".a ";
 						asrc = "  Stage_" + currentStage + ".a ";
-					break;
-					case "GL_ONE_MINUS_SRC_ALPHA":
+					}
+					else if (src == "GL_ONE_MINUS_SRC_ALPHA")
+					{
 						csrc = " (1.0 -  Stage_" + currentStage + ".a) ";
 						asrc = " (1.0 -  Stage_" + currentStage + ".a) ";
-					break;
-					case "GL_DST_ALPHA":
+					}
+					else if (src == "GL_DST_ALPHA")
+					{
 						csrc = " color.a ";
 						asrc = " color.a ";
-					break;
-					case "GL_ONE_MINUS_DST_ALPHA":
+					}
+					else if (src == "GL_ONE_MINUS_DST_ALPHA")
+					{
 						csrc = " (1.0 - color.a) ";
 						asrc = " (1.0 - color.a) ";
-					break;
+					}
 				}
-				switch (dst)
+
+				//DEST
 				{
-					case "GL_ONE":
+					if (dst == "GL_ONE")
+					{
 						cdst = " 1.0 ";
 						adst = " 1.0 ";
 						if (currentStage == 0)
 							qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
-					break;
-					case "GL_ZERO":
+					}
+					else if (dst == "GL_ZERO")
+					{
 						cdst = " 0.0 ";
 						adst = " 0.0 ";
-					break;
-					case "GL_SRC_COLOR":
+					}
+					else if (dst == "GL_SRC_COLOR")
+					{
 						cdst = " Stage_" + currentStage + ".rgb ";
 						adst = " Stage_" + currentStage + ".a ";
-					break;
-					case "GL_ONE_MINUS_SRC_COLOR":
+					}
+					else if (dst == "GL_ONE_MINUS_SRC_COLOR")
+					{
 						cdst = " (1.0 - Stage_" + currentStage + ".rgb) ";
 						adst = " (1.0 - Stage_" + currentStage + ".a) ";
-					break;
-					case "GL_DST_ALPHA":
+					}
+					else if (dst == "GL_DST_ALPHA")
+					{
 						cdst = " color.a ";
 						adst = " color.a ";
-					break;
-					case "GL_ONE_MINUS_DST_ALPHA":
+					}
+					else if (dst == "GL_ONE_MINUS_DST_ALPHA")
+					{
 						cdst = " (1.0 - color.a) ";
 						adst = " (1.0 - color.a) ";
-					break;
-					case "GL_SRC_ALPHA":
+					}
+					else if (dst == "GL_SRC_ALPHA")
+					{
 						cdst = "  Stage_" + currentStage + ".a ";
 						adst = "  Stage_" + currentStage + ".a ";
-					break;
-					case "GL_ONE_MINUS_SRC_ALPHA":
+					}
+					else if (dst == "GL_ONE_MINUS_SRC_ALPHA")
+					{
 						cdst = " (1.0 -  Stage_" + currentStage + ".a) ";
 						adst = " (1.0 -  Stage_" + currentStage + ".a) ";
-					break;
+					}
 				}
+
 				if (currentStage == 0)
 				{
-					switch (src)
 					{
-						default:
-							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
-							Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
-						break;
-						case "GL_ZERO":
+						if (src == "GL_ZERO")
 						{
-							switch (dst)
 							{
-								default:
-									Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
-									Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
-								break;
-								case "GL_SRC_COLOR":
+								if (dst == "GL_SRC_COLOR")
+								{
 									Blend = "\tcolor = Stage_" + currentStage + "; \n";
 									qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
-								break;
-								case "GL_ONE_MINUS_SRC_COLOR":
+								}
+								else if (dst == "GL_ONE_MINUS_SRC_COLOR")
+								{
 									Blend = "\tcolor.rgb = " + cdst + ";\n";
 									qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Multiplicative;
-								break;
-							}
-						}
-						break;
-						case "GL_DST_COLOR":
-						{
-							switch (dst)
-							{
-								default:
+								}
+								else
+								{
 									Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
 									Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
-								break;
-								case "GL_ZERO":
+								}
+							}
+						}
+						else if (src == "GL_DST_COLOR")
+						{
+							{
+								if (dst == "GL_ZERO")
+								{
 									Blend = "\tcolor = Stage_" + currentStage + "; \n";
 									qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
-								break;
-							}
-						}
-						break;
-						case "GL_SRC_ALPHA":
-						{
-							switch (dst)
-							{
-								default:
+								}
+								else
+								{
 									Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
 									Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
-								break;
-								case "GL_ONE_MINUS_SRC_ALPHA":
+								}
+							}
+						}
+						else if (src == "GL_SRC_ALPHA")
+						{
+							{
+								if (dst == "GL_ONE_MINUS_SRC_ALPHA")
+								{
 									Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * Stage_" + currentStage + ".a + color.rgb * (1.0 - Stage_" + currentStage + ".a); \n";
 									Blend += "\tcolor.a = Stage_" + currentStage + ".a *   Stage_" + currentStage + ".a;\n";
 									alphaIsTransparent = true;
-								break;
+								}
+								else
+								{
+									Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
+									Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
+								}
 							}
 						}
-						break;
+						else
+						{
+							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
+							Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
+						}
 					}
 				}
 				else
@@ -1593,54 +1622,51 @@ public class QShaderGlobal
 	}
 	public void AddGlobal(string Params, string Value)
 	{
-		switch (Params)
 		{
-			case "SURFACEPARM":
+			if (Params == "SURFACEPARM")
+			{
 				if (surfaceParms == null)
 					surfaceParms = new List<string>();
 				surfaceParms.Add(Value);
-				switch (Value)
 				{
-					case "TRANS":
+					if (Value == "TRANS")
+					{
 						if (!lava)
 							trans = true;
-					break;
-					case "NODLIGHT":
+					}
+					else if (Value == "NODLIGHT")
 						unShaded = true;
-					break;
-					case "SKY":
+					else if (Value == "SKY")
 						isSky = true;
-					break;
-					case "LAVA":
+					else if (Value == "LAVA")
+					{
 						lava = true;
 						if (trans)
 							trans = false;
-					break;
-					case "WATER":
+					}
+					else if (Value == "WATER")
 						water = true;
-					break;
 				}
-				break;
-			case "SKYPARMS":
+			}
+			else if (Params == "SKYPARMS")
+			{
 				if (skyParms == null)
 					skyParms = new List<string>();
 				skyParms.AddRange(Value.Split(' '));
-			break;
-			case "CULL":
-				switch (Value)
+			}
+			else if (Params == "CULL")
+			{
 				{
-					case "FRONT":
+					if (Value == "FRONT")
 						cullType = CullType.Back;
-					break;
-					case "BACK":
+					else if (Value == "BACK")
 						cullType = CullType.Front;
-					break;
-					default:
+					else
 						cullType = CullType.Disable;
-					break;
 				}
-			break;
-			case "DEFORMVERTEXES":
+			}
+			else if (Params == "DEFORMVERTEXES")
+			{
 				if (Value.Contains("AUTOSPRITE"))
 				{
 					if (Value.Contains('2'))
@@ -1654,71 +1680,72 @@ public class QShaderGlobal
 						deformVertexes = new List<string[]>();
 					deformVertexes.Add(Value.Split(' '));
 				}
-			break;
-			case "FOGPARMS":
+			}
+			else if (Params == "FOGPARMS")
+			{
 				fogParms = Value.Split(' ');
 				isFog = true;
-			break;
-			case "SORT":
-				switch (Value)
+			}
+			else if (Params == "SORT")
+			{
 				{
-					case "ADDITIVE":
+					if (Value == "ADDITIVE")
 						sort = SortType.Additive;
-					break;
-					default:
+					else
 						sort = SortType.Opaque;
-					break;
 				}
-				break;
-			case "TESSSIZE":
+			}
+			else if (Params == "TESSSIZE")
+			{
 				if (tessSize == null)
 					tessSize = new List<string>();
 				tessSize.Add(Value);
-			break;
-			case "Q3MAP_BACKSHADER":
+			}
+			else if (Params == "Q3MAP_BACKSHADER")
+			{
 				if (q3map_BackShader == null)
 					q3map_BackShader = new List<string>();
-				q3map_BackShader.Add(Value);	
-			break;
-			case "Q3MAP_GLOBALTEXTURE":
+				q3map_BackShader.Add(Value);
+			}
+			else if (Params == "Q3MAP_GLOBALTEXTURE")
+			{
 				if (q3map_GlobalTexture == null)
 					q3map_GlobalTexture = new List<string>();
 				q3map_GlobalTexture.Add(Value);
-			break;
-			case "Q3MAP_SUN":
+			}
+			else if (Params == "Q3MAP_SUN")
+			{
 				if (sunParams == null)
 					sunParams = Value.Split(' ');
-			break;
-			case "Q3MAP_SURFACELIGHT":
+			}
+			else if (Params == "Q3MAP_SURFACELIGHT")
+			{
 				if (q3map_SurfaceLight == null)
 					q3map_SurfaceLight = new List<string>();
 				q3map_SurfaceLight.Add(Value);
-			break;
-			case "Q3MAP_LIGHTIMAGE":
+			}
+			else if (Params == "Q3MAP_LIGHTIMAGE")
+			{
 				if (q3map_LightImage == null)
 					q3map_LightImage = new List<string>();
 				q3map_LightImage.Add(Value);
-			break;
-			case "Q3MAP_LIGHTSUBDIVIDE":
+			}
+			else if (Params == "Q3MAP_LIGHTSUBDIVIDE")
+			{
 				if (q3map_LightSubdivide == null)
 					q3map_LightSubdivide = new List<string>();
 				q3map_LightSubdivide.Add(Value);
-			break;
-			case "NOPICMIP":
+			}
+			else if (Params == "NOPICMIP")
 				noPicMip = true;
-			break;
-			case "NOMIPMAP":
+			else if (Params == "NOMIPMAP")
 				noMipMap = true;
-			break;
-			case "POLYGONOFFSET":
+			else if (Params == "POLYGONOFFSET")
 				polygonOffset = true;
-			break;
-			case "PORTAL":
+			else if (Params == "PORTAL")
 				portal = true;
-			break;
-			case "QER_EDITORIMAGE":
+			else if (Params == "QER_EDITORIMAGE")
 				editorImage = Value.StripExtension().ToUpper();
-			break;
 		}
 	}
 }
@@ -1741,58 +1768,55 @@ public class QShaderStage
 
 	public void AddStageParams(string Params, string Value)
 	{
-		switch (Params)
 		{
-			case "MAP":
+			if (Params == "MAP")
+			{
 				map = new string[1] { Value.StripExtension() };
 				if (map[0].Contains("$LIGHTMAP"))
 					isLightmap = true;
-			break;
-			case "CLAMPMAP":
+			}
+			else if (Params == "CLAMPMAP")
+			{
 				clamp = true;
 				map = new string[1] { Value.StripExtension() };
-			break;
-			case "ANIMMAP":
+			}
+			else if (Params == "ANIMMAP")
 			{
 				string[] keyValue = Value.Split(' ');
 				animFreq = QShaderManager.TryToParseFloat(keyValue[0]);
 				map = new string[keyValue.Length - 1];
 				for (int i = 1; i < keyValue.Length; i++)
-					map[i-1] = keyValue[i].StripExtension();
+					map[i - 1] = keyValue[i].StripExtension();
 			}
-			break;
-			case "SKYMAP":
+			else if (Params == "SKYMAP")
 			{
 				skyMap = true;
 				map = new string[1] { Value.StripExtension() };
 			}
-			break;
-			case "BLENDFUNC":
-				if (blendFunc == null) 
+			else if (Params == "BLENDFUNC")
+			{
+				if (blendFunc == null)
 					blendFunc = Value.Split(' ');
-				break;
-			case "RGBGEN":
+			}
+			else if (Params == "RGBGEN")
+			{
 				if (rgbGen == null)
 					rgbGen = Value.Split(' ');
-			break;
-			case "ALPHAGEN":
+			}
+			else if (Params == "ALPHAGEN")
+			{
 				if (alphaGen == null)
 					alphaGen = Value.Split(' ');
-				break;
-			case "TCGEN":
-				if (tcGen  == null)
+			}
+			else if (Params == "TCGEN")
+			{
+				if (tcGen == null)
 					tcGen = Value.Split(' ');
 
-				switch (Value)
-				{
-					case "ENVIRONMENT":
-						environment = true;
-					break;
-					default:
-					break;
-				}
-			break;
-			case "TCMOD":
+				if (Value == "ENVIRONMENT")
+					environment = true;
+			}
+			else if (Params == "TCMOD")
 			{
 				string[] keyValue = Value.Split(' ', 2);
 				if (keyValue.Length == 2)
@@ -1800,61 +1824,47 @@ public class QShaderStage
 					if (tcMod == null)
 						tcMod = new List<QShaderTCMod>();
 					QShaderTCMod shaderTCMod = new QShaderTCMod();
-
-					switch (keyValue[0])
+					string func = keyValue[0];
 					{
-						case "ROTATE":
+						if (func == "ROTATE")
 							shaderTCMod.type = TCModType.Rotate;
-						break;
-						case "SCALE":
+						else if (func == "SCALE")
 							shaderTCMod.type = TCModType.Scale;
-						break;
-						case "SCROLL":
+						else if (func == "SCROLL")
 							shaderTCMod.type = TCModType.Scroll;
-						break;
-						case "STRETCH":
+						else if (func == "STRETCH")
 							shaderTCMod.type = TCModType.Stretch;
-						break;
-						case "TRANSFORM":
+						else if (func == "TRANSFORM")
 							shaderTCMod.type = TCModType.Transform;
-						break;
-						case "TURB":
+						else if (func == "TURB")
 							shaderTCMod.type = TCModType.Turb;
-						break;
 					}
 					shaderTCMod.value = keyValue[1].Split(' ');
 					tcMod.Add(shaderTCMod);
 				}
 			}
-			break;
-			case "DEPTHFUNC":
-				switch (Value)
+			else if (Params == "DEPTHFUNC")
+			{
 				{
-					case "LEQUAL":
+					if (Value == "LEQUAL")
 						depthFunc = DepthFuncType.LEQUAL;
-						break;
-					case "EQUAL":
+					else if (Value == "EQUAL")
 						depthFunc = DepthFuncType.EQUAL;
-						break;
 				}
-				break;
-			case "DEPTHWRITE":
+			}
+			else if (Params == "DEPTHWRITE")
 				depthWrite = true;
-			break;
-			case "ALPHAFUNC":
-				switch (Value)
+			else if (Params == "ALPHAFUNC")
+			{
 				{
-					case "GT0":
+					if (Value == "GT0")
 						alphaFunc = AlphaFuncType.GT0;
-					break;
-					case "LT128":
+					else if (Value == "LT128")
 						alphaFunc = AlphaFuncType.LT128;
-					break;
-					case "GE128":
+					else if (Value == "GE128")
 						alphaFunc = AlphaFuncType.GE128;
-					break;
 				}
-				break;
+			}
 		}
 	}
 	public class QShaderTCMod

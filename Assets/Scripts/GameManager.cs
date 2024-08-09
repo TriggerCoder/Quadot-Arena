@@ -1059,7 +1059,7 @@ public partial class GameManager : Node
 					if (result.TryGetValue("name", out nameVar))
 					{
 						string name = (string)nameVar;
-						if (name.Contains("UseModulation"))
+						if (name == "UseModulation")
 						{
 							currentMeshes.Add(mesh);
 							break;
