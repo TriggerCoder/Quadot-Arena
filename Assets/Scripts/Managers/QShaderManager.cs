@@ -357,7 +357,7 @@ public static class QShaderManager
 			GameManager.Print("Current shader is transparent");
 		}
 
-		if (qShader.qShaderGlobal.editorImage.Length != 0)
+		if ((qShader.qShaderGlobal.editorImage.Length != 0) && (qShader.qShaderGlobal.isSky == false))
 		{
 			QShaderData qeditorShader;
 			if (QShaders.TryGetValue(qShader.qShaderGlobal.editorImage, out qeditorShader))
@@ -502,7 +502,9 @@ public static class QShaderManager
 		else if (lightmapStage < 0)
 			code += "\tvec3 ambient = AmbientColor.rgb * mixBrightness;\n";
 
-		if (lightmapStage >= 0)
+		if (qShader.qShaderGlobal.isSky)
+			code += "\tvec4 color = vec4(0.0, 0.0, 0.0, 0.0);\n";
+		else if (lightmapStage >= 0)
 			code += "\tvec4 color = Stage_" + lightmapStage + ";\n";
 		else if (qShader.qShaderGlobal.editorImage.Length != 0)
 		{
@@ -904,18 +906,27 @@ public static class QShaderManager
 
 		if (qShader.qShaderGlobal.skyParms != null)
 		{
-			if ((currentStage == 0) && (qShader.qShaderGlobal.skyParms[0] != "-"))
-			{				
-				TcGen += "\tvec4 vot" + currentStage + " = INV_VIEW_MATRIX * vec4(VERTEX, 0.0);\n";
-				TcGen += "\tvot" + currentStage + " = normalize(vot" + currentStage + ");\n";
-			}
-			else
+			if (qShader.qShaderGlobal.skyParms[0] == "-")
 			{
 //				int cloudheight = int.Parse(qShader.qShaderGlobal.skyParms[1]) / 5;
 				TcGen += "\tvec4 vot" + currentStage + " = INV_VIEW_MATRIX * vec4(VERTEX, 0.0);\n";
-				TcGen += "\tvot" + currentStage + ".y = 6.0 * (vot" + currentStage + ".y );\n";
+				TcGen += "\tvot" + currentStage + ".y = 5.0 * (vot" + currentStage + ".y);\n";
 				TcGen += "\tvot" + currentStage + " = normalize(vot" + currentStage + ");\n";
 				TcGen += "\tvec2 uv_" + currentStage + " = vec2(vot" + currentStage + ".x, vot" + currentStage + ".z);\n";
+			}
+			else
+			{
+				if (currentStage == 0)
+				{
+					TcGen += "\tvec4 vot" + currentStage + " = INV_VIEW_MATRIX * vec4(VERTEX, 0.0);\n";
+					TcGen += "\tvec4 sky_vol" + currentStage + " = vot" + currentStage + ";\n";
+					TcGen += "\tsky_vol" + currentStage + ".y = 5.0 * (vot" + currentStage + ".y);\n";
+					TcGen += "\tsky_vol" + currentStage + " = normalize(sky_vol" + currentStage + ");\n";
+					TcGen += "\tvot" + currentStage + " = normalize(vot" + currentStage + ");\n";
+					TcGen += "\tvec2 uv_" + currentStage + " = vec2(sky_vol" + currentStage + ".x, sky_vol" + currentStage + ".z);\n";
+				}
+				else
+					TcGen += "\tvec2 uv_" + currentStage + " = uv_0;\n";
 			}
 		}
 		else
@@ -991,6 +1002,20 @@ public static class QShaderManager
 				break;
 				case QShaderStage.TCModType.Transform:
 				{
+					float M00 = TryToParseFloat(shaderTCMod.value[0]);
+					float M01 = TryToParseFloat(shaderTCMod.value[1]);
+					float M10 = TryToParseFloat(shaderTCMod.value[2]);
+					float M11 = TryToParseFloat(shaderTCMod.value[3]);
+					float T0 = TryToParseFloat(shaderTCMod.value[4]);
+					float T1 = TryToParseFloat(shaderTCMod.value[5]);
+					if (qShader.qShaderGlobal.skyParms != null)
+					{
+						T0 *= 5;
+						T1 *= 5;
+					}
+					string transX = "(uv_" + currentStage + ".x * " + M00.ToString("0.00") + " + uv_" + currentStage + ".y * " + M10.ToString("0.00") + " + " + T0.ToString("0.00") + ")";
+					string transY = "(uv_" + currentStage + ".x * " + M01.ToString("0.00") + " + uv_" + currentStage + ".y * " + M11.ToString("0.00") + " + " + T1.ToString("0.00") + ")";
+					TcMod += "\tuv_" + currentStage + " = vec2(" + transX + "," + transY + "); \n";
 				}
 				break;
 				case QShaderStage.TCModType.Turb:
@@ -1058,9 +1083,9 @@ public static class QShaderManager
 		else if (GenFunc.Length > 0)
 		{
 			string Func = GenFunc[0];
-			if (Func.Contains("VERTEX"))
+			if (Func == "FROMVERTEX")
 				StageGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * vertx_color.rgb ; \n";
-			else if (Func.Contains("ENTITY"))
+			else if (Func == "ENTITY")
 			{
 				StageGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * modulate.rgb ; \n";
 				entityColor = true;
