@@ -159,18 +159,22 @@ public static class PakManager
 			if (e.FullName.Contains("."))
 			{
 				string logName = e.FullName.ToUpper();
+				//Process Shaders and continue
+				if (logName.Contains(".SHADER"))
+				{
+					QShaderManager.ReadShaderData(e.Open());
+					continue;
+				}
+
 				if (ZipFiles.ContainsKey(logName))
 				{
-					GameManager.Print("Updating pak file with name " + logName);
+//					GameManager.Print("Updating pak file with name " + logName);
 					ZipFiles[logName] = file.Name;
 				}
 				else
 					ZipFiles.Add(logName, file.Name);
 
-				//Add Shaders Files for processing
-				if (logName.Contains(".SHADER"))
-					QShaderManager.AddShaderFiles(logName);
-				else if (logName.Contains(".BSP"))
+				if (logName.Contains(".BSP"))
 					AddMapToList(logName);
 				else if (logName.Contains(".SKIN"))
 					AddPlayerSkin(logName);

@@ -328,7 +328,8 @@ public partial class GameManager : Node
 		}
 
 		PakManager.LoadPK3Files();
-		QShaderManager.ProcessShaders();
+		//Process extra shaders
+		MaterialManager.Instance.AddExtraShaders();
 		MaterialManager.LoadFXShaders();
 		MaterialManager.SetAmbient();
 

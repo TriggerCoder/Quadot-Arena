@@ -1,6 +1,5 @@
 using Godot;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
 using ExtensionMethods;
 
@@ -8,28 +7,10 @@ public static class QShaderManager
 {
 	public static Dictionary<string, QShaderData> QShaders = new Dictionary<string, QShaderData>();
 	public static Dictionary<string, QShaderData> FogShaders = new Dictionary<string, QShaderData>();
-	public static List<string> QShadersFiles = new List<string>();
 	public enum GenFuncType
 	{
 		RGB,
 		Alpha
-	}
-	public static void ProcessShaders()
-	{
-		foreach (string shaderFile in QShadersFiles)
-		{
-			string FileName;
-			if (PakManager.ZipFiles.TryGetValue(shaderFile, out FileName))
-			{
-				var reader = new ZipReader();
-				reader.Open(FileName);
-				byte[] rawShader = reader.ReadFile(shaderFile, false);
-				ReadShaderData(rawShader);
-			}
-		}
-
-		//Process extra shaders
-		MaterialManager.Instance.AddExtraShaders();
 	}
 
 	public static ShaderMaterial GetFog(string shaderName, float height)
@@ -1330,11 +1311,15 @@ public static class QShaderManager
 	public static void ReadShaderData(byte[] shaderData)
 	{
 		MemoryStream ms = new MemoryStream(shaderData);
+		ReadShaderData(ms);
+		ms.Close();
+	}
+
+	public static void ReadShaderData(Stream ms)
+	{
 		StreamReader stream = new StreamReader(ms);
 		string strWord;
 		char[] line = new char[1024];
-
-		stream.BaseStream.Seek(0, SeekOrigin.Begin);
 
 		int p;
 		int stage = 0;
@@ -1374,7 +1359,7 @@ public static class QShaderManager
 							{
 								if (FogShaders.ContainsKey(qShaderData.Name))
 								{
-									GameManager.Print("Fog Shader already on the list: " + qShaderData.Name, GameManager.PrintType.Info);
+//									GameManager.Print("Fog Shader already on the list: " + qShaderData.Name, GameManager.PrintType.Info);
 									FogShaders[qShaderData.Name] = qShaderData;
 								}
 								else
@@ -1493,17 +1478,9 @@ public static class QShaderManager
 				}
 			}
 		}
+		stream.Close();
 	}
-	public static void AddShaderFiles(string FileName)
-	{
-		if (QShadersFiles.Contains(FileName))
-		{
-			GameManager.Print("Shader File "+ FileName + " already on the list ", GameManager.PrintType.Info);
-			return;
-		}
-		else
-			QShadersFiles.Add(FileName);
-	}
+
 	public static float TryToParseFloat(string Number)
 	{
 		int inum;

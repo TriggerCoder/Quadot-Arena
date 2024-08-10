@@ -871,7 +871,6 @@ public partial class ThingsManager : Node
 					// Solid Model
 					else if (entity.name == "func_static")
 					{
-						thingObject.GlobalPosition = entity.origin;
 						if (entity.entityData.TryGetValue("model", out strWord))
 						{
 							int model = int.Parse(strWord.Trim('*'));
@@ -880,6 +879,7 @@ public partial class ThingsManager : Node
 						}
 						else if (entity.entityData.TryGetValue("model2", out strWord))
 						{
+							thingObject.GlobalPosition = entity.origin;
 							ModelController modelController = new ModelController();
 							thingObject.AddChild(modelController);
 							modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
@@ -979,11 +979,11 @@ public partial class ThingsManager : Node
 				break;
 				case ThingController.ThingType.Decor:
 				{
+					thingObject.GlobalPosition = entity.origin;
+
 					//Rotating Object
 					if (entity.name == "func_rotating")
 					{
-						thingObject.GlobalPosition = entity.origin;
-
 						int speed = 100;
 						NodeAnimation nodeAnim = new NodeAnimation();
 						thingObject.AddChild(nodeAnim);
@@ -1003,8 +1003,6 @@ public partial class ThingsManager : Node
 					//Intermission Camera
 					else if (entity.name == "info_player_intermission")
 					{
-						thingObject.GlobalPosition = entity.origin;
-
 						Camera3D camera = new Camera3D();
 						thingObject.AddChild(camera);
 						camera.CullMask = GameManager.AllPlayerViewMask | (1 << GameManager.NotVisibleLayer);
@@ -1064,6 +1062,7 @@ public partial class ThingsManager : Node
 							GameManager.Print("TargetName " + strWord);
 						}
 						portalSurfaces.Add(portalSurface);
+						thingObject.QueueFree();
 					}
 					//Teleporter
 					else if (entity.name == "trigger_teleport")
@@ -1573,6 +1572,7 @@ public partial class ThingsManager : Node
 						int gravity = int.Parse(strWord);
 						GameManager.Instance.gravity = gravity * GameManager.sizeDividor;
 					}
+					thingObject.QueueFree();
 				}
 				break;
 			}
