@@ -5,3 +5,4 @@
 [node name="misc_portal_camera" type="Node3D"]
 script = ExtResource("1_ftu61")
 respawnSound = ""
+thingType = 3

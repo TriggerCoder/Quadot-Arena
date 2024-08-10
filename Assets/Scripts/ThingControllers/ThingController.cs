@@ -23,11 +23,11 @@ public partial class ThingController : Node3D
 		Blocking, //blocking or interactive
 		Item,
 		Teleport,
-		JumpPad,
-		TargetDestination,
+		WorldSpawn,
+		Target,
 		Trigger,
 		Door,
-		Player
+		Spawn
 	}
 	[Export]
 	public ThingType thingType = ThingType.Decor;

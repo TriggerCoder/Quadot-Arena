@@ -777,9 +777,10 @@ public partial class ThingsManager : Node
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
 			thingObject.Name = entity.name;
 
-			switch (entity.name)
+			switch (thingObject.thingType)
 			{
 				default:
+				case ThingController.ThingType.Item:
 				{
 					float num;
 					thingObject.GlobalPosition = entity.origin;
@@ -833,8 +834,7 @@ public partial class ThingsManager : Node
 					}
 				}
 				break;
-				//Deathmatch spawning  location
-				case "info_player_deathmatch":
+				case ThingController.ThingType.Spawn:
 				{
 					thingObject.GlobalPosition = entity.origin;
 
@@ -845,451 +845,378 @@ public partial class ThingsManager : Node
 					entity.entityData.TryGetNumValue("angle", out angle);
 
 					SpawnPosition spawnPosition = (SpawnPosition)thingObject;
-					spawnPosition.Init((int)angle, entity.entityData);
+					//Deathmatch spawning  location
+					if (entity.name == "info_player_deathmatch")
+						spawnPosition.Init((int)angle, entity.entityData);
+					//Red Team spawning  location
+					else if(entity.name == "team_CTF_redspawn")
+						spawnPosition.Init((int)angle, entity.entityData, SpawnPosition.SpawnType.Red);
+					//Blue Team spawning  location
+					else if (entity.name == "team_CTF_bluespawn")
+						spawnPosition.Init((int)angle, entity.entityData, SpawnPosition.SpawnType.Blue);
 				}
 				break;
-				//Red Team spawning  location
-				case "team_CTF_redspawn":
+				case ThingController.ThingType.Blocking:
 				{
-					thingObject.GlobalPosition = entity.origin;
-
-					if (entity.entityData.ContainsKey("nohumans"))
-						continue;
-
-					float angle = 0;
-					entity.entityData.TryGetNumValue("angle", out angle);
-
-					SpawnPosition spawnPosition = (SpawnPosition)thingObject;
-					spawnPosition.Init((int)angle, entity.entityData, SpawnPosition.SpawnType.Red);
-				}
-				break;
-				//Blue Team spawning  location
-				case "team_CTF_bluespawn":
-				{
-					thingObject.GlobalPosition = entity.origin;
-
-					if (entity.entityData.ContainsKey("nohumans"))
-						continue;
-
-					float angle = 0;
-					entity.entityData.TryGetNumValue("angle", out angle);
-
-					SpawnPosition spawnPosition = (SpawnPosition)thingObject;
-					spawnPosition.Init((int)angle, entity.entityData, SpawnPosition.SpawnType.Blue);
-				}
-				break;
-				// Solid Model
-				case "func_static":
-				{
-					thingObject.GlobalPosition = entity.origin;
-					if (entity.entityData.TryGetValue("model", out strWord))
+					//Advertisement
+					if (entity.name == "advertisement")
 					{
-						int model = int.Parse(strWord.Trim('*'));
-						MapLoader.GenerateGeometricSurface(thingObject, model);
-						MapLoader.GenerateGeometricCollider(thingObject, null, model, 0, false);
-					}
-					else if (entity.entityData.TryGetValue("model2", out strWord))
-					{
-						ModelController modelController = new ModelController();
-						thingObject.AddChild(modelController);
-						modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
-						modelController.Init();
-					}
-				}
-				break;
-				//Switch
-				case "func_button":
-				{
-					strWord = entity.entityData["model"];
-					int model = int.Parse(strWord.Trim('*'));
-					int angle = 0, hitpoints = 0, speed = 40, lip = 4;
-					float wait;
-
-					SwitchController sw = new SwitchController();
-					thingObject.AddChild(sw);
-
-					sw.startSound = "movers/switches/butn2";
-					sw.endSound = "";
-
-					if (entity.entityData.TryGetValue("angle", out strWord))
-						angle = int.Parse(strWord);
-					if (entity.entityData.TryGetValue("health", out strWord))
-						hitpoints = int.Parse(strWord);
-					if (entity.entityData.TryGetValue("speed", out strWord))
-						speed = int.Parse(strWord);
-					if (!entity.entityData.TryGetNumValue("wait", out wait))
-						wait = 1;
-					if (entity.entityData.TryGetValue("lip", out strWord))
-						lip = int.Parse(strWord);
-
-					MapLoader.GenerateGeometricSurface(sw, model);
-					uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, sw, model, 0, false);
-					int shapes = sw.ShapeOwnerGetShapeCount(OwnerShapeId);
-					Aabb BigBox = new Aabb();
-					for (int i = 0; i < shapes; i++)
-					{
-						Shape3D boxShape = sw.ShapeOwnerGetShape(OwnerShapeId, i);
-						Aabb box = boxShape.GetDebugMesh().GetAabb();
-						if (i == 0)
-							BigBox = new Aabb(box.Position, box.Size);
-						else
-							BigBox = BigBox.Merge(box);
-					}
-					sw.Init(angle, hitpoints, speed, wait, lip, BigBox);
-
-					//If it's not damagable, then create trigger collider
-					if (hitpoints == 0)
-					{
-						float max = BigBox.GetLongestAxisSize();
-						Area3D triggerCollider = new Area3D();
-						sw.AddChild(triggerCollider);
-						CollisionShape3D mc = new CollisionShape3D();
-						mc.Name = "Switch Trigger";
-						triggerCollider.AddChild(mc);
-						triggerCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
-						triggerCollider.CollisionMask = GameManager.TakeDamageMask;
-						triggerCollider.InputRayPickable = false;
-
-						SphereShape3D sphere = new SphereShape3D();
-						sphere.Radius = max;
-						mc.Shape = sphere;
-						triggerCollider.GlobalPosition = BigBox.GetCenter();
-						triggerCollider.BodyEntered += sw.internalSwitch.OnBodyEntered;
-						sw.internalSwitch.Areas.Add(triggerCollider);
-					}
-
-					if (entity.entityData.TryGetValue("target", out strWord))
-					{
-						string target = strWord;
-						TriggerController tc;
-						if (!triggerToActivate.TryGetValue(target, out tc))
-							tc = null;
-						sw.tc = tc;
-
-						sw.internalSwitch.SetController(target, (p) =>
+						if (entity.entityData.TryGetValue("model", out strWord))
 						{
-							if (sw.tc == null)
-							{
-								TriggerController swTrigger;
-								if (!triggerToActivate.TryGetValue(sw.internalSwitch.triggerName, out swTrigger))
-									return;
-								sw.tc = swTrigger;
-							}
-							sw.CurrentState = DoorController.State.Opening;
-							sw.tc.Activate(null);
-						});
-					}
-				}
-				break;
-				//Door
-				case "func_door":
-				{
-					strWord = entity.entityData["model"];
-					int model = int.Parse(strWord.Trim('*'));
-					int angle = 0, hitpoints = 0, speed = 200, lip = 8, dmg = 4;
-					float wait;
-
-					DoorController door = new DoorController();
-					thingObject.AddChild(door);
-
-					Node3D SourceTransform = new Node3D();
-					door.AddChild(SourceTransform);
-
-					InterpolatedTransform interpolatedTransform = new InterpolatedTransform();
-					interpolatedTransform.SetSource(SourceTransform);
-					thingObject.AddChild(interpolatedTransform);
-
-					if (entity.entityData.TryGetValue("angle", out strWord))
-						angle = int.Parse(strWord);
-					if (entity.entityData.TryGetValue("health", out strWord))
-						hitpoints = int.Parse(strWord);
-					if (entity.entityData.TryGetValue("speed", out strWord))
-						speed = int.Parse(strWord);
-					if (!entity.entityData.TryGetNumValue("wait", out wait))
-						wait = 2;
-					if (entity.entityData.TryGetValue("lip", out strWord))
-						lip = int.Parse(strWord);
-					if (entity.entityData.TryGetValue("dmg", out strWord))
-						dmg = int.Parse(strWord);
-
-					MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
-					uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, door, model, 0, false);
-					int shapes = door.ShapeOwnerGetShapeCount(OwnerShapeId);
-					Aabb BigBox = new Aabb();
-
-					for (int i = 0; i < shapes; i++)
-					{
-						Shape3D shape = door.ShapeOwnerGetShape(OwnerShapeId, i);
-						Aabb box = shape.GetDebugMesh().GetAabb();
-						if (i == 0)
-							BigBox = new Aabb(box.Position, box.Size);
-						else
-							BigBox = BigBox.Merge(box);
-					}
-					door.Init(angle, hitpoints, speed, wait, lip, BigBox, dmg);
-
-					if (entity.entityData.TryGetValue("targetname", out strWord))
-					{
-						string target = strWord;
-
-						TriggerController tc;
-						if (!triggerToActivate.TryGetValue(target, out tc))
-						{
-							tc = new TriggerController();
-							thingObject.AddChild(tc);
-							triggerToActivate.Add(target, tc);
+							int model = int.Parse(strWord.Trim('*'));
+							MapLoader.GenerateGeometricSurface(thingObject, model);
+							MapLoader.GenerateGeometricCollider(thingObject, null, model, 0, false);
 						}
-						tc.Repeatable = true;
-						tc.AutoReturn = true;
-						tc.AutoReturnTime = wait;
-						tc.SetController(target, (p) =>
-						{
-							door.CurrentState = DoorController.State.Opening;
-						});
 					}
-					else //If it's not external trigger
+					// Solid Model
+					else if (entity.name == "func_static")
 					{
-						if (hitpoints == 0)//If  not damagable, then create a trigger and collider
+						thingObject.GlobalPosition = entity.origin;
+						if (entity.entityData.TryGetValue("model", out strWord))
+						{
+							int model = int.Parse(strWord.Trim('*'));
+							MapLoader.GenerateGeometricSurface(thingObject, model);
+							MapLoader.GenerateGeometricCollider(thingObject, null, model, 0, false);
+						}
+						else if (entity.entityData.TryGetValue("model2", out strWord))
+						{
+							ModelController modelController = new ModelController();
+							thingObject.AddChild(modelController);
+							modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
+							modelController.Init();
+						}
+					}
+					//Platform
+					else if (entity.name == "func_bobbing")
+					{
+						Vector3 center = Vector3.Zero;
+						int model = -1;
+						int angle = 0, spawnflags = 0, height = 32;
+						float speed = 4, phase = 0;
+						string noise;
+
+						ModelController modelController = null;
+						if (entity.entityData.TryGetValue("model", out strWord))
+							model = int.Parse(strWord.Trim('*'));
+						if (entity.entityData.TryGetValue("model2", out strWord))
+						{
+							model = -1;
+							modelController = new ModelController();
+							modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
+							modelController.Init();
+							thingObject.GlobalPosition = entity.origin;
+						}
+
+						entity.entityData.TryGetNumValue("speed", out speed);
+						entity.entityData.TryGetNumValue("phase", out phase);
+
+						if (speed == 0)
+						{
+							if (model >= 0)
+							{
+								MapLoader.GenerateGeometricSurface(thingObject, model);
+								MapLoader.GenerateGeometricCollider(thingObject, null, model, 0, false);
+							}
+							else if (modelController != null)
+								thingObject.AddChild(modelController);
+							break;
+						}
+
+						PlatformController platform = new PlatformController();
+						thingObject.AddChild(platform);
+
+						if (modelController != null)
+							platform.AddChild(modelController);
+
+						Node3D SourceTransform = new Node3D();
+						platform.AddChild(SourceTransform);
+
+						InterpolatedTransform interpolatedTransform = new InterpolatedTransform();
+						interpolatedTransform.SetSource(SourceTransform);
+						thingObject.AddChild(interpolatedTransform);
+
+						if (entity.entityData.TryGetValue("angle", out strWord))
+							angle = int.Parse(strWord);
+						if (entity.entityData.TryGetValue("height", out strWord))
+							height = int.Parse(strWord);
+						if (entity.entityData.TryGetValue("spawnflags", out strWord))
+							spawnflags = int.Parse(strWord);
+						if (entity.entityData.TryGetValue("noise", out noise))
+							noise = GetSoundName(noise);
+
+						Vector3 direction = Vector3.Up;
+						if ((spawnflags & 1) != 0)
+							direction = Vector3.Right;
+						else if ((spawnflags & 2) != 0)
+							direction = Vector3.Forward;
+
+						bool isCrusher = false;
+						if (model >= 0)
+						{
+							MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
+							uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, platform, model, 0, false);
+							if (OwnerShapeId != 0)
+							{
+								int shapes = platform.ShapeOwnerGetShapeCount(OwnerShapeId);
+								Aabb BigBox = new Aabb();
+
+								for (int i = 0; i < shapes; i++)
+								{
+									Shape3D shape = platform.ShapeOwnerGetShape(OwnerShapeId, i);
+									Aabb box = shape.GetDebugMesh().GetAabb();
+									if (i == 0)
+										BigBox = new Aabb(box.Position, box.Size);
+									else
+										BigBox = BigBox.Merge(box);
+								}
+								center = BigBox.GetCenter();
+								isCrusher = true;
+							}
+						}
+						platform.Init(direction, speed, phase, height, isCrusher, center, noise);
+					}
+				}
+				break;
+				case ThingController.ThingType.Decor:
+				{
+					//Rotating Object
+					if (entity.name == "func_rotating")
+					{
+						thingObject.GlobalPosition = entity.origin;
+
+						int speed = 100;
+						NodeAnimation nodeAnim = new NodeAnimation();
+						thingObject.AddChild(nodeAnim);
+						if (entity.entityData.TryGetValue("speed", out strWord))
+							speed = int.Parse(strWord);
+						nodeAnim.rotFPS = speed;
+						nodeAnim.rotEnable = true;
+						if (entity.entityData.TryGetValue("model2", out strWord))
+						{
+							ModelController modelController = new ModelController();
+							thingObject.AddChild(modelController);
+							modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
+							modelController.Init();
+						}
+						nodeAnim.Init();
+					}
+					//Intermission Camera
+					else if (entity.name == "info_player_intermission")
+					{
+						thingObject.GlobalPosition = entity.origin;
+
+						Camera3D camera = new Camera3D();
+						thingObject.AddChild(camera);
+						camera.CullMask = GameManager.AllPlayerViewMask | (1 << GameManager.NotVisibleLayer);
+						ScoreBoard scoreBoard = (ScoreBoard)GameManager.Instance.scoreBoard.Instantiate();
+						camera.AddChild(scoreBoard);
+
+						int angle = 0;
+						Vector3 lookAt = Vector3.Forward;
+
+						if (entity.entityData.TryGetValue("target", out strWord))
+							if (targetsOnMap.ContainsKey(strWord))
+							{
+								lookAt = targetsOnMap[strWord][0].destination;
+								thingObject.LookAt(lookAt, Vector3.Up);
+								angle = targetsOnMap[strWord][0].angle;
+							}
+						GameManager.Instance.interMissionCamera = camera;
+						GameManager.Instance.SetViewPortToCamera(camera, GameManager.Instance.IntermissionViewPort);
+					}
+				}
+				break;
+				case ThingController.ThingType.Teleport:
+				{
+					//Portal Camera
+					if (entity.name == "misc_portal_camera")
+					{
+						thingObject.GlobalPosition = entity.origin;
+
+						int angle = 0;
+						Vector3 lookAt = Vector3.Forward;
+
+						if (entity.entityData.TryGetValue("target", out strWord))
+							if (targetsOnMap.ContainsKey(strWord))
+							{
+								lookAt = targetsOnMap[strWord][0].destination;
+								thingObject.LookAt(lookAt, Vector3.Up);
+								angle = targetsOnMap[strWord][0].angle;
+							}
+
+						if (entity.entityData.TryGetValue("targetname", out strWord))
+						{
+							Camera3D camera = new Camera3D();
+							thingObject.AddChild(camera);
+							camera.CullMask = GameManager.AllPlayerViewMask;
+							portalCameras.Add(strWord, camera);
+						}
+					}
+					//Portal Surface
+					else if (entity.name == "misc_portal_surface")
+					{
+						PortalSurface portalSurface = new PortalSurface();
+						GameManager.Instance.TemporaryObjectsHolder.AddChild(portalSurface);
+						portalSurface.GlobalPosition = entity.origin;
+						if (entity.entityData.TryGetValue("target", out strWord))
+						{
+							portalSurface.targetName = strWord;
+							GameManager.Print("TargetName " + strWord);
+						}
+						portalSurfaces.Add(portalSurface);
+					}
+					//Teleporter
+					else if (entity.name == "trigger_teleport")
+					{
+						string target;
+						List<Target> dest;
+						if (!entity.entityData.TryGetValue("target", out target))
+							continue;
+						if (!targetsOnMap.TryGetValue(target, out dest))
+							continue;
+						if (!entity.entityData.TryGetValue("model", out strWord))
+							continue;
+
+						TeleporterThing teleporter = new TeleporterThing();
+						thingObject.AddChild(teleporter);
+						int model = int.Parse(strWord.Trim('*'));
+						MapLoader.GenerateGeometricCollider(thingObject, teleporter, model, ContentFlags.Teleporter);
+						teleporter.Init(dest, entity.entityData);
+					}
+				}
+				break;
+				case ThingController.ThingType.Door:
+				{
+					//Switch
+					if (entity.name == "func_button")
+					{
+						strWord = entity.entityData["model"];
+						int model = int.Parse(strWord.Trim('*'));
+						int angle = 0, hitpoints = 0, speed = 40, lip = 4;
+						float wait;
+
+						SwitchController sw = new SwitchController();
+						thingObject.AddChild(sw);
+
+						sw.startSound = "movers/switches/butn2";
+						sw.endSound = "";
+
+						if (entity.entityData.TryGetValue("angle", out strWord))
+							angle = int.Parse(strWord);
+						if (entity.entityData.TryGetValue("health", out strWord))
+							hitpoints = int.Parse(strWord);
+						if (entity.entityData.TryGetValue("speed", out strWord))
+							speed = int.Parse(strWord);
+						if (!entity.entityData.TryGetNumValue("wait", out wait))
+							wait = 1;
+						if (entity.entityData.TryGetValue("lip", out strWord))
+							lip = int.Parse(strWord);
+
+						MapLoader.GenerateGeometricSurface(sw, model);
+						uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, sw, model, 0, false);
+						int shapes = sw.ShapeOwnerGetShapeCount(OwnerShapeId);
+						Aabb BigBox = new Aabb();
+						for (int i = 0; i < shapes; i++)
+						{
+							Shape3D boxShape = sw.ShapeOwnerGetShape(OwnerShapeId, i);
+							Aabb box = boxShape.GetDebugMesh().GetAabb();
+							if (i == 0)
+								BigBox = new Aabb(box.Position, box.Size);
+							else
+								BigBox = BigBox.Merge(box);
+						}
+						sw.Init(angle, hitpoints, speed, wait, lip, BigBox);
+
+						//If it's not damagable, then create trigger collider
+						if (hitpoints == 0)
 						{
 							float max = BigBox.GetLongestAxisSize();
 							Area3D triggerCollider = new Area3D();
-							door.AddChild(triggerCollider);
+							sw.AddChild(triggerCollider);
 							CollisionShape3D mc = new CollisionShape3D();
-							mc.Name = "Door Trigger";
+							mc.Name = "Switch Trigger";
 							triggerCollider.AddChild(mc);
 							triggerCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
 							triggerCollider.CollisionMask = GameManager.TakeDamageMask;
 							triggerCollider.InputRayPickable = false;
 
 							SphereShape3D sphere = new SphereShape3D();
-							sphere.Radius = max * .5f;
+							sphere.Radius = max;
 							mc.Shape = sphere;
-
-							TriggerController tc = new TriggerController();
-							thingObject.AddChild(tc);
-							tc.Repeatable = true;
-							tc.AutoReturn = true;
-							tc.AutoReturnTime = wait;
-							tc.SetController("", (p) =>
-							{
-								door.CurrentState = DoorController.State.Opening;
-							});
-
 							triggerCollider.GlobalPosition = BigBox.GetCenter();
-							triggerCollider.BodyEntered += tc.OnBodyEntered;
-							tc.Areas.Add(triggerCollider);
+							triggerCollider.BodyEntered += sw.internalSwitch.OnBodyEntered;
+							sw.internalSwitch.Areas.Add(triggerCollider);
 						}
-					}
-				}
-				break;
-				//Platform
-				case "func_bobbing":
-				{
-					Vector3 center = Vector3.Zero;
-					int model = -1;
-					int angle = 0, spawnflags = 0, height = 32;
-					float speed = 4, phase = 0;
-					string noise;
 
-					ModelController modelController = null;
-					if (entity.entityData.TryGetValue("model", out strWord))
-						model = int.Parse(strWord.Trim('*'));
-					if (entity.entityData.TryGetValue("model2", out strWord))
-					{
-						model = -1;
-						modelController = new ModelController();
-						modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
-						modelController.Init();
-						thingObject.GlobalPosition = entity.origin;
-					}
-
-					entity.entityData.TryGetNumValue("speed", out speed);
-					entity.entityData.TryGetNumValue("phase", out phase);
-
-					if (speed == 0)
-					{
-						if (model >= 0)
+						if (entity.entityData.TryGetValue("target", out strWord))
 						{
-							MapLoader.GenerateGeometricSurface(thingObject, model);
-							MapLoader.GenerateGeometricCollider(thingObject, null, model, 0, false);
-						}
-						else if (modelController != null)
-							thingObject.AddChild(modelController);
-						break;
-					}
+							string target = strWord;
+							TriggerController tc;
+							if (!triggerToActivate.TryGetValue(target, out tc))
+								tc = null;
+							sw.tc = tc;
 
-					PlatformController platform = new PlatformController();
-					thingObject.AddChild(platform);
-
-					if (modelController != null)
-						platform.AddChild(modelController);
-
-					Node3D SourceTransform = new Node3D();
-					platform.AddChild(SourceTransform);
-
-					InterpolatedTransform interpolatedTransform = new InterpolatedTransform();
-					interpolatedTransform.SetSource(SourceTransform);
-					thingObject.AddChild(interpolatedTransform);
-
-					if (entity.entityData.TryGetValue("angle", out strWord))
-						angle = int.Parse(strWord);
-					if (entity.entityData.TryGetValue("height", out strWord))
-						height = int.Parse(strWord);
-					if (entity.entityData.TryGetValue("spawnflags", out strWord))
-						spawnflags = int.Parse(strWord);
-					if (entity.entityData.TryGetValue("noise", out noise))
-						noise = GetSoundName(noise);
-
-					Vector3 direction = Vector3.Up;
-					if ((spawnflags & 1) != 0)
-						direction = Vector3.Right;
-					else if ((spawnflags & 2) != 0)
-						direction = Vector3.Forward;
-
-					bool isCrusher = false;
-					if (model >= 0)
-					{
-						MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
-						uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, platform, model, 0, false);
-						if (OwnerShapeId != 0)
-						{
-							int shapes = platform.ShapeOwnerGetShapeCount(OwnerShapeId);
-							Aabb BigBox = new Aabb();
-
-							for (int i = 0; i < shapes; i++)
+							sw.internalSwitch.SetController(target, (p) =>
 							{
-								Shape3D shape = platform.ShapeOwnerGetShape(OwnerShapeId, i);
-								Aabb box = shape.GetDebugMesh().GetAabb();
-								if (i == 0)
-									BigBox = new Aabb(box.Position, box.Size);
-								else
-									BigBox = BigBox.Merge(box);
-							}
-							center = BigBox.GetCenter();
-							isCrusher = true;
+								if (sw.tc == null)
+								{
+									TriggerController swTrigger;
+									if (!triggerToActivate.TryGetValue(sw.internalSwitch.triggerName, out swTrigger))
+										return;
+									sw.tc = swTrigger;
+								}
+								sw.CurrentState = DoorController.State.Opening;
+								sw.tc.Activate(null);
+							});
 						}
 					}
-					platform.Init(direction, speed, phase, height, isCrusher, center, noise);
-				}
-				break;
-				//Rotating Object
-				case "func_rotating":
-				{
-					thingObject.GlobalPosition = entity.origin;
-
-					int speed = 100;
-					NodeAnimation nodeAnim = new NodeAnimation();
-					thingObject.AddChild(nodeAnim);
-					if (entity.entityData.TryGetValue("speed", out strWord))
-						speed = int.Parse(strWord);
-					nodeAnim.rotFPS = speed;
-					nodeAnim.rotEnable = true;
-					if (entity.entityData.TryGetValue("model2", out strWord))
+					//Door
+					else if (entity.name == "func_door")
 					{
-						ModelController modelController = new ModelController();
-						thingObject.AddChild(modelController);
-						modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
-						modelController.Init();
-					}
-					nodeAnim.Init();
-				}
-				break;
-				//Trigger Hurt
-				case "trigger_hurt":
-				{
-					int dmg = 9999;
-					strWord = entity.entityData["model"];
-					int model = int.Parse(strWord.Trim('*'));
-					if (entity.entityData.TryGetValue("dmg", out strWord))
-						dmg = int.Parse(strWord);
+						strWord = entity.entityData["model"];
+						int model = int.Parse(strWord.Trim('*'));
+						int angle = 0, hitpoints = 0, speed = 200, lip = 8, dmg = 4;
+						float wait;
 
-					TriggerController tc = new TriggerController();
-					thingObject.AddChild(tc);
-					Area3D objCollider = new Area3D();
-					thingObject.AddChild(objCollider);
-					MapLoader.GenerateGeometricCollider(thingObject, objCollider, model, ContentFlags.Trigger);
-					objCollider.BodyEntered += tc.OnBodyEntered;
-					tc.Areas.Add(objCollider);
+						DoorController door = new DoorController();
+						thingObject.AddChild(door);
 
-					tc.Repeatable = true;
-					tc.SetController("trigger_hurt", (p) =>
-					{
-						p.Damage(dmg, DamageType.Generic);
-					});
-				}
-				break;
-				//Intermission Camera
-				case "info_player_intermission":
-				{
-					thingObject.GlobalPosition = entity.origin;
+						Node3D SourceTransform = new Node3D();
+						door.AddChild(SourceTransform);
 
-					Camera3D camera = new Camera3D();
-					thingObject.AddChild(camera);
-					camera.CullMask = GameManager.AllPlayerViewMask | (1 << GameManager.NotVisibleLayer);
-					ScoreBoard scoreBoard =	(ScoreBoard)GameManager.Instance.scoreBoard.Instantiate();
-					camera.AddChild(scoreBoard);
+						InterpolatedTransform interpolatedTransform = new InterpolatedTransform();
+						interpolatedTransform.SetSource(SourceTransform);
+						thingObject.AddChild(interpolatedTransform);
 
-					int angle = 0;
-					Vector3 lookAt = Vector3.Forward;
+						if (entity.entityData.TryGetValue("angle", out strWord))
+							angle = int.Parse(strWord);
+						if (entity.entityData.TryGetValue("health", out strWord))
+							hitpoints = int.Parse(strWord);
+						if (entity.entityData.TryGetValue("speed", out strWord))
+							speed = int.Parse(strWord);
+						if (!entity.entityData.TryGetNumValue("wait", out wait))
+							wait = 2;
+						if (entity.entityData.TryGetValue("lip", out strWord))
+							lip = int.Parse(strWord);
+						if (entity.entityData.TryGetValue("dmg", out strWord))
+							dmg = int.Parse(strWord);
 
-					if (entity.entityData.TryGetValue("target", out strWord))
-						if (targetsOnMap.ContainsKey(strWord))
+						MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
+						uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, door, model, 0, false);
+						int shapes = door.ShapeOwnerGetShapeCount(OwnerShapeId);
+						Aabb BigBox = new Aabb();
+
+						for (int i = 0; i < shapes; i++)
 						{
-							lookAt = targetsOnMap[strWord][0].destination;
-							thingObject.LookAt(lookAt, Vector3.Up);
-							angle = targetsOnMap[strWord][0].angle;
+							Shape3D shape = door.ShapeOwnerGetShape(OwnerShapeId, i);
+							Aabb box = shape.GetDebugMesh().GetAabb();
+							if (i == 0)
+								BigBox = new Aabb(box.Position, box.Size);
+							else
+								BigBox = BigBox.Merge(box);
 						}
-					GameManager.Instance.interMissionCamera = camera;
-					GameManager.Instance.SetViewPortToCamera(camera, GameManager.Instance.IntermissionViewPort);
-				}
-				break;
-				//Portal Camera
-				case "misc_portal_camera":
-				{
-					thingObject.GlobalPosition = entity.origin;
+						door.Init(angle, hitpoints, speed, wait, lip, BigBox, dmg);
 
-					int angle = 0;
-					Vector3 lookAt = Vector3.Forward;
-//					if (entity.entityData.TryGetValue("angle", out strWord))
-//						GameManager.Print("Angle " + strWord);
-
-					if (entity.entityData.TryGetValue("target", out strWord))
-						if (targetsOnMap.ContainsKey(strWord))
-						{
-							lookAt = targetsOnMap[strWord][0].destination;
-							thingObject.LookAt(lookAt, Vector3.Up);
-							angle = targetsOnMap[strWord][0].angle;
-						}
-
-					if (entity.entityData.TryGetValue("targetname", out strWord))
-					{
-						Camera3D camera = new Camera3D();
-						thingObject.AddChild(camera);
-						camera.CullMask = GameManager.AllPlayerViewMask;
-						portalCameras.Add(strWord, camera);
-					}
-//					if (entity.entityData.TryGetValue("roll", out strWord))
-//						GameManager.Print("Roll " + strWord);
-				}
-				break;
-				//Portal Surface
-				case "misc_portal_surface":
-				{
-					PortalSurface portalSurface = new PortalSurface();
-					GameManager.Instance.TemporaryObjectsHolder.AddChild(portalSurface);
-					portalSurface.GlobalPosition = entity.origin;
-					if (entity.entityData.TryGetValue("target", out strWord))
-					{
-						portalSurface.targetName = strWord;
-						GameManager.Print("TargetName " + strWord);
-					}
-					portalSurfaces.Add(portalSurface);
-				}
-				break;
-				//Remove PowerUps
-/*
-				case "target_remove_powerups":
-					{
 						if (entity.entityData.TryGetValue("targetname", out strWord))
 						{
 							string target = strWord;
@@ -1297,283 +1224,333 @@ public partial class ThingsManager : Node
 							TriggerController tc;
 							if (!triggerToActivate.TryGetValue(target, out tc))
 							{
-								tc = thingObject.AddComponent<TriggerController>();
+								tc = new TriggerController();
+								thingObject.AddChild(tc);
 								triggerToActivate.Add(target, tc);
 							}
-							else
-								Destroy(thingObject);
 							tc.Repeatable = true;
+							tc.AutoReturn = true;
+							tc.AutoReturnTime = wait;
 							tc.SetController(target, (p) =>
 							{
-								p.RemovePowerUps();
+								door.CurrentState = DoorController.State.Opening;
+							});
+						}
+						else //If it's not external trigger
+						{
+							if (hitpoints == 0)//If  not damagable, then create a trigger and collider
+							{
+								float max = BigBox.GetLongestAxisSize();
+								Area3D triggerCollider = new Area3D();
+								door.AddChild(triggerCollider);
+								CollisionShape3D mc = new CollisionShape3D();
+								mc.Name = "Door Trigger";
+								triggerCollider.AddChild(mc);
+								triggerCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
+								triggerCollider.CollisionMask = GameManager.TakeDamageMask;
+								triggerCollider.InputRayPickable = false;
+
+								SphereShape3D sphere = new SphereShape3D();
+								sphere.Radius = max * .5f;
+								mc.Shape = sphere;
+
+								TriggerController tc = new TriggerController();
+								thingObject.AddChild(tc);
+								tc.Repeatable = true;
+								tc.AutoReturn = true;
+								tc.AutoReturnTime = wait;
+								tc.SetController("", (p) =>
+								{
+									door.CurrentState = DoorController.State.Opening;
+								});
+
+								triggerCollider.GlobalPosition = BigBox.GetCenter();
+								triggerCollider.BodyEntered += tc.OnBodyEntered;
+								tc.Areas.Add(triggerCollider);
+							}
+						}
+					}
+				}
+				break;
+				case ThingController.ThingType.Target:
+				{
+					//Delay
+					if (entity.name == "target_delay")
+					{
+						string target;
+						if (!entity.entityData.TryGetValue("target", out target))
+							continue;
+						if (entity.entityData.TryGetValue("targetname", out strWord))
+						{
+							float wait = 0;
+							entity.entityData.TryGetNumValue("wait", out wait);
+
+							string targetName = strWord;
+							TriggerController source, relay;
+							if (!triggerToActivate.TryGetValue(targetName, out source))
+							{
+								source = new TriggerController();
+								thingObject.AddChild(source);
+								triggerToActivate.Add(targetName, source);
+							}
+
+							if (!triggerToActivate.TryGetValue(target, out relay))
+								relay = null;
+
+							source.SetController(targetName, (p) =>
+							{
+								if (relay == null)
+								{
+									if (!triggerToActivate.TryGetValue(target, out relay))
+										return;
+								}
+
+								relay.ActivateAfterTime(wait, p);
 							});
 						}
 					}
-					break;
-*/
-				//Delay
-				case "target_delay":
-				{
-					string target;
-					if (!entity.entityData.TryGetValue("target", out target))
-						continue;
-					if (entity.entityData.TryGetValue("targetname", out strWord))
+					//Relay
+					else if (entity.name == "target_relay")
 					{
-						float wait = 0;
-						entity.entityData.TryGetNumValue("wait", out wait);
-
-						string targetName = strWord;
-						TriggerController source, relay;
-						if (!triggerToActivate.TryGetValue(targetName, out source))
+						string target;
+						if (!entity.entityData.TryGetValue("target", out target))
+							continue;
+						if (entity.entityData.TryGetValue("targetname", out strWord))
 						{
-							source = new TriggerController();
-							thingObject.AddChild(source);
-							triggerToActivate.Add(targetName, source);
-						}
-
-						if (!triggerToActivate.TryGetValue(target, out relay))
-							relay = null;
-
-						source.SetController(targetName, (p) =>
-						{
-							if (relay == null)
+							string targetName = strWord;
+							TriggerController source, relay;
+							if (!triggerToActivate.TryGetValue(targetName, out source))
 							{
-								if (!triggerToActivate.TryGetValue(target, out relay))
-									return;
+								source = new TriggerController();
+								thingObject.AddChild(source);
+								triggerToActivate.Add(targetName, source);
 							}
 
-							relay.ActivateAfterTime(wait, p);
-						});
-						}
-					}
-					break;
-				//Relay
-				case "target_relay":
-				{
-					string target;
-					if (!entity.entityData.TryGetValue("target", out target))
-						continue;
-					if (entity.entityData.TryGetValue("targetname", out strWord))
-					{
-						string targetName = strWord;
-						TriggerController source, relay;
-						if (!triggerToActivate.TryGetValue(targetName, out source))
-						{
-							source = new TriggerController();
-							thingObject.AddChild(source);
-							triggerToActivate.Add(targetName, source);
-						}
+							if (!triggerToActivate.TryGetValue(target, out relay))
+								relay = null;
 
-						if (!triggerToActivate.TryGetValue(target, out relay))
-							relay = null;
-
-						source.SetController(targetName, (p) =>
-						{
-							if (relay == null)
+							source.SetController(targetName, (p) =>
 							{
-								if (!triggerToActivate.TryGetValue(target, out relay))
-									return;
-							}
-							relay.Activate(p);
-						});
-					}
-				}
-				break;
-				//Give
-				case "target_give":
-				{
-					string target;
-					if (!entity.entityData.TryGetValue("target", out target))
-						continue;
-					if (entity.entityData.TryGetValue("targetname", out strWord))
-					{
-						string targetName = strWord;
-						TriggerController tc;
-						if (!triggerToActivate.TryGetValue(targetName, out tc))
-						{
-							tc = new TriggerController();
-							thingObject.AddChild(tc);
-							triggerToActivate.Add(targetName, tc);
-						}
-
-						tc.SetController(targetName, (p) =>
-						{
-							if (p == null)
-								return;
-
-							List<Target> targetList = null;
-							if (!targetsOnMap.TryGetValue(target, out targetList))
-								return;
-							foreach (Target target in targetList)
-							{
-								ItemPickup itemPickup;
-								if (giveItemPickup.TryGetValue(target.entityData["classname"], out itemPickup))
-									itemPickup.PickUp(p, false);
-							}
-						});
-					}
-				}
-				break;
-				//JumpPad
-				case "trigger_push":
-				{
-					string target;
-					List<Target> dest;
-					if (!entity.entityData.TryGetValue("target", out target))
-						continue;
-					if (!targetsOnMap.TryGetValue(target, out dest))
-						continue;
-
-					thingObject.GlobalPosition = entity.origin;
-					JumpPadThing jumpPad = new JumpPadThing();
-					thingObject.AddChild(jumpPad);
-					strWord = entity.entityData["model"];
-					int model = int.Parse(strWord.Trim('*'));
-					Vector3 destination = dest[0].destination;
-					Vector3 center = MapLoader.GenerateJumpPadCollider(jumpPad, model);
-					jumpPad.Init(destination, center);
-				}
-				break;
-				//Teleporter
-				case "trigger_teleport":
-				{
-					string target;
-					List<Target> dest;
-					if (!entity.entityData.TryGetValue("target", out target))
-						continue;
-					if (!targetsOnMap.TryGetValue(target, out dest))
-						continue;
-					if (!entity.entityData.TryGetValue("model", out strWord))
-						continue;
-
-					TeleporterThing teleporter = new  TeleporterThing();
-					thingObject.AddChild(teleporter);
-					int model = int.Parse(strWord.Trim('*'));
-					MapLoader.GenerateGeometricCollider(thingObject, teleporter, model, ContentFlags.Teleporter);
-					teleporter.Init(dest, entity.entityData);
-				}
-				break;
-				//Location
-				case "target_location":
-				{
-					string message;
-					thingObject.GlobalPosition = entity.origin;
-					if (entity.entityData.TryGetValue("message", out message))
-						thingObject.EditorDescription = message;
-					MapLoader.Locations.Add(thingObject);
-				}
-				break;
-				//Speaker
-				case "target_speaker":
-				{
-
-					strWord = GetSoundName(entity.entityData["noise"]);
-					bool isAudio3d = true;
-					AudioStreamPlayer audioStream2D = null;
-					MultiAudioStream audioStream = null;
-
-					thingObject.GlobalPosition = entity.origin;
-					if (entity.entityData.ContainsKey("spawnflags"))
-					{
-
-						string audioFile = strWord;
-						audioStream = new MultiAudioStream();
-						thingObject.AddChild(audioStream);
-						audioStream.Bus = "BKGBus";
-
-						strWord = entity.entityData["spawnflags"];
-
-						int spawnflags = int.Parse(strWord);
-						if ((spawnflags & 3) != 0)
-						{
-							audioStream.Stream = SoundManager.LoadSound(audioFile,true);
-							if ((spawnflags & 1) != 0)
-								audioStream.Play();
-						}
-						else
-						{
-							if ((spawnflags & 8) != 0) //Activator Sound
-							{
-								if (entity.entityData.TryGetValue("targetname", out strWord))
+								if (relay == null)
 								{
-									string target = strWord;
-									bool playerSound = false;
-
-									if (audioFile.Contains('*'))
-									{
-										playerSound = true;
-										audioFile = audioFile.Trim('*');
-									}
-									else
-										audioStream.Stream = SoundManager.LoadSound(audioFile);
-									TriggerController tc;
-									if (!triggerToActivate.TryGetValue(target, out tc))
-									{
-										tc = new TriggerController();
-										thingObject.AddChild(tc);
-										triggerToActivate.Add(target, tc);
-									}
-									tc.Repeatable = true;
-									tc.SetController(target, (p) =>
-									{
-										if (playerSound)
-											p.PlayModelSound(audioFile);
-										else if (audioStream != null)
-											audioStream.Play();
-									});
+									if (!triggerToActivate.TryGetValue(target, out relay))
+										return;
 								}
+								relay.Activate(p);
+							});
+						}
+					}
+					//Give
+					else if (entity.name == "target_give")
+					{
+						string target;
+						if (!entity.entityData.TryGetValue("target", out target))
+							continue;
+						if (entity.entityData.TryGetValue("targetname", out strWord))
+						{
+							string targetName = strWord;
+							TriggerController tc;
+							if (!triggerToActivate.TryGetValue(targetName, out tc))
+							{
+								tc = new TriggerController();
+								thingObject.AddChild(tc);
+								triggerToActivate.Add(targetName, tc);
+							}
+
+							tc.SetController(targetName, (p) =>
+							{
+								if (p == null)
+									return;
+
+								List<Target> targetList = null;
+								if (!targetsOnMap.TryGetValue(target, out targetList))
+									return;
+								foreach (Target target in targetList)
+								{
+									ItemPickup itemPickup;
+									if (giveItemPickup.TryGetValue(target.entityData["classname"], out itemPickup))
+										itemPickup.PickUp(p, false);
+								}
+							});
+						}
+					}
+					//Location
+					else if (entity.name == "target_location")
+					{
+						string message;
+						thingObject.GlobalPosition = entity.origin;
+						if (entity.entityData.TryGetValue("message", out message))
+							thingObject.EditorDescription = message;
+						MapLoader.Locations.Add(thingObject);
+					}
+					//Speaker
+					else if (entity.name == "target_speaker")
+					{
+						strWord = GetSoundName(entity.entityData["noise"]);
+						bool isAudio3d = true;
+						AudioStreamPlayer audioStream2D = null;
+						MultiAudioStream audioStream = null;
+
+						thingObject.GlobalPosition = entity.origin;
+						if (entity.entityData.ContainsKey("spawnflags"))
+						{
+							string audioFile = strWord;
+							audioStream = new MultiAudioStream();
+							thingObject.AddChild(audioStream);
+							audioStream.Bus = "BKGBus";
+
+							strWord = entity.entityData["spawnflags"];
+
+							int spawnflags = int.Parse(strWord);
+							if ((spawnflags & 3) != 0)
+							{
+								audioStream.Stream = SoundManager.LoadSound(audioFile, true);
+								if ((spawnflags & 1) != 0)
+									audioStream.Play();
 							}
 							else
 							{
-								if ((spawnflags & 4) != 0) //Global 2D Sound
+								if ((spawnflags & 8) != 0) //Activator Sound
 								{
-									isAudio3d = false;
-									audioStream.QueueFree();
-									audioStream2D = new AudioStreamPlayer();
-									thingObject.AddChild(audioStream2D);
-									audioStream2D.Stream = SoundManager.LoadSound(audioFile);
-									audioStream2D.Bus = "BKGBus";
-								}
-								if (entity.entityData.TryGetValue("targetname", out strWord))
-								{
-									string target = strWord;
+									if (entity.entityData.TryGetValue("targetname", out strWord))
+									{
+										string target = strWord;
+										bool playerSound = false;
 
-									TriggerController tc;
-									if (!triggerToActivate.TryGetValue(target, out tc))
-									{
-										tc = new TriggerController();
-										thingObject.AddChild(tc);
-										triggerToActivate.Add(target, tc);
-									}
-									tc.Repeatable = true;
-									tc.SetController(target, (p) =>
-									{
-										if (isAudio3d)
-											audioStream.Play();
+										if (audioFile.Contains('*'))
+										{
+											playerSound = true;
+											audioFile = audioFile.Trim('*');
+										}
 										else
-											audioStream2D.Play();
-									});
+											audioStream.Stream = SoundManager.LoadSound(audioFile);
+										TriggerController tc;
+										if (!triggerToActivate.TryGetValue(target, out tc))
+										{
+											tc = new TriggerController();
+											thingObject.AddChild(tc);
+											triggerToActivate.Add(target, tc);
+										}
+										tc.Repeatable = true;
+										tc.SetController(target, (p) =>
+										{
+											if (playerSound)
+												p.PlayModelSound(audioFile);
+											else if (audioStream != null)
+												audioStream.Play();
+										});
+									}
+								}
+								else
+								{
+									if ((spawnflags & 4) != 0) //Global 2D Sound
+									{
+										isAudio3d = false;
+										audioStream.QueueFree();
+										audioStream2D = new AudioStreamPlayer();
+										thingObject.AddChild(audioStream2D);
+										audioStream2D.Stream = SoundManager.LoadSound(audioFile);
+										audioStream2D.Bus = "BKGBus";
+									}
+									if (entity.entityData.TryGetValue("targetname", out strWord))
+									{
+										string target = strWord;
+
+										TriggerController tc;
+										if (!triggerToActivate.TryGetValue(target, out tc))
+										{
+											tc = new TriggerController();
+											thingObject.AddChild(tc);
+											triggerToActivate.Add(target, tc);
+										}
+										tc.Repeatable = true;
+										tc.SetController(target, (p) =>
+										{
+											if (isAudio3d)
+												audioStream.Play();
+											else
+												audioStream2D.Play();
+										});
+									}
 								}
 							}
 						}
+						else if (entity.entityData.ContainsKey("random"))
+							AddRandomTimeToSound(thingObject, entity.entityData, audioStream2D, audioStream, isAudio3d);
 					}
-					else if (entity.entityData.ContainsKey("random"))
-						AddRandomTimeToSound(thingObject, entity.entityData, audioStream2D, audioStream, isAudio3d);
-				}
-				break;
-				//Advertisement
-				case "advertisement":
+				//Remove PowerUps
+/*
+				else if (entity.name ==  "target_remove_powerups":
 				{
-					if (entity.entityData.TryGetValue("model", out strWord))
+					if (entity.entityData.TryGetValue("targetname", out strWord))
 					{
+						string target = strWord;
+
+						TriggerController tc;
+						if (!triggerToActivate.TryGetValue(target, out tc))
+						{
+							tc = thingObject.AddComponent<TriggerController>();
+							triggerToActivate.Add(target, tc);
+						}
+						else
+							Destroy(thingObject);
+						tc.Repeatable = true;
+						tc.SetController(target, (p) =>
+						{
+							p.RemovePowerUps();
+						});
+					}
+				}
+*/
+				}
+				break;
+				case ThingController.ThingType.Trigger:
+				{
+					//Trigger Hurt
+					if (entity.name == "trigger_hurt")
+					{
+						int dmg = 9999;
+						strWord = entity.entityData["model"];
 						int model = int.Parse(strWord.Trim('*'));
-						MapLoader.GenerateGeometricSurface(thingObject, model);
-						MapLoader.GenerateGeometricCollider(thingObject, null, model, 0, false);
+						if (entity.entityData.TryGetValue("dmg", out strWord))
+							dmg = int.Parse(strWord);
+
+						TriggerController tc = new TriggerController();
+						thingObject.AddChild(tc);
+						Area3D objCollider = new Area3D();
+						thingObject.AddChild(objCollider);
+						MapLoader.GenerateGeometricCollider(thingObject, objCollider, model, ContentFlags.Trigger);
+						objCollider.BodyEntered += tc.OnBodyEntered;
+						tc.Areas.Add(objCollider);
+
+						tc.Repeatable = true;
+						tc.SetController("trigger_hurt", (p) =>
+						{
+							p.Damage(dmg, DamageType.Generic);
+						});
+					}
+					//JumpPad
+					else if (entity.name == "trigger_push")
+					{
+						string target;
+						List<Target> dest;
+						if (!entity.entityData.TryGetValue("target", out target))
+							continue;
+						if (!targetsOnMap.TryGetValue(target, out dest))
+							continue;
+
+						thingObject.GlobalPosition = entity.origin;
+						JumpPadThing jumpPad = new JumpPadThing();
+						thingObject.AddChild(jumpPad);
+						strWord = entity.entityData["model"];
+						int model = int.Parse(strWord.Trim('*'));
+						Vector3 destination = dest[0].destination;
+						Vector3 center = MapLoader.GenerateJumpPadCollider(jumpPad, model);
+						jumpPad.Init(destination, center);
 					}
 				}
 				break;
-				//Worldspawn
-				case "worldspawn":
+				case ThingController.ThingType.WorldSpawn:
 				{
 					if (entity.entityData.TryGetValue("message", out strWord))
 						GameManager.Print("Map Message: " + strWord);

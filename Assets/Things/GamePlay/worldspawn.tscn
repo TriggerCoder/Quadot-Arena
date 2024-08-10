@@ -5,3 +5,4 @@
 [node name="worldspawn" type="Node3D"]
 script = ExtResource("1_rpucn")
 respawnSound = ""
+thingType = 4

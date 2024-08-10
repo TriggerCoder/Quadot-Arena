@@ -5,4 +5,4 @@
 [node name="team_CTF_redspawn" type="Node3D"]
 script = ExtResource("1_y3k3i")
 respawnSound = ""
-thingType = 3
+thingType = 8

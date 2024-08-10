@@ -5,4 +5,4 @@
 [node name="func_bobbing" type="Node3D"]
 script = ExtResource("1_kywsg")
 respawnSound = ""
-thingType = 6
+thingType = 1

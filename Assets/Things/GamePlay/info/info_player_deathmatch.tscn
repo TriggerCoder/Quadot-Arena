@@ -5,4 +5,4 @@
 [node name="info_player_deathmatch" type="Node3D"]
 script = ExtResource("2_3gift")
 respawnSound = ""
-thingType = 3
+thingType = 8

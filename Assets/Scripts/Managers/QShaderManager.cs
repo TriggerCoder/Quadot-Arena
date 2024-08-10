@@ -780,89 +780,83 @@ public static class QShaderManager
 		for (int i = 0; i < qShader.qShaderGlobal.deformVertexes.Count; i++)
 		{
 			string[] VertexFunc = qShader.qShaderGlobal.deformVertexes[i];
+			if (VertexFunc[0] == "WAVE")
 			{
-				if (VertexFunc[0] == "WAVE")
+				float div = TryToParseFloat(VertexFunc[1]) * GameManager.sizeDividor;
+				string DeformFunc = VertexFunc[2];
+				float offset = TryToParseFloat(VertexFunc[3]);
+				float amp = TryToParseFloat(VertexFunc[4]);
+				float phase = TryToParseFloat(VertexFunc[5]);
+				float freq = TryToParseFloat(VertexFunc[6]);
+
+				if (div > 0)
+					div = 1.0f / div;
+				else
+					div = 100 * GameManager.sizeDividor;
+
+				Vars += "\tfloat OffSet_" + i + " = (VERTEX.x + VERTEX.y + VERTEX.z) * " + div.ToString("0.00") + ";\n";
+				if (DeformFunc == "SIN")
 				{
-					float div = TryToParseFloat(VertexFunc[1]) * GameManager.sizeDividor;
-					string DeformFunc = VertexFunc[2];
-					float offset = TryToParseFloat(VertexFunc[3]);
-					float amp = TryToParseFloat(VertexFunc[4]);
-					float phase = TryToParseFloat(VertexFunc[5]);
-					float freq = TryToParseFloat(VertexFunc[6]);
-
-					if (div > 0)
-						div = 1.0f / div;
-					else
-						div = 100 * GameManager.sizeDividor;
-
-					Vars += "\tfloat OffSet_" + i + " = (VERTEX.x + VERTEX.y + VERTEX.z) * " + div.ToString("0.00") + ";\n";
-					{
-						if (DeformFunc == "SIN")
-						{
-							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
-							Verts += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") + " +  OffSet_" + i + "))  * " + amp.ToString("0.00") + "); \n";
-						}
-						else if (DeformFunc == "SQUARE")
-						{
-							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
-							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))); \n";
-						}
-						else if (DeformFunc == "TRIANGLE")
-						{
-
-							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
-							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))))); \n";
-						}
-						else if (DeformFunc == "SAWTOOTH")
-						{
-							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
-							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))); \n";
-						}
-						else if (DeformFunc == "INVERSESAWTOOTH")
-						{
-							Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
-							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + ")))); \n";
-						}
-					}
+					Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+					Verts += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") + " +  OffSet_" + i + "))  * " + amp.ToString("0.00") + "); \n";
 				}
-				else if (VertexFunc[0] == "MOVE")
+				else if (DeformFunc == "SQUARE")
 				{
-					Vector3 move = new Vector3(-1.0f * TryToParseFloat(VertexFunc[1]), TryToParseFloat(VertexFunc[3]), TryToParseFloat(VertexFunc[2])) * GameManager.sizeDividor;
-					string DeformFunc = VertexFunc[4];
-					float offset = TryToParseFloat(VertexFunc[5]);
-					float amp = TryToParseFloat(VertexFunc[6]);
-					float phase = TryToParseFloat(VertexFunc[7]);
-					float freq = TryToParseFloat(VertexFunc[8]);
+					Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+					Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))); \n";
+				}
+				else if (DeformFunc == "TRIANGLE")
+				{
 
-					Vars += "\tvec3 OffSet_" + i + " = vec3(" + move.X.ToString("0.00") + ", "+ move.Y.ToString("0.00") + ", " + move.Z.ToString("0.00") + ");\n";
-					{
-						if (DeformFunc == "SIN")
-						{
-							Verts += "\tVERTEX += OffSet_" + i + " * (";
-							Verts += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") +"))  * " + amp.ToString("0.00") + "); \n";
-						}
-						else if (DeformFunc == "SQUARE")
-						{
-							Verts += "\tVERTEX += OffSet_" + i + " * (";
-							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
-						}
-						else if (DeformFunc == "TRIANGLE")
-						{
-							Verts += "\tVERTEX += OffSet_" + i + " * (";
-							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
-						}
-						else if (DeformFunc == "SAWTOOTH")
-						{
+					Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+					Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))))); \n";
+				}
+				else if (DeformFunc == "SAWTOOTH")
+				{
+					Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+					Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + "))); \n";
+				}
+				else if (DeformFunc == "INVERSESAWTOOTH")
+				{
+					Verts += "\tVERTEX += NORMAL * " + GameManager.sizeDividor.ToString("0.00") + " * (";
+					Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " +  OffSet_" + i + ")))); \n";
+				}
+			}
+			else if (VertexFunc[0] == "MOVE")
+			{
+				Vector3 move = new Vector3(-1.0f * TryToParseFloat(VertexFunc[1]), TryToParseFloat(VertexFunc[3]), TryToParseFloat(VertexFunc[2])) * GameManager.sizeDividor;
+				string DeformFunc = VertexFunc[4];
+				float offset = TryToParseFloat(VertexFunc[5]);
+				float amp = TryToParseFloat(VertexFunc[6]);
+				float phase = TryToParseFloat(VertexFunc[7]);
+				float freq = TryToParseFloat(VertexFunc[8]);
 
-							Verts += "\tVERTEX += OffSet_" + i + " * (";
-							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
-						}
-						else if (DeformFunc == "INVERSESAWTOOTH")
-						{
-							Verts += "\tVERTEX += OffSet_" + i + " * (";
-							Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + ")))); \n";
-						}
-					}
+				Vars += "\tvec3 OffSet_" + i + " = vec3(" + move.X.ToString("0.00") + ", " + move.Y.ToString("0.00") + ", " + move.Z.ToString("0.00") + ");\n";
+				if (DeformFunc == "SIN")
+				{
+					Verts += "\tVERTEX += OffSet_" + i + " * (";
+					Verts += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") + "))  * " + amp.ToString("0.00") + "); \n";
+				}
+				else if (DeformFunc == "SQUARE")
+				{
+					Verts += "\tVERTEX += OffSet_" + i + " * (";
+					Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
+				}
+				else if (DeformFunc == "TRIANGLE")
+				{
+					Verts += "\tVERTEX += OffSet_" + i + " * (";
+					Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
+				}
+				else if (DeformFunc == "SAWTOOTH")
+				{
+
+					Verts += "\tVERTEX += OffSet_" + i + " * (";
+					Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
+				}
+				else if (DeformFunc == "INVERSESAWTOOTH")
+				{
+					Verts += "\tVERTEX += OffSet_" + i + " * (";
+					Verts += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + ")))); \n";
 				}
 			}
 		}
@@ -1061,38 +1055,36 @@ public static class QShaderManager
 			float amp = TryToParseFloat(GenFunc[3]);
 			float phase = TryToParseFloat(GenFunc[4]);
 			float freq = TryToParseFloat(GenFunc[5]);
+			if (RGBFunc == "SIN")
 			{
-				if (RGBFunc == "SIN")
-				{
-					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
-					StageGen += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") + "))  * " + amp.ToString("0.00") + "); \n";
-				}
-				else if (RGBFunc == "SQUARE")
-				{
-					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
-					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
-				}
-				else if (RGBFunc == "TRIANGLE")
-				{
-					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
-					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
-				}
-				else if (RGBFunc == "SAWTOOTH")
-				{
-					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
-					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
-				}
-				else if (RGBFunc == "INVERSESAWTOOTH")
-				{
-					StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
-					StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + ")))); \n";
-				}
+				StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
+				StageGen += offset.ToString("0.00") + " + sin(6.28 * " + freq.ToString("0.00") + " * (Time +" + phase.ToString("0.00") + "))  * " + amp.ToString("0.00") + "); \n";
+			}
+			else if (RGBFunc == "SQUARE")
+			{
+				StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
+				StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * round(fract(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
+			}
+			else if (RGBFunc == "TRIANGLE")
+			{
+				StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
+				StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (abs(2.0 * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(0.5 + Time * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))))); \n";
+			}
+			else if (RGBFunc == "SAWTOOTH")
+			{
+				StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
+				StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + "))); \n";
+			}
+			else if (RGBFunc == "INVERSESAWTOOTH")
+			{
+				StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * (";
+				StageGen += offset.ToString("0.00") + " + " + amp.ToString("0.00") + " * (1.0 - (Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + " - floor(Time  * " + freq.ToString("0.00") + " + " + phase.ToString("0.00") + ")))); \n";
 			}
 		}
 		else if (GenFunc.Length > 0)
 		{
 			string Func = GenFunc[0];
-			if (Func == "FROMVERTEX")
+			if (Func == "VERTEX")
 				StageGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * vertx_color.rgb ; \n";
 			else if (Func == "ENTITY")
 			{
@@ -1260,63 +1252,61 @@ public static class QShaderManager
 
 				if (currentStage == 0)
 				{
+					if (src == "GL_ZERO")
 					{
-						if (src == "GL_ZERO")
 						{
+							if (dst == "GL_SRC_COLOR")
 							{
-								if (dst == "GL_SRC_COLOR")
-								{
-									Blend = "\tcolor = Stage_" + currentStage + "; \n";
-									qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
-								}
-								else if (dst == "GL_ONE_MINUS_SRC_COLOR")
-								{
-									Blend = "\tcolor.rgb = " + cdst + ";\n";
-									qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Multiplicative;
-								}
-								else
-								{
-									Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
-									Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
-								}
+								Blend = "\tcolor = Stage_" + currentStage + "; \n";
+								qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
+							}
+							else if (dst == "GL_ONE_MINUS_SRC_COLOR")
+							{
+								Blend = "\tcolor.rgb = " + cdst + ";\n";
+								qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Multiplicative;
+							}
+							else
+							{
+								Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
+								Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
 							}
 						}
-						else if (src == "GL_DST_COLOR")
+					}
+					else if (src == "GL_DST_COLOR")
+					{
 						{
+							if (dst == "GL_ZERO")
 							{
-								if (dst == "GL_ZERO")
-								{
-									Blend = "\tcolor = Stage_" + currentStage + "; \n";
-									qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
-								}
-								else
-								{
-									Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
-									Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
-								}
+								Blend = "\tcolor = Stage_" + currentStage + "; \n";
+								qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
+							}
+							else
+							{
+								Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
+								Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
 							}
 						}
-						else if (src == "GL_SRC_ALPHA")
+					}
+					else if (src == "GL_SRC_ALPHA")
+					{
 						{
+							if (dst == "GL_ONE_MINUS_SRC_ALPHA")
 							{
-								if (dst == "GL_ONE_MINUS_SRC_ALPHA")
-								{
-									Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * Stage_" + currentStage + ".a + color.rgb * (1.0 - Stage_" + currentStage + ".a); \n";
-									Blend += "\tcolor.a = Stage_" + currentStage + ".a *   Stage_" + currentStage + ".a;\n";
-									alphaIsTransparent = true;
-								}
-								else
-								{
-									Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
-									Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
-								}
+								Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * Stage_" + currentStage + ".a + color.rgb * (1.0 - Stage_" + currentStage + ".a); \n";
+								Blend += "\tcolor.a = Stage_" + currentStage + ".a *   Stage_" + currentStage + ".a;\n";
+								alphaIsTransparent = true;
+							}
+							else
+							{
+								Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
+								Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
 							}
 						}
-						else
-						{
-							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
-							Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
-						}
+					}
+					else
+					{
+						Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
+						Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
 					}
 				}
 				else
@@ -1372,7 +1362,6 @@ public static class QShaderManager
 						node++;
 						if (node == 2)
 							stage++;
-//						i = strWord.Length;
 					}
 					break;
 					case '}':
@@ -1622,131 +1611,123 @@ public class QShaderGlobal
 	}
 	public void AddGlobal(string Params, string Value)
 	{
+		if (Params == "SURFACEPARM")
 		{
-			if (Params == "SURFACEPARM")
+			if (surfaceParms == null)
+				surfaceParms = new List<string>();
+			surfaceParms.Add(Value);
+			if (Value == "TRANS")
 			{
-				if (surfaceParms == null)
-					surfaceParms = new List<string>();
-				surfaceParms.Add(Value);
-				{
-					if (Value == "TRANS")
-					{
-						if (!lava)
-							trans = true;
-					}
-					else if (Value == "NODLIGHT")
-						unShaded = true;
-					else if (Value == "SKY")
-						isSky = true;
-					else if (Value == "LAVA")
-					{
-						lava = true;
-						if (trans)
-							trans = false;
-					}
-					else if (Value == "WATER")
-						water = true;
-				}
+				if (!lava)
+					trans = true;
 			}
-			else if (Params == "SKYPARMS")
+			else if (Value == "NODLIGHT")
+				unShaded = true;
+			else if (Value == "SKY")
+				isSky = true;
+			else if (Value == "LAVA")
 			{
-				if (skyParms == null)
-					skyParms = new List<string>();
-				skyParms.AddRange(Value.Split(' '));
+				lava = true;
+				if (trans)
+					trans = false;
 			}
-			else if (Params == "CULL")
-			{
-				{
-					if (Value == "FRONT")
-						cullType = CullType.Back;
-					else if (Value == "BACK")
-						cullType = CullType.Front;
-					else
-						cullType = CullType.Disable;
-				}
-			}
-			else if (Params == "DEFORMVERTEXES")
-			{
-				if (Value.Contains("AUTOSPRITE"))
-				{
-					if (Value.Contains('2'))
-						billboard = SpriteType.FixedY;
-					else
-						billboard = SpriteType.Enabled;
-				}
-				else
-				{
-					if (deformVertexes == null)
-						deformVertexes = new List<string[]>();
-					deformVertexes.Add(Value.Split(' '));
-				}
-			}
-			else if (Params == "FOGPARMS")
-			{
-				fogParms = Value.Split(' ');
-				isFog = true;
-			}
-			else if (Params == "SORT")
-			{
-				{
-					if (Value == "ADDITIVE")
-						sort = SortType.Additive;
-					else
-						sort = SortType.Opaque;
-				}
-			}
-			else if (Params == "TESSSIZE")
-			{
-				if (tessSize == null)
-					tessSize = new List<string>();
-				tessSize.Add(Value);
-			}
-			else if (Params == "Q3MAP_BACKSHADER")
-			{
-				if (q3map_BackShader == null)
-					q3map_BackShader = new List<string>();
-				q3map_BackShader.Add(Value);
-			}
-			else if (Params == "Q3MAP_GLOBALTEXTURE")
-			{
-				if (q3map_GlobalTexture == null)
-					q3map_GlobalTexture = new List<string>();
-				q3map_GlobalTexture.Add(Value);
-			}
-			else if (Params == "Q3MAP_SUN")
-			{
-				if (sunParams == null)
-					sunParams = Value.Split(' ');
-			}
-			else if (Params == "Q3MAP_SURFACELIGHT")
-			{
-				if (q3map_SurfaceLight == null)
-					q3map_SurfaceLight = new List<string>();
-				q3map_SurfaceLight.Add(Value);
-			}
-			else if (Params == "Q3MAP_LIGHTIMAGE")
-			{
-				if (q3map_LightImage == null)
-					q3map_LightImage = new List<string>();
-				q3map_LightImage.Add(Value);
-			}
-			else if (Params == "Q3MAP_LIGHTSUBDIVIDE")
-			{
-				if (q3map_LightSubdivide == null)
-					q3map_LightSubdivide = new List<string>();
-				q3map_LightSubdivide.Add(Value);
-			}
-			else if (Params == "NOPICMIP")
-				noPicMip = true;
-			else if (Params == "NOMIPMAP")
-				noMipMap = true;
-			else if (Params == "POLYGONOFFSET")
-				polygonOffset = true;
-			else if (Params == "PORTAL")
-				portal = true;
-			else if (Params == "QER_EDITORIMAGE")
-				editorImage = Value.StripExtension().ToUpper();
+			else if (Value == "WATER")
+				water = true;
 		}
+		else if (Params == "SKYPARMS")
+		{
+			if (skyParms == null)
+				skyParms = new List<string>();
+			skyParms.AddRange(Value.Split(' '));
+		}
+		else if (Params == "CULL")
+		{
+			if (Value == "FRONT")
+				cullType = CullType.Back;
+			else if (Value == "BACK")
+				cullType = CullType.Front;
+			else
+				cullType = CullType.Disable;
+		}
+		else if (Params == "DEFORMVERTEXES")
+		{
+			if (Value.Contains("AUTOSPRITE"))
+			{
+				if (Value.Contains('2'))
+					billboard = SpriteType.FixedY;
+				else
+					billboard = SpriteType.Enabled;
+			}
+			else
+			{
+				if (deformVertexes == null)
+					deformVertexes = new List<string[]>();
+				deformVertexes.Add(Value.Split(' '));
+			}
+		}
+		else if (Params == "FOGPARMS")
+		{
+			fogParms = Value.Split(' ');
+			isFog = true;
+		}
+		else if (Params == "SORT")
+		{
+			if (Value == "ADDITIVE")
+				sort = SortType.Additive;
+			else
+				sort = SortType.Opaque;
+		}
+		else if (Params == "TESSSIZE")
+		{
+			if (tessSize == null)
+				tessSize = new List<string>();
+			tessSize.Add(Value);
+		}
+		else if (Params == "Q3MAP_BACKSHADER")
+		{
+			if (q3map_BackShader == null)
+				q3map_BackShader = new List<string>();
+			q3map_BackShader.Add(Value);
+		}
+		else if (Params == "Q3MAP_GLOBALTEXTURE")
+		{
+			if (q3map_GlobalTexture == null)
+				q3map_GlobalTexture = new List<string>();
+			q3map_GlobalTexture.Add(Value);
+		}
+		else if (Params == "Q3MAP_SUN")
+		{
+			if (sunParams == null)
+				sunParams = Value.Split(' ');
+		}
+		else if (Params == "Q3MAP_SURFACELIGHT")
+		{
+			if (q3map_SurfaceLight == null)
+				q3map_SurfaceLight = new List<string>();
+			q3map_SurfaceLight.Add(Value);
+		}
+		else if (Params == "Q3MAP_LIGHTIMAGE")
+		{
+			if (q3map_LightImage == null)
+				q3map_LightImage = new List<string>();
+			q3map_LightImage.Add(Value);
+		}
+		else if (Params == "Q3MAP_LIGHTSUBDIVIDE")
+		{
+			if (q3map_LightSubdivide == null)
+				q3map_LightSubdivide = new List<string>();
+			q3map_LightSubdivide.Add(Value);
+		}
+		else if (Params == "NOPICMIP")
+			noPicMip = true;
+		else if (Params == "NOMIPMAP")
+			noMipMap = true;
+		else if (Params == "POLYGONOFFSET")
+			polygonOffset = true;
+		else if (Params == "PORTAL")
+			portal = true;
+		else if (Params == "QER_EDITORIMAGE")
+			editorImage = Value.StripExtension().ToUpper();
 	}
 }
 public class QShaderStage
@@ -1768,103 +1749,95 @@ public class QShaderStage
 
 	public void AddStageParams(string Params, string Value)
 	{
+		if (Params == "MAP")
 		{
-			if (Params == "MAP")
-			{
-				map = new string[1] { Value.StripExtension() };
-				if (map[0].Contains("$LIGHTMAP"))
-					isLightmap = true;
-			}
-			else if (Params == "CLAMPMAP")
-			{
-				clamp = true;
-				map = new string[1] { Value.StripExtension() };
-			}
-			else if (Params == "ANIMMAP")
-			{
-				string[] keyValue = Value.Split(' ');
-				animFreq = QShaderManager.TryToParseFloat(keyValue[0]);
-				map = new string[keyValue.Length - 1];
-				for (int i = 1; i < keyValue.Length; i++)
-					map[i - 1] = keyValue[i].StripExtension();
-			}
-			else if (Params == "SKYMAP")
-			{
-				skyMap = true;
-				map = new string[1] { Value.StripExtension() };
-			}
-			else if (Params == "BLENDFUNC")
-			{
-				if (blendFunc == null)
-					blendFunc = Value.Split(' ');
-			}
-			else if (Params == "RGBGEN")
-			{
-				if (rgbGen == null)
-					rgbGen = Value.Split(' ');
-			}
-			else if (Params == "ALPHAGEN")
-			{
-				if (alphaGen == null)
-					alphaGen = Value.Split(' ');
-			}
-			else if (Params == "TCGEN")
-			{
-				if (tcGen == null)
-					tcGen = Value.Split(' ');
+			map = new string[1] { Value.StripExtension() };
+			if (map[0].Contains("$LIGHTMAP"))
+				isLightmap = true;
+		}
+		else if (Params == "CLAMPMAP")
+		{
+			clamp = true;
+			map = new string[1] { Value.StripExtension() };
+		}
+		else if (Params == "ANIMMAP")
+		{
+			string[] keyValue = Value.Split(' ');
+			animFreq = QShaderManager.TryToParseFloat(keyValue[0]);
+			map = new string[keyValue.Length - 1];
+			for (int i = 1; i < keyValue.Length; i++)
+				map[i - 1] = keyValue[i].StripExtension();
+		}
+		else if (Params == "SKYMAP")
+		{
+			skyMap = true;
+			map = new string[1] { Value.StripExtension() };
+		}
+		else if (Params == "BLENDFUNC")
+		{
+			if (blendFunc == null)
+				blendFunc = Value.Split(' ');
+		}
+		else if (Params == "RGBGEN")
+		{
+			if (rgbGen == null)
+				rgbGen = Value.Split(' ');
+		}
+		else if (Params == "ALPHAGEN")
+		{
+			if (alphaGen == null)
+				alphaGen = Value.Split(' ');
+		}
+		else if (Params == "TCGEN")
+		{
+			if (tcGen == null)
+				tcGen = Value.Split(' ');
 
-				if (Value == "ENVIRONMENT")
-					environment = true;
-			}
-			else if (Params == "TCMOD")
+			if (Value == "ENVIRONMENT")
+				environment = true;
+		}
+		else if (Params == "TCMOD")
+		{
+			string[] keyValue = Value.Split(' ', 2);
+			if (keyValue.Length == 2)
 			{
-				string[] keyValue = Value.Split(' ', 2);
-				if (keyValue.Length == 2)
-				{
-					if (tcMod == null)
-						tcMod = new List<QShaderTCMod>();
-					QShaderTCMod shaderTCMod = new QShaderTCMod();
-					string func = keyValue[0];
-					{
-						if (func == "ROTATE")
-							shaderTCMod.type = TCModType.Rotate;
-						else if (func == "SCALE")
-							shaderTCMod.type = TCModType.Scale;
-						else if (func == "SCROLL")
-							shaderTCMod.type = TCModType.Scroll;
-						else if (func == "STRETCH")
-							shaderTCMod.type = TCModType.Stretch;
-						else if (func == "TRANSFORM")
-							shaderTCMod.type = TCModType.Transform;
-						else if (func == "TURB")
-							shaderTCMod.type = TCModType.Turb;
-					}
-					shaderTCMod.value = keyValue[1].Split(' ');
-					tcMod.Add(shaderTCMod);
-				}
+				if (tcMod == null)
+					tcMod = new List<QShaderTCMod>();
+				QShaderTCMod shaderTCMod = new QShaderTCMod();
+				string func = keyValue[0];
+				if (func == "ROTATE")
+					shaderTCMod.type = TCModType.Rotate;
+				else if (func == "SCALE")
+					shaderTCMod.type = TCModType.Scale;
+				else if (func == "SCROLL")
+					shaderTCMod.type = TCModType.Scroll;
+				else if (func == "STRETCH")
+					shaderTCMod.type = TCModType.Stretch;
+				else if (func == "TRANSFORM")
+					shaderTCMod.type = TCModType.Transform;
+				else if (func == "TURB")
+					shaderTCMod.type = TCModType.Turb;
+				shaderTCMod.value = keyValue[1].Split(' ');
+				tcMod.Add(shaderTCMod);
 			}
-			else if (Params == "DEPTHFUNC")
-			{
-				{
-					if (Value == "LEQUAL")
-						depthFunc = DepthFuncType.LEQUAL;
-					else if (Value == "EQUAL")
-						depthFunc = DepthFuncType.EQUAL;
-				}
-			}
-			else if (Params == "DEPTHWRITE")
-				depthWrite = true;
-			else if (Params == "ALPHAFUNC")
-			{
-				{
-					if (Value == "GT0")
-						alphaFunc = AlphaFuncType.GT0;
-					else if (Value == "LT128")
-						alphaFunc = AlphaFuncType.LT128;
-					else if (Value == "GE128")
-						alphaFunc = AlphaFuncType.GE128;
-				}
-			}
+		}
+		else if (Params == "DEPTHFUNC")
+		{
+			if (Value == "LEQUAL")
+				depthFunc = DepthFuncType.LEQUAL;
+			else if (Value == "EQUAL")
+				depthFunc = DepthFuncType.EQUAL;
+		}
+		else if (Params == "DEPTHWRITE")
+			depthWrite = true;
+		else if (Params == "ALPHAFUNC")
+		{
+			if (Value == "GT0")
+				alphaFunc = AlphaFuncType.GT0;
+			else if (Value == "LT128")
+				alphaFunc = AlphaFuncType.LT128;
+			else if (Value == "GE128")
+				alphaFunc = AlphaFuncType.GE128;
 		}
 	}
 	public class QShaderTCMod

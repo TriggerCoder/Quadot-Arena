@@ -5,4 +5,4 @@
 [node name="trigger_push" type="Node3D"]
 script = ExtResource("1_j8j6i")
 respawnSound = ""
-thingType = 4
+thingType = 6

@@ -5,4 +5,4 @@
 [node name="func_button" type="Node3D"]
 script = ExtResource("1_ihq7l")
 respawnSound = ""
-thingType = 6
+thingType = 7

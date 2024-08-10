@@ -5,3 +5,4 @@
 [node name="advertisement" type="Node3D"]
 script = ExtResource("1_bjjjp")
 respawnSound = ""
+thingType = 1

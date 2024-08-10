@@ -5,3 +5,4 @@
 [node name="misc_portal_surface" type="Node3D"]
 script = ExtResource("1_lrimx")
 respawnSound = ""
+thingType = 3
