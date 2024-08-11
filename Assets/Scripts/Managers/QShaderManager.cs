@@ -187,6 +187,11 @@ public static class QShaderManager
 					}
 				}
 			}
+			else
+			{
+				GameManager.Print("Shader: '" + shaderName + "' Stage: " + currentStage + " is invalid, skipping", GameManager.PrintType.Warning);
+				continue;
+			}
 
 			GSVertexUvs += GetUVGen(qShader, currentStage, ref GSVaryings);
 			GSFragmentUvs += GetTcGen(qShader, currentStage, ref lightmapStage);

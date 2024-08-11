@@ -745,11 +745,13 @@ public partial class ThingsManager : Node
 				if (entity.name == uniqueGamePlayThings[i])
 				{
 					thingObject.initDisabled = false;
-					thingObject.uniqueItem = true;
 					if (uniqueThingsOnMap.ContainsKey(entity.name))
 						skip = true;
 					else
+					{
+						thingObject.uniqueItem = true;
 						uniqueThingsOnMap.Add(entity.name, thingObject);
+					}
 				}
 				if (uniqueThingsOnMap.Count != uniqueGamePlayThings.Count)
 				{
