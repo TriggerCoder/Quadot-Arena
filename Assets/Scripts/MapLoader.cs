@@ -573,7 +573,7 @@ public static void LerpColorOnRepeatedVertex()
 			}
 		}
 	}
-	public static uint GenerateGeometricCollider(Node3D node, CollisionObject3D collider, int num, uint contentFlags = 0, bool isTrigger = true)
+	public static (uint, bool) GenerateGeometricCollider(Node3D node, CollisionObject3D collider, int num, uint contentFlags = 0, bool isTrigger = true)
 	{
 		List<QBrush> listBrushes = new List<QBrush>();
 
@@ -583,11 +583,12 @@ public static void LerpColorOnRepeatedVertex()
 		if (listBrushes.Count == 0)
 		{
 			GameManager.Print("GenerateGeometricCollider brushes: " + num + " is empty", GameManager.PrintType.Info);
-			return 0;
+			return (0, false);
 		}
-
-		uint OwnerShapeId = Mesher.GenerateGroupBrushCollider(num, node, listBrushes.ToArray(), collider, contentFlags);
-		return OwnerShapeId;
+		uint OwnerShapeId = 0;
+		bool valid = false;
+		(OwnerShapeId, valid) = Mesher.GenerateGroupBrushCollider(num, node, listBrushes.ToArray(), collider, contentFlags);
+		return (OwnerShapeId, valid);
 	}
 
 	public static Vector3 GenerateJumpPadCollider(Area3D jumpPad, int num)

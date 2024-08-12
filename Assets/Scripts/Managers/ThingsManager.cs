@@ -956,8 +956,11 @@ public partial class ThingsManager : Node
 						if (model >= 0)
 						{
 							MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
-							uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, platform, model, 0, false);
-							if (OwnerShapeId != 0)
+							uint OwnerShapeId = 0;
+							bool valid = false;
+
+							(OwnerShapeId, valid) = MapLoader.GenerateGeometricCollider(thingObject, platform, model, 0, false);
+							if (valid)
 							{
 								int shapes = platform.ShapeOwnerGetShapeCount(OwnerShapeId);
 								Aabb BigBox = new Aabb();
@@ -1114,7 +1117,17 @@ public partial class ThingsManager : Node
 							lip = int.Parse(strWord);
 
 						MapLoader.GenerateGeometricSurface(sw, model);
-						uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, sw, model, 0, false);
+						uint OwnerShapeId = 0;
+						bool valid = false;
+
+						(OwnerShapeId, valid) = MapLoader.GenerateGeometricCollider(thingObject, sw, model, ContentFlags.Solid, false);
+						if (!valid)
+						{
+							GameManager.Print("Switch model: " + model + " is not valid, no collider was generated", GameManager.PrintType.Warning);
+							thingObject.QueueFree();
+							break;
+						}
+
 						int shapes = sw.ShapeOwnerGetShapeCount(OwnerShapeId);
 						Aabb BigBox = new Aabb();
 						for (int i = 0; i < shapes; i++)
@@ -1203,7 +1216,17 @@ public partial class ThingsManager : Node
 							dmg = int.Parse(strWord);
 
 						MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
-						uint OwnerShapeId = MapLoader.GenerateGeometricCollider(thingObject, door, model, 0, false);
+						uint OwnerShapeId = 0;
+						bool valid = false;
+
+						(OwnerShapeId, valid) = MapLoader.GenerateGeometricCollider(thingObject, door, model, ContentFlags.Solid, false);
+						if (!valid)
+						{
+							GameManager.Print("Door model: " + model + " is not solid, no collider was generated", GameManager.PrintType.Warning);
+							thingObject.QueueFree();
+							break;
+						}
+							
 						int shapes = door.ShapeOwnerGetShapeCount(OwnerShapeId);
 						Aabb BigBox = new Aabb();
 

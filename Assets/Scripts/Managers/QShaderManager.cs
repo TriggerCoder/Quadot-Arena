@@ -1376,8 +1376,10 @@ public static class QShaderManager
 								if (qShaderData.qShaderGlobal.skyParms != null)
 								{
 									if (qShaderData.qShaderGlobal.skyParms[0] != "-")
-										qShaderData.AddFirstStage("SKYMAP", qShaderData.qShaderGlobal.skyParms[0]);
-								}
+									{
+										GameManager.Print("ADDING SKY: "+ qShaderData.qShaderGlobal.skyParms[0] + " TO SHADER: " + qShaderData.Name);
+										qShaderData.AddFirstStage("SKYMAP", qShaderData.qShaderGlobal.skyParms[0]);										}
+									}
 								if (QShaders.ContainsKey(qShaderData.Name))
 								{
 //									GameManager.Print("Shader already on the list: " + qShaderData.Name, GameManager.PrintType.Info);
@@ -1618,9 +1620,12 @@ public class QShaderGlobal
 		}
 		else if (Params == "SKYPARMS")
 		{
-			if (skyParms == null)
+//			Some shader overwrite their first skyparams as those are invalid
+//			if (skyParms == null)
 				skyParms = new List<string>();
 			skyParms.AddRange(Value.Split(' '));
+			if ((skyParms[0] == "FULL") || (skyParms[0] == "HALF"))
+				skyParms[0] = "-";
 		}
 		else if (Params == "CULL")
 		{
