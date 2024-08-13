@@ -65,6 +65,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	private const float respawnDelay = 1.7f;
 
 	private int lastJumpIndex = PlayerModel.LowerAnimation.Jump;
+	private bool applyFallDamage = true;
 
 	//Head/Weapon Bob
 	public const float vBob = .005f;
@@ -380,6 +381,9 @@ public partial class PlayerControls : InterpolatedNode3D
 								currentFootStep = PlayerThing.FootStepType.Flesh;
 							else
 								currentFootStep = footStep;
+
+							if (st.NoFallDamage)
+								applyFallDamage = false;
 						}
 
 					}
@@ -440,21 +444,24 @@ public partial class PlayerControls : InterpolatedNode3D
 		{
 			playerThing.PlayModelSound("land1", false, false);
 			fallSpeed = 0;
+			applyFallDamage = true;
 			return;
 		}
 		if (fallSpeed > -30)
 		{
-			playerThing.Damage(5, DamageType.Land);
+			if (applyFallDamage)
+				playerThing.Damage(5, DamageType.Land);
 			weaponPositionAnimation.Set("parameters/TimeScale/scale", 1.4f);
 			weaponPositionAnimation.Set("parameters/depth/add_amount", .75f);
 		}
 		else
 		{
-			playerThing.Damage(10, DamageType.Fall);
+			if (applyFallDamage)
+				playerThing.Damage(10, DamageType.Fall);
 			weaponPositionAnimation.Set("parameters/TimeScale/scale", 1f);
 			weaponPositionAnimation.Set("parameters/depth/add_amount", 1f);
 		}
-
+		applyFallDamage = true;
 		weaponPositionAnimation.Set("parameters/fall_shot/request", (int)AnimationNodeOneShot.OneShotRequest.Fire);
 		fallSpeed = 0;
 	}

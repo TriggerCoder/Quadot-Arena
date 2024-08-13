@@ -265,7 +265,7 @@ public class ContentFlags
 }
 public class SurfaceFlags
 {
-	public const int NoDamage = 0x00001;			// Don't give falling damage
+	public const int NoFallDamage = 0x00001;		// Don't give falling damage
 	public const int Slick = 0x00002;				// Affects game physics
 	public const int Sky = 0x00004;					// Lighting from environment map
 	public const int Ladder = 0x00008;				// Surface is climbable

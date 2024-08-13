@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class SurfaceType
 {
 	public uint value;
-	public bool NoDamage = false;
+	public bool NoFallDamage = false;
 	public bool Slick = false;
 	public bool Sky = false;
 	public bool Ladder = false;
@@ -27,8 +27,8 @@ public class SurfaceType
 	public void Init(uint surfaceType)
 	{
 		value = surfaceType;
-		if ((surfaceType & SurfaceFlags.NoDamage) != 0)
-			NoDamage = true;
+		if ((surfaceType & SurfaceFlags.NoFallDamage) != 0)
+			NoFallDamage = true;
 		if ((surfaceType & SurfaceFlags.Slick) != 0)
 			Slick = true;
 		if ((surfaceType & SurfaceFlags.Sky) != 0)
