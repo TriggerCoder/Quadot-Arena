@@ -293,10 +293,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 							break;
 						case LowerAnimation.Jump:
 						case LowerAnimation.JumpBack:
-							if (isGrounded)
-								lowerAnimation = LowerAnimation.Idle;
-							else
-								lowerAnimation = LowerAnimation.Run;
+							lowerAnimation = LowerAnimation.Idle;
 							enableOffset = true;
 							break;
 						case LowerAnimation.Land:
@@ -307,7 +304,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 						case LowerAnimation.Turn:
 						case LowerAnimation.Fall:
 						case LowerAnimation.FallBack:
-							if (_isGrounded)
+							if (isGrounded)
 							{
 								if (turnTo.LengthSquared() > 0)
 								{
@@ -431,6 +428,17 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			FxLight.Visible = hasQuad;
 			GameManager.ChangeQuadFx(fxMeshes, hasQuad);
 		}
+	}
+
+	public void ForceChangeView(Quaternion dir)
+	{
+		if (ownerDead)
+			return;
+
+		playerModel.Quaternion = dir;
+		headBody.Quaternion = Quaternion.Identity;
+		upperBody.Quaternion = Quaternion.Identity;
+		turnTo = QuaternionZero;
 	}
 
 	public void ChangeView(Vector2 viewDirection, float deltaTime)
