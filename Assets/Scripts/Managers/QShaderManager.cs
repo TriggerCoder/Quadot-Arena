@@ -552,6 +552,10 @@ public static class QShaderManager
 				code += "\tEMISSION = emission;\n";
 			}
 		}
+		if (forceView)
+			code += "\tDEPTH = mix(FRAGCOORD.z, 1.0, 0.999);\n";
+		else if ((multiPassList == null) && (canvasShader == false) && (qShader.qShaderGlobal.isSky == false))
+			code += "\tDEPTH = mix(FRAGCOORD.z, mix(FRAGCOORD.z, 1.0, 0.999), float(ViewModel));\n";
 
 		if (qShader.qShaderGlobal.portal)
 		{
@@ -750,13 +754,9 @@ public static class QShaderManager
 				Vertex += "\tPROJECTION_MATRIX[1][1] = -InvTanFOV;\n";
 				Vertex += "\tPROJECTION_MATRIX[0][0] =  InvTanFOV / Aspect;\n";
 			}
-			Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);\n";
+			Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);\n";
 			if (qShader.qShaderGlobal.polygonOffset)
-				Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.001);\n";
-			else if (forceView)
-				Vertex += "\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
-			else if (useView)
-				Vertex += "\tPOSITION.z = mix(POSITION.z, mix(POSITION.z, 0, 0.999), float(ViewModel));\n";
+				Vertex += "\t\tPOSITION.z = mix(POSITION.z, 1.0, 0.001);\n";
 			return Vertex;
 		}
 
@@ -862,13 +862,9 @@ public static class QShaderManager
 			Vertex += "\tPROJECTION_MATRIX[1][1] = -InvTanFOV;\n";
 			Vertex += "\tPROJECTION_MATRIX[0][0] =  InvTanFOV / Aspect;\n";
 		}
-		Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);\n";
+		Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);\n";
 		if (qShader.qShaderGlobal.polygonOffset)
-			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.001);\n";
-		else if (forceView)
-			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 0, 0.999);\n";
-		else if (useView)
-			Vertex += "\tPOSITION.z = mix(POSITION.z, mix(POSITION.z, 0, 0.999), float(ViewModel));\n";
+			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 1.0, 0.001);\n";
 		return Vertex;
 	}
 	public static string GetUVGen(QShaderData qShader, int currentStage, ref string GSVaryings)

@@ -284,7 +284,8 @@ public static class PakManager
 		else
 			mapName = fullPath[0];
 		mapName = mapName.StripExtension();
-		mapList.Add(mapName);
+		if (!mapList.Contains(mapName))
+			mapList.Add(mapName);
 	}
 
 	public static void OrderLists()

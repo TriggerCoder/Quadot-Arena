@@ -37,9 +37,8 @@ void vertex()
 	float InvTanFOV = 1.0f / tan(0.5f * (ViewCameraFOV * PI / 180.0f));
 	float Aspect = VIEWPORT_SIZE.x / VIEWPORT_SIZE.y;
 	PROJECTION_MATRIX[1][1] = mix(PROJECTION_MATRIX[1][1],-InvTanFOV,float(ViewModel));
-	PROJECTION_MATRIX[0][0] = mix(PROJECTION_MATRIX[0][0],InvTanFOV / Aspect,float(ViewModel));	
-	POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.xyz, 1.0);
-	POSITION.z = mix(POSITION.z, mix(POSITION.z, 0, 0.999), float(ViewModel));
+	PROJECTION_MATRIX[0][0] = mix(PROJECTION_MATRIX[0][0],InvTanFOV / Aspect,float(ViewModel));
+	POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
 }
 
 
@@ -52,13 +51,14 @@ void fragment()
 	vec3 albedo = color.rgb * vertx_color.rgb;
 	vec3 emission = color.rgb;
 	vec3 ambient = AmbientColor.rgb * mixBrightness;
-	
+
 	vec3 useLightVolEmission = emission * mix(ambientColor, emission, mixBrightness);
 	vec3 defaultEmission = mix(albedo * ambient, albedo , mixBrightness);
 	emission = mix(defaultEmission, useLightVolEmission, float(UseLightVol));
 
 	ALBEDO = albedo;
 	EMISSION = emission;
+	DEPTH = mix(FRAGCOORD.z, mix(FRAGCOORD.z, 1.0, 0.999), float(ViewModel));
 }
 
 void light()

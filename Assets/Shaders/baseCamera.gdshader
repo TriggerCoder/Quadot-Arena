@@ -20,8 +20,7 @@ void light()
 
 void vertex()
 {
-	POSITION = vec4(VERTEX.xyz, 1.0);
-	POSITION.z = 0.1;
+	POSITION = vec4(VERTEX, 1.0);
 }
 
 void fragment()
