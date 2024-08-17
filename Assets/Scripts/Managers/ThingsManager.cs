@@ -227,119 +227,114 @@ public partial class ThingsManager : Node
 			if (strWord[0] != '{')
 				continue;
 
+			strWord = stream.ReadLine();
+			Dictionary<string, string> entityData = new Dictionary<string, string>();
+			while (strWord[0] != '}')
 			{
+				string[] keyValue = strWord.Split('"');
+				entityData[keyValue[1].Trim('"')] = keyValue[3].Trim('"');
 				strWord = stream.ReadLine();
-				Dictionary<string, string> entityData = new Dictionary<string, string>();
-				while (strWord[0] != '}')
-				{
-					string[] keyValue = strWord.Split('"');
-					entityData[keyValue[1].Trim('"')] = keyValue[3].Trim('"');
-					strWord = stream.ReadLine();
-				}
-				string ClassName;
-				if (!entityData.TryGetValue("classname",out ClassName))
-					continue;
-
-				if (ignoreThings.Any(s => s == ClassName))
-					continue;
-
-				if (!thingsPrefabs.ContainsKey(ClassName))
-				{
-					GameManager.Print(ClassName + " not found", GameManager.PrintType.Warning);
-					continue;
-				}
-
-				int angle = 0;
-				float fangle = 0;
-				if (entityData.TryGetNumValue("angle", out fangle))
-					angle = (int)fangle;
-
-				Vector3 origin = Vector3.Zero;
-				if (entityData.TryGetValue("origin", out strWord))
-				{
-					string[] values = new string[3] { "", "", "", };
-					bool lastDigit = true;
-					for (int i = 0, j = 0; i < strWord.Length; i++)
-					{
-						if ((char.IsDigit(strWord[i])) || (strWord[i] == '-') || (strWord[i] == '.'))
-						{
-							if (lastDigit)
-								values[j] += strWord[i];
-							else
-							{
-								j++;
-								values[j] += strWord[i];
-								lastDigit = true;
-							}
-						}
-						else
-							lastDigit = false;
-						if ((j == 2) && (!lastDigit))
-							break;
-					}
-					float x = values[0].GetNumValue();
-					float y = values[1].GetNumValue();
-					float z = values[2].GetNumValue();
-					origin = new Vector3(-x, z, y);
-					origin *= GameManager.sizeDividor;
-				}
-
-				bool found = false;
-				if (targetThings.Any(s => s == ClassName))
-				{
-					found = true;
-					string target;
-					if (entityData.TryGetValue("targetname", out target))
-					{
-						List<Target> targetList = null;
-						if (targetsOnMap.TryGetValue(target, out targetList))
-							targetList.Add(new Target(origin, angle, entityData));
-						else
-						{
-							targetList = new List<Target>
-							{
-								new Target(origin, angle, entityData)
-							};
-							targetsOnMap.Add(target, targetList);
-						}
-					}
-				}
-
-				if (triggerThings.Any(s => s == ClassName))
-				{
-					found = true;
-					string target;
-					if (entityData.TryGetValue("target", out target))
-					{
-						switch (ClassName)
-						{
-							default:
-								if (ClassName == "trigger_always")
-									entityData.Add("activate", "true");
-								else if ((ClassName == "target_delay") || (ClassName == "target_relay") || (ClassName == "target_give")) //Need to add the delay/relay and give after
-									found = false;
-								List<Dictionary<string, string>> triggersList = null;
-								if (triggersOnMap.TryGetValue(target, out triggersList))
-									triggersList.Add(entityData);
-								else
-								{
-									triggersList = new List<Dictionary<string, string>>
-								{
-									entityData
-								};
-									triggersOnMap.Add(target, triggersList);
-								}
-								break;
-							case "func_timer": //Timers
-								timersOnMap.Add(target, entityData);
-								break;
-						}
-					}
-				}
-
-				if (!found)
-					entitiesOnMap.Add(new Entity(ClassName, origin, entityData));
 			}
+			string ClassName;
+			if (!entityData.TryGetValue("classname", out ClassName))
+				continue;
+
+			if (ignoreThings.Any(s => s == ClassName))
+				continue;
+
+			if (!thingsPrefabs.ContainsKey(ClassName))
+			{
+				GameManager.Print(ClassName + " not found", GameManager.PrintType.Warning);
+				continue;
+			}
+
+			int angle = 0;
+			float fangle = 0;
+			if (entityData.TryGetNumValue("angle", out fangle))
+				angle = (int)fangle;
+
+			Vector3 origin = Vector3.Zero;
+			if (entityData.TryGetValue("origin", out strWord))
+			{
+				string[] values = new string[3] { "", "", "", };
+				bool lastDigit = true;
+				for (int i = 0, j = 0; i < strWord.Length; i++)
+				{
+					if ((char.IsDigit(strWord[i])) || (strWord[i] == '-') || (strWord[i] == '.'))
+					{
+						if (lastDigit)
+							values[j] += strWord[i];
+						else
+						{
+							j++;
+							values[j] += strWord[i];
+							lastDigit = true;
+						}
+					}
+					else
+						lastDigit = false;
+					if ((j == 2) && (!lastDigit))
+						break;
+				}
+				float x = values[0].GetNumValue();
+				float y = values[1].GetNumValue();
+				float z = values[2].GetNumValue();
+				origin = new Vector3(-x, z, y);
+				origin *= GameManager.sizeDividor;
+			}
+
+			bool found = false;
+			if (targetThings.Any(s => s == ClassName))
+			{
+				found = true;
+				string target;
+				if (entityData.TryGetValue("targetname", out target))
+				{
+					List<Target> targetList = null;
+					if (targetsOnMap.TryGetValue(target, out targetList))
+						targetList.Add(new Target(origin, angle, entityData));
+					else
+					{
+						targetList = new List<Target>
+						{
+							new Target(origin, angle, entityData)
+						};
+						targetsOnMap.Add(target, targetList);
+					}
+				}
+			}
+
+			if (triggerThings.Any(s => s == ClassName))
+			{
+				found = true;
+				string target;
+				if (entityData.TryGetValue("target", out target))
+				{
+					if (ClassName == "func_timer") //Timers
+						timersOnMap.Add(target, entityData);
+					else
+					{
+						if (ClassName == "trigger_always")
+							entityData.Add("activate", "true");
+						else if ((ClassName == "target_delay") || (ClassName == "target_relay") || (ClassName == "target_give")) //Need to add the delay/relay and give after
+							found = false;
+						List<Dictionary<string, string>> triggersList = null;
+						if (triggersOnMap.TryGetValue(target, out triggersList))
+							triggersList.Add(entityData);
+						else
+						{
+							triggersList = new List<Dictionary<string, string>>
+							{
+								entityData
+							};
+							triggersOnMap.Add(target, triggersList);
+						}
+					}
+				}
+			}
+
+			if (!found)
+				entitiesOnMap.Add(new Entity(ClassName, origin, entityData));
 		}
 
 		stream.Close();

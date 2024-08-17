@@ -1,6 +1,4 @@
 using Godot;
-using System;
-using System.IO;
 using System.Collections.Generic;
 using static Godot.Image;
 using ExtensionMethods;
@@ -125,7 +123,7 @@ public static class TextureLoader
 					else if ((size.X != width) || (size.Y != height))
 						baseTex.Resize(size.X, size.Y, Interpolation.Lanczos);
 					baseTex.GenerateMipmaps();
-					baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgb);
+					baseTex.CompressFromChannels(CompressMode.Bptc, UsedChannels.Rgb);
 					cubeImages.Add(baseTex);
 					break;
 				}
@@ -380,7 +378,7 @@ public static class TextureLoader
 	{
 		Color colors;
 		int pixelSize = (int)MapLoader.currentLightMapSize;
-		Image baseTex = Image.Create(pixelSize, pixelSize, false, Image.Format.Rgba8);
+		Image baseTex = CreateEmpty(pixelSize, pixelSize, false, Format.Rgb8);
 		int k = 0;
 		for (int j = 0; j < pixelSize; j++)
 		{
@@ -390,6 +388,8 @@ public static class TextureLoader
 				baseTex.SetPixel(i, j, colors);
 			}
 		}
+		baseTex.GenerateMipmaps();
+		baseTex.CompressFromChannels(CompressMode.Bptc, UsedChannels.Rgb);
 		ImageTexture tex = ImageTexture.CreateFromImage(baseTex);
 		return tex;
 	}
@@ -449,13 +449,15 @@ public static class TextureLoader
 			}
 			Ambient.SetData(Size.X, Size.Y, false, Format.Rgba8, dataAmbient);
 			Directional.SetData(Size.X, Size.Y, false, Format.Rgba8, dataDirectional);
+			Ambient.CompressFromChannels(CompressMode.Bptc, UsedChannels.Rgba);
+			Directional.CompressFromChannels(CompressMode.Bptc, UsedChannels.Rgba);
 			AmbientImage.Add(Ambient);
 			DirectionalImage.Add(Directional);
 		}
 		ImageTexture3D AmbientTex = new ImageTexture3D();
 		ImageTexture3D DirectionalTex = new ImageTexture3D();
-		AmbientTex.Create(Format.Rgba8, Size.X, Size.Y, Size.Z, false, AmbientImage);
-		DirectionalTex.Create(Format.Rgba8, Size.X, Size.Y, Size.Z, false, DirectionalImage);
+		AmbientTex.Create(Format.BptcRgba, Size.X, Size.Y, Size.Z, false, AmbientImage);
+		DirectionalTex.Create(Format.BptcRgba, Size.X, Size.Y, Size.Z, false, DirectionalImage);
 		GameManager.Print("3D Grid N: X=" + Size.X + " Y=" + Size.Y + " Z=" + Size.Z);
 		Normalize = new Vector3(Size.X * 2, Size.Y * 2, Size.Z * 4);
 		return (AmbientTex, DirectionalTex);
