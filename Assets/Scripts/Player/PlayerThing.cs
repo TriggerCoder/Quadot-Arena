@@ -261,16 +261,18 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		if (Dead)
 			return;
 
-		if ((damageType != DamageType.Environment) || (damageType != DamageType.Crusher))
+		if ((damageType != DamageType.Environment) && (damageType != DamageType.Crusher) && (damageType != DamageType.Telefrag) && (damageType != DamageType.Trigger))
 			amount = Mathf.RoundToInt(amount * handicap * GameManager.Instance.PlayerDamageReceive);
 
-		if (invul)
-			if ((damageType != DamageType.Crusher) && (damageType != DamageType.Telefrag))
+		if ((invul) || (playerInfo.godMode))
+		{
+			if ((damageType != DamageType.Crusher) && (damageType != DamageType.Telefrag) && (damageType != DamageType.Trigger))
 				amount = 0;
+		}
 
 		if (amount <= 0)
 		{
-			if ((damageType == DamageType.Crusher) || (damageType == DamageType.Telefrag))
+			if ((damageType == DamageType.Crusher) || (damageType == DamageType.Telefrag) || (damageType == DamageType.Trigger))
 				amount = 1000;
 			else
 				return;

@@ -63,6 +63,8 @@ public static class MapLoader
 	public static Vector3 LightVolOffset;
 	public static ImageTexture3D LightVolAmbient;
 	public static ImageTexture3D LightVolDirectonal;
+
+	public static bool UseCheats = false;
 	public static bool Load(string mapName)
 	{
 		string FileName;
@@ -333,8 +335,9 @@ public static class MapLoader
 		return true;
 	}
 
-	public static void UnloadMap()
+	public static void UnloadMap(bool useCheats)
 	{
+		UseCheats = useCheats;
 		SpawnerManager.ClearLists();
 		ModelsManager.ClearModels();
 		ClusterPVSManager.Instance.ResetClusterList(1);

@@ -20,6 +20,7 @@ public enum DamageType
 	Rail,
 	Land,
 	Fall,
+	Trigger
 }
 
 public enum BloodType

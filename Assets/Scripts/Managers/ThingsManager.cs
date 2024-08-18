@@ -1545,7 +1545,7 @@ public partial class ThingsManager : Node
 						tc.Repeatable = true;
 						tc.SetController("trigger_hurt", (p) =>
 						{
-							p.Damage(dmg, DamageType.Generic);
+							p.Damage(dmg, DamageType.Trigger);
 						});
 					}
 					//JumpPad

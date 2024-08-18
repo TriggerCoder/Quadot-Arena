@@ -190,6 +190,7 @@ public partial class GameManager : Node
 	private int currentDeathCount = 0;
 
 	private bool useCustomMap = false;
+	private bool useCheats = false;
 	private string nextMapName;
 	public static class Announcer
 	{
@@ -724,12 +725,13 @@ public partial class GameManager : Node
 		loading = true;
 	}
 
-	public void ChangeMap(string nextMap)
+	public void ChangeMap(string nextMap, bool cheats = false)
 	{
 		if (!string.IsNullOrEmpty(nextMap))
 		{
 			useCustomMap = true;
 			nextMapName = nextMap;
+			useCheats = cheats;
 		}
 		console.ChangeConsole(true);
 		limitReach = LimitReach.Time;
@@ -739,7 +741,8 @@ public partial class GameManager : Node
 	public void ChangeMap()
 	{
 		useCustomMap = false;
-		MapLoader.UnloadMap();
+		MapLoader.UnloadMap(useCheats);
+		useCheats = false;
 		skipFrames = 5;
 		currentState = FuncState.None;
 	}

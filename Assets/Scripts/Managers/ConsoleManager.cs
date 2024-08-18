@@ -142,24 +142,19 @@ public partial class ConsoleManager : Control
 			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
 			return;
 		}
+
+		if (autohop == "TRUE")
+			GameManager.Instance.Players[playerNum].playerInfo.configData.AutoHop = true;
+		else if (autohop == "FALSE")
+			GameManager.Instance.Players[playerNum].playerInfo.configData.AutoHop = false;
 		else
 		{
-			bool failed = false;
-			if (autohop == "TRUE")
-				GameManager.Instance.Players[playerNum].playerInfo.configData.AutoHop = true;
-			else if (autohop == "FALSE")
-				GameManager.Instance.Players[playerNum].playerInfo.configData.AutoHop = false;
-			else
-				failed = true;
-
-			if (failed)
-				AddToConsole("Command: " + args[0] + " failed: " + autohop + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
-			else
-			{
-				AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
-				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
-			}
+			AddToConsole("Command: " + args[0] + " failed: " + autohop + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
+			return;
 		}
+
+		AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
+		GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
 	}
 
 	public void ChangeAutoSwap(string[] args, string command)
@@ -196,24 +191,19 @@ public partial class ConsoleManager : Control
 			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
 			return;
 		}
+
+		if (autoSwap == "TRUE")
+			GameManager.Instance.Players[playerNum].playerInfo.configData.AutoSwap = true;
+		else if (autoSwap == "FALSE")
+			GameManager.Instance.Players[playerNum].playerInfo.configData.AutoSwap = false;
 		else
 		{
-			bool failed = false;
-			if (autoSwap == "TRUE")
-				GameManager.Instance.Players[playerNum].playerInfo.configData.AutoSwap = true;
-			else if (autoSwap == "FALSE")
-				GameManager.Instance.Players[playerNum].playerInfo.configData.AutoSwap = false;
-			else
-				failed = true;
-
-			if (failed)
-				AddToConsole("Command: " + args[0] + " failed: " + autoSwap + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
-			else
-			{
-				AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
-				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
-			}
+			AddToConsole("Command: " + args[0] + " failed: " + autoSwap + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
+			return;
 		}
+
+		AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
+		GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
 	}
 
 	public void ChangeBloodScreen(string[] args, string command)
@@ -250,24 +240,19 @@ public partial class ConsoleManager : Control
 			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
 			return;
 		}
+
+		if (bloodscreen == "TRUE")
+			GameManager.Instance.Players[playerNum].playerInfo.configData.BloodScreen = true;
+		else if (bloodscreen == "FALSE")
+			GameManager.Instance.Players[playerNum].playerInfo.configData.BloodScreen = false;
 		else
 		{
-			bool failed = false;
-			if (bloodscreen == "TRUE")
-				GameManager.Instance.Players[playerNum].playerInfo.configData.BloodScreen = true;
-			else if (bloodscreen == "FALSE")
-				GameManager.Instance.Players[playerNum].playerInfo.configData.BloodScreen = false;
-			else
-				failed = true;
-
-			if (failed)
-				AddToConsole("Command: " + args[0] + " failed: " + bloodscreen + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
-			else
-			{
-				AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
-				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
-			}
+			AddToConsole("Command: " + args[0] + " failed: " + bloodscreen + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
+			return;
 		}
+
+		AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
+		GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
 	}
 
 	public void ChangeColor(string[] args, string command)
@@ -304,29 +289,27 @@ public partial class ConsoleManager : Control
 			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
 			return;
 		}
-		else
+
+		Color modulate = Colors.White;
+		bool failed = false;
+		try
 		{
-			Color modulate = Colors.White;
-			bool failed = false;
-			try
-			{
-				modulate = new Color(color);
-			}
-			catch (Exception)
-			{
-				AddToConsole("Command: " + args[0] + " failed: " + color + " is an invalid color", GameManager.PrintType.Warning);
-				failed = true;
-			}
-			if (!failed)
-			{
-				modulate.R = Mathf.Max(0.1f, modulate.R);
-				modulate.G = Mathf.Max(0.1f, modulate.G);
-				modulate.B = Mathf.Max(0.1f, modulate.B);
-				GameManager.Instance.Players[playerNum].modulate = modulate;
-				AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
-				GameManager.Instance.Players[playerNum].playerInfo.configData.ModulateColor = color;
-				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
-			}
+			modulate = new Color(color);
+		}
+		catch (Exception)
+		{
+			AddToConsole("Command: " + args[0] + " failed: " + color + " is an invalid color", GameManager.PrintType.Warning);
+			failed = true;
+		}
+		if (!failed)
+		{
+			modulate.R = Mathf.Max(0.1f, modulate.R);
+			modulate.G = Mathf.Max(0.1f, modulate.G);
+			modulate.B = Mathf.Max(0.1f, modulate.B);
+			GameManager.Instance.Players[playerNum].modulate = modulate;
+			AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
+			GameManager.Instance.Players[playerNum].playerInfo.configData.ModulateColor = color;
+			GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
 		}
 	}
 
@@ -355,7 +338,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
 					return;
 				}
-				if (value > GameManager.Instance.defaultModels.Length)
+				if (value > GameManager.Instance.Players.Count)
 				{
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
 					return;
@@ -364,6 +347,12 @@ public partial class ConsoleManager : Control
 				weapon = args[2];
 				crosshair = args[3];
 			}
+		}
+
+		if (playerNum == GameManager.Instance.Players.Count)
+		{
+			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+			return;
 		}
 
 		int weaponNum = 0;
@@ -477,7 +466,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
 					return;
 				}
-				if (value > GameManager.Instance.defaultModels.Length)
+				if (value > GameManager.Instance.Players.Count)
 				{
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
 					return;
@@ -485,6 +474,12 @@ public partial class ConsoleManager : Control
 				playerNum = value;
 				alpha = args[2];
 			}
+		}
+
+		if (playerNum == GameManager.Instance.Players.Count)
+		{
+			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+			return;
 		}
 
 		bool failed = true;
@@ -523,7 +518,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
 					return;
 				}
-				if (value > GameManager.Instance.defaultModels.Length)
+				if (value > GameManager.Instance.Players.Count)
 				{
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
 					return;
@@ -531,6 +526,12 @@ public partial class ConsoleManager : Control
 				playerNum = value;
 				scale = args[2];
 			}
+		}
+
+		if (playerNum == GameManager.Instance.Players.Count)
+		{
+			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+			return;
 		}
 
 		bool failed = true;
@@ -589,7 +590,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
 					return;
 				}
-				if (value > GameManager.Instance.defaultModels.Length)
+				if (value > GameManager.Instance.Players.Count)
 				{
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
 					return;
@@ -597,6 +598,12 @@ public partial class ConsoleManager : Control
 				playerNum = value;
 				fov = args[2];
 			}
+		}
+
+		if (playerNum == GameManager.Instance.Players.Count)
+		{
+			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+			return;
 		}
 
 		bool failed = true;
@@ -614,6 +621,132 @@ public partial class ConsoleManager : Control
 		GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
 	}
 
+	public void GiveItem(string[] args, string command)
+	{
+		if (!MapLoader.UseCheats)
+		{
+			AddToConsole("Cheats are not enabled on this server", GameManager.PrintType.Warning);
+			return;
+		}
+
+		if (args.Length < 2)
+		{
+			AddToConsole("Command: " + command + " missing item to give", GameManager.PrintType.Warning);
+			return;
+		}
+
+		int playerNum = 0;
+		string item = args[1];
+		if (args.Length > 2)
+		{
+			if (int.TryParse(args[1], out int value))
+			{
+				if (value < 0)
+				{
+					AddToConsole("Command: " + args[0] + " failed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+					return;
+				}
+				if (value > GameManager.Instance.Players.Count)
+				{
+					AddToConsole("Command: " + args[0] + " failed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+					return;
+				}
+				playerNum = value;
+				item = args[2];
+			}
+		}
+
+		if (playerNum == GameManager.Instance.Players.Count)
+		{
+			AddToConsole("Command: " + args[0] + " failed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+			return;
+		}
+
+		item = item.ToLower();
+		bool found = false;
+		if (!item.Contains('_'))
+		{
+			string[] checks = new string[5] { "weapon_", "ammo_", "item_", "item_armor_", "item_health_" };
+			for (int i = 0; i < checks.Length; i++) 
+			{
+				string newItem = checks[i] + item;
+				if (ThingsManager.thingsPrefabs.ContainsKey(newItem))
+				{
+					item = newItem;
+					found = true;
+					break;
+				}
+			}
+		}
+		else if (ThingsManager.thingsPrefabs.ContainsKey(item))
+			found = true;
+
+		if (!found)
+		{
+			AddToConsole("Command: " + args[0] + " failed. Item " + item + " doesn't exist", GameManager.PrintType.Warning);
+			return;
+		}
+
+		ThingController thingObject = (ThingController)ThingsManager.thingsPrefabs[item].Instantiate();
+		if (thingObject == null)
+		{
+			AddToConsole("Command: " + args[0] + " failed. Item " + item + " is invalid", GameManager.PrintType.Warning);
+			return;
+		}
+		ItemPickup itemPickup = thingObject.itemPickup;
+		if (itemPickup == null)
+		{
+			AddToConsole("Command: " + args[0] + " failed. Item " + item + " is invalid", GameManager.PrintType.Warning);
+			return;
+		}
+		thingObject.initDisabled = true;
+		thingObject.SpawnCheck(item);
+		GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
+		thingObject.GlobalPosition = GameManager.Instance.Players[playerNum].GlobalPosition;
+		thingObject.SetRespawnTime(-1);
+		itemPickup.PickUp(GameManager.Instance.Players[playerNum]);
+		AddToConsole("Command: " + args[0] + " executed sucesfully for Player " + playerNum, GameManager.PrintType.Success);
+	}
+
+	public void ChangeGodMode(string[] args, string command)
+	{
+		if (!MapLoader.UseCheats)
+		{
+			AddToConsole("Cheats are not enabled on this server", GameManager.PrintType.Warning);
+			return;
+		}
+
+		int playerNum = 0;
+		if (args.Length > 2)
+		{
+			if (int.TryParse(args[1], out int value))
+			{
+				if (value < 0)
+				{
+					AddToConsole("Command: " + args[0] + " failed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
+					return;
+				}
+				if (value > GameManager.Instance.Players.Count)
+				{
+					AddToConsole("Command: " + args[0] + " failed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
+					return;
+				}
+				playerNum = value;
+			}
+		}
+
+		if (playerNum == GameManager.Instance.Players.Count)
+		{
+			AddToConsole("Command: " + args[0] + " failed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+			return;
+		}
+		bool godMode = GameManager.Instance.Players[playerNum].playerInfo.godMode;
+		GameManager.Instance.Players[playerNum].playerInfo.godMode = !godMode;
+		if (godMode)
+			AddToConsole("Command: " + args[0] + " OFF for Player " + playerNum, GameManager.PrintType.Success);
+		else
+			AddToConsole("Command: " + args[0] + " ON for Player " + playerNum, GameManager.PrintType.Success);
+	}
 	public void ShowCommands(string command)
 	{
 		AddToConsole("Command: " + command, GameManager.PrintType.Success);
@@ -625,8 +758,11 @@ public partial class ConsoleManager : Control
 		AddToConsole("CROSSHAIRALPHA [i]0-7[/i] [b]0-100[/b] -> Set CrossHair [b]Transparency[/b] for the [i]player[/i], default: [b]25[/b]", GameManager.PrintType.Log);
 		AddToConsole("CROSSHAIRSCALE [i]0-7[/i] [b]10-100[/b] -> Set 2D CrossHair [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
 		AddToConsole("COLOR [i]0-7[/i] [b]color[/b] -> Change the [b]color[/b] (color can be #hex or by name) for the [i]player[/i], default: [b]#50a1cd[/b]", GameManager.PrintType.Log);
+		AddToConsole("DEVMAP [b]mapName[/b] -> Loads [b]map[/b] with Cheats Enabled", GameManager.PrintType.Log);
 		AddToConsole("FRAGLIMIT [b]limit[/b] -> Set the [b]fraglimit[/b] per map, default: [b]15[/b]", GameManager.PrintType.Log);
 		AddToConsole("FOV [i]0-7[/i] [b]30-130[/b] -> Set [b]Fov[/b] for the [i]player[/i], default: [b]90[/b]", GameManager.PrintType.Log);
+		AddToConsole("GIVE [i]0-7[/i] [b]itemName[/b] -> Give [b]Item[/b] for the [i]player[/i]", GameManager.PrintType.Log);
+		AddToConsole("GOD [i]0-7[/i] -> Switch GOD Mode for the [i]player[/i]", GameManager.PrintType.Log);
 		AddToConsole("HUD2DSCALE [i]0-7[/i] [b]10-100[/b] -> Set 2D HUD Elements [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
 		AddToConsole("HUD3DSCALE [i]0-7[/i] [b]10-100[/b] -> Set 3D HUD Elements [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
 		AddToConsole("HUDSHOW [i]0-7[/i] [b]true/false[/b] -> Set HUD Visibility [b]true/false[/b] for the [i]player[/i], default: [b]true[/b]", GameManager.PrintType.Log);
@@ -669,7 +805,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
 					return;
 				}
-				if (value > GameManager.Instance.defaultModels.Length)
+				if (value > GameManager.Instance.Players.Count)
 				{
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
 					return;
@@ -677,6 +813,12 @@ public partial class ConsoleManager : Control
 				playerNum = value;
 				scale = args[2];
 			}
+		}
+
+		if (playerNum == GameManager.Instance.Players.Count)
+		{
+			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+			return;
 		}
 
 		bool failed = true;
@@ -714,7 +856,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
 					return;
 				}
-				if (value > GameManager.Instance.defaultModels.Length)
+				if (value > GameManager.Instance.Players.Count)
 				{
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
 					return;
@@ -722,6 +864,12 @@ public partial class ConsoleManager : Control
 				playerNum = value;
 				scale = args[2];
 			}
+		}
+
+		if (playerNum == GameManager.Instance.Players.Count)
+		{
+			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+			return;
 		}
 
 		bool failed = true;
@@ -774,30 +922,25 @@ public partial class ConsoleManager : Control
 			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
 			return;
 		}
+
+		if (hudshow == "TRUE")
+		{
+			GameManager.Instance.Players[playerNum].playerInfo.configData.HUDShow = true;
+			GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.UpdateLayersHud(GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.UIMask);
+		}
+		else if (hudshow == "FALSE")
+		{
+			GameManager.Instance.Players[playerNum].playerInfo.configData.HUDShow = false;
+			GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.UpdateLayersHud(1 << GameManager.UINotVisibleLayer);
+		}
 		else
 		{
-			bool failed = false;
-			if (hudshow == "TRUE")
-			{
-				GameManager.Instance.Players[playerNum].playerInfo.configData.HUDShow = true;
-				GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.UpdateLayersHud(GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.UIMask);
-			}
-			else if (hudshow == "FALSE")
-			{
-				GameManager.Instance.Players[playerNum].playerInfo.configData.HUDShow = false;
-				GameManager.Instance.Players[playerNum].playerInfo.playerPostProcessing.playerHUD.UpdateLayersHud(1 << GameManager.UINotVisibleLayer);
-			}
-			else
-				failed = true;
-
-			if (failed)
-				AddToConsole("Command: " + args[0] + " failed: " + hudshow + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
-			else
-			{
-				AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
-				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
-			}
+			AddToConsole("Command: " + args[0] + " failed: " + hudshow + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
+			return;
 		}
+
+		AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
+		GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
 	}
 
 	public void ChangeInvertView(string[] args, string command)
@@ -834,24 +977,19 @@ public partial class ConsoleManager : Control
 			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
 			return;
 		}
+
+		if (invert == "TRUE")
+			GameManager.Instance.Players[playerNum].playerInfo.configData.InvertView = true;
+		else if (invert == "FALSE")
+			GameManager.Instance.Players[playerNum].playerInfo.configData.InvertView = false;
 		else
 		{
-			bool failed = false;
-			if (invert == "TRUE")
-				GameManager.Instance.Players[playerNum].playerInfo.configData.InvertView = true;
-			else if (invert == "FALSE")
-				GameManager.Instance.Players[playerNum].playerInfo.configData.InvertView = false;
-			else
-				failed = true;
-
-			if (failed)
-				AddToConsole("Command: " + args[0] + " failed: " + invert + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
-			else
-			{
-				AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
-				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
-			}
+			AddToConsole("Command: " + args[0] + " failed: " + invert + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
+			return;
 		}
+
+		AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
+		GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
 	}
 
 	public void KillPlayer(string[] args, string command)
@@ -880,8 +1018,8 @@ public partial class ConsoleManager : Control
 			AddToConsole("Command: " + args[0] + " was not applied. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
 			return;
 		}
-		else
-			GameManager.Instance.Players[playerNum].Damage(1000, DamageType.Telefrag);
+
+		GameManager.Instance.Players[playerNum].Damage(1000, DamageType.Telefrag);
 		AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
 	}
 
@@ -943,7 +1081,7 @@ public partial class ConsoleManager : Control
 		}
 	}
 
-	public void ChangeMap(string[] args, string command)
+	public void ChangeMap(string[] args, string command, bool cheats = false)
 	{
 		if (args.Length < 2)
 		{
@@ -957,7 +1095,7 @@ public partial class ConsoleManager : Control
 			AddToConsole("Command: " + command + " map not found", GameManager.PrintType.Warning);
 			return;
 		}
-		GameManager.Instance.ChangeMap(mapName);
+		GameManager.Instance.ChangeMap(mapName, cheats);
 	}
 
 	public void ChangeModel(string[] args, string command)
@@ -1021,7 +1159,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
 					return;
 				}
-				if (value > GameManager.Instance.defaultModels.Length)
+				if (value > GameManager.Instance.Players.Count)
 				{
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
 					return;
@@ -1029,6 +1167,12 @@ public partial class ConsoleManager : Control
 				playerNum = value;
 				sensitivity = args[2];
 			}
+		}
+
+		if (playerNum == GameManager.Instance.Players.Count)
+		{
+			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+			return;
 		}
 
 		if (!sensitivity.Contains(','))
@@ -1104,8 +1248,8 @@ public partial class ConsoleManager : Control
 			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
 			return;
 		}
-		else
-			GameManager.Instance.ChangePlayerName(playerNum, playerName);
+
+		GameManager.Instance.ChangePlayerName(playerNum, playerName);
 		AddToConsole("Command: " + args[0] + " sucesfully changed to " + playerName + " for Player " + playerNum, GameManager.PrintType.Success);
 	}
 
@@ -1135,8 +1279,8 @@ public partial class ConsoleManager : Control
 			AddToConsole("Command: " + args[0] + " was not applied. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
 			return;
 		}
-		else
-			GameManager.Instance.RemovePlayer(playerNum);
+
+		GameManager.Instance.RemovePlayer(playerNum);
 		AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
 	}
 
@@ -1174,24 +1318,19 @@ public partial class ConsoleManager : Control
 			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
 			return;
 		}
+
+		if (safeSwap == "TRUE")
+			GameManager.Instance.Players[playerNum].playerInfo.configData.SafeSwap = true;
+		else if (safeSwap == "FALSE")
+			GameManager.Instance.Players[playerNum].playerInfo.configData.SafeSwap = false;
 		else
 		{
-			bool failed = false;
-			if (safeSwap == "TRUE")
-				GameManager.Instance.Players[playerNum].playerInfo.configData.SafeSwap = true;
-			else if (safeSwap == "FALSE")
-				GameManager.Instance.Players[playerNum].playerInfo.configData.SafeSwap = false;
-			else
-				failed = true;
-
-			if (failed)
-				AddToConsole("Command: " + args[0] + " failed: " + safeSwap + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
-			else
-			{
-				AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
-				GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
-			}
+			AddToConsole("Command: " + args[0] + " failed: " + safeSwap + " is not [b]true/false[/b]", GameManager.PrintType.Warning);
+			return;
 		}
+
+		AddToConsole("Command: " + command + " was succesfully applied", GameManager.PrintType.Success);
+		GameManager.Instance.Players[playerNum].playerInfo.SaveConfigData();
 	}
 
 	public void ChangeSkin(string[] args, string command)
@@ -1213,7 +1352,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
 					return;
 				}
-				if (value > GameManager.Instance.defaultModels.Length)
+				if (value > GameManager.Instance.defaultSkins.Length)
 				{
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
 					return;
@@ -1259,7 +1398,7 @@ public partial class ConsoleManager : Control
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " must be positive", GameManager.PrintType.Warning);
 					return;
 				}
-				if (value > GameManager.Instance.defaultModels.Length)
+				if (value > GameManager.Instance.Players.Count)
 				{
 					AddToConsole("Command: " + args[0] + " was not changed. Player " + args[1] + " doesn't exist", GameManager.PrintType.Warning);
 					return;
@@ -1267,6 +1406,12 @@ public partial class ConsoleManager : Control
 				playerNum = value;
 				sensitivity = args[2];
 			}
+		}
+
+		if (playerNum == GameManager.Instance.Players.Count)
+		{
+			AddToConsole("Command: " + args[0] + " was not changed. Player " + playerNum + " doesn't exist", GameManager.PrintType.Warning);
+			return;
 		}
 
 		if (!sensitivity.Contains(','))
@@ -1349,10 +1494,16 @@ public partial class ConsoleManager : Control
 			ChangeCrossHairAlpha(args, command);
 		else if (args[0] == "CROSSHAIRSCALE")
 			ChangeCrossHairScale(args, command);
+		else if (args[0] == "DEVMAP")
+			ChangeMap(args, command, true);
 		else if (args[0] == "FRAGLIMIT")
 			ChangeFragLimit(args, command);
 		else if (args[0] == "FOV")
 			ChangeFOV(args, command);
+		else if (args[0] == "GIVE")
+			GiveItem(args, command);
+		else if (args[0] == "GOD")
+			ChangeGodMode(args, command);
 		else if (args[0] == "HELP")
 			ShowCommands(command);
 		else if (args[0] == "HUD2DSCALE")
