@@ -20,6 +20,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	private const int readyToLand = 25;
 	private uint currentLayer;
 	public bool enableOffset = true;
+
+	public Vector3 currentScale { get { return _currentScale; } set { _currentScale = value; Scale = _currentScale; } }
+	private Vector3 _currentScale = Vector3.One;
 	public bool isGrounded { get { return _isGrounded; } set { if ((!_isGrounded) && (!value)) { airFrames++; if (airFrames > readyToLand) airFrames = readyToLand; } else airFrames = 0; _isGrounded = value; } }
 
 	private bool _isGrounded = true;
@@ -149,6 +152,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	private List<MeshInstance3D> fxMeshes = new List<MeshInstance3D>();
 	private int hitpoints;
 	private List<MultiMeshData> multiMeshDataList = new List<MultiMeshData>();
+	private Dictionary<MeshInstance3D, ShaderMaterial> painMaterial = new Dictionary<MeshInstance3D, ShaderMaterial>();
 	private static readonly string gibSound = "player/gibsplt1";
 
 	//Needed to keep impulse once it turn into ragdoll
@@ -826,94 +830,61 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		barrel.Quaternion = barrel.Quaternion.Slerp(rotation, speed);
 	}
 
-	public void LoadWeapon(MD3 newWeapon, string barrelModelName, string muzzleModelName, bool isMelee)
+	public void LoadWeapon(ModelController[] newWeaponList, bool isMelee, Node3D barrelObject, Node3D muzzleObject)
 	{
 		if (ownerDead)
 			return;
+
 		if (destroyWeapon)
 			DestroyWeapon();
 
-		MD3 barrelModel = null;
-		MD3 weaponModelTags;
-		Node3D barrelTag = null;
-		Quaternion Rotation = Quaternion.Identity;
-		int tagId;
-
-		if (!string.IsNullOrEmpty(barrelModelName))
-		{
-			barrelModel = ModelsManager.GetModel(barrelModelName);
-			if (barrelModel == null)
-				return;
-		}
-
-		weapon = newWeapon;
+		weapon = newWeaponList[0].Model;
 		weaponModel = Mesher.GenerateModelFromMeshes(weapon, currentLayer, true, true, null, false, false);
 		weaponModel.node.Name = "weapon";
 		weaponNode.AddChild(weaponModel.node);
+		AddAllMeshInstance3D(weaponNode);
 
-		if (barrelModel != null)
+		for (int i = 1; i < newWeaponList.Length; i++)
 		{
-			Vector3 OffSet = Vector3.Zero;
-			barrel = new Node3D();
-			barrel.Name = "barrel_weapon";
-			if (isMelee)
+			Node3D weaponPart = new Node3D();
+			weaponPart.Name = "Weapon_Part_" + i;
+
+			Mesher.GenerateModelFromMeshes(newWeaponList[i].Model, currentLayer, true, true, weaponPart, false, false);
+			//Ugly Hack but Gauntlet rotation is not a child of the weapon
+			if ((isMelee) && (i == 1))
 			{
-				barrelTag = new Node3D();
+				Node3D barrelTag = new Node3D();
 				barrelTag.Name = "Barrel_Tag";
+				if (newWeaponList[0].Model.tagsIdbyName.TryGetValue("tag_barrel", out int tagId))
+				{
+					barrelTag.Position = newWeaponList[0].Model.tagsbyId[tagId][0].origin;
+					barrelTag.Quaternion = newWeaponList[0].Model.tagsbyId[tagId][0].rotation;
+				}
+				weaponModel.node.AddChild(barrelTag);
+				barrelTag.AddChild(weaponPart);
 			}
 			else
-				barrelTag = barrel;
-
-			Mesher.GenerateModelFromMeshes(barrelModel, currentLayer, true, true, barrel, false, false);
-			weaponModel.node.AddChild(barrelTag);
-			if (isMelee)
-				barrelTag.AddChild(barrel);
-
-			if (weapon.tagsIdbyName.TryGetValue("tag_barrel", out tagId))
+				weaponModel.node.AddChild(weaponPart);
+			weaponPart.Position = newWeaponList[i].Position;
+			weaponPart.Quaternion = newWeaponList[i].Quaternion;
+			if (newWeaponList[i] == barrelObject)
 			{
-				OffSet = weapon.tagsbyId[tagId][0].origin;
-				Rotation = weapon.tagsbyId[tagId][0].rotation;
+				barrel = weaponPart;
+				AddAllMeshInstance3D(weaponPart);
 			}
-			barrelTag.Quaternion = Rotation;
-			barrelTag.Position = OffSet;
-
-			weaponModelTags = barrelModel;
+			else if (newWeaponList[i] == muzzleObject)
+			{
+				muzzleFlash = weaponPart;
+				muzzleFlash.Visible = false;
+				AddAllMeshInstance3D(weaponPart, false);
+			}
+			else
+				AddAllMeshInstance3D(weaponPart);
 		}
-		else
-			weaponModelTags = weapon;
 
 		isMeleeWeapon = isMelee;
 		upperAnimation = UpperAnimation.Raise;
 
-		AddAllMeshInstance3D(weaponNode);
-
-		if (!string.IsNullOrEmpty(muzzleModelName))
-		{
-			Vector3 OffSet = Vector3.Zero;
-			muzzleFlash = new Node3D();
-			muzzleFlash.Name = "muzzle_flash";
-			MD3 muzzle = ModelsManager.GetModel(muzzleModelName, true);
-
-			if (muzzle == null)
-				return;
-
-			Mesher.GenerateModelFromMeshes(muzzle, currentLayer, false, false, muzzleFlash, true, false);
-
-			if (barrel == null)
-				weaponModel.node.AddChild(muzzleFlash);
-			else
-				barrelTag.AddChild(muzzleFlash);
-
-			if (weaponModelTags.tagsIdbyName.TryGetValue("tag_flash", out tagId))
-			{
-				OffSet = weaponModelTags.tagsbyId[tagId][0].origin;
-				Rotation = weaponModelTags.tagsbyId[tagId][0].rotation;
-			}
-			muzzleFlash.Position = OffSet;
-			muzzleFlash.Quaternion = Rotation;
-			muzzleFlash.Visible = false;
-		}
-		AddAllMeshInstance3D(weaponNode, false);
 		if (hasQuad)
 			GameManager.ChangeQuadFx(fxMeshes, true);
 	}
@@ -1075,10 +1046,35 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		currentLayer = layer;
 
 		AddAllMeshInstance3D(playerModel);
-
+		AddPainMaterial();
 		playerControls.playerInfo.playerPostProcessing.playerHUD.InitHUD(head, meshToSkin);
 		return true;
 	}
+
+	public void AddPainMaterial()
+	{
+		foreach (MeshInstance3D mesh in modelsMeshes)
+		{
+			ShaderMaterial material = (ShaderMaterial)MaterialManager.Instance.painModelMaterial.Duplicate(true);
+			painMaterial.Add(mesh,material);
+		}
+	}
+
+	public void SetPain(bool enable, float duration = 0)
+	{
+		foreach (var painMat in painMaterial)
+		{
+			if (enable)
+			{
+				painMat.Value.SetShaderParameter("pain_duration", .25f);
+				painMat.Value.SetShaderParameter("pain_start_time", GameManager.CurrentTimeMsec);
+				painMat.Key.MaterialOverlay = painMat.Value;
+			}
+			else
+				painMat.Key.MaterialOverlay = null;
+		}
+	}
+
 	public void ChangeLayer(uint layer)
 	{
 		for (int i = 0; i < modelsMeshes.Count; i++)

@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=3 uid="uid://h6jkwahjjxfk"]
+[gd_scene load_steps=12 format=3 uid="uid://h6jkwahjjxfk"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/GrenadeLauncherWeapon.cs" id="1_c2ugi"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_dhid1"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_ksely"]
 
 [sub_resource type="Animation" id="Animation_pi8jm"]
 resource_name = "fire"
@@ -52,7 +53,7 @@ nodes/idle/node = SubResource("AnimationNodeAnimation_cij11")
 nodes/idle/position = Vector2(-318.976, 109.718)
 node_connections = [&"TimeScale", 0, &"attack", &"fire_shot", 0, &"idle", &"fire_shot", 1, &"TimeScale", &"output", 0, &"fire_shot"]
 
-[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("weaponAnimation", "audioStream", "muzzleLight")]
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("weaponAnimation", "audioStream", "models", "muzzleObject", "muzzleLight")]
 transform = Transform3D(0.997546, 0.0700209, 0, -0.0700209, 0.997546, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("1_c2ugi")
 AttackProjectileName = "GrenadeProjectile"
@@ -61,12 +62,28 @@ animationSpeed = 2.0
 Offset = Vector3(0.2, -0.3, 0)
 audioStream = NodePath("WeaponAudioStream")
 _sounds = PackedStringArray("weapons/grenade/grenlf1a", "weapons/noammo", "weapons/change")
-ModelName = "weapons2/grenadel/grenadel"
-MuzzleModelName = "weapons2/grenadel/grenadel_flash"
+models = [NodePath("Grenade Launcher"), NodePath("Grenade Launcher/Muzzle")]
+muzzleObject = NodePath("Grenade Launcher/Muzzle")
 fullAuto = false
 _fireRate = 0.8
 _muzzleTime = 0.8
 muzzleLight = NodePath("OmniLight3D")
+
+[node name="Grenade Launcher" type="Node3D" parent="."]
+script = ExtResource("2_ksely")
+modelName = "weapons2/grenadel/grenadel"
+useCommon = false
+castShadows = true
+isViewModel = true
+currentState = 0
+
+[node name="Muzzle" type="Node3D" parent="Grenade Launcher"]
+script = ExtResource("2_ksely")
+modelName = "weapons2/grenadel/grenadel_flash"
+tagName = "tag_flash"
+useCommon = false
+isViewModel = true
+currentState = 0
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 layers = 255

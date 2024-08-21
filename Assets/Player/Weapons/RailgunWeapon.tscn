@@ -1,19 +1,19 @@
-[gd_scene load_steps=3 format=3 uid="uid://bblybo8kkck16"]
+[gd_scene load_steps=4 format=3 uid="uid://bblybo8kkck16"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/RailgunWeapon.cs" id="1_r5wvs"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_02w7n"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_u6gs3"]
 
-[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("humStream", "audioStream", "muzzleLight")]
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("humStream", "audioStream", "models", "muzzleObject", "muzzleLight")]
 script = ExtResource("1_r5wvs")
 humStream = NodePath("HumAudioStream")
 _humSound = "weapons/railgun/rg_hum"
 pushForce = 500.0
 Offset = Vector3(0.25, -0.3, -0.1)
-MuzzleOffset = Vector3(-0.6, 0.1, -0.06)
 audioStream = NodePath("WeaponAudioStream")
 _sounds = PackedStringArray("weapons/railgun/railgf1a", "weapons/noammo", "weapons/change")
-ModelName = "weapons2/railgun/railgun"
-MuzzleModelName = "weapons2/railgun/railgun_flash"
+models = [NodePath("Railgun"), NodePath("Railgun/Muzzle")]
+muzzleObject = NodePath("Railgun/Muzzle")
 fullAuto = false
 DamageMin = 80
 DamageMax = 100
@@ -21,6 +21,21 @@ kickSpeed = 30.0
 _fireRate = 1.5
 _muzzleTime = 0.13
 muzzleLight = NodePath("OmniLight3D")
+
+[node name="Railgun" type="Node3D" parent="."]
+script = ExtResource("2_u6gs3")
+modelName = "weapons2/railgun/railgun"
+useCommon = false
+isViewModel = true
+currentState = 0
+
+[node name="Muzzle" type="Node3D" parent="Railgun"]
+script = ExtResource("2_u6gs3")
+modelName = "weapons2/railgun/railgun_flash"
+tagName = "tag_flash"
+useCommon = false
+isViewModel = true
+currentState = 0
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 layers = 255

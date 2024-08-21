@@ -9,25 +9,21 @@ public partial class PlayerWeapon : Node3D
 	[Export]
 	public Vector3 Offset = new Vector3(.2f, -.2f, -.14f);
 	[Export]
-	public Vector3 MuzzleOffset = new Vector3(-0.5f, 0f, 0);
-	[Export]
 	public float ReadyHeight = 0.75f;
 	[Export]
 	public MultiAudioStream audioStream;
 	[Export]
 	public string[] _sounds = new string[0];
+	[Export]
+	public ModelController[] models;
 
 	public AudioStream[] Sounds = new AudioStream[0];
 
+	[Export]
 	public Node3D muzzleObject = null;
+	[Export]
 	public Node3D barrelObject = null;
 
-	[Export]
-	public string ModelName;
-	[Export]
-	public string BarrelModelName;
-	[Export]
-	public string MuzzleModelName;
 	[Export]
 	public bool useCrosshair = true;
 	[Export]
@@ -91,6 +87,7 @@ public partial class PlayerWeapon : Node3D
 	public string quadSound = "items/damage3";
 	public List<MeshInstance3D> fxMeshes;
 	public bool hasQuad = false;
+
 	public override void _Ready()
 	{
 		Sounds = new AudioStream[_sounds.Length];
@@ -117,83 +114,43 @@ public partial class PlayerWeapon : Node3D
 		playerInfo = p;
 		playerInfo.WeaponHand.AddChild(this);
 		playerInfo.WeaponHand.Position = Offset;
-		MD3 weaponModelTags;
-		MD3 barrelModel = null;
-		Node3D barrelTag = null;
-		Quaternion Rotation = Quaternion.Identity;
-		int tagId;
 
 		if (Weapon == null)
 			Weapon = this;
 
-		if (!string.IsNullOrEmpty(BarrelModelName))
+		for (int i = 0; i < models.Length; i++)
 		{
-			barrelModel = ModelsManager.GetModel(BarrelModelName);
-			if (barrelModel == null)
-				return;
+			if (i == models.Length - 1)
+				fxMeshes = GameManager.CreateFXMeshInstance3D(playerInfo.WeaponHand);
+
+			ModelController model = models[i];
+			model.currentLayer = p.uiLayer;
+			model.currentState = GameManager.FuncState.Ready;
+			model.Init();
 		}
 
-		MD3 model = ModelsManager.GetModel(ModelName);
-		if (model != null)
+		for (int i = 0; i < models.Length; i++)
 		{
-			Mesher.GenerateModelFromMeshes(model, p.uiLayer, false, false, Weapon, false, false, null, true, false, true);
-			if (playerInfo.playerThing.avatar != null)
-				playerInfo.playerThing.avatar.LoadWeapon(model, BarrelModelName, MuzzleModelName, isMelee);
+			ModelController model = models[i];
+			model.Start();
 		}
 
-		if (barrelModel != null)
+		//Ugly Hack but Gauntlet rotation is not a child of the weapon
+		if (isMelee)
 		{
-			Vector3 OffSet = Vector3.Zero;
-
-			barrelObject = new Node3D();
-			barrelObject.Name = "Barrel_Weapon";
-			if (isMelee)
+			Node3D barrelTag = (Node3D)barrelObject.GetParent();
+			if (models[0].Model.tagsIdbyName.TryGetValue("tag_barrel", out int tagId))
 			{
-				barrelTag = new Node3D();
-				barrelTag.Name = "Barrel_Tag";
+				barrelTag.Position = models[0].Model.tagsbyId[tagId][0].origin;
+				barrelTag.Quaternion = models[0].Model.tagsbyId[tagId][0].rotation;
 			}
-			else
-				barrelTag = barrelObject;
-
-			Mesher.GenerateModelFromMeshes(barrelModel, p.uiLayer, false, false, barrelObject, false, false, null, true, false, true);
-			Weapon.AddChild(barrelTag);
-			if (isMelee)
-				barrelTag.AddChild(barrelObject);
-
-			if (model.tagsIdbyName.TryGetValue("tag_barrel", out tagId))
-			{
-				OffSet = model.tagsbyId[tagId][0].origin;
-				Rotation = model.tagsbyId[tagId][0].rotation;
-			}
-			barrelTag.Quaternion = Rotation;
-			barrelTag.Position = OffSet;
-			weaponModelTags = barrelModel;
-		}
-		else
-			weaponModelTags = model;
-
-		if (weaponModelTags.tagsIdbyName.TryGetValue("tag_flash", out tagId))
-		{
-			MuzzleOffset = weaponModelTags.tagsbyId[tagId][0].origin;
-			Rotation = weaponModelTags.tagsbyId[tagId][0].rotation;
 		}
 
-		fxMeshes = GameManager.CreateFXMeshInstance3D(playerInfo.WeaponHand);
+		if (playerInfo.playerThing.avatar != null)
+			playerInfo.playerThing.avatar.LoadWeapon(models, isMelee, barrelObject, muzzleObject);
 
-		if (!string.IsNullOrEmpty(MuzzleModelName))
+		if (muzzleObject != null)
 		{
-			muzzleObject = new Node3D();
-			muzzleObject.Name = "Muzzle";
-			if (barrelObject == null)
-				Weapon.AddChild(muzzleObject);
-			else
-				barrelTag.AddChild(muzzleObject);
-
-			muzzleObject.Position = MuzzleOffset;
-			muzzleObject.Quaternion = Rotation;
-			model = ModelsManager.GetModel(MuzzleModelName, true);
-			if (model != null)
-				Mesher.GenerateModelFromMeshes(model, p.uiLayer, false, false, muzzleObject, true, false, null, true, false, true);
 			muzzleObject.Visible = false;
 			if (muzzleLight != null)
 			{

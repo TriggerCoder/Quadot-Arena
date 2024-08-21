@@ -758,7 +758,7 @@ public partial class ConsoleManager : Control
 		AddToConsole("CROSSHAIRALPHA [i]0-7[/i] [b]0-100[/b] -> Set CrossHair [b]Transparency[/b] for the [i]player[/i], default: [b]25[/b]", GameManager.PrintType.Log);
 		AddToConsole("CROSSHAIRSCALE [i]0-7[/i] [b]10-100[/b] -> Set 2D CrossHair [b]Scale[/b] for the [i]player[/i], default: [b]100[/b]", GameManager.PrintType.Log);
 		AddToConsole("COLOR [i]0-7[/i] [b]color[/b] -> Change the [b]color[/b] (color can be #hex or by name) for the [i]player[/i], default: [b]#50a1cd[/b]", GameManager.PrintType.Log);
-		AddToConsole("DEVMAP [b]mapName[/b] -> Loads [b]map[/b] with Cheats Enabled", GameManager.PrintType.Log);
+		AddToConsole("DEVMAP [b]mapName[/b] -> Load [b]map[/b] with Cheats Enabled", GameManager.PrintType.Log);
 		AddToConsole("FRAGLIMIT [b]limit[/b] -> Set the [b]fraglimit[/b] per map, default: [b]15[/b]", GameManager.PrintType.Log);
 		AddToConsole("FOV [i]0-7[/i] [b]30-130[/b] -> Set [b]Fov[/b] for the [i]player[/i], default: [b]90[/b]", GameManager.PrintType.Log);
 		AddToConsole("GIVE [i]0-7[/i] [b]itemName[/b] -> Give [b]Item[/b] for the [i]player[/i]", GameManager.PrintType.Log);
@@ -771,7 +771,7 @@ public partial class ConsoleManager : Control
 		AddToConsole("LISTMAPS -> List all the posible maps that can be played", GameManager.PrintType.Log);
 		AddToConsole("LISTMODELS -> List all the posible player models that can be used", GameManager.PrintType.Log);
 		AddToConsole("LISTSKINS [i]0-7[/i] -> List all the posible skins for the current [i]player[/i] model", GameManager.PrintType.Log);
-		AddToConsole("MAP [b]mapName[/b] -> Loads [b]map[/b]", GameManager.PrintType.Log);
+		AddToConsole("MAP [b]mapName[/b] -> Load [b]map[/b]", GameManager.PrintType.Log);
 		AddToConsole("MODEL [i]0-7[/i] [b]modelName[/b] -> Change the [b]model[/b] for the [i]player[/i]", GameManager.PrintType.Log);
 		AddToConsole("MOUSESENSITIVITY [i]0-7[/i] [b]X,Y[/b] -> Change the mouse sensitivity [b]X,Y[/b] for the [i]player[/i], default: [b].5,.5[/b]", GameManager.PrintType.Log);
 		AddToConsole("NEXTMAP -> Change to the next map in the map rotation list", GameManager.PrintType.Log);

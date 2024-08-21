@@ -24,6 +24,8 @@ public partial class MaterialManager : Node
 	[Export]
 	public ShaderMaterial underWaterMaterial;
 	[Export]
+	public ShaderMaterial painModelMaterial;
+	[Export]
 	public Resource[] _extraTextures;
 	[Export]
 	public string[] _decalsNames;

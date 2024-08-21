@@ -378,7 +378,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			}
 
 			painTime = 1f;
-			avatar.Scale = Vector3.One * 1.1f;
+			avatar.currentScale = Vector3.One * 1.1f;
+			avatar.SetPain(true, painFlash);
 		}
 
 		if (attacker != this)
@@ -455,6 +456,9 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		{
 			default:
 				break;
+			case PlayerInfo.MachineGun:
+				itemsToDrop.Add("weapon_machinegun");
+			break;
 			case PlayerInfo.Shotgun:
 				itemsToDrop.Add("weapon_shotgun");
 			break;
@@ -547,12 +551,13 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		if (painTime > 0f)
 		{
 			painTime -= deltaTime;
-			avatar.Scale = Vector3.One * Mathf.Lerp(1, avatar.Scale.X, painTime);
+			avatar.currentScale = Vector3.One * Mathf.Lerp(1, avatar.currentScale.X, painTime);
 		}
 		else if (painTime < 0f)
 		{
 			painTime = 0;
-			avatar.Scale = Vector3.One;
+			avatar.currentScale = Vector3.One;
+			avatar.SetPain(false);
 		}
 
 		//Last Attacker

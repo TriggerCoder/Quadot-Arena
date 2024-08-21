@@ -88,8 +88,6 @@ public partial class LightningGunWeapon : PlayerWeapon
 		humStream.Play();
 		currentHum = CurrentHum.Idle;
 
-		boltOrigin.Position = MuzzleOffset;
-//		lightningBolt.Reparent(muzzleObject, false);
 		baseRotation = boltOrigin.Quaternion;
 
 		avatarboltOrigin = new Node3D();

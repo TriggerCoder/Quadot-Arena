@@ -8,6 +8,10 @@ public partial class ModelController : Node3D
 	[Export]
 	public string shaderName = "";
 	[Export]
+	public string tagName = "";
+	[Export]
+	public bool useCommon = true;
+	[Export]
 	public bool isTransparent = false;
 	[Export]
 	public bool receiveShadows = false;
@@ -17,7 +21,10 @@ public partial class ModelController : Node3D
 	public bool useLowCountMultiMesh = true;
 	[Export]
 	public bool alphaFade = false;
+	[Export]
+	public bool isViewModel = false;
 
+	public uint currentLayer = GameManager.AllPlayerViewMask;
 	public MD3 Model { get { return md3Model; } }
 	private MD3 md3Model = null;
 
@@ -28,6 +35,8 @@ public partial class ModelController : Node3D
 	public DestroyType destroyType;
 	[Export]
 	public float destroyTimer = 0;
+	[Export]
+	public GameManager.FuncState currentState = GameManager.FuncState.Ready;
 
 	private List<MultiMeshData> multiMeshDataList = new List<MultiMeshData>();
 	private List<Node3D> destroyNodes = new List<Node3D>();
@@ -40,8 +49,6 @@ public partial class ModelController : Node3D
 
 	private float ModelLerpTime = 0;
 	private float ModelCurrentLerpTime = 0;
-
-	private GameManager.FuncState currentState = GameManager.FuncState.None;
 
 	private Color Modulate = Colors.Black;
 	private float baseTime = 1;
@@ -68,7 +75,9 @@ public partial class ModelController : Node3D
 
 	public void Init()
 	{
-		currentState = GameManager.FuncState.Ready;
+		if (currentState == GameManager.FuncState.None)
+			return;
+
 		if (string.IsNullOrEmpty(modelName))
 			return;
 
@@ -89,7 +98,7 @@ public partial class ModelController : Node3D
 				TextureLoader.AddNewTexture(shaderName, isTransparent);
 		}
 
-		model = Mesher.GenerateModelFromMeshes(md3Model, GameManager.AllPlayerViewMask, receiveShadows, castShadows, currentObject, isTransparent, ((modelAnimationFPS == 0) && !isTransparent), meshToSkin, useLowCountMultiMesh, alphaFade);
+		model = Mesher.GenerateModelFromMeshes(md3Model, currentLayer, receiveShadows, castShadows, currentObject, isTransparent, ((modelAnimationFPS == 0) && !isTransparent) && useCommon, meshToSkin, useLowCountMultiMesh, alphaFade, isViewModel);
 
 		for (int i = 0; i < md3Model.meshes.Count; i++)
 		{
@@ -102,7 +111,22 @@ public partial class ModelController : Node3D
 		if (destroyTimer != 0)
 			baseTime = destroyTimer;
 		ModelsManager.AddModel(this);
+
 	}
+
+	void SetTagPosition()
+	{
+		Node parent = GetParent();
+		if (parent is ModelController source)
+		{
+			if (source.Model.tagsIdbyName.TryGetValue(tagName, out int tagId))
+			{
+				Position = source.Model.tagsbyId[tagId][0].origin;
+				Quaternion = source.Model.tagsbyId[tagId][0].rotation;
+			}
+		}
+	}
+
 	void AnimateModel(float deltaTime)
 	{
 		if (modelAnimationFPS == 0)
@@ -160,7 +184,10 @@ public partial class ModelController : Node3D
 			return;
 		}
 
-		if (modelAnimationFPS == 0)
+		if (!string.IsNullOrEmpty(tagName))
+			SetTagPosition();
+
+		if ((modelAnimationFPS == 0) && useCommon)
 		{
 			for (int i = 0; i < model.data.Length; i++)
 			{
@@ -249,14 +276,11 @@ public partial class ModelController : Node3D
 	}
 	public void Process(float deltaTime)
 	{
-		switch (currentState)
-		{
-			default:
-			break;
-			case GameManager.FuncState.Ready:
-				Start();
-			break;
-		}
+		if (currentState == GameManager.FuncState.None)
+			return;
+
+		if (currentState == GameManager.FuncState.Ready)
+			Start();
 
 		AnimateModel(deltaTime);
 		UpdateMultiMesh();

@@ -1,9 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://cuxddhbt7p0lt"]
+[gd_scene load_steps=4 format=3 uid="uid://cuxddhbt7p0lt"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/BFG10KWeapon.cs" id="1_lil2e"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_b6bpy"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_eg7gr"]
 
-[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("humStream", "audioStream", "muzzleLight")]
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("humStream", "audioStream", "models", "muzzleObject", "muzzleLight")]
 script = ExtResource("1_lil2e")
 AttackProjectileName = "BFGProjectile"
 humStream = NodePath("HumAudioStream")
@@ -11,11 +12,26 @@ _humSounds = PackedStringArray("weapons/bfg/bfg_hum", "weapons/bfg/bfg_charge")
 Offset = Vector3(0.2, -0.5, 0)
 audioStream = NodePath("WeaponAudioStream")
 _sounds = PackedStringArray("weapons/bfg/bfg_fire", "weapons/noammo", "weapons/change")
-ModelName = "weapons2/bfg/bfg"
-MuzzleModelName = "weapons2/bfg/bfg_flash"
+models = [NodePath("BFG10K"), NodePath("BFG10K/Muzzle")]
+muzzleObject = NodePath("BFG10K/Muzzle")
 kickSpeed = 30.0
 _fireRate = 1.13
 muzzleLight = NodePath("OmniLight3D")
+
+[node name="BFG10K" type="Node3D" parent="."]
+script = ExtResource("2_eg7gr")
+modelName = "weapons2/bfg/bfg"
+useCommon = false
+isViewModel = true
+currentState = 0
+
+[node name="Muzzle" type="Node3D" parent="BFG10K"]
+script = ExtResource("2_eg7gr")
+modelName = "weapons2/bfg/bfg_flash"
+tagName = "tag_flash"
+useCommon = false
+isViewModel = true
+currentState = 0
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 layers = 255
