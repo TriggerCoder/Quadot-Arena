@@ -81,8 +81,8 @@ public partial class PlayerHUD : MeshInstance3D
 
 	private Sprite3D[] noAmmoIcon;
 	private Sprite3D selectIcon;
-	private static readonly string[] weaponNames = { "Gauntlet", "Machinegun", "Shotgun", "Grenade Launcher", "Rocket Launcher", "Lightning Gun", "Railgun", "Plasma Gun", "BFG 10K", "Grapple Hook" };
-	private static readonly string[] weaponSprites = { "ICONS/ICONW_GAUNTLET", "ICONS/ICONW_MACHINEGUN", "ICONS/ICONW_SHOTGUN", "ICONS/ICONW_GRENADE", "ICONS/ICONW_ROCKET", "ICONS/ICONW_LIGHTNING", "ICONS/ICONW_RAILGUN", "ICONS/ICONW_PLASMA", "ICONS/ICONW_BFG", "ICONS/ICONW_GRAPPLE" };
+	private static readonly string[] weaponNames = { "Gauntlet", "Machinegun", "Shotgun", "Grenade Launcher", "Rocket Launcher", "Lightning Gun", "Railgun", "Plasma Gun", "BFG 10K", "Grapple Hook", "Nail Gun", "Vulcan", "Proximity Launcher", "Heavy Machine Gun" };
+	private static readonly string[] weaponSprites = { "ICONS/ICONW_GAUNTLET", "ICONS/ICONW_MACHINEGUN", "ICONS/ICONW_SHOTGUN", "ICONS/ICONW_GRENADE", "ICONS/ICONW_ROCKET", "ICONS/ICONW_LIGHTNING", "ICONS/ICONW_RAILGUN", "ICONS/ICONW_PLASMA", "ICONS/ICONW_BFG", "ICONS/ICONW_GRAPPLE", "ICONS/NAILGUN128", "ICONS/CHAINGUN128", "ICONS/PROXMINE", "ICONS/WEAP_HMG" };
 	private static readonly string[] ammoModels = { "machinegunam", "shotgunam", "grenadeam", "rocketam", "lightningam", "railgunam", "plasmaam", "bfgam" };
 	private static readonly string[] powerUpsSprites = { "ICONS/QUAD", "ICONS/HASTE", "ICONS/INVIS", "ICONS/REGEN", "ICONS/ENVIROSUIT", "ICONS/FLIGHT" };
 	private static readonly string[] holdableItemsSprites = { "ICONS/TELEPORTER", "ICONS/MEDKIT" };
@@ -238,18 +238,13 @@ public partial class PlayerHUD : MeshInstance3D
 			if (child is MeshInstance3D mesh)
 				mesh.Layers = layers;
 		}
-		var Childrens = GameManager.GetAllChildrens(ArmorContainer);
-		foreach (var child in Childrens)
-		{
-			if (child is MeshInstance3D mesh)
-				mesh.Layers = layers;
-		}
-		Childrens = GameManager.GetAllChildrens(AmmoContainer);
-		foreach (var child in Childrens)
-		{
-			if (child is MeshInstance3D mesh)
-				mesh.Layers = layers;
-		}
+		List<MeshInstance3D> Childrens = GameManager.GetAllChildrensByType<MeshInstance3D>(ArmorContainer);
+		foreach (MeshInstance3D mesh in Childrens)
+			mesh.Layers = layers;
+
+		Childrens = GameManager.GetAllChildrensByType<MeshInstance3D>(AmmoContainer);
+		foreach (MeshInstance3D mesh in Childrens)
+			mesh.Layers = layers;
 	}
 
 	public void ChangeCrossHairScale(int scale)
@@ -329,7 +324,7 @@ public partial class PlayerHUD : MeshInstance3D
 			Mesher.GenerateModelFromMeshes(headModel, currentLayer, false, false, viewHead, false, false, meshToSkin, true, false, true, false);
 
 		fxMeshes = GameManager.CreateFXMeshInstance3D(viewHeadContainer);
-		NodeList = GameManager.GetAllChildrens(viewHead);
+		NodeList = GameManager.GetAllChildrensByType<Node>(viewHead);
 		headAnimation.Set("parameters/Look/pain_shot/active", true);
 	}
 
@@ -617,7 +612,7 @@ public partial class PlayerHUD : MeshInstance3D
 
 			case PlayerInfo.Gauntlet:
 				break;
-
+			case PlayerInfo.HeavyMachineGun:
 			case PlayerInfo.MachineGun:
 				if (playerInfo.Ammo[PlayerInfo.bulletsAmmo] <= 0)
 					return false;

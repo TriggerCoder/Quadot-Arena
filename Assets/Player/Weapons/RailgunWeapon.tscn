@@ -34,6 +34,7 @@ script = ExtResource("2_u6gs3")
 modelName = "weapons2/railgun/railgun_flash"
 tagName = "tag_flash"
 useCommon = false
+isTransparent = true
 isViewModel = true
 currentState = 0
 

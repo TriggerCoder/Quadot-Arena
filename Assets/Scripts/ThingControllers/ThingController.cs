@@ -1,5 +1,5 @@
 using Godot;
-using System;
+using System.Collections.Generic;
 
 public partial class ThingController : Node3D
 {
@@ -38,6 +38,8 @@ public partial class ThingController : Node3D
 	public string itemName;
 	//Only 1 per Map according to GameType
 	public bool uniqueItem = false;
+
+	private List<ThingController> collidedItems = new List<ThingController>();
 	public void SpawnCheck(string name)
 	{
 		itemName = name;
@@ -48,6 +50,56 @@ public partial class ThingController : Node3D
 			remainingTime = 30;
 		}
 	}
+
+	public override void _Ready()
+	{
+		//Only Keep Items Active
+		if (thingType != ThingType.Item)
+			SetProcess(false);
+	}
+
+	public void CheckItemsNearBy()
+	{
+		SetPhysicsProcess(false);
+		if (itemPickup == null)
+			return;
+
+		//Unique Items don't do checks
+		if (uniqueItem)
+			return;
+
+		List<CollisionShape3D> Childrens = GameManager.GetAllChildrensByType<CollisionShape3D>(this);
+		if (Childrens.Count == 0)
+			return;
+		
+		var Sphere = Childrens[0].Shape.GetRid();
+		var SphereCast = new PhysicsShapeQueryParameters3D();
+		SphereCast.ShapeRid = Sphere;
+		SphereCast.CollideWithAreas = true;
+		SphereCast.CollideWithBodies = false;
+		SphereCast.CollisionMask = (1 << GameManager.ThingsLayer);
+		SphereCast.Motion = Vector3.Zero;
+		SphereCast.Transform = GlobalTransform;
+		var SpaceState = GetWorld3D().DirectSpaceState;
+		var hits = SpaceState.IntersectShape(SphereCast);
+		var max = hits.Count;
+
+		for (int i = 0; i < max; i++)
+		{
+			var hit = hits[i];
+
+			CollisionObject3D collider = (CollisionObject3D)hit["collider"];
+			if (collider is ItemPickup item)
+			{
+				//Don't Add Self
+				if (item == itemPickup)
+					continue;
+
+				collidedItems.Add(item.thingController);
+			}
+		}
+	}
+
 	public override void _Process(double delta)
 	{
 		if (GameManager.Paused)
@@ -59,6 +111,20 @@ public partial class ThingController : Node3D
 			remainingTime -= deltaTime;
 			if (remainingTime < 0)
 			{
+				if (collidedItems.Count > 0)
+				{
+					bool blocked = false;
+					for (int i = 0; i < collidedItems.Count; i++)
+					{
+						if (!collidedItems[i].disabled)
+							blocked = true;
+					}
+					if (blocked)
+					{
+						remainingTime += 5;
+						return;
+					}
+				}
 				remainingTime = 0;
 				_disabled = false;
 				Visible = true;
@@ -66,6 +132,14 @@ public partial class ThingController : Node3D
 					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(respawnSound));
 			}
 		}
+	}
+
+	public override void _PhysicsProcess(double delta)
+	{
+		if (GameManager.Paused)
+			return;
+
+		CheckItemsNearBy();
 	}
 
 	public void SetRandomTime(float waitTime)

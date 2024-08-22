@@ -26,7 +26,6 @@ muzzleLight = NodePath("OmniLight3D")
 script = ExtResource("2_e657m")
 modelName = "weapons2/lightning/lightning"
 useCommon = false
-castShadows = true
 isViewModel = true
 currentState = 0
 
@@ -35,7 +34,7 @@ script = ExtResource("2_e657m")
 modelName = "weapons2/lightning/lightning_flash"
 tagName = "tag_flash"
 useCommon = false
-castShadows = true
+isTransparent = true
 isViewModel = true
 currentState = 0
 
@@ -54,7 +53,7 @@ script = ExtResource("2_vn27h")
 Bus = "FXBus"
 
 [node name="BoltOrigin" type="Node3D" parent="."]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -0.5, 0, 0)
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -0.5, 0.1, 0)
 visible = false
 
 [node name="LightningBolt" parent="BoltOrigin" instance=ExtResource("3_tcc8f")]

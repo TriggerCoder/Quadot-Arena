@@ -1,0 +1,44 @@
+[gd_scene load_steps=4 format=3 uid="uid://is7qx5pq84vw"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/HeavyMachineGunWeapon.cs" id="1_icwjw"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_wrs3y"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="3_5sj2y"]
+
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("audioStream", "models", "muzzleObject", "muzzleLight")]
+script = ExtResource("1_icwjw")
+Offset = Vector3(0.25, -0.3, 0)
+audioStream = NodePath("WeaponAudioStream")
+_sounds = PackedStringArray("weapons/hmg/machgf4b", "weapons/noammo", "weapons/change", "weapons/machinegun/ric1", "weapons/machinegun/ric2", "weapons/machinegun/ric3")
+models = [NodePath("HeavyMachineGun"), NodePath("HeavyMachineGun/Muzzle")]
+muzzleObject = NodePath("HeavyMachineGun/Muzzle")
+DamageMin = 8
+DamageMax = 16
+_fireRate = 0.06
+_muzzleTime = 0.13
+muzzleLight = NodePath("OmniLight3D")
+
+[node name="HeavyMachineGun" type="Node3D" parent="."]
+script = ExtResource("2_wrs3y")
+modelName = "weapons3/hmg/hmg"
+useCommon = false
+isViewModel = true
+currentState = 0
+
+[node name="Muzzle" type="Node3D" parent="HeavyMachineGun"]
+script = ExtResource("2_wrs3y")
+modelName = "weapons3/hmg/hmg_flash"
+tagName = "tag_flash"
+useCommon = false
+isTransparent = true
+isViewModel = true
+currentState = 0
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+layers = 255
+light_color = Color(1, 0.686275, 0, 1)
+light_bake_mode = 0
+omni_shadow_mode = 0
+
+[node name="WeaponAudioStream" type="Node3D" parent="."]
+script = ExtResource("3_5sj2y")
+Bus = "FXBus"

@@ -889,7 +889,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 			case PlayerInfo.Gauntlet:
 				break;
-
+			case PlayerInfo.HeavyMachineGun:
 			case PlayerInfo.MachineGun:
 				if (playerInfo.Ammo[PlayerInfo.bulletsAmmo] <= 0)
 					return false;
@@ -946,6 +946,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	{
 		if (TrySwapWeapon(PlayerInfo.BFG10K)) return;
 		if (TrySwapWeapon(PlayerInfo.PlasmaGun)) return;
+		if (TrySwapWeapon(PlayerInfo.HeavyMachineGun)) return;
 		if (TrySwapWeapon(PlayerInfo.LightningGun)) return;
 		if (TrySwapWeapon(PlayerInfo.Shotgun)) return;
 		if (TrySwapWeapon(PlayerInfo.MachineGun)) return;
@@ -958,6 +959,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	{
 		if (TrySwapWeapon(PlayerInfo.BFG10K)) return;
 		if (TrySwapWeapon(PlayerInfo.PlasmaGun)) return;
+		if (TrySwapWeapon(PlayerInfo.HeavyMachineGun)) return;
 		if (TrySwapWeapon(PlayerInfo.Railgun)) return;
 		if (TrySwapWeapon(PlayerInfo.LightningGun)) return;
 		if (TrySwapWeapon(PlayerInfo.RocketLauncher)) return;
@@ -972,7 +974,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (Input.IsActionJustPressed(playerInput.Action_WeaponSwitch_Up))
 		{
 			bool gotWeapon = false;
-			for (int NextWeapon = CurrentWeapon + 1; NextWeapon < 9; NextWeapon++)
+			for (int NextWeapon = CurrentWeapon + 1; NextWeapon < 14; NextWeapon++)
 			{
 				gotWeapon = TrySwapWeapon(NextWeapon);
 				if (gotWeapon)

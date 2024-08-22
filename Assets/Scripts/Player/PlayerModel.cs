@@ -838,6 +838,8 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		if (destroyWeapon)
 			DestroyWeapon();
 
+		Node3D barrelTag = null;
+
 		weapon = newWeaponList[0].Model;
 		weaponModel = Mesher.GenerateModelFromMeshes(weapon, currentLayer, true, true, null, false, false);
 		weaponModel.node.Name = "weapon";
@@ -850,18 +852,26 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			weaponPart.Name = "Weapon_Part_" + i;
 
 			Mesher.GenerateModelFromMeshes(newWeaponList[i].Model, currentLayer, true, true, weaponPart, false, false);
-			//Ugly Hack but Gauntlet rotation is not a child of the weapon
-			if ((isMelee) && (i == 1))
+			//Ugly Hack but Gauntlet rotation is all messed up
+			if (isMelee)
 			{
-				Node3D barrelTag = new Node3D();
-				barrelTag.Name = "Barrel_Tag";
-				if (newWeaponList[0].Model.tagsIdbyName.TryGetValue("tag_barrel", out int tagId))
+				if (i == 1)
 				{
-					barrelTag.Position = newWeaponList[0].Model.tagsbyId[tagId][0].origin;
-					barrelTag.Quaternion = newWeaponList[0].Model.tagsbyId[tagId][0].rotation;
+					barrelTag = new Node3D();
+					barrelTag.Name = "Barrel_Tag";
+					if (newWeaponList[0].Model.tagsIdbyName.TryGetValue("tag_barrel", out int tagId))
+					{
+						barrelTag.Position = newWeaponList[0].Model.tagsbyId[tagId][0].origin;
+						barrelTag.Quaternion = newWeaponList[0].Model.tagsbyId[tagId][0].rotation;
+					}
+					weaponModel.node.AddChild(barrelTag);
+					barrelTag.AddChild(weaponPart);
 				}
-				weaponModel.node.AddChild(barrelTag);
-				barrelTag.AddChild(weaponPart);
+				else if (i == 2)
+				{
+					weaponPart.Position += barrelTag.Position;
+					weaponPart.Quaternion *= Quaternion.FromEuler(Vector3.Up * Mathf.Pi);
+				}
 			}
 			else
 				weaponModel.node.AddChild(weaponPart);
@@ -1086,54 +1096,48 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 	private void AddAllMeshInstance3D(Node parent, bool addFx = true)
 	{
-		var Childrens = GameManager.GetAllChildrens(parent);
-		foreach (var child in Childrens)
+		List<MeshInstance3D> Childrens = GameManager.GetAllChildrensByType<MeshInstance3D>(parent);
+		foreach (MeshInstance3D mesh in Childrens)
 		{
-			if (child is MeshInstance3D mesh)
-			{
-				if (modelsMeshes.Contains(mesh))
-					continue;
+			if (modelsMeshes.Contains(mesh))
+				continue;
 
-				//Check if UI Self Shadow
-				if (mesh.CastShadow == GeometryInstance3D.ShadowCastingSetting.ShadowsOnly)
-					continue;
+			//Check if UI Self Shadow
+			if (mesh.CastShadow == GeometryInstance3D.ShadowCastingSetting.ShadowsOnly)
+				continue;
 
-				if (fxMeshes.Contains(mesh))
-					continue;
-				modelsMeshes.Add(mesh);
+			if (fxMeshes.Contains(mesh))
+				continue;
+			modelsMeshes.Add(mesh);
 
-				//UI Self Shadow
-				MeshInstance3D shadowMesh = new MeshInstance3D();
-				shadowMesh.Mesh = mesh.Mesh;
-				shadowMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
-				shadowMesh.Layers = playerControls.playerInfo.uiLayer;
-				mesh.AddChild(shadowMesh);
+			//UI Self Shadow
+			MeshInstance3D shadowMesh = new MeshInstance3D();
+			shadowMesh.Mesh = mesh.Mesh;
+			shadowMesh.CastShadow = GeometryInstance3D.ShadowCastingSetting.ShadowsOnly;
+			shadowMesh.Layers = playerControls.playerInfo.uiLayer;
+			mesh.AddChild(shadowMesh);
 
-				if (!addFx)
-					continue;
+			if (!addFx)
+				continue;
 
-				//FX Mesh
-				MeshInstance3D fxMesh = new MeshInstance3D();
-				fxMesh.Mesh = mesh.Mesh;
-				fxMesh.Layers = currentLayer;
-				fxMesh.Visible = false;
-				mesh.AddChild(fxMesh);
-				fxMeshes.Add(fxMesh);
-			}
+			//FX Mesh
+			MeshInstance3D fxMesh = new MeshInstance3D();
+			fxMesh.Mesh = mesh.Mesh;
+			fxMesh.Layers = currentLayer;
+			fxMesh.Visible = false;
+			mesh.AddChild(fxMesh);
+			fxMeshes.Add(fxMesh);
 		}
 	}
 	private void RemoveAllMeshInstance3D(Node parent)
 	{
-		var Childrens = GameManager.GetAllChildrens(parent);
-		foreach (var child in Childrens)
+		List<MeshInstance3D> Childrens = GameManager.GetAllChildrensByType<MeshInstance3D>(parent);
+		foreach (MeshInstance3D mesh in Childrens)
 		{
-			if (child is MeshInstance3D mesh)
-			{
-				if (fxMeshes.Contains(mesh))
-					fxMeshes.Remove(mesh);
-				if (modelsMeshes.Contains(mesh))
-					modelsMeshes.Remove(mesh);
-			}
+			if (fxMeshes.Contains(mesh))
+				fxMeshes.Remove(mesh);
+			if (modelsMeshes.Contains(mesh))
+				modelsMeshes.Remove(mesh);
 		}
 	}
 

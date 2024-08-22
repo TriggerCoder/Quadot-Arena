@@ -21,7 +21,6 @@ muzzleLight = NodePath("OmniLight3D")
 script = ExtResource("2_0nmtl")
 modelName = "weapons2/rocketl/rocketl"
 useCommon = false
-castShadows = true
 isViewModel = true
 currentState = 0
 
@@ -30,6 +29,7 @@ script = ExtResource("2_0nmtl")
 modelName = "weapons2/rocketl/rocketl_flash"
 tagName = "tag_flash"
 useCommon = false
+isTransparent = true
 isViewModel = true
 currentState = 0
 

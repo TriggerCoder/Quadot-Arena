@@ -27,7 +27,6 @@ transform = Transform3D(0.943447, 0.211992, 0.254887, -0.17101, 0.969846, -0.173
 script = ExtResource("2_q7ixh")
 modelName = "weapons2/gauntlet/gauntlet"
 useCommon = false
-castShadows = true
 isViewModel = true
 currentState = 0
 
@@ -38,16 +37,15 @@ script = ExtResource("2_q7ixh")
 modelName = "weapons2/gauntlet/gauntlet_barrel"
 tagName = "tag_barrel"
 useCommon = false
-castShadows = true
 isViewModel = true
 currentState = 0
 
 [node name="Muzzle" type="Node3D" parent="Gauntlet"]
-transform = Transform3D(-4.09782e-08, 1, 0, -1, -2.6077e-08, 7.45058e-09, 7.45058e-09, 2.98023e-08, 1, 0, 0, 0)
 script = ExtResource("2_q7ixh")
 modelName = "weapons2/gauntlet/gauntlet_flash"
 tagName = "tag_flash"
 useCommon = false
+isTransparent = true
 isViewModel = true
 currentState = 0
 

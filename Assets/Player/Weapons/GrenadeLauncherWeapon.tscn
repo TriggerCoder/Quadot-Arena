@@ -73,7 +73,6 @@ muzzleLight = NodePath("OmniLight3D")
 script = ExtResource("2_ksely")
 modelName = "weapons2/grenadel/grenadel"
 useCommon = false
-castShadows = true
 isViewModel = true
 currentState = 0
 
@@ -82,6 +81,7 @@ script = ExtResource("2_ksely")
 modelName = "weapons2/grenadel/grenadel_flash"
 tagName = "tag_flash"
 useCommon = false
+isTransparent = true
 isViewModel = true
 currentState = 0
 

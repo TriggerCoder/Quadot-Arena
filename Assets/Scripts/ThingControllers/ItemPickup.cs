@@ -21,7 +21,8 @@ public partial class ItemPickup : Area3D
 		Invis,
 		Enviro,
 		Flight,
-		Teleporter
+		Teleporter,
+		AmmoPack
 	}
 	[Export]
 	public ThingController thingController;
@@ -54,6 +55,73 @@ public partial class ItemPickup : Area3D
 		switch (itemType)
 		{
 			default:
+				break;
+
+			case ItemType.AmmoPack:
+				if (player.playerInfo.Ammo[PlayerInfo.bulletsAmmo] < player.playerInfo.MaxAmmo[PlayerInfo.bulletsAmmo])
+				{
+					player.playerInfo.Ammo[PlayerInfo.bulletsAmmo] += (player.playerInfo.DefaultAmmo[PlayerInfo.bulletsAmmo] * GameManager.Instance.PlayerAmmoReceive);
+					if (player.playerInfo.Ammo[PlayerInfo.bulletsAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.bulletsAmmo])
+						player.playerInfo.Ammo[PlayerInfo.bulletsAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.bulletsAmmo];
+					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.bulletsAmmo], PlayerInfo.bulletsAmmo);
+					disable = true;
+				}
+				if ((player.playerInfo.Weapon[PlayerInfo.Shotgun]) && (player.playerInfo.Ammo[PlayerInfo.shellsAmmo] < player.playerInfo.MaxAmmo[PlayerInfo.shellsAmmo]))
+				{
+					player.playerInfo.Ammo[PlayerInfo.shellsAmmo] += (player.playerInfo.DefaultAmmo[PlayerInfo.shellsAmmo] * GameManager.Instance.PlayerAmmoReceive);
+					if (player.playerInfo.Ammo[PlayerInfo.shellsAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.shellsAmmo])
+						player.playerInfo.Ammo[PlayerInfo.shellsAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.shellsAmmo];
+					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.shellsAmmo], PlayerInfo.shellsAmmo);
+					disable = true;
+				}
+				if ((player.playerInfo.Weapon[PlayerInfo.GrenadeLauncher]) && (player.playerInfo.Ammo[PlayerInfo.grenadesAmmo] < player.playerInfo.MaxAmmo[PlayerInfo.grenadesAmmo]))
+				{
+					player.playerInfo.Ammo[PlayerInfo.grenadesAmmo] += (player.playerInfo.DefaultAmmo[PlayerInfo.grenadesAmmo] * GameManager.Instance.PlayerAmmoReceive);
+					if (player.playerInfo.Ammo[PlayerInfo.grenadesAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.grenadesAmmo])
+						player.playerInfo.Ammo[PlayerInfo.grenadesAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.grenadesAmmo];
+					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.grenadesAmmo], PlayerInfo.grenadesAmmo);
+					disable = true;
+				}
+				if ((player.playerInfo.Weapon[PlayerInfo.RocketLauncher]) && (player.playerInfo.Ammo[PlayerInfo.rocketsAmmo] < player.playerInfo.MaxAmmo[PlayerInfo.rocketsAmmo]))
+				{
+					player.playerInfo.Ammo[PlayerInfo.rocketsAmmo] += (player.playerInfo.DefaultAmmo[PlayerInfo.rocketsAmmo] * GameManager.Instance.PlayerAmmoReceive);
+					if (player.playerInfo.Ammo[PlayerInfo.rocketsAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.rocketsAmmo])
+						player.playerInfo.Ammo[PlayerInfo.rocketsAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.rocketsAmmo];
+					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.rocketsAmmo], PlayerInfo.rocketsAmmo);
+					disable = true;
+				}
+				if ((player.playerInfo.Weapon[PlayerInfo.LightningGun]) && (player.playerInfo.Ammo[PlayerInfo.lightningAmmo] < player.playerInfo.MaxAmmo[PlayerInfo.lightningAmmo]))
+				{
+					player.playerInfo.Ammo[PlayerInfo.lightningAmmo] += (player.playerInfo.DefaultAmmo[PlayerInfo.lightningAmmo] * GameManager.Instance.PlayerAmmoReceive);
+					if (player.playerInfo.Ammo[PlayerInfo.lightningAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.lightningAmmo])
+						player.playerInfo.Ammo[PlayerInfo.lightningAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.lightningAmmo];
+					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.lightningAmmo], PlayerInfo.lightningAmmo);
+					disable = true;
+				}
+				if ((player.playerInfo.Weapon[PlayerInfo.Railgun]) && (player.playerInfo.Ammo[PlayerInfo.slugAmmo] < player.playerInfo.MaxAmmo[PlayerInfo.slugAmmo]))
+				{
+					player.playerInfo.Ammo[PlayerInfo.slugAmmo] += (player.playerInfo.DefaultAmmo[PlayerInfo.slugAmmo] * GameManager.Instance.PlayerAmmoReceive);
+					if (player.playerInfo.Ammo[PlayerInfo.slugAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.slugAmmo])
+						player.playerInfo.Ammo[PlayerInfo.slugAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.slugAmmo];
+					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.slugAmmo], PlayerInfo.slugAmmo);
+					disable = true;
+				}
+				if ((player.playerInfo.Weapon[PlayerInfo.PlasmaGun]) && (player.playerInfo.Ammo[PlayerInfo.cellsAmmo] < player.playerInfo.MaxAmmo[PlayerInfo.cellsAmmo]))
+				{
+					player.playerInfo.Ammo[PlayerInfo.cellsAmmo] += (player.playerInfo.DefaultAmmo[PlayerInfo.cellsAmmo] * GameManager.Instance.PlayerAmmoReceive);
+					if (player.playerInfo.Ammo[PlayerInfo.cellsAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.cellsAmmo])
+						player.playerInfo.Ammo[PlayerInfo.cellsAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.cellsAmmo];
+					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.cellsAmmo], PlayerInfo.cellsAmmo);
+					disable = true;
+				}
+				if ((player.playerInfo.Weapon[PlayerInfo.BFG10K]) && (player.playerInfo.Ammo[PlayerInfo.bfgAmmo] < player.playerInfo.MaxAmmo[PlayerInfo.bfgAmmo]))
+				{
+					player.playerInfo.Ammo[PlayerInfo.bfgAmmo] += (player.playerInfo.DefaultAmmo[PlayerInfo.bfgAmmo] * GameManager.Instance.PlayerAmmoReceive);
+					if (player.playerInfo.Ammo[PlayerInfo.bfgAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.bfgAmmo])
+						player.playerInfo.Ammo[PlayerInfo.bfgAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.bfgAmmo];
+					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.bfgAmmo], PlayerInfo.bfgAmmo);
+					disable = true;
+				}
 				break;
 
 			case ItemType.Bullets:

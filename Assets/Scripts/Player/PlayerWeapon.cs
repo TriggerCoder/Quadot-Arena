@@ -135,7 +135,7 @@ public partial class PlayerWeapon : Node3D
 			model.Start();
 		}
 
-		//Ugly Hack but Gauntlet rotation is not a child of the weapon
+		//Ugly Hack but Gauntlet rotation is all messed up
 		if (isMelee)
 		{
 			Node3D barrelTag = (Node3D)barrelObject.GetParent();
@@ -144,6 +144,8 @@ public partial class PlayerWeapon : Node3D
 				barrelTag.Position = models[0].Model.tagsbyId[tagId][0].origin;
 				barrelTag.Quaternion = models[0].Model.tagsbyId[tagId][0].rotation;
 			}
+			muzzleObject.Position += barrelTag.Position;
+			muzzleObject.Quaternion *= Quaternion.FromEuler(Vector3.Up * Mathf.Pi);
 		}
 
 		if (playerInfo.playerThing.avatar != null)

@@ -20,7 +20,6 @@ muzzleLight = NodePath("OmniLight3D")
 script = ExtResource("2_wwsln")
 modelName = "weapons2/machinegun/machinegun"
 useCommon = false
-castShadows = true
 isViewModel = true
 currentState = 0
 
@@ -29,7 +28,6 @@ script = ExtResource("2_wwsln")
 modelName = "weapons2/machinegun/machinegun_barrel"
 tagName = "tag_barrel"
 useCommon = false
-castShadows = true
 isViewModel = true
 currentState = 0
 
@@ -38,6 +36,7 @@ script = ExtResource("2_wwsln")
 modelName = "weapons2/machinegun/machinegun_flash"
 tagName = "tag_flash"
 useCommon = false
+isTransparent = true
 isViewModel = true
 currentState = 0
 

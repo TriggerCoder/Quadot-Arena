@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 public partial class PlayerInfo : Node3D
@@ -19,9 +20,9 @@ public partial class PlayerInfo : Node3D
 
 	//Weapons and Ammo
 	public int[] Ammo = new int[8] { 100, 0, 0, 0, 0, 0, 0, 0 }; //bullets, shells, grenades, rockets, lightning, slugs, cells, bfgammo
-	public bool[] Weapon = new bool[9] { true, true, false, false, false, false, false, false, false }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k
+	public bool[] Weapon = new bool[14] { true, true, false, false, false, false, false, false, false, false, false, false, false, false }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k, grapple, nailgun, vulcan, proxmine, heavymachinegun
 	public int[] MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 300 };
-
+	public int[] DefaultAmmo = new int[8] { 50, 10, 5, 5, 60, 10, 30, 100 };
 	//Const Weapon Nums
 	public const int Gauntlet = 0;
 	public const int MachineGun = 1;
@@ -32,6 +33,11 @@ public partial class PlayerInfo : Node3D
 	public const int Railgun = 6;
 	public const int PlasmaGun = 7;
 	public const int BFG10K = 8;
+	public const int Grapple = 9;
+	public const int NailGun = 10;
+	public const int Vulcan = 11;
+	public const int ProxLauncher = 12;
+	public const int HeavyMachineGun = 13;
 
 
 	//Const Ammo Nums
@@ -72,7 +78,7 @@ public partial class PlayerInfo : Node3D
 		public bool InvertView { get; set; } = false;											// Y Axis View Invert Controls.
 		public bool AutoHop { get; set; } = false;												// Allows player to just hold jump button to keep on bhopping perfectly.
 		public bool BloodScreen { get; set; } = true;											// Show Visible Pain Feedback.
-		public int[] CroosHair { get; set; } = new int[9] { 5, 5, 5, 5, 5, 5, 107, 5, 5 };		//gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k
+		public int[] CroosHair { get; set; } = new int[14] { 5, 5, 5, 5, 5, 5, 107, 5, 5, 5, 5, 5, 5, 5 };     //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k, grapple, nailgun, vulcan, proxmine, heavymachinegun
 		public int CroosHairAlpha { get; set; } = 25;											// CrossHair Alpha Value.
 		public int CroosHairScale { get; set; } = 100;											// CrossHair Scale Value.
 		public string ModulateColor { get; set; } = "#50a1cd";                                  // Modulate Color.
@@ -116,12 +122,9 @@ public partial class PlayerInfo : Node3D
 		playerCamera.playerPostProcessing.UIMask = uiLayer;
 		playerCamera.playerPostProcessing.UpdateLayersPost();
 		//Change UI Weapon Layer
-		var Childrens = GameManager.GetAllChildrens(WeaponHand);
-		foreach (var child in Childrens)
-		{
-			if (child is MeshInstance3D mesh)
-				mesh.Layers = uiLayer;
-		}
+		List<MeshInstance3D> Childrens = GameManager.GetAllChildrensByType<MeshInstance3D>(WeaponHand);
+		foreach (MeshInstance3D mesh in Childrens)
+			mesh.Layers = uiLayer;
 
 		if (playerThing.avatar == null)
 			return;
@@ -135,7 +138,7 @@ public partial class PlayerInfo : Node3D
 	public void Reset()
 	{
 		Ammo = new int[8] { 100, 0, 0, 0, 0, 0, 0, 0 };
-		Weapon = new bool[9] { true, true, false, false, false, false, false, false, false };
+		Weapon = new bool[14] { true, true, false, false, false, false, false, false, false, false, false, false, false, false };
 		MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 300 };
 
 		godMode = false;
@@ -199,8 +202,8 @@ public partial class PlayerInfo : Node3D
 					configData.FOV = 90;
 				playerCamera.ViewCamera.Fov = configData.FOV;
 
-				if (configData.CroosHair.Length < 9)
-					configData.CroosHair = new int[9] { 5, 5, 5, 5, 5, 5, 107, 5, 5 };
+				if (configData.CroosHair.Length < 14)
+					configData.CroosHair = new int[14] { 5, 5, 5, 5, 5, 5, 107, 5, 5, 5, 5, 5, 5, 5 };
 
 				for (int i = 0; i < configData.CroosHair.Length; i++)
 				{

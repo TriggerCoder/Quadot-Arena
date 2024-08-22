@@ -510,19 +510,13 @@ public partial class GameManager : Node
 		if (mapLeftTime > 0)
 		{
 			mapLeftTime -= deltaTime;
-			if ((mapLeftTime > 299) && (mapLeftTime < 300))
+			if (timeToSync)
 			{
-				if (timeToSync)
+				if ((mapLeftTime > 299) && (mapLeftTime < 300))
 					PlayAnnouncer(FiveMinutes);
-			}
-			else if ((mapLeftTime > 59) && (mapLeftTime < 60))
-			{
-				if (timeToSync)
+				else if ((mapLeftTime > 59) && (mapLeftTime < 60))
 					PlayAnnouncer(OneMinute);
-			}
-			else if (mapLeftTime < 4)
-			{
-				if (timeToSync)
+				else if (mapLeftTime < 4)
 				{
 					if (mapLeftTime < 1)
 					{
@@ -536,9 +530,8 @@ public partial class GameManager : Node
 						PlayAnnouncer(Seconds[second++]);
 				}
 			}
-
 		}
-		if (mapLeftTime < 0)
+		else if (mapLeftTime < 0)
 		{
 			if (!useCustomMap)
 			{
@@ -1024,9 +1017,9 @@ public partial class GameManager : Node
 		RenderingServer.ViewportAttachCamera(viewPortRID, CamRID);
 	}
 
-	public static List<Node> GetAllChildrens(Node parent)
+	public static List<T> GetAllChildrensByType<T>(Node parent)
 	{
-		List<Node> list = new List<Node>();
+		List<T> list = new List<T>();
 
 		var Childrens = parent.GetChildren();
 		foreach (var child in Childrens)
@@ -1034,40 +1027,41 @@ public partial class GameManager : Node
 			if (child.IsQueuedForDeletion())
 				continue;
 
-			list.Add(child);
-			list.AddRange(GetAllChildrens(child));
+			if (child is T childT)
+				list.Add(childT);
+
+			list.AddRange(GetAllChildrensByType<T>(child));
 		}
 		return list;
 	}
 
 	public static List<MeshInstance3D> GetModulateMeshes(Node parent, List<MeshInstance3D> ignoreList = null)
 	{
-		var Childrens = GetAllChildrens(parent);
+		var Childrens = GetAllChildrensByType<MeshInstance3D>(parent);
 		List<MeshInstance3D> currentMeshes = new List<MeshInstance3D>();
+
 		if (ignoreList == null)
 			ignoreList = new List<MeshInstance3D>();
-		foreach (var child in Childrens)
-		{
-			if (child is MeshInstance3D mesh)
-			{
-				if (mesh.Mesh == null)
-					continue;
 
-				if (ignoreList.Contains(mesh))
-					continue;
-				ShaderMaterial shaderMaterial = (ShaderMaterial)mesh.GetActiveMaterial(0);
-				var Results = RenderingServer.GetShaderParameterList(shaderMaterial.Shader.GetRid());
-				foreach (var result in Results)
+		foreach (var mesh in Childrens)
+		{
+			if (mesh.Mesh == null)
+				continue;
+
+			if (ignoreList.Contains(mesh))
+				continue;
+			ShaderMaterial shaderMaterial = (ShaderMaterial)mesh.GetActiveMaterial(0);
+			var Results = RenderingServer.GetShaderParameterList(shaderMaterial.Shader.GetRid());
+			foreach (var result in Results)
+			{
+				Variant nameVar;
+				if (result.TryGetValue("name", out nameVar))
 				{
-					Variant nameVar;
-					if (result.TryGetValue("name", out nameVar))
+					string name = (string)nameVar;
+					if (name == "UseModulation")
 					{
-						string name = (string)nameVar;
-						if (name == "UseModulation")
-						{
-							currentMeshes.Add(mesh);
-							break;
-						}
+						currentMeshes.Add(mesh);
+						break;
 					}
 				}
 			}
@@ -1076,22 +1070,19 @@ public partial class GameManager : Node
 	}
 	public static List<MeshInstance3D> CreateFXMeshInstance3D(Node parent)
 	{
-		var Childrens = GetAllChildrens(parent);
+		var Childrens = GetAllChildrensByType<MeshInstance3D>(parent);
 		List<MeshInstance3D> fxMeshes = new List<MeshInstance3D>();
-		foreach (var child in Childrens)
+		foreach (var mesh in Childrens)
 		{
-			if (child is MeshInstance3D mesh)
-			{
-				if (mesh.Mesh == null)
-					continue;
+			if (mesh.Mesh == null)
+				continue;
 
-				MeshInstance3D fxMesh = new MeshInstance3D();
-				fxMesh.Mesh = mesh.Mesh;
-				fxMesh.Layers = mesh.Layers;
-				fxMesh.Visible = false;
-				mesh.AddChild(fxMesh);
-				fxMeshes.Add(fxMesh);
-			}
+			MeshInstance3D fxMesh = new MeshInstance3D();
+			fxMesh.Mesh = mesh.Mesh;
+			fxMesh.Layers = mesh.Layers;
+			fxMesh.Visible = false;
+			mesh.AddChild(fxMesh);
+			fxMeshes.Add(fxMesh);
 		}
 		return fxMeshes;
 	}

@@ -41,3 +41,13 @@ models/gibs/gibs
 		map models/gibs/gibs.tga
 	}
 }
+
+models/powerups/ammo/ammopack2
+{
+	nopicmip
+	{
+		map models/powerups/ammo/ammopack2.tga
+		blendfunc GL_ONE GL_ZERO
+		rgbGen lightingDiffuse
+	}
+}

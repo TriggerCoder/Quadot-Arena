@@ -572,13 +572,12 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		//Quad
 		if (quadTime > 0f)
 		{
-			if (quadTime < 4f)
-			{
-				if (newTick)
-					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
-			}
 			if (newTick)
-				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Quad,Mathf.FloorToInt(quadTime));
+			{
+				if (quadTime < 4f)
+					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
+				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Quad, Mathf.FloorToInt(quadTime));
+			}
 			quadTime -= deltaTime;
 		}
 		else if (quadTime < 0f) 
@@ -596,13 +595,12 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		//Haste
 		if (hasteTime > 0f)
 		{
-			if (hasteTime < 4f)
-			{
-				if (newTick)
-					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
-			}
 			if (newTick)
+			{
+				if (hasteTime < 4f)
+					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
 				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Haste, Mathf.FloorToInt(hasteTime));
+			}
 			hasteTime -= deltaTime;
 		}
 		else if (hasteTime < 0f)
@@ -615,13 +613,10 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		//Regen
 		if (regenTime > 0f)
 		{
-			if (regenTime < 4f)
-			{
-				if (newTick)
-					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
-			}
 			if (newTick)
 			{
+				if (regenTime < 4f)
+					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
 				if (hitpoints < playerInfo.MaxBonusHealth)
 				{
 					hitpoints += 5;

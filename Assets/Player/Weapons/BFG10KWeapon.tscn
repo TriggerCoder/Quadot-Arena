@@ -30,6 +30,7 @@ script = ExtResource("2_eg7gr")
 modelName = "weapons2/bfg/bfg_flash"
 tagName = "tag_flash"
 useCommon = false
+isTransparent = true
 isViewModel = true
 currentState = 0
 
