@@ -1702,7 +1702,7 @@ public static class Mesher
 
 	public static bool CanForm3DConvexHull(List<Vector3> points, ref Vector3 normal)
 	{
-		const float EPSILON = 0.00001f;
+		const float DISCARD_LIMIT = 0.00015f;
 		int i;
 		bool retry = false;
 
@@ -1740,7 +1740,7 @@ public static class Mesher
 			Vector3 px = points[i] - points[0];
 			float dotProduct = px.Dot(normal);
 
-			if (Mathf.Abs(dotProduct) > EPSILON)
+			if (Mathf.Abs(dotProduct) > DISCARD_LIMIT)
 				return true;
 		}
 		

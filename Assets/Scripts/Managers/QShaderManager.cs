@@ -54,7 +54,7 @@ public static class QShaderManager
 			return true;
 		return false;
 	}
-	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, ref bool alphaIsTransparent, ref bool hasPortal, List<int> multiPassList = null, bool forceView = false, bool canvasShader = false)
+	public static ShaderMaterial GetShadedMaterial(string shaderName, int lm_index, ref bool alphaIsTransparent, ref bool hasPortal, List<int> multiPassList = null, bool forceView = false, bool canvasShader = false, int numPass = 0)
 	{
 		string code = "";
 		string GSHeader = "shader_type spatial;\nrender_mode diffuse_lambert, specular_schlick_ggx, ";
@@ -95,6 +95,7 @@ public static class QShaderManager
 		bool entityColor = false;
 		bool needLightMap = false;
 		bool checkEditorImage = true;
+		bool firstPass = true;
 
 		//Needed for Mutipass
 		int needMultiPass = 0;
@@ -108,7 +109,10 @@ public static class QShaderManager
 		{
 			totalStages = multiPassList.Count;
 			if (multiPassList[0] != 0)
+			{
+				firstPass = false;
 				checkEditorImage = false;
+			}
 		}
 
 		for (int i = 0; i < totalStages; i++)
@@ -233,11 +237,15 @@ public static class QShaderManager
 				if (!matPass.Contains(lightmapStage))
 					matPass.Add(lightmapStage);
 			bool baseAlpha = forceAlpha;
-			ShaderMaterial passZeroMaterial = GetShadedMaterial(shaderName, lm_index, ref baseAlpha, ref hasPortal, matPass);
+
+			ShaderMaterial passZeroMaterial = GetShadedMaterial(shaderName, lm_index, ref baseAlpha, ref hasPortal, matPass, forceView, canvasShader, numPass);
 			ShaderMaterial lastMaterial = passZeroMaterial;
 
 			while (lastMaterial.NextPass != null)
+			{
+				numPass++;
 				lastMaterial = (ShaderMaterial)lastMaterial.NextPass;
+			}
 
 			matPass = new List<int>();
 			if (multiPassList == null)
@@ -258,9 +266,9 @@ public static class QShaderManager
 					matPass.Add(lightmapStage);
 
 			qShader.qShaderGlobal.sort = sortType;
-			ShaderMaterial passOneMaterial = GetShadedMaterial(shaderName, lm_index, ref forceAlpha, ref hasPortal, matPass);
-//			passZeroMaterial.RenderPriority = -1;
-//			passOneMaterial.RenderPriority = 0;
+
+			numPass++;
+			ShaderMaterial passOneMaterial = GetShadedMaterial(shaderName, lm_index, ref forceAlpha, ref hasPortal, matPass, forceView, canvasShader, numPass);
 			lastMaterial.NextPass = passOneMaterial;
 			alphaIsTransparent = forceAlpha | baseAlpha;
 
@@ -467,7 +475,10 @@ public static class QShaderManager
 		//Vertex
 		if ((canvasShader == false) && (qShader.qShaderGlobal.isSky == false))
 		{
+			float Value = 0.001f;
 			bool offSet = qShader.qShaderGlobal.polygonOffset;
+			if (offSet)
+				numPass++;
 			code += GSVertexH;
 			if (multiPassList == null)
 			{
@@ -480,9 +491,12 @@ public static class QShaderManager
 				code += "\tfloat lat = dir.a * (PI) / 128.0f;\n";
 				code += "\tdirVector = vec3(-cos(lat) * sin(lng), cos(lng), sin(lat) * sin(lng));\n";
 			}
-			else if (multiPassList[0] != 0)
+			else if (!firstPass)
 				offSet = true;
-			code += GetVertex(qShader, (multiPassList == null), forceView, offSet);
+
+			if (offSet)
+				Value *= numPass;
+			code += GetVertex(qShader, (multiPassList == null), forceView, offSet, Value);
 			code += GSVertexUvs + "}\n";
 		}
 
@@ -507,7 +521,7 @@ public static class QShaderManager
 		else if (lightmapStage < 0)
 			code += "\tvec3 ambient = AmbientColor.rgb * mixBrightness;\n";
 
-		if (qShader.qShaderGlobal.isSky)
+		if ((qShader.qShaderGlobal.isSky) || (!firstPass) || (qShader.qShaderGlobal.sort == QShaderGlobal.SortType.Additive))
 			code += "\tvec4 color = vec4(0.0, 0.0, 0.0, 0.0);\n";
 		else if (lightmapStage >= 0)
 			code += "\tvec4 color = Stage_" + lightmapStage + ";\n";
@@ -586,9 +600,7 @@ public static class QShaderManager
 		{
 			if (canvasShader)
 				code += "\tCOLOR = COLOR.rgb + color.a;\n";
-			else if (multiPassList == null)
-				code += "\tALPHA = color.a;\n";
-			else if (multiPassList[0] == 0)
+			else if ((multiPassList == null) || (firstPass))
 				code += "\tALPHA = color.a;\n";
 			else
 			{
@@ -740,7 +752,7 @@ public static class QShaderManager
 		return DiffuseLight;
 	}
 
-	public static string GetVertex(QShaderData qShader, bool useView, bool forceView, bool offSet)
+	public static string GetVertex(QShaderData qShader, bool useView, bool forceView, bool polygonOffSet, float Value = 0.001f)
 	{
 		string Vertex = "";
 
@@ -781,8 +793,8 @@ public static class QShaderManager
 				Vertex += "\tPROJECTION_MATRIX[0][0] =  InvTanFOV / Aspect;\n";
 			}
 			Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);\n";
-			if (offSet)
-				Vertex += "\t\tPOSITION.z = mix(POSITION.z, 1.0, 0.001);\n";
+			if (polygonOffSet)
+				Vertex += "\tPOSITION.z = mix(POSITION.z, 1.0, "+ Value.ToString("0.000") + ");\n";
 			return Vertex;
 		}
 
@@ -889,8 +901,8 @@ public static class QShaderManager
 			Vertex += "\tPROJECTION_MATRIX[0][0] =  InvTanFOV / Aspect;\n";
 		}
 		Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);\n";
-		if (offSet)
-			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 1.0, 0.001);\n";
+		if (polygonOffSet)
+			Vertex += "\tPOSITION.z = mix(POSITION.z, 1.0, "+ Value.ToString("0.000") + ");\n";
 		return Vertex;
 	}
 	public static string GetUVGen(QShaderData qShader, int currentStage, ref string GSVaryings)
