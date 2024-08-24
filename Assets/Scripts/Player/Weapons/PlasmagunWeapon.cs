@@ -4,8 +4,8 @@ using ExtensionMethods;
 
 public partial class PlasmagunWeapon : PlayerWeapon
 {
-	public override float avgDispersion { get { return .01f; } }
-	public override float maxDispersion { get { return .02f; } }
+	public override float verticalDispersion { get { return .02f; } }
+	public override float horizontalDispersion { get { return .02f; } }
 	[Export]
 	public string AttackProjectileName;
 	public Vector3 spawnPos;

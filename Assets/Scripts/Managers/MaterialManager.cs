@@ -213,7 +213,12 @@ public partial class MaterialManager : Node
 			if (lm_index >= 0 && Instance.applyLightmaps)
 			{
 				mat = (ShaderMaterial)sourceMat.Duplicate(true);
-				mat.Set(lightMapProperty, lmap);
+				ShaderMaterial lastMaterial = mat;
+				while ((lastMaterial != null) && (lm_index >= 0 && Instance.applyLightmaps))
+				{
+					lastMaterial.Set(lightMapProperty, lmap);
+					lastMaterial = (ShaderMaterial)lastMaterial.NextPass;
+				}
 			}
 			else
 				mat = sourceMat;

@@ -4,8 +4,8 @@ using ExtensionMethods;
 
 public partial class ShotgunWeapon : PlayerWeapon
 {
-	public override float avgDispersion { get { return .049f; } } // tan(4) / 2
-	public override float maxDispersion { get { return .062f; } } //tan(7.1) / 2
+	public override float verticalDispersion { get { return .049f; } } // tan(4) / 2
+	public override float horizontalDispersion { get { return .062f; } } //tan(7.1) / 2
 
 	public string caseName = "ShotgunShell";
 	public string onDeathSpawn = "BulletHit";

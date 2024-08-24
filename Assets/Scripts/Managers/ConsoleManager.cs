@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ExtensionMethods;
 public partial class ConsoleManager : Control
 {
@@ -670,7 +671,7 @@ public partial class ConsoleManager : Control
 			for (int i = 0; i < checks.Length; i++) 
 			{
 				string newItem = checks[i] + item;
-				if (ThingsManager.thingsPrefabs.ContainsKey(newItem))
+				if (ThingsManager.pickablePrefabs.ContainsKey(newItem))
 				{
 					item = newItem;
 					found = true;
@@ -678,8 +679,29 @@ public partial class ConsoleManager : Control
 				}
 			}
 		}
-		else if (ThingsManager.thingsPrefabs.ContainsKey(item))
+		else if (ThingsManager.pickablePrefabs.ContainsKey(item))
 			found = true;
+
+		if (found)
+		{
+			switch (GameManager.Instance.gameConfig.GameSelect)
+			{
+				default:
+					break;
+				case GameManager.BasePak.TeamArena:
+					if (ThingsManager.teamArenaIgnoreItems.Any(s => s == item))
+						found = false;
+					break;
+				case GameManager.BasePak.Quake3:
+					if (ThingsManager.retailIgnoreItems.Any(s => s == item))
+						found = false;
+				break;
+				case GameManager.BasePak.Demo:
+					if (ThingsManager.demoIgnoreItems.Any(s => s == item))
+						found = false;
+				break;
+			}
+		}
 
 		if (!found)
 		{
@@ -687,7 +709,7 @@ public partial class ConsoleManager : Control
 			return;
 		}
 
-		ThingController thingObject = (ThingController)ThingsManager.thingsPrefabs[item].Instantiate();
+		ThingController thingObject = (ThingController)ThingsManager.pickablePrefabs[item].Instantiate();
 		if (thingObject == null)
 		{
 			AddToConsole("Command: " + args[0] + " failed. Item " + item + " is invalid", GameManager.PrintType.Warning);
@@ -697,6 +719,7 @@ public partial class ConsoleManager : Control
 		if (itemPickup == null)
 		{
 			AddToConsole("Command: " + args[0] + " failed. Item " + item + " is invalid", GameManager.PrintType.Warning);
+			thingObject.QueueFree();
 			return;
 		}
 		thingObject.initDisabled = true;

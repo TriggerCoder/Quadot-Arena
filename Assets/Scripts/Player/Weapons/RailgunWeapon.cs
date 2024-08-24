@@ -4,8 +4,8 @@ using ExtensionMethods;
 
 public partial class RailgunWeapon : PlayerWeapon
 {
-	public override float avgDispersion { get { return .005f; } }
-	public override float maxDispersion { get { return .01f; } }
+	public override float verticalDispersion { get { return .005f; } }
+	public override float horizontalDispersion { get { return .01f; } }
 
 	public string onDeathSpawn = "RailTrail";
 	public string explosionFx = "RailExplosion";

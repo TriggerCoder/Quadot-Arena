@@ -3,8 +3,8 @@ using System;
 using ExtensionMethods;
 public partial class GauntletWeapon : PlayerWeapon
 {
-	public override float avgDispersion { get { return .017f; } } // tan(2) / 2
-	public override float maxDispersion { get { return .049f; } } // tan(5.6) / 2
+	public override float verticalDispersion { get { return .017f; } } // tan(2) / 2
+	public override float horizontalDispersion { get { return .049f; } } // tan(5.6) / 2
 
 	public float maxRange = 1f;
 

@@ -41,6 +41,7 @@ public partial class ThingsManager : Node
 	[Export]
 	public Texture2D[] _largeCrosshairs;
 
+	public static Dictionary<string, PackedScene> pickablePrefabs = new Dictionary<string, PackedScene>();
 	public static Dictionary<string, PackedScene> thingsPrefabs = new Dictionary<string, PackedScene>();
 	public static List<Entity> entitiesOnMap = new List<Entity>();
 	public static List<PortalSurface> portalSurfaces = new List<PortalSurface>();
@@ -58,6 +59,10 @@ public partial class ThingsManager : Node
 	public static List<Texture2D> largeCrosshairs = new List<Texture2D>();
 	public static Texture2D defaultCrosshair;
 	public static readonly string[] quadHogReplacement = { "item_haste", "item_regen", "item_flight", "item_invis", "item_enviro", "item_health_mega", "item_armor_body", "item_armor_combat" };
+
+	public static readonly string[] demoIgnoreItems = { "item_haste", "item_regen", "item_flight", "item_invis", "item_enviro", "weapon_grenadelauncher", "weapon_bfg", "ammo_grenades", "ammo_bfg", "weapon_hmg", "ammo_pack" };
+	public static readonly string[] retailIgnoreItems = {  "weapon_hmg", "ammo_pack" };
+	public static readonly string[] teamArenaIgnoreItems = { "weapon_hmg", "ammo_pack" };
 
 	public static readonly string[] gibsParts = { "GibSkull", "GibBrain", "GibAbdomen", "GibArm", "GibChest", "GibFist", "GibFoot", "GibForearm", "GibIntestine", "GibLeg", "GibLeg" };
 	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group", "info_null", "info_spectator_start", "info_firstplace", "info_secondplace", "info_thirdplace" };
@@ -100,6 +105,7 @@ public partial class ThingsManager : Node
 			string prefabName = sceneState.GetNodeName(0);
 			GameManager.Print("Item Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
+			pickablePrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _debrisPrefabs)
 		{
@@ -121,6 +127,7 @@ public partial class ThingsManager : Node
 			string prefabName = sceneState.GetNodeName(0);
 			GameManager.Print("Weapon Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
+			pickablePrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _healthsPrefabs)
 		{
@@ -128,6 +135,7 @@ public partial class ThingsManager : Node
 			string prefabName = sceneState.GetNodeName(0);
 			GameManager.Print("Health Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
+			pickablePrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _armorPrefabs)
 		{
@@ -135,6 +143,7 @@ public partial class ThingsManager : Node
 			string prefabName = sceneState.GetNodeName(0);
 			GameManager.Print("Armor Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
+			pickablePrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _powerUpsPrefabs)
 		{
@@ -142,6 +151,7 @@ public partial class ThingsManager : Node
 			string prefabName = sceneState.GetNodeName(0);
 			GameManager.Print("PowerUp Name: " + prefabName);
 			thingsPrefabs.Add(prefabName, thing);
+			pickablePrefabs.Add(prefabName, thing);
 		}
 		foreach (var thing in _funcPrefabs)
 		{
@@ -246,6 +256,24 @@ public partial class ThingsManager : Node
 			{
 				GameManager.Print(ClassName + " not found", GameManager.PrintType.Warning);
 				continue;
+			}
+
+			switch (GameManager.Instance.gameConfig.GameSelect)
+			{
+				default:
+					break;
+				case GameManager.BasePak.TeamArena:
+					if (teamArenaIgnoreItems.Any(s => s == ClassName)) 
+						continue;
+				break;
+				case GameManager.BasePak.Quake3:
+					if (retailIgnoreItems.Any(s => s == ClassName))
+						continue;
+				break;
+				case GameManager.BasePak.Demo:
+					if (demoIgnoreItems.Any(s => s == ClassName))
+						continue;
+				break;
 			}
 
 			int angle = 0;

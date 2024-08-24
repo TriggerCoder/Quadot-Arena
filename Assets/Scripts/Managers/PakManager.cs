@@ -89,7 +89,9 @@ public static class PakManager
 
 		int start = 0;
 		int end = basePaks.Length;
-		if (GameManager.Instance.gameConfig.GameSelect != GameManager.BasePak.All)
+		if (GameManager.Instance.gameConfig.GameSelect == GameManager.BasePak.All)
+			GameManager.Instance.gameConfig.GameSelect = basePak;
+		else
 		{
 			if (GameManager.Instance.gameConfig.GameSelect > basePak)
 				GameManager.Instance.gameConfig.GameSelect = basePak;
@@ -231,7 +233,7 @@ public static class PakManager
 					GameManager.Print("Adding File: " + pak.Name + " is QUAKE3 BasePak");
 				}
 				if (basePak < GameManager.BasePak.TeamArena)
-						basePak = GameManager.BasePak.Quake3;
+					basePak = GameManager.BasePak.Quake3;
 			}
 			break;
 			case pak1Patch:
@@ -242,7 +244,7 @@ public static class PakManager
 			case pak6Patch:
 			case pak7Patch:
 			case pak8Patch:
-				{
+			{
 				if (!QuakeFiles.ContainsKey(md5))
 				{
 					QuakeFiles.Add(md5, pak);
@@ -259,7 +261,6 @@ public static class PakManager
 				}
 				if (basePak != GameManager.BasePak.QuakeLive)
 					basePak = GameManager.BasePak.TeamArena;
-
 			}
 			break;
 			case pak0Demo:

@@ -4,17 +4,13 @@ using ExtensionMethods;
 
 public partial class HeavyMachineGunWeapon : PlayerWeapon
 {
-	public override float avgDispersion { get { return .049f; } } // tan(5.6) / 2
-	public override float maxDispersion { get { return .049f; } } // tan(5.6) / 2
+	public override float verticalDispersion { get { return .088f; } } // tan(10) / 2
+	public override float horizontalDispersion { get { return .088f; } } // tan(10) / 2
 
 	public string caseName = "MachineGunAmmoCase";
 	public string onDeathSpawn = "BulletHit";
 	public string decalMark = "BulletMark";
 	public float maxRange = 400f;
-
-	public float barrelSpeed = 10;
-	public float hastebarrelSpeed = 11;
-	private float currentRotSpeed = 0;
 
 	protected override void OnUpdate(float deltaTime)
 	{
@@ -148,7 +144,7 @@ public partial class HeavyMachineGunWeapon : PlayerWeapon
 			RigidBody3D ammocase = (RigidBody3D)ThingsManager.thingsPrefabs[caseName].Instantiate();
 			GameManager.Instance.TemporaryObjectsHolder.AddChild(ammocase);
 			ammocase.Position = GlobalPosition;
-			ammocase.Quaternion = new Quaternion(Vector3.Right, currentRotSpeed);
+			ammocase.Quaternion = new Quaternion(Vector3.Right, (float)GD.RandRange(0, Mathf.Pi) - Mathf.Pi * .5f);
 			ammocase.ApplyImpulse(new Vector3((float)GD.RandRange(-.2f, .02f), (float)GD.RandRange(.2f, .4f), (float)GD.RandRange(-.2f, .2f)));
 		}
 		return true;

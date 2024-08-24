@@ -484,7 +484,7 @@ public static class BezierMesh
 		float a = 1f - t;
 		float tt = t * t;
 
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 4; i++)
 			tPoints[i] = a * a * p0[i] + 2 * a * (t * p1[i]) + tt * p2[i];
 
 		Color bezPoint = new Color(tPoints[0], tPoints[1], tPoints[2], tPoints[3]);

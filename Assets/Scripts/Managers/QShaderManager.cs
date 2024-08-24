@@ -94,6 +94,7 @@ public static class QShaderManager
 		bool depthWrite = false;
 		bool entityColor = false;
 		bool needLightMap = false;
+		bool checkEditorImage = true;
 
 		//Needed for Mutipass
 		int needMultiPass = 0;
@@ -104,7 +105,12 @@ public static class QShaderManager
 		if (multiPassList == null)
 			totalStages = qShader.qShaderStages.Count;
 		else
+		{
 			totalStages = multiPassList.Count;
+			if (multiPassList[0] != 0)
+				checkEditorImage = false;
+		}
+
 		for (int i = 0; i < totalStages; i++)
 		{
 			int currentStage;
@@ -199,8 +205,8 @@ public static class QShaderManager
 			
 			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.RGB, ref entityColor);
 			GSFragmentRGBs += GetGenFunc(qShader, currentStage, GenFuncType.Alpha, ref entityColor);
-			GSFragmentBlends += GetAlphaFunc(qShader, currentStage);
-			GSFragmentBlends += GetBlend(qShader, currentStage, i, ref needMultiPass, ref alphaIsTransparent);
+			GSFragmentBlends += GetAlphaFunc(qShader, currentStage, multiPassList, ref needMultiPass);
+			GSFragmentBlends += GetBlend(qShader, currentStage, i, multiPassList, ref needMultiPass, ref alphaIsTransparent);
 			if (qShaderStage.depthWrite)
 			{
 				if (i == 0)
@@ -223,9 +229,9 @@ public static class QShaderManager
 					currentStage = multiPassList[i];
 				matPass.Add(currentStage);
 			}
-//			if (lightmapStage >= 0)
-//				if (!matPass.Contains(lightmapStage))
-//					matPass.Add(lightmapStage);
+			if (lightmapStage >= 0)
+				if (!matPass.Contains(lightmapStage))
+					matPass.Add(lightmapStage);
 			bool baseAlpha = forceAlpha;
 			ShaderMaterial passZeroMaterial = GetShadedMaterial(shaderName, lm_index, ref baseAlpha, ref hasPortal, matPass);
 			ShaderMaterial lastMaterial = passZeroMaterial;
@@ -247,9 +253,9 @@ public static class QShaderManager
 					currentStage = multiPassList[i];
 				matPass.Add(currentStage);
 			}
-//			if (lightmapStage >= 0)
-//				if (!matPass.Contains(lightmapStage))
-//					matPass.Add(lightmapStage);
+			if (lightmapStage >= 0)
+				if (!matPass.Contains(lightmapStage))
+					matPass.Add(lightmapStage);
 
 			qShader.qShaderGlobal.sort = sortType;
 			ShaderMaterial passOneMaterial = GetShadedMaterial(shaderName, lm_index, ref forceAlpha, ref hasPortal, matPass);
@@ -282,14 +288,17 @@ public static class QShaderManager
 			switch (qShader.qShaderGlobal.sort)
 			{
 				case QShaderGlobal.SortType.Opaque:
+				{
+					if (alphaIsTransparent)
 					{
-						if (alphaIsTransparent)
+						if (multiPassList != null)
 							GSHeader += "depth_prepass_alpha, ";
-						if ((depthWrite) || (forceAlpha))
-							GSHeader += "depth_draw_always, blend_mix, ";
-						else
-							GSHeader += "depth_draw_opaque, blend_mix, ";
 					}
+					if ((depthWrite) || (forceAlpha))
+						GSHeader += "depth_draw_always, blend_mix, ";
+					else
+						GSHeader += "depth_draw_opaque, blend_mix, ";
+				}
 				break;
 				case QShaderGlobal.SortType.Additive:
 					if (depthWrite)
@@ -308,7 +317,10 @@ public static class QShaderManager
 		}
 
 		if (qShader.qShaderGlobal.isSky)
+		{
 			qShader.qShaderGlobal.unShaded = true;
+			checkEditorImage = false;
+		}
 
 		if (qShader.qShaderGlobal.unShaded)
 		{
@@ -343,7 +355,7 @@ public static class QShaderManager
 			GameManager.Print("Current shader is transparent");
 		}
 
-		if ((qShader.qShaderGlobal.editorImage.Length != 0) && (qShader.qShaderGlobal.isSky == false))
+		if ((checkEditorImage) && (qShader.qShaderGlobal.editorImage.Length != 0))
 		{
 			QShaderData qeditorShader;
 			if (QShaders.TryGetValue(qShader.qShaderGlobal.editorImage, out qeditorShader))
@@ -357,17 +369,21 @@ public static class QShaderManager
 
 			if (TextureLoader.HasTextureOrAddTexture(qShader.qShaderGlobal.editorImage, alphaIsTransparent))
 			{
+				int lastStage = totalStages;
+				if (multiPassList != null)
+					lastStage = multiPassList[lastStage-1] + 1;
+
 				int editorIndex;
 				if (TexIndex.TryGetValue(qShader.qShaderGlobal.editorImage, out editorIndex))
 				{
-					GSFragmentUvs += "\tvec2 uv_" + totalStages + " = UV;\n";
-					GSFragmentTexs += "\tvec4 Stage_" + totalStages + " = texture(" + "Tex_" + editorIndex + ", uv_" + totalStages + ");\n";
+					GSFragmentUvs += "\tvec2 uv_" + lastStage + " = UV;\n";
+					GSFragmentTexs += "\tvec4 Stage_" + lastStage + " = texture(" + "Tex_" + editorIndex + ", uv_" + lastStage + ");\n";
 				}
 				else
 				{
 					GSUniforms += "uniform sampler2D " + "Tex_" + totalTex + " : repeat_enable;\n";
-					GSFragmentUvs += "\tvec2 uv_" + totalStages + " = UV;\n";
-					GSFragmentTexs += "\tvec4 Stage_" + totalStages + " = texture(" + "Tex_" + totalTex + ", uv_" + totalStages + ");\n";
+					GSFragmentUvs += "\tvec2 uv_" + lastStage + " = UV;\n";
+					GSFragmentTexs += "\tvec4 Stage_" + lastStage + " = texture(" + "Tex_" + totalTex + ", uv_" + lastStage + ");\n";
 					textures.Add(qShader.qShaderGlobal.editorImage);
 					TexIndex.Add(qShader.qShaderGlobal.editorImage, totalTex);
 					totalTex++;
@@ -451,6 +467,7 @@ public static class QShaderManager
 		//Vertex
 		if ((canvasShader == false) && (qShader.qShaderGlobal.isSky == false))
 		{
+			bool offSet = qShader.qShaderGlobal.polygonOffset;
 			code += GSVertexH;
 			if (multiPassList == null)
 			{
@@ -463,7 +480,9 @@ public static class QShaderManager
 				code += "\tfloat lat = dir.a * (PI) / 128.0f;\n";
 				code += "\tdirVector = vec3(-cos(lat) * sin(lng), cos(lng), sin(lat) * sin(lng));\n";
 			}
-			code += GetVertex(qShader, (multiPassList == null), forceView);
+			else if (multiPassList[0] != 0)
+				offSet = true;
+			code += GetVertex(qShader, (multiPassList == null), forceView, offSet);
 			code += GSVertexUvs + "}\n";
 		}
 
@@ -567,8 +586,15 @@ public static class QShaderManager
 		{
 			if (canvasShader)
 				code += "\tCOLOR = COLOR.rgb + color.a;\n";
-			else
+			else if (multiPassList == null)
 				code += "\tALPHA = color.a;\n";
+			else if (multiPassList[0] == 0)
+				code += "\tALPHA = color.a;\n";
+			else
+			{
+				code += "\tALPHA_HASH_SCALE = 0.5;\n";
+				code += "\tALPHA = color.a;\n";
+			}
 		}
 		code += "}\n\n";
 
@@ -649,7 +675,7 @@ public static class QShaderManager
 		code += "instance uniform float OffSetTime = 0.0;\n";
 		code += "const bool ViewModel = false;\n";
 		code += "void vertex()\n{\n";
-		code += GetVertex(qShader, false, false) + "}\n";
+		code += GetVertex(qShader, false, false, qShader.qShaderGlobal.polygonOffset) + "}\n";
 		code += "void fragment()\n{\n\tvec2 uv_0 = SCREEN_UV;\n\tvec4 Stage_0 = texture(Tex_0, uv_0);\n";
 		code += "\tvec4 ambient = AmbientColor * mixBrightness;\n";
 		code += "\tvec4 vertx_color = COLOR;\n";
@@ -685,7 +711,7 @@ public static class QShaderManager
 		code += "\tUV2.x = mix(UV2.x, 1.0 - UV2.x, InvertX);\n";
 		code += "\tUV2.y = mix(UV2.y, 1.0 - UV2.y, InvertY);\n";
 		if (qShader != null)
-			code += GetVertex(qShader, false, false);
+			code += GetVertex(qShader, false, false, qShader.qShaderGlobal.polygonOffset);
 		code += "}\nvoid fragment()\n{\n\tvec2 uv_0 = UV2;\n\tvec4 Stage_0 = texture(Tex_0, uv_0);\n";
 		code += "\tvec4 ambient = AmbientColor * mixBrightness;\n";
 		code += "\tvec4 vertx_color = COLOR;\n";
@@ -714,7 +740,7 @@ public static class QShaderManager
 		return DiffuseLight;
 	}
 
-	public static string GetVertex(QShaderData qShader, bool useView, bool forceView)
+	public static string GetVertex(QShaderData qShader, bool useView, bool forceView, bool offSet)
 	{
 		string Vertex = "";
 
@@ -755,7 +781,7 @@ public static class QShaderManager
 				Vertex += "\tPROJECTION_MATRIX[0][0] =  InvTanFOV / Aspect;\n";
 			}
 			Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);\n";
-			if (qShader.qShaderGlobal.polygonOffset)
+			if (offSet)
 				Vertex += "\t\tPOSITION.z = mix(POSITION.z, 1.0, 0.001);\n";
 			return Vertex;
 		}
@@ -863,7 +889,7 @@ public static class QShaderManager
 			Vertex += "\tPROJECTION_MATRIX[0][0] =  InvTanFOV / Aspect;\n";
 		}
 		Vertex += "\tPOSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);\n";
-		if (qShader.qShaderGlobal.polygonOffset)
+		if (offSet)
 			Vertex += "\t\tPOSITION.z = mix(POSITION.z, 1.0, 0.001);\n";
 		return Vertex;
 	}
@@ -1067,27 +1093,42 @@ public static class QShaderManager
 		{
 			string Func = GenFunc[0];
 			if (Func == "VERTEX")
-				StageGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * vertx_color.rgb ; \n";
+			{
+				if (type == GenFuncType.RGB)
+					StageGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * vertx_color.rgb; \n";
+				else
+					StageGen = "\tStage_" + currentStage + ".a = vertx_color.a ; \n";
+			}
 			else if (Func == "ENTITY")
 			{
-				StageGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * modulate.rgb ; \n";
+				StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * modulate" + GenType + " ; \n";
 				entityColor = true;
 			}
 		}
 		return StageGen;
 	}
 
-	public static string GetAlphaFunc(QShaderData qShader, int currentStage)
+	public static string GetAlphaFunc(QShaderData qShader, int currentStage, List<int> multiPassList, ref int needMultiPass)
 	{
 		string AlphaFunc = "";
 		if (qShader.qShaderStages[currentStage].alphaFunc == QShaderStage.AlphaFuncType.NONE)
 			return AlphaFunc;
 
+		int fistStage = 0;
+		if (multiPassList != null)
+			fistStage = multiPassList[0];
+		if (currentStage != fistStage)
+		{
+			needMultiPass = currentStage;
+			return AlphaFunc;
+		}
+
+
 		AlphaFunc = "\tif (Stage_" + currentStage + ".a ";		
 		switch (qShader.qShaderStages[currentStage].alphaFunc)
 		{
 			case QShaderStage.AlphaFuncType.GT0:
-				AlphaFunc += "== 1.0)\n";
+				AlphaFunc += "== 0.0)\n";
 			break;
 			case QShaderStage.AlphaFuncType.LT128:
 				AlphaFunc += ">= 0.5)\n";
@@ -1100,23 +1141,27 @@ public static class QShaderManager
 
 		return AlphaFunc;
 	}
-	public static string GetBlend(QShaderData qShader, int currentStage, int numStage, ref int needMultiPass, ref bool alphaIsTransparent)
+	public static string GetBlend(QShaderData qShader, int currentStage, int numStage, List<int> multiPassList, ref int needMultiPass, ref bool alphaIsTransparent)
 	{
 		string Blend = "";
 		if (qShader.qShaderStages[currentStage].blendFunc != null)
 		{
+			int firstStage = 0;
+			if (multiPassList != null)
+				firstStage = multiPassList[0];
+
 			string BlendWhat = qShader.qShaderStages[currentStage].blendFunc[0];
 			if (BlendWhat == "ADD")
 			{
 				Blend = "\tcolor = Stage_" + currentStage + " + color; \n";
-				if (currentStage == 0)
+				if (currentStage == firstStage)
 					qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
 			}
 			else if (BlendWhat == "FILTER")
 			{
 
 				Blend = "\tcolor = Stage_" + currentStage + " * color; \n";
-				if (currentStage == 0)
+				if (currentStage == firstStage)
 				{
 					Blend = "\tcolor = Stage_" + currentStage + "; \n";
 					qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
@@ -1126,10 +1171,15 @@ public static class QShaderManager
 			{
 				Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * Stage_" + currentStage + ".a + color.rgb * (1.0 - Stage_" + currentStage + ".a); \n";
 				Blend += "\tcolor.a = Stage_" + currentStage + ".a *   Stage_" + currentStage + ".a + color.a *  (1.0 -  Stage_" + currentStage + ".a); \n";
-				if (currentStage == 0)
+				if (currentStage == firstStage)
 				{
-					Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * Stage_" + currentStage + ".a + color.rgb * (1.0 - Stage_" + currentStage + ".a); \n";
-					Blend += "\tcolor.a = Stage_" + currentStage + ".a *   Stage_" + currentStage + ".a;\n";
+					if (firstStage == 0)
+					{
+						Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * Stage_" + currentStage + ".a + color.rgb * (1.0 - Stage_" + currentStage + ".a); \n";
+						Blend += "\tcolor.a = Stage_" + currentStage + ".a *   Stage_" + currentStage + ".a;\n";
+					}
+					else
+						Blend = "\tcolor = Stage_" + currentStage + ";\n";
 					alphaIsTransparent = true;
 				}
 			}
@@ -1143,115 +1193,110 @@ public static class QShaderManager
 				string cdst = "";
 
 				//SOURCE
+				if (src == "GL_ONE")
 				{
-					if (src == "GL_ONE")
-					{
-						csrc = " 1.0 ";
-						asrc = " 1.0 ";
-					}
-					else if (src == "GL_ZERO")
-					{
-						csrc = " 0.0 ";
-						asrc = " 0.0 ";
-					}
-					else if (src == "GL_DST_COLOR")
-					{
-						csrc = " color.rgb ";
-						asrc = " color.a ";
-					}
-					else if (src == "GL_ONE_MINUS_DST_COLOR")
-					{
-						csrc = " 1.0 - color.rgb ";
-						asrc = " 1.0 - color.a ";
-					}
-					else if (src == "GL_SRC_ALPHA")
-					{
-						csrc = "  Stage_" + currentStage + ".a ";
-						asrc = "  Stage_" + currentStage + ".a ";
-					}
-					else if (src == "GL_ONE_MINUS_SRC_ALPHA")
-					{
-						csrc = " (1.0 -  Stage_" + currentStage + ".a) ";
-						asrc = " (1.0 -  Stage_" + currentStage + ".a) ";
-					}
-					else if (src == "GL_DST_ALPHA")
-					{
-						csrc = " color.a ";
-						asrc = " color.a ";
-					}
-					else if (src == "GL_ONE_MINUS_DST_ALPHA")
-					{
-						csrc = " (1.0 - color.a) ";
-						asrc = " (1.0 - color.a) ";
-					}
+					csrc = " 1.0 ";
+					asrc = " 1.0 ";
+				}
+				else if (src == "GL_ZERO")
+				{
+					csrc = " 0.0 ";
+					asrc = " 0.0 ";
+				}
+				else if (src == "GL_DST_COLOR")
+				{
+					csrc = " color.rgb ";
+					asrc = " color.a ";
+				}
+				else if (src == "GL_ONE_MINUS_DST_COLOR")
+				{
+					csrc = " 1.0 - color.rgb ";
+					asrc = " 1.0 - color.a ";
+				}
+				else if (src == "GL_SRC_ALPHA")
+				{
+					csrc = "  Stage_" + currentStage + ".a ";
+					asrc = "  Stage_" + currentStage + ".a ";
+				}
+				else if (src == "GL_ONE_MINUS_SRC_ALPHA")
+				{
+					csrc = " (1.0 -  Stage_" + currentStage + ".a) ";
+					asrc = " (1.0 -  Stage_" + currentStage + ".a) ";
+				}
+				else if (src == "GL_DST_ALPHA")
+				{
+					csrc = " color.a ";
+					asrc = " color.a ";
+				}
+				else if (src == "GL_ONE_MINUS_DST_ALPHA")
+				{
+					csrc = " (1.0 - color.a) ";
+					asrc = " (1.0 - color.a) ";
 				}
 
 				//DEST
+				if (dst == "GL_ONE")
 				{
-					if (dst == "GL_ONE")
-					{
-						cdst = " 1.0 ";
-						adst = " 1.0 ";
-						if (currentStage == 0)
-							qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
-					}
-					else if (dst == "GL_ZERO")
-					{
-						cdst = " 0.0 ";
-						adst = " 0.0 ";
-					}
-					else if (dst == "GL_SRC_COLOR")
-					{
-						cdst = " Stage_" + currentStage + ".rgb ";
-						adst = " Stage_" + currentStage + ".a ";
-					}
-					else if (dst == "GL_ONE_MINUS_SRC_COLOR")
-					{
-						cdst = " (1.0 - Stage_" + currentStage + ".rgb) ";
-						adst = " (1.0 - Stage_" + currentStage + ".a) ";
-					}
-					else if (dst == "GL_DST_ALPHA")
-					{
-						cdst = " color.a ";
-						adst = " color.a ";
-					}
-					else if (dst == "GL_ONE_MINUS_DST_ALPHA")
-					{
-						cdst = " (1.0 - color.a) ";
-						adst = " (1.0 - color.a) ";
-					}
-					else if (dst == "GL_SRC_ALPHA")
-					{
-						cdst = "  Stage_" + currentStage + ".a ";
-						adst = "  Stage_" + currentStage + ".a ";
-					}
-					else if (dst == "GL_ONE_MINUS_SRC_ALPHA")
-					{
-						cdst = " (1.0 -  Stage_" + currentStage + ".a) ";
-						adst = " (1.0 -  Stage_" + currentStage + ".a) ";
-					}
+					cdst = " 1.0 ";
+					adst = " 1.0 ";
+					if (currentStage == firstStage)
+						qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
+				}
+				else if (dst == "GL_ZERO")
+				{
+					cdst = " 0.0 ";
+					adst = " 0.0 ";
+				}
+				else if (dst == "GL_SRC_COLOR")
+				{
+					cdst = " Stage_" + currentStage + ".rgb ";
+					adst = " Stage_" + currentStage + ".a ";
+				}
+				else if (dst == "GL_ONE_MINUS_SRC_COLOR")
+				{
+					cdst = " (1.0 - Stage_" + currentStage + ".rgb) ";
+					adst = " (1.0 - Stage_" + currentStage + ".a) ";
+				}
+				else if (dst == "GL_DST_ALPHA")
+				{
+					cdst = " color.a ";
+					adst = " color.a ";
+				}
+				else if (dst == "GL_ONE_MINUS_DST_ALPHA")
+				{
+					cdst = " (1.0 - color.a) ";
+					adst = " (1.0 - color.a) ";
+				}
+				else if (dst == "GL_SRC_ALPHA")
+				{
+					cdst = "  Stage_" + currentStage + ".a ";
+					adst = "  Stage_" + currentStage + ".a ";
+				}
+				else if (dst == "GL_ONE_MINUS_SRC_ALPHA")
+				{
+					cdst = " (1.0 -  Stage_" + currentStage + ".a) ";
+					adst = " (1.0 -  Stage_" + currentStage + ".a) ";
 				}
 
-				if (currentStage == 0)
+				//Check FirstStage
+				if (currentStage == firstStage)
 				{
 					if (src == "GL_ZERO")
 					{
+						if (dst == "GL_SRC_COLOR")
 						{
-							if (dst == "GL_SRC_COLOR")
-							{
-								Blend = "\tcolor = Stage_" + currentStage + "; \n";
-								qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
-							}
-							else if (dst == "GL_ONE_MINUS_SRC_COLOR")
-							{
-								Blend = "\tcolor.rgb = " + cdst + ";\n";
-								qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Multiplicative;
-							}
-							else
-							{
-								Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
-								Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
-							}
+							Blend = "\tcolor = Stage_" + currentStage + "; \n";
+							qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Additive;
+						}
+						else if (dst == "GL_ONE_MINUS_SRC_COLOR")
+						{
+							Blend = "\tcolor.rgb = " + cdst + ";\n";
+							qShader.qShaderGlobal.sort = QShaderGlobal.SortType.Multiplicative;
+						}
+						else
+						{
+							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
+							Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
 						}
 					}
 					else if (src == "GL_DST_COLOR")
@@ -1271,18 +1316,21 @@ public static class QShaderManager
 					}
 					else if (src == "GL_SRC_ALPHA")
 					{
+						if (dst == "GL_ONE_MINUS_SRC_ALPHA")
 						{
-							if (dst == "GL_ONE_MINUS_SRC_ALPHA")
+							if (firstStage == 0)
 							{
 								Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * Stage_" + currentStage + ".a + color.rgb * (1.0 - Stage_" + currentStage + ".a); \n";
 								Blend += "\tcolor.a = Stage_" + currentStage + ".a *   Stage_" + currentStage + ".a;\n";
-								alphaIsTransparent = true;
 							}
 							else
-							{
-								Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
-								Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
-							}
+								Blend = "\tcolor = Stage_" + currentStage + ";\n";
+							alphaIsTransparent = true;
+						}
+						else
+						{
+							Blend = "\tcolor.rgb = Stage_" + currentStage + ".rgb * " + csrc + " + color.rgb * " + cdst + ";\n";
+							Blend += "\tcolor.a = Stage_" + currentStage + ".a * " + asrc + " + color.a * " + adst + ";\n";
 						}
 					}
 					else

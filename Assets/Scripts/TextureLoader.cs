@@ -211,6 +211,7 @@ public static class TextureLoader
 		}
 		luminance /= (width * height);
 		luminance = Mathf.Clamp(luminance, 0f, .35f);
+		bool hasAlpha = (baseTex.DetectAlpha() != AlphaMode.None);
 		baseTex.ResizeToPo2(false, Interpolation.Lanczos);
 		baseTex.GenerateMipmaps();
 		baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgba);
@@ -219,7 +220,7 @@ public static class TextureLoader
 
 		if (Textures.ContainsKey(TextName))
 		{
-			if (baseTex.DetectAlpha() != AlphaMode.None)
+			if (hasAlpha)
 			{
 				GameManager.Print("Adding transparent texture with name " + TextName);
 				TransparentTextures.Add(TextName, readyTex);
@@ -232,7 +233,7 @@ public static class TextureLoader
 		}
 		else
 		{
-			if (baseTex.DetectAlpha() != AlphaMode.None)
+			if (hasAlpha)
 			{
 				GameManager.Print("Adding transparent texture with name " + TextName);
 				TransparentTextures.Add(TextName, readyTex);
@@ -319,11 +320,12 @@ public static class TextureLoader
 				}
 				luminance /= (width * height);
 				luminance = Mathf.Clamp(luminance, 0f, .35f);
+				bool hasAlpha = (baseTex.DetectAlpha() != AlphaMode.None);
 				if (compress)
 				{
 					baseTex.ResizeToPo2(false, Interpolation.Lanczos);
 					baseTex.GenerateMipmaps();
-					if ((tex.addAlpha) || (baseTex.DetectAlpha() != AlphaMode.None))
+					if ((tex.addAlpha) || (hasAlpha))
 						baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgba);
 					else
 						baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgb);
@@ -333,7 +335,7 @@ public static class TextureLoader
 
 				if (Textures.ContainsKey(tex.name))
 				{
-					if ((tex.addAlpha) || (baseTex.DetectAlpha() != AlphaMode.None))
+					if ((tex.addAlpha) || (hasAlpha))
 					{
 						GameManager.Print("Adding transparent texture with name " + tex.name + "." + imageFormat);
 						TransparentTextures.Add(tex.name, readyTex);
@@ -346,7 +348,7 @@ public static class TextureLoader
 				}
 				else
 				{
-					if ((tex.addAlpha) || (baseTex.DetectAlpha() != AlphaMode.None))
+					if ((tex.addAlpha) || (hasAlpha))
 					{
 						GameManager.Print("Adding transparent texture with name " + tex.name + "."+ imageFormat);
 						TransparentTextures.Add(tex.name, readyTex);

@@ -31,8 +31,8 @@ public partial class PlayerWeapon : Node3D
 	[Export]
 	public bool isMelee = false;
 
-	public virtual float avgDispersion { get { return .02f; } } //tan(2.3) / 2
-	public virtual float maxDispersion { get { return .03f; } } //tan(3.4) / 2
+	public virtual float verticalDispersion { get { return .02f; } } //tan(2.3) / 2
+	public virtual float horizontalDispersion { get { return .03f; } } //tan(3.4) / 2
 	[Export]
 	public int DamageMin = 5;
 	[Export]
@@ -43,6 +43,8 @@ public partial class PlayerWeapon : Node3D
 	public float kickSpeed = 6f;
 	[Export]
 	public float KickOffSet = .1f;
+	[Export]
+	public float KickBackTime = .1f;
 
 	public Vector2 Sensitivity = new Vector2(.015f, .01f);
 	public float rotateSpeed = 4f;
@@ -253,7 +255,7 @@ public partial class PlayerWeapon : Node3D
 		{
 			if (fullAuto)
 				KickAmount = Mathf.Lerp(KickAmount, 1, deltaTime * kickSpeed);
-			else if (fireTime < 0.1f)
+			else if (fireTime < KickBackTime)
 				KickAmount = Mathf.Lerp(KickAmount, 0, deltaTime * kickSpeed);
 			else
 				KickAmount = Mathf.Lerp(KickAmount, 1, deltaTime * kickSpeed);
@@ -367,23 +369,17 @@ public partial class PlayerWeapon : Node3D
 	{
 		playerInfo.playerControls.playerWeapon = null;
 	}
+
 	public Vector2 GetDispersion()
 	{
-		Vector2 dispersion = new Vector2((float)GD.RandRange(-1f, 1f), (float)GD.RandRange(-1f, 1f));
-		float dx = Mathf.Abs(dispersion.X);
-		float dy = Mathf.Abs(dispersion.Y);
+		float t = 2 * Mathf.Pi * (float)GD.RandRange(0, 1f);
+		float r = (float)GD.RandRange(0, 1f);// + (float)GD.RandRange(0, 1f);
+//		if (r > 1)
+//			r = 2 - r;
 
-		if (dx == 1)
-			return dispersion * maxDispersion;
-		if (dy == 1)
-			return dispersion * maxDispersion;
-		if (dx + dy <= 1)
-			return dispersion * avgDispersion;
-		if (dx * dx + dy * dy <= 1)
-			return dispersion * avgDispersion;
-		return dispersion * maxDispersion;
+		Vector2 dispersion = new Vector2(r * Mathf.Cos(t) * horizontalDispersion, r * Mathf.Sin(t) * verticalDispersion);
+		return dispersion;
 	}
-
 	public bool CheckIfCanMark(PhysicsDirectSpaceState3D SpaceState, CollisionObject3D collider, Vector3 collision)
 	{
 		if (collider is Damageable)
