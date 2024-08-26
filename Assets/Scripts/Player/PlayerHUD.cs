@@ -81,9 +81,9 @@ public partial class PlayerHUD : MeshInstance3D
 
 	private Sprite3D[] noAmmoIcon;
 	private Sprite3D selectIcon;
-	private static readonly string[] weaponNames = { "Gauntlet", "Machinegun", "Shotgun", "Grenade Launcher", "Rocket Launcher", "Lightning Gun", "Railgun", "Plasma Gun", "BFG 10K", "Grapple Hook", "Nail Gun", "Vulcan", "Proximity Launcher", "Heavy Machine Gun" };
+	private static readonly string[] weaponNames = { "Gauntlet", "Machinegun", "Shotgun", "Grenade Launcher", "Rocket Launcher", "Lightning Gun", "Railgun", "Plasma Gun", "BFG 10K", "Grapple Hook", "Nail Gun", "ChainGun", "Proximity Launcher", "Heavy Machine Gun" };
 	private static readonly string[] weaponSprites = { "ICONS/ICONW_GAUNTLET", "ICONS/ICONW_MACHINEGUN", "ICONS/ICONW_SHOTGUN", "ICONS/ICONW_GRENADE", "ICONS/ICONW_ROCKET", "ICONS/ICONW_LIGHTNING", "ICONS/ICONW_RAILGUN", "ICONS/ICONW_PLASMA", "ICONS/ICONW_BFG", "ICONS/ICONW_GRAPPLE", "ICONS/NAILGUN128", "ICONS/CHAINGUN128", "ICONS/PROXMINE", "ICONS/WEAP_HMG" };
-	private static readonly string[] ammoModels = { "machinegunam", "shotgunam", "grenadeam", "rocketam", "lightningam", "railgunam", "plasmaam", "bfgam" };
+	private static readonly string[] ammoModels = { "machinegunam", "shotgunam", "grenadeam", "rocketam", "lightningam", "railgunam", "plasmaam", "bfgam", "nailgunam", "chaingunam" };
 	private static readonly string[] powerUpsSprites = { "ICONS/QUAD", "ICONS/HASTE", "ICONS/INVIS", "ICONS/REGEN", "ICONS/ENVIROSUIT", "ICONS/FLIGHT" };
 	private static readonly string[] holdableItemsSprites = { "ICONS/TELEPORTER", "ICONS/MEDKIT" };
 
@@ -558,7 +558,7 @@ public partial class PlayerHUD : MeshInstance3D
 			if (weaponIcon[i].Visible == false)
 				weaponIcon[i].Show();
 
-			noAmmoIcon[i].Visible = !HasAmmo(currentWeapons[i]);
+			noAmmoIcon[i].Visible = !playerInfo.playerControls.HasAmmo(currentWeapons[i]);
 
 			if (currentWeapons[i] == current)
 				selectIcon.Position = weaponIcon[i].Position;
@@ -589,7 +589,7 @@ public partial class PlayerHUD : MeshInstance3D
 
 		for (int i = 0; i < currentWeapons.Count; i++)
 		{
-			noAmmoIcon[i].Visible = !HasAmmo(currentWeapons[i]);
+			noAmmoIcon[i].Visible = !playerInfo.playerControls.HasAmmo(currentWeapons[i]);
 			if (currentWeapons[i] == weapon)
 			{
 				weaponLabel.Text = weaponNames[weapon];
@@ -601,59 +601,6 @@ public partial class PlayerHUD : MeshInstance3D
 		if (selectIcon.Visible == false)
 			selectIcon.Show();
 		weaponTime = 3f;
-	}
-
-	public bool HasAmmo(int weapon)
-	{
-		switch (weapon)
-		{
-			default:
-				return false;
-
-			case PlayerInfo.Gauntlet:
-				break;
-			case PlayerInfo.HeavyMachineGun:
-			case PlayerInfo.MachineGun:
-				if (playerInfo.Ammo[PlayerInfo.bulletsAmmo] <= 0)
-					return false;
-				break;
-
-			case PlayerInfo.Shotgun:
-				if (playerInfo.Ammo[PlayerInfo.shellsAmmo] <= 0)
-					return false;
-				break;
-
-			case PlayerInfo.GrenadeLauncher:
-				if (playerInfo.Ammo[PlayerInfo.grenadesAmmo] <= 0)
-					return false;
-				break;
-
-			case PlayerInfo.RocketLauncher:
-				if (playerInfo.Ammo[PlayerInfo.rocketsAmmo] <= 0)
-					return false;
-				break;
-
-			case PlayerInfo.LightningGun:
-				if (playerInfo.Ammo[PlayerInfo.lightningAmmo] <= 0)
-					return false;
-				break;
-
-			case PlayerInfo.Railgun:
-				if (playerInfo.Ammo[PlayerInfo.slugAmmo] <= 0)
-					return false;
-				break;
-
-			case PlayerInfo.PlasmaGun:
-				if (playerInfo.Ammo[PlayerInfo.cellsAmmo] <= 0)
-					return false;
-				break;
-
-			case PlayerInfo.BFG10K:
-				if (playerInfo.Ammo[PlayerInfo.bfgAmmo] < 40)
-					return false;
-				break;
-		}
-		return true;
 	}
 
 	public void CheckWeapon(float deltaTime)
@@ -767,12 +714,11 @@ public partial class PlayerHUD : MeshInstance3D
 		pickUpIcon.Show();
 		pickUpText.Show();
 
-
 		//Small Check in case we picked Up Ammo
 		if (weaponTime > 0)
 		{
 			for (int i = 0; i < currentWeapons.Count; i++)
-				noAmmoIcon[i].Visible = !HasAmmo(currentWeapons[i]);
+				noAmmoIcon[i].Visible = !playerInfo.playerControls.HasAmmo(currentWeapons[i]);
 		}
 	}
 

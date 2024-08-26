@@ -871,17 +871,9 @@ public partial class PlayerControls : InterpolatedNode3D
 		playerThing.avatar.enableOffset = false;
 		playerThing.PlayModelSound("jump1", true, false);
 	}
-	public bool TrySwapWeapon(int weapon)
+
+	public bool HasAmmo(int weapon)
 	{
-		if (CurrentWeapon == weapon || SwapWeapon != -1)
-			return false;
-
-		if (weapon < 0 || weapon >= playerInfo.Weapon.Length)
-			return false;
-
-		if (!playerInfo.Weapon[weapon])
-			return false;
-
 		switch (weapon)
 		{
 			default:
@@ -929,7 +921,27 @@ public partial class PlayerControls : InterpolatedNode3D
 				if (playerInfo.Ammo[PlayerInfo.bfgAmmo] < 40)
 					return false;
 				break;
+
+			case PlayerInfo.ChainGun:
+				if (playerInfo.Ammo[PlayerInfo.chainAmmo] <= 0)
+					return false;
+				break;
 		}
+		return true;
+	}
+	public bool TrySwapWeapon(int weapon)
+	{
+		if (CurrentWeapon == weapon || SwapWeapon != -1)
+			return false;
+
+		if (weapon < 0 || weapon >= playerInfo.Weapon.Length)
+			return false;
+
+		if (!playerInfo.Weapon[weapon])
+			return false;
+
+		if (!HasAmmo(weapon))
+			return false;
 
 		if (playerWeapon != null)
 		{
@@ -945,6 +957,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	public void SwapToBestSafeWeapon()
 	{
 		if (TrySwapWeapon(PlayerInfo.BFG10K)) return;
+		if (TrySwapWeapon(PlayerInfo.ChainGun)) return;
 		if (TrySwapWeapon(PlayerInfo.PlasmaGun)) return;
 		if (TrySwapWeapon(PlayerInfo.HeavyMachineGun)) return;
 		if (TrySwapWeapon(PlayerInfo.LightningGun)) return;
@@ -958,6 +971,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	public void SwapToBestWeapon()
 	{
 		if (TrySwapWeapon(PlayerInfo.BFG10K)) return;
+		if (TrySwapWeapon(PlayerInfo.ChainGun)) return;
 		if (TrySwapWeapon(PlayerInfo.PlasmaGun)) return;
 		if (TrySwapWeapon(PlayerInfo.HeavyMachineGun)) return;
 		if (TrySwapWeapon(PlayerInfo.Railgun)) return;

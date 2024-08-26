@@ -61,7 +61,7 @@ public partial class ThingsManager : Node
 	public static readonly string[] quadHogReplacement = { "item_haste", "item_regen", "item_flight", "item_invis", "item_enviro", "item_health_mega", "item_armor_body", "item_armor_combat" };
 
 	public static readonly string[] demoIgnoreItems = { "item_haste", "item_regen", "item_flight", "item_invis", "item_enviro", "weapon_grenadelauncher", "weapon_bfg", "ammo_grenades", "ammo_bfg", "weapon_hmg", "ammo_pack" };
-	public static readonly string[] retailIgnoreItems = {  "weapon_hmg", "ammo_pack" };
+	public static readonly string[] retailIgnoreItems = { "weapon_chaingun", "weapon_hmg", "ammo_pack" };
 	public static readonly string[] teamArenaIgnoreItems = { "weapon_hmg", "ammo_pack" };
 
 	public static readonly string[] gibsParts = { "GibSkull", "GibBrain", "GibAbdomen", "GibArm", "GibChest", "GibFist", "GibFoot", "GibForearm", "GibIntestine", "GibLeg", "GibLeg" };
@@ -1205,6 +1205,146 @@ public partial class ThingsManager : Node
 								sw.CurrentState = DoorController.State.Opening;
 								sw.tc.Activate(null);
 							});
+						}
+					}
+					//Elevator
+					else if (entity.name == "func_plat")
+					{
+						int model = -1;
+						int height = 0, speed = 150, lip = 16, dmg = 4;
+
+						ModelController modelController = null;
+
+						if (entity.entityData.TryGetValue("model", out strWord))
+							model = int.Parse(strWord.Trim('*'));
+						if (entity.entityData.TryGetValue("model2", out strWord))
+						{
+							model = -1;
+							modelController = new ModelController();
+							modelController.modelName = strWord.Split('.')[0].Split("models/")[1];
+							modelController.Init();
+							thingObject.GlobalPosition = entity.origin;
+						}
+
+						ElevatorController elevator = new ElevatorController();
+						thingObject.AddChild(elevator);
+
+						if (modelController != null)
+							elevator.AddChild(modelController);
+						
+						Node3D SourceTransform = new Node3D();
+						elevator.AddChild(SourceTransform);
+
+						InterpolatedTransform interpolatedTransform = new InterpolatedTransform();
+						interpolatedTransform.SetSource(SourceTransform);
+						thingObject.AddChild(interpolatedTransform);
+
+						if (entity.entityData.TryGetValue("height", out strWord))
+							height = int.Parse(strWord);
+						if (entity.entityData.TryGetValue("speed", out strWord))
+							speed = int.Parse(strWord);
+						if (entity.entityData.TryGetValue("lip", out strWord))
+							lip = int.Parse(strWord);
+						if (entity.entityData.TryGetValue("dmg", out strWord))
+							dmg = int.Parse(strWord);
+
+						Aabb BigBox = new Aabb();
+						if (model >= 0)
+						{
+							MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
+							uint OwnerShapeId = 0;
+							bool valid = false;
+
+							(OwnerShapeId, valid) = MapLoader.GenerateGeometricCollider(thingObject, elevator, model, 0, false);
+							if (valid)
+							{
+								int shapes = elevator.ShapeOwnerGetShapeCount(OwnerShapeId);
+
+								for (int i = 0; i < shapes; i++)
+								{
+									Shape3D shape = elevator.ShapeOwnerGetShape(OwnerShapeId, i);
+									Aabb box = shape.GetDebugMesh().GetAabb();
+									if (i == 0)
+										BigBox = new Aabb(box.Position, box.Size);
+									else
+										BigBox = BigBox.Merge(box);
+								}
+							}
+						}
+
+						elevator.Init(speed, height, lip, BigBox, model, dmg);
+
+						if (entity.entityData.TryGetValue("targetname", out strWord))
+						{
+							string target = strWord;
+
+							TriggerController tc;
+							if (!triggerToActivate.TryGetValue(target, out tc))
+							{
+								tc = new TriggerController();
+								thingObject.AddChild(tc);
+								triggerToActivate.Add(target, tc);
+							}
+							tc.Repeatable = true;
+							tc.AutoReturn = true;
+							tc.AutoReturnTime = 1;
+							tc.SetController(target, (p) =>
+							{
+								switch(elevator.CurrentState)
+								{
+									default:
+										elevator.CurrentState = ElevatorController.State.Rising;
+									break;
+									case ElevatorController.State.Up:
+										elevator.CurrentState = ElevatorController.State.Up;
+									break;
+									case ElevatorController.State.Rising:
+									break;
+								}
+							});
+						}
+						else //If it's not external trigger
+						{
+							Area3D triggerCollider = new Area3D();
+							elevator.AddChild(triggerCollider);
+							CollisionShape3D mc = new CollisionShape3D();
+							mc.Name = "Elevator Trigger";
+							triggerCollider.AddChild(mc);
+							triggerCollider.CollisionLayer = (1 << GameManager.WalkTriggerLayer);
+							triggerCollider.CollisionMask = GameManager.TakeDamageMask;
+							triggerCollider.InputRayPickable = false;
+
+							BoxShape3D box = new BoxShape3D();
+							box.Size = BigBox.Size;
+							mc.Shape = box;
+
+							TriggerController tc = new TriggerController();
+							thingObject.AddChild(tc);
+							tc.Repeatable = true;
+							tc.AutoReturn = true;
+							tc.AutoReturnTime = 1;
+							tc.SetController("", (p) =>
+							{
+								switch (elevator.CurrentState)
+								{
+									default:
+										elevator.CurrentState = ElevatorController.State.Rising;
+									break;
+									case ElevatorController.State.Up:
+										elevator.CurrentState = ElevatorController.State.Up;
+									break;
+									case ElevatorController.State.Rising:
+									break;
+								}
+							});
+
+							if (model >= 0)
+								triggerCollider.GlobalPosition = BigBox.GetCenter();
+							else
+								triggerCollider.GlobalPosition = entity.origin;
+
+							triggerCollider.BodyEntered += tc.OnBodyEntered;
+							tc.Areas.Add(triggerCollider);
 						}
 					}
 					//Door

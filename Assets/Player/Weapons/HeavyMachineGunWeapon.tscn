@@ -17,7 +17,6 @@ DamageMax = 16
 kickSpeed = 80.0
 KickBackTime = 0.05
 _fireRate = 0.06
-_muzzleTime = 0.13
 muzzleLight = NodePath("OmniLight3D")
 
 [node name="HeavyMachineGun" type="Node3D" parent="."]

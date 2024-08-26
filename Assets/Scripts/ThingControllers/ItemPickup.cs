@@ -22,7 +22,8 @@ public partial class ItemPickup : Area3D
 		Enviro,
 		Flight,
 		Teleporter,
-		AmmoPack
+		AmmoPack,
+		ChainBullets
 	}
 	[Export]
 	public ThingController thingController;
@@ -122,6 +123,14 @@ public partial class ItemPickup : Area3D
 					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.bfgAmmo], PlayerInfo.bfgAmmo);
 					disable = true;
 				}
+				if ((player.playerInfo.Weapon[PlayerInfo.ChainGun]) && (player.playerInfo.Ammo[PlayerInfo.chainAmmo] < player.playerInfo.MaxAmmo[PlayerInfo.chainAmmo]))
+				{
+					player.playerInfo.Ammo[PlayerInfo.chainAmmo] += (player.playerInfo.DefaultAmmo[PlayerInfo.chainAmmo] * GameManager.Instance.PlayerAmmoReceive);
+					if (player.playerInfo.Ammo[PlayerInfo.chainAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.chainAmmo])
+						player.playerInfo.Ammo[PlayerInfo.chainAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.chainAmmo];
+					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.chainAmmo], PlayerInfo.chainAmmo);
+					disable = true;
+				}
 				break;
 
 			case ItemType.Bullets:
@@ -212,6 +221,16 @@ public partial class ItemPickup : Area3D
 				disable = true;
 				break;
 
+			case ItemType.ChainBullets:
+				if (player.playerInfo.Ammo[PlayerInfo.chainAmmo] == player.playerInfo.MaxAmmo[PlayerInfo.chainAmmo])
+					break;
+
+				player.playerInfo.Ammo[PlayerInfo.chainAmmo] += (amount * GameManager.Instance.PlayerAmmoReceive);
+				if (player.playerInfo.Ammo[PlayerInfo.chainAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.chainAmmo])
+					player.playerInfo.Ammo[PlayerInfo.chainAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.chainAmmo];
+				player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.chainAmmo], PlayerInfo.chainAmmo);
+				disable = true;
+				break;
 			case ItemType.Health:
 				if (bonus)
 				{

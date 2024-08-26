@@ -19,10 +19,10 @@ public partial class PlayerInfo : Node3D
 	public Node3D WeaponHand;
 
 	//Weapons and Ammo
-	public int[] Ammo = new int[8] { 100, 0, 0, 0, 0, 0, 0, 0 }; //bullets, shells, grenades, rockets, lightning, slugs, cells, bfgammo
-	public bool[] Weapon = new bool[14] { true, true, false, false, false, false, false, false, false, false, false, false, false, false }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k, grapple, nailgun, vulcan, proxmine, heavymachinegun
-	public int[] MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 300 };
-	public int[] DefaultAmmo = new int[8] { 50, 10, 5, 5, 60, 10, 30, 100 };
+	public int[] Ammo = new int[11] { 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; //bullets, shells, grenades, rockets, lightning, slugs, cells, bfgammo, nailammo, chainammo, proxammo
+	public bool[] Weapon = new bool[14] { true, true, false, false, false, false, false, false, false, false, false, false, false, false }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k, grapple, nailgun, chaingun, proxmine, heavymachinegun
+	public int[] MaxAmmo = new int[11] { 200, 200, 200, 200, 200, 200, 200, 300, 200, 300, 200 };
+	public int[] DefaultAmmo = new int[11] { 50, 10, 5, 5, 60, 10, 30, 100, 10, 100, 10 };
 	//Const Weapon Nums
 	public const int Gauntlet = 0;
 	public const int MachineGun = 1;
@@ -35,7 +35,7 @@ public partial class PlayerInfo : Node3D
 	public const int BFG10K = 8;
 	public const int Grapple = 9;
 	public const int NailGun = 10;
-	public const int Vulcan = 11;
+	public const int ChainGun = 11;
 	public const int ProxLauncher = 12;
 	public const int HeavyMachineGun = 13;
 
@@ -49,6 +49,9 @@ public partial class PlayerInfo : Node3D
 	public const int slugAmmo = 5;
 	public const int cellsAmmo = 6;
 	public const int bfgAmmo = 7;
+	public const int nailAmmo = 8;
+	public const int chainAmmo = 9;
+
 
 	//PowerUps
 	public bool godMode = false;
@@ -78,7 +81,7 @@ public partial class PlayerInfo : Node3D
 		public bool InvertView { get; set; } = false;											// Y Axis View Invert Controls.
 		public bool AutoHop { get; set; } = false;												// Allows player to just hold jump button to keep on bhopping perfectly.
 		public bool BloodScreen { get; set; } = true;											// Show Visible Pain Feedback.
-		public int[] CroosHair { get; set; } = new int[14] { 5, 5, 5, 5, 5, 5, 107, 5, 5, 5, 5, 5, 5, 5 };     //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k, grapple, nailgun, vulcan, proxmine, heavymachinegun
+		public int[] CroosHair { get; set; } = new int[14] { 5, 5, 5, 5, 5, 5, 107, 5, 5, 5, 5, 5, 5, 5 };     //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k, grapple, nailgun, chaingun, proxmine, heavymachinegun
 		public int CroosHairAlpha { get; set; } = 25;											// CrossHair Alpha Value.
 		public int CroosHairScale { get; set; } = 100;											// CrossHair Scale Value.
 		public string ModulateColor { get; set; } = "#50a1cd";                                  // Modulate Color.
@@ -137,9 +140,9 @@ public partial class PlayerInfo : Node3D
 
 	public void Reset()
 	{
-		Ammo = new int[8] { 100, 0, 0, 0, 0, 0, 0, 0 };
+		Ammo = new int[11] { 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		Weapon = new bool[14] { true, true, false, false, false, false, false, false, false, false, false, false, false, false };
-		MaxAmmo = new int[8] { 200, 200, 200, 200, 200, 200, 200, 300 };
+		MaxAmmo = new int[11] { 200, 200, 200, 200, 200, 200, 200, 300, 200, 300, 200 };
 
 		godMode = false;
 		quadDamage = false;

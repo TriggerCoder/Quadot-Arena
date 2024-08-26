@@ -1,0 +1,61 @@
+[gd_scene load_steps=4 format=3 uid="uid://dhlhrcn0t2mq7"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/ChainGunWeapon.cs" id="1_vpwlb"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_qk0rw"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="3_2lq34"]
+
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("humStream", "audioStream", "models", "muzzleObject", "barrelObject", "muzzleLight")]
+script = ExtResource("1_vpwlb")
+humStream = NodePath("HumAudioStream")
+_humSound = "weapons/vulcan/wvulfire"
+Offset = Vector3(0.2, -0.3, 0.1)
+audioStream = NodePath("WeaponAudioStream")
+_sounds = PackedStringArray("weapons/vulcan/vulcanf1b", "weapons/vulcan/vulcanf2b", "weapons/vulcan/vulcanf3b", "weapons/vulcan/vulcanf4b", "weapons/noammo", "weapons/change", "weapons/vulcan/wvulimpd", "weapons/vulcan/wvulimpl", "weapons/vulcan/wvulimpm", "weapons/vulcan/wvulwind")
+models = [NodePath("ChainGun"), NodePath("ChainGun/Barrel"), NodePath("ChainGun/Barrel/Muzzle")]
+muzzleObject = NodePath("ChainGun/Barrel/Muzzle")
+barrelObject = NodePath("ChainGun/Barrel")
+DamageMin = 8
+DamageMax = 18
+useCooldown = true
+muzzleLightTime = 10.0
+cooldownTime = 0.6
+_fireRate = 0.07
+muzzleLight = NodePath("OmniLight3D")
+
+[node name="ChainGun" type="Node3D" parent="."]
+script = ExtResource("2_qk0rw")
+modelName = "weapons/vulcan/vulcan"
+useCommon = false
+isViewModel = true
+currentState = 0
+
+[node name="Barrel" type="Node3D" parent="ChainGun"]
+script = ExtResource("2_qk0rw")
+modelName = "weapons/vulcan/vulcan_barrel"
+tagName = "tag_barrel"
+useCommon = false
+isViewModel = true
+currentState = 0
+
+[node name="Muzzle" type="Node3D" parent="ChainGun/Barrel"]
+script = ExtResource("2_qk0rw")
+modelName = "weapons/vulcan/vulcan_flash"
+tagName = "tag_flash"
+useCommon = false
+isTransparent = true
+isViewModel = true
+currentState = 0
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+layers = 255
+light_color = Color(1, 0.686275, 0, 1)
+light_bake_mode = 0
+omni_shadow_mode = 0
+
+[node name="WeaponAudioStream" type="Node3D" parent="."]
+script = ExtResource("3_2lq34")
+Bus = "FXBus"
+
+[node name="HumAudioStream" type="Node3D" parent="."]
+script = ExtResource("3_2lq34")
+Bus = "FXBus"

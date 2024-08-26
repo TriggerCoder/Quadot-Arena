@@ -64,8 +64,11 @@ public partial class PlayerWeapon : Node3D
 	public bool weaponReady = false;
 
 	public bool cooldown = false;
+	[Export]
 	public bool useCooldown = false;
+	[Export]
 	public float muzzleLightTime = 5f;
+	[Export]
 	public float cooldownTime = 0f;
 
 	[Export]
@@ -74,9 +77,6 @@ public partial class PlayerWeapon : Node3D
 
 	public float fireTime = 0f;
 	public float faceTime = 1.5f;
-	[Export]
-	public float _muzzleTime = .1f;
-	public float muzzleTimer = 0f;
 	[Export]
 	protected OmniLight3D muzzleLight;
 
@@ -308,9 +308,9 @@ public partial class PlayerWeapon : Node3D
 				faceTime = 1.5f;
 				coolTimer = 0;
 				if (useCooldown)
-					cooldown = true;
-				else
 				{
+					cooldown = true;
+					OnCoolDown();
 				}
 			}
 			else
@@ -360,6 +360,7 @@ public partial class PlayerWeapon : Node3D
 
 	protected virtual void OnPhysicsUpdate(float deltaTime) { }
 	protected virtual void OnInit() { }
+	protected virtual void OnCoolDown() { }
 	public virtual bool Fire()
 	{
 		return false;

@@ -1,4 +1,4 @@
-[gd_scene load_steps=269 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=271 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
@@ -129,6 +129,7 @@
 [ext_resource type="PackedScene" uid="uid://bdgbff1p5ko4n" path="res://Assets/Things/Pickups/Weapons/weapon_machinegun.tscn" id="84_hoa3p"]
 [ext_resource type="PackedScene" uid="uid://dbyfx8j7w2bf8" path="res://Assets/Things/GamePlay/target/target_give.tscn" id="88_nvs58"]
 [ext_resource type="PackedScene" uid="uid://bqgf3p2n1en2o" path="res://Assets/Things/Pickups/Weapons/weapon_hmg.tscn" id="92_dbs5t"]
+[ext_resource type="PackedScene" uid="uid://vcyvwg4626pb" path="res://Assets/Things/Pickups/Weapons/weapon_chaingun.tscn" id="94_1nu6c"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/AdaptativeMusicManager.cs" id="95_viiyv"]
 [ext_resource type="AudioStream" uid="uid://by58bujxtsieb" path="res://Assets/Music/Tracks/Out/Ambient_1_Outro.ogg" id="96_e3wmk"]
 [ext_resource type="AudioStream" uid="uid://bbh1a7o5ma5ip" path="res://Assets/Music/Tracks/Main/Ambient_1.ogg" id="97_ff5rj"]
@@ -148,6 +149,7 @@
 [ext_resource type="PackedScene" uid="uid://ct0tajbntnq7m" path="res://Assets/Things/GamePlay/advertisement.tscn" id="110_ltt47"]
 [ext_resource type="PackedScene" uid="uid://vl5qwu3ral8w" path="res://Assets/Things/GamePlay/team/team_CTF_redspawn.tscn" id="111_1n03y"]
 [ext_resource type="AudioStream" uid="uid://kk5q33151ba3" path="res://Assets/Music/Blends/Wubs.ogg" id="111_2dxqd"]
+[ext_resource type="PackedScene" uid="uid://bfaf1kir22tjk" path="res://Assets/Things/GamePlay/func/func_plat.tscn" id="111_qylle"]
 [ext_resource type="AudioStream" uid="uid://ddb8765t61kdp" path="res://Assets/Music/Blends/Drum_Fill_Intro.ogg" id="112_ouf8h"]
 [ext_resource type="PackedScene" uid="uid://cwjemuupx2evp" path="res://Assets/Things/GamePlay/team/team_CTF_bluespawn.tscn" id="112_ow86p"]
 [ext_resource type="Texture2D" uid="uid://dalvcfjdcb8ku" path="res://Assets/Player/GUI/Crosshairs/Small/small_crosshair_01.png" id="128_50tgk"]
@@ -409,11 +411,11 @@ _decalsPrefabs = Array[PackedScene]([ExtResource("17_au5sd"), ExtResource("19_rm
 _ammoPrefabs = Array[PackedScene]([ExtResource("19_qacws"), ExtResource("21_gcmhg"), ExtResource("30_kksrp"), ExtResource("22_xc5q4"), ExtResource("20_88qir"), ExtResource("35_frbmv"), ExtResource("40_a7icm"), ExtResource("43_por0y"), ExtResource("71_san3o")])
 _debrisPrefabs = Array[PackedScene]([ExtResource("18_dkfmq"), ExtResource("19_flqi0"), ExtResource("59_rmbdm")])
 _gibsPrefabs = Array[PackedScene]([ExtResource("54_rkkly"), ExtResource("55_f0i75"), ExtResource("56_6f34d"), ExtResource("57_yotn7"), ExtResource("58_16pvy"), ExtResource("59_byap5"), ExtResource("60_a3qpk"), ExtResource("61_eaowh"), ExtResource("62_chqu0"), ExtResource("63_k1tst")])
-_weaponsPrefabs = Array[PackedScene]([ExtResource("84_hoa3p"), ExtResource("24_5ts3k"), ExtResource("25_5i6m0"), ExtResource("26_6gxqa"), ExtResource("37_ho6wf"), ExtResource("42_f3nx2"), ExtResource("48_k36jd"), ExtResource("53_qje8m"), ExtResource("92_dbs5t")])
+_weaponsPrefabs = Array[PackedScene]([ExtResource("84_hoa3p"), ExtResource("24_5ts3k"), ExtResource("25_5i6m0"), ExtResource("26_6gxqa"), ExtResource("37_ho6wf"), ExtResource("42_f3nx2"), ExtResource("48_k36jd"), ExtResource("53_qje8m"), ExtResource("92_dbs5t"), ExtResource("94_1nu6c")])
 _healthsPrefabs = Array[PackedScene]([ExtResource("27_5pqil"), ExtResource("28_dpe7f"), ExtResource("30_u4mvd"), ExtResource("31_g11tp")])
 _armorPrefabs = Array[PackedScene]([ExtResource("29_slqlw"), ExtResource("30_8nwr7"), ExtResource("32_pviff")])
 _powerUpsPrefabs = Array[PackedScene]([ExtResource("37_60yxr"), ExtResource("42_lo0q4"), ExtResource("43_0nxgr"), ExtResource("44_nb564")])
-_funcPrefabs = Array[PackedScene]([ExtResource("39_63dug"), ExtResource("38_2vxeb"), ExtResource("47_g2dqw"), ExtResource("40_xap66"), ExtResource("34_nkc1v"), ExtResource("76_lanxu")])
+_funcPrefabs = Array[PackedScene]([ExtResource("39_63dug"), ExtResource("38_2vxeb"), ExtResource("47_g2dqw"), ExtResource("40_xap66"), ExtResource("34_nkc1v"), ExtResource("76_lanxu"), ExtResource("111_qylle")])
 _infoPrefabs = Array[PackedScene]([ExtResource("46_6njgx"), ExtResource("33_epjyi"), ExtResource("44_er3mv"), ExtResource("74_1t76s"), ExtResource("110_ltt47"), ExtResource("111_1n03y"), ExtResource("112_ow86p")])
 _miscPrefabs = Array[PackedScene]([ExtResource("48_uv6co"), ExtResource("49_gicjp"), ExtResource("37_kkxgn")])
 _targetPrefabs = Array[PackedScene]([ExtResource("32_b20ey"), ExtResource("31_tr8jk"), ExtResource("49_mb0ac"), ExtResource("79_dvn2g"), ExtResource("80_bwsan"), ExtResource("88_nvs58")])
