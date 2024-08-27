@@ -38,13 +38,6 @@ public static class BezierMesh
 	private static List<Color> p2svertsLocalColor = new List<Color>();
 
 	private static List<Vector2> vertex2d = new List<Vector2>();
-	public enum Axis
-	{
-		None,
-		X,
-		Y,
-		Z
-	}
 	public static void ClearCaches()
 	{
 		vertsCache = new List<Vector3>();
@@ -316,92 +309,24 @@ public static class BezierMesh
 					vertsLocalCache.Add(BezCurve(f, p0sCache[2], p1sCache[2], p2sCache[2]));
 				}
 				Vector3 normal = Vector3.Zero;
-				Axis axis;
-				bool is3D = true;
-				Quaternion changeRotation = Quaternion.Identity;
-				if (!Mesher.CanForm3DConvexHull(vertsLocalCache, ref normal))
+				List<Vector3> vertsCleanLocalCache = Mesher.RemoveDuplicatedVectors(vertsLocalCache);
+				if (!Mesher.CanForm3DConvexHull(vertsCleanLocalCache, ref normal, 0.00015f))
 				{
 					if (normal.LengthSquared() == 0)
 					{
 						GameManager.Print("BezierColliderMesh: Cannot Form 2D/3D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time", GameManager.PrintType.Warning);
 						return;
 					}
-
-					if ((normal.X == 1) || (normal.X == -1))
-						axis = Axis.X;
-					else if ((normal.Y == 1) || (normal.Y == -1))
-						axis = Axis.Y;
-					else if ((normal.Z == 1) || (normal.Z == -1))
-						axis = Axis.Z;
-					else
-					{
-						float x = Mathf.Abs(normal.X), y = Mathf.Abs(normal.Y), z = Mathf.Abs(normal.Z);
-						Vector3 normalRef = Vector3.Zero;
-
-						if ((x >= y) && (x >= z))
-							axis = Axis.X;
-						else if ((y >= x) && (y >= z))
-							axis = Axis.Y;
-						else
-							axis = Axis.Z;
-
-						switch (axis)
-						{
-							case Axis.X:
-								if (normal.X > 0)
-									normalRef = Vector3.Right;
-								else
-									normalRef = Vector3.Left;
-								break;
-							case Axis.Y:
-								if (normal.Y > 0)
-									normalRef = Vector3.Up;
-								else
-									normalRef = Vector3.Down;
-								break;
-							case Axis.Z:
-								if (normal.Z > 0)
-									normalRef = Vector3.Back;
-								else
-									normalRef = Vector3.Forward;
-								break;
-						}
-						changeRotation.CalculateRotation(normal, normalRef);
-					}
-
-					//Check if it's a 2D Surface
-					vertex2d.Clear();
-					for (int k = 0; k < vertsLocalCache.Count; k++)
-					{
-						Vector3 vertex = changeRotation * vertsLocalCache[k];
-						switch (axis)
-						{ 
-							case Axis.X:
-								vertex2d.Add(new Vector2(vertex.Y, vertex.Z));
-								break;
-							case Axis.Y:
-								vertex2d.Add(new Vector2(vertex.X, vertex.Z));
-								break;
-							case Axis.Z:
-								vertex2d.Add(new Vector2(vertex.X, vertex.Y));
-								break;
-						}
-					}
-
-					if (!Mesher.CanForm2DConvexHull(vertex2d))
+					vertsCleanLocalCache = Mesher.GetExtrudedVerticesFromPoints(vertsCleanLocalCache, normal);
+					if (!Mesher.CanForm3DConvexHull(vertsCleanLocalCache, ref normal, Mathf.Epsilon))
 					{
 						GameManager.Print("BezierColliderMesh: Cannot Form 2D ConvexHull " + surfaceId + "_" + patchNumber + " this was a waste of time", GameManager.PrintType.Warning);
 						return;
 					}
-					else
-						is3D = false;
 				}
 
 				ConvexPolygonShape3D convexHull = new ConvexPolygonShape3D();
-				if (is3D)
-					convexHull.Points = Mesher.RemoveDuplicatedVectors(vertsLocalCache).ToArray();
-				else
-					convexHull.Points = Mesher.GetExtrudedVerticesFromPoints(vertsLocalCache.ToArray(), normal);
+				convexHull.Points = vertsCleanLocalCache.ToArray();
 				collider.ShapeOwnerAddShape(ownerShapeId, convexHull);
 			}
 		}

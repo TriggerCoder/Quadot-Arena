@@ -489,7 +489,7 @@ public static class Mesher
 		}
 
 		center /= vertsCache.Count;
-		CanForm3DConvexHull(vertsCache, ref normal);
+		CanForm3DConvexHull(vertsCache, ref normal, 0.00001f, false);
 
 		if (Mathf.IsZeroApprox(normal.Dot(Vector3.Up)))
 			changeRotation = Transform3D.Identity.LookingAt(normal, Vector3.Up).Basis.GetRotationQuaternion();
@@ -1700,11 +1700,9 @@ public static class Mesher
 		GameManager.Print("FOG: " + textureName + " Height " + Fog.Size.Y);
 	}
 
-	public static bool CanForm3DConvexHull(List<Vector3> points, ref Vector3 normal)
+	public static bool CanForm3DConvexHull(List<Vector3> points, ref Vector3 normal, float DISCARD_LIMIT = 0.00001f, bool retried = true)
 	{
-		const float DISCARD_LIMIT = 0.00015f;
 		int i;
-		bool retry = false;
 
 		// Calculate a normal vector
 		tryagain:
@@ -1727,9 +1725,9 @@ public static class Mesher
 		//Check if we got a normal
 		if (i == points.Count)
 		{
-			if (retry)
+			if (retried)
 				return false;
-			retry = true;
+			retried = true;
 			points = RemoveDuplicatedVectors(points);
 			goto tryagain;
 		}
@@ -1749,57 +1747,20 @@ public static class Mesher
 		return false;
 	}
 
-	public static bool CanForm2DConvexHull(List<Vector2> points)
+	public static List<Vector3> GetExtrudedVerticesFromPoints(List<Vector3> points, Vector3 normal)
 	{
-		const float EPSILON = 0.001f;
-
-		Vector2 min = points[0];
-		Vector2 max = points[0];
-
-		if (points.Count < 3)
-			return false;
-
-		for (int i = 1; i < points.Count; i++)
+		List<Vector3> vertices = new List<Vector3>(points.Count * 2);
+		float depth = 0.002f;
+		vertices.AddRange(points);
+		for (int i = 0; i < points.Count; i++)
 		{
-			Vector2 p = points[i];
-
-			if (p.X < min.X)
-				min.X = p.X;
-			else if (p.X > max.X)
-				max.X = p.X;
-
-			if (p.Y < min.Y)
-				min.Y = p.Y;
-			else if (p.Y > max.Y)
-				max.Y = p.Y;
-		}
-
-		float xWidth = Mathf.Abs(max.X - min.X);
-		float yWidth = Mathf.Abs(max.Y - min.Y);
-
-		if ((xWidth < EPSILON) && (yWidth < EPSILON))
-			return false;
-
-		return true;
-	}
-
-	public static Vector3[] GetExtrudedVerticesFromPoints(Vector3[] points, Vector3 normal)
-	{
-		Vector3[] vertices = new Vector3[points.Length * 2];
-		float depth = 0.0015f;
-
-		for (int i = 0; i < points.Length; i++)
-		{
-			vertices[i].X = points[i].X;
-			vertices[i].Y = points[i].Y;
-			vertices[i].Z = points[i].Z;
-			vertices[i + points.Length].X = points[i].X - depth * normal.X;
-			vertices[i + points.Length].Y = points[i].Y - depth * normal.Y;
-			vertices[i + points.Length].Z = points[i].Z + depth * normal.Z;
+			Vector3 vertice = new Vector3(points[i].X - depth * normal.X, points[i].Y - depth * normal.Y, points[i].Z + depth * normal.Z);
+			vertices.Add(vertice);
 		}
 
 		return vertices;
 	}
+
 	public static List<Vector3> RemoveDuplicatedVectors(List<Vector3> test)
 	{
 		List<Vector3> uniqueVector = new List<Vector3>();

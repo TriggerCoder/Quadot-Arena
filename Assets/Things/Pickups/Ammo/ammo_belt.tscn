@@ -1,0 +1,43 @@
+[gd_scene load_steps=6 format=3 uid="uid://b4qvk2ioxoc4c"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_8amg4"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_rpq4p"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_wst1m"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="4_rwpr6"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+radius = 0.7
+
+[node name="ammo_belt" type="Node3D" node_paths=PackedStringArray("itemPickup")]
+script = ExtResource("1_8amg4")
+respawnTime = 30.0
+thingType = 2
+itemPickup = NodePath("Item")
+
+[node name="NodeAnimation" type="Node3D" parent="."]
+script = ExtResource("2_rpq4p")
+rotEnable = true
+rotFPS = 40.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="ChainBelt" type="Node3D" parent="."]
+script = ExtResource("3_wst1m")
+modelName = "powerups/ammo/chaingunam"
+castShadows = true
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("4_rwpr6")
+thingController = NodePath("..")
+itemType = 19
+amount = 100
+PickupSound = "misc/am_pkup"
+PickupIcon = "icons/ammo_chaingun"
+PickupText = "Chaingun Belt"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

@@ -1,0 +1,44 @@
+[gd_scene load_steps=6 format=3 uid="uid://cwft7hduumnwy"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_4c30x"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_r2ksv"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_cl81r"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="4_3kjyn"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+radius = 0.7
+
+[node name="item_armor_jacket" type="Node3D" node_paths=PackedStringArray("itemPickup")]
+script = ExtResource("1_4c30x")
+respawnTime = 30.0
+thingType = 2
+itemPickup = NodePath("Item")
+
+[node name="NodeAnimation" type="Node3D" parent="."]
+script = ExtResource("2_r2ksv")
+rotEnable = true
+rotFPS = 20.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Jacket Armor" type="Node3D" parent="."]
+script = ExtResource("3_cl81r")
+modelName = "powerups/armor/armor_grn"
+castShadows = true
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("4_3kjyn")
+thingController = NodePath("..")
+itemType = 1
+amount = 25
+bonus = true
+PickupSound = "misc/ar2_pkup"
+PickupIcon = "icons/iconr_green"
+PickupText = "Jacket Armor"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

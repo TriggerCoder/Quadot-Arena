@@ -278,8 +278,13 @@ public partial class ThingsManager : Node
 
 			int angle = 0;
 			float fangle = 0;
-			if (entityData.TryGetNumValue("angle", out fangle))
-				angle = (int)fangle;
+			if (entityData.TryGetValue("angle", out strWord))
+			{
+				if (strWord.Contains(" "))
+					GameManager.Print("CLASSNAME: " + ClassName + " ANGLE IS VECTOR", GameManager.PrintType.Warning);
+				else if (entityData.TryGetNumValue("angle", out fangle))
+					angle = (int)fangle;
+			}
 
 			Vector3 origin = Vector3.Zero;
 			if (entityData.TryGetValue("origin", out strWord))
@@ -811,10 +816,14 @@ public partial class ThingsManager : Node
 					thingObject.GlobalPosition = entity.origin;
 					if (entity.entityData.TryGetValue("spawnflags", out strWord))
 					{
-						int spawnflags = int.Parse(strWord);
-						//Suspended
-						if ((spawnflags & 1) == 0)
-							thingsDroppedToFloor.Add(thingObject);
+						//check if 'suspended'
+						if (strWord[0] != 's')
+						{
+							int spawnflags = int.Parse(strWord);
+							//Suspended
+							if ((spawnflags & 1) == 0)
+								thingsDroppedToFloor.Add(thingObject);
+						}
 					}
 					else
 						thingsDroppedToFloor.Add(thingObject);
