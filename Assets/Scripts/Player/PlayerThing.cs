@@ -509,9 +509,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 				}
 				thingObject.itemName = currentItem;
 				thingObject.SetRespawnTime(-1);
-				int ammount;
-				if (itemQuantity.TryGetValue(currentItem, out ammount))
-					thingObject.itemPickup.amount = ammount;
+				if (itemQuantity.TryGetValue(currentItem, out int amount))
+					thingObject.itemPickup.amount = amount;
 
 				for (int j = 0; j < ThingsManager.uniqueGamePlayThings.Count; j++)
 				{

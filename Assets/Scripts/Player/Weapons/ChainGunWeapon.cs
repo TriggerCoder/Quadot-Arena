@@ -171,8 +171,7 @@ public partial class ChainGunWeapon : PlayerWeapon
 				}
 				else
 				{
-					SurfaceType st;
-					if (MapLoader.mapSurfaceTypes.TryGetValue(collider, out st))
+					if (MapLoader.mapSurfaceTypes.TryGetValue(collider, out SurfaceType st))
 					{
 						if (st.MetalSteps)
 							soundIndex = 8;

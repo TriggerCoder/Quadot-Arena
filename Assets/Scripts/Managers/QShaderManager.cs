@@ -365,8 +365,7 @@ public static class QShaderManager
 
 		if ((checkEditorImage) && (qShader.qShaderGlobal.editorImage.Length != 0))
 		{
-			QShaderData qeditorShader;
-			if (QShaders.TryGetValue(qShader.qShaderGlobal.editorImage, out qeditorShader))
+			if (QShaders.TryGetValue(qShader.qShaderGlobal.editorImage, out QShaderData qeditorShader))
 			{
 				if (qeditorShader.qShaderGlobal.trans)
 				{
@@ -381,8 +380,7 @@ public static class QShaderManager
 				if (multiPassList != null)
 					lastStage = multiPassList[lastStage-1] + 1;
 
-				int editorIndex;
-				if (TexIndex.TryGetValue(qShader.qShaderGlobal.editorImage, out editorIndex))
+				if (TexIndex.TryGetValue(qShader.qShaderGlobal.editorImage, out int editorIndex))
 				{
 					GSFragmentUvs += "\tvec2 uv_" + lastStage + " = UV;\n";
 					GSFragmentTexs += "\tvec4 Stage_" + lastStage + " = texture(" + "Tex_" + editorIndex + ", uv_" + lastStage + ");\n";
@@ -410,8 +408,7 @@ public static class QShaderManager
 					{
 						for (int j = 0; j < qShaderStage.map.Length; j++)
 						{
-							int texIndex;
-							if (TexIndex.TryGetValue(qShaderStage.map[j], out texIndex))
+							if (TexIndex.TryGetValue(qShaderStage.map[j], out int texIndex))
 								GSFragmentTexs += "\tvec4 Anim_" + i + "_" + j + " = texture(" + "Tex_" + texIndex + ", uv_" + i + ");\n";
 							else
 							{

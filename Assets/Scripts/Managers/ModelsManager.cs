@@ -35,8 +35,7 @@ public static class ModelsManager
 
 	public static ModelAnimationData GetAnimationData(string animation)
 	{
-		ModelAnimationData animationData;
-		if (AnimationData.TryGetValue(animation, out animationData))
+		if (AnimationData.TryGetValue(animation, out ModelAnimationData animationData))
 			return animationData;
 		return null;
 	}

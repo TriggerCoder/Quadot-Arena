@@ -320,8 +320,7 @@ public partial class ThingsManager : Node
 			if (targetThings.Any(s => s == ClassName))
 			{
 				found = true;
-				string target;
-				if (entityData.TryGetValue("targetname", out target))
+				if (entityData.TryGetValue("targetname", out string target))
 				{
 					List<Target> targetList = null;
 					if (targetsOnMap.TryGetValue(target, out targetList))
@@ -340,8 +339,7 @@ public partial class ThingsManager : Node
 			if (triggerThings.Any(s => s == ClassName))
 			{
 				found = true;
-				string target;
-				if (entityData.TryGetValue("target", out target))
+				if (entityData.TryGetValue("target", out string target))
 				{
 					if (ClassName == "func_timer") //Timers
 						timersOnMap.Add(target, entityData);
@@ -591,7 +589,6 @@ public partial class ThingsManager : Node
 					GameManager.Print("Skipping Area3D for " + entityData["classname"] + " as it's already targetted, targetName: " + strWord);
 					continue;
 				}
-
 
 				if (entityData.TryGetValue("model", out strWord))
 				{
@@ -850,8 +847,7 @@ public partial class ThingsManager : Node
 					else if (entity.entityData.TryGetNumValue("count", out num))
 						itemPickup.amount = (int)num;
 
-					string target;
-					if (entity.entityData.TryGetValue("targetname", out target))
+					if (entity.entityData.TryGetValue("targetname", out string target))
 					{
 						List<Target> targetList = null;
 						if (targetsOnMap.TryGetValue(target, out targetList))
@@ -1283,10 +1279,8 @@ public partial class ThingsManager : Node
 
 						elevator.Init(speed, height, lip, BigBox, model, dmg);
 
-						if (entity.entityData.TryGetValue("targetname", out strWord))
+						if (entity.entityData.TryGetValue("targetname", out string target))
 						{
-							string target = strWord;
-
 							TriggerController tc;
 							if (!triggerToActivate.TryGetValue(target, out tc))
 							{
@@ -1413,10 +1407,8 @@ public partial class ThingsManager : Node
 						}
 						door.Init(angle, hitpoints, speed, wait, lip, BigBox, dmg);
 
-						if (entity.entityData.TryGetValue("targetname", out strWord))
+						if (entity.entityData.TryGetValue("targetname", out string target))
 						{
-							string target = strWord;
-
 							TriggerController tc;
 							if (!triggerToActivate.TryGetValue(target, out tc))
 							{
@@ -1511,9 +1503,8 @@ public partial class ThingsManager : Node
 						string target;
 						if (!entity.entityData.TryGetValue("target", out target))
 							continue;
-						if (entity.entityData.TryGetValue("targetname", out strWord))
+						if (entity.entityData.TryGetValue("targetname", out string targetName))
 						{
-							string targetName = strWord;
 							TriggerController source, relay;
 							if (!triggerToActivate.TryGetValue(targetName, out source))
 							{
@@ -1542,9 +1533,8 @@ public partial class ThingsManager : Node
 						string target;
 						if (!entity.entityData.TryGetValue("target", out target))
 							continue;
-						if (entity.entityData.TryGetValue("targetname", out strWord))
+						if (entity.entityData.TryGetValue("targetname", out string targetName))
 						{
-							string targetName = strWord;
 							TriggerController tc;
 							if (!triggerToActivate.TryGetValue(targetName, out tc))
 							{
@@ -1573,9 +1563,8 @@ public partial class ThingsManager : Node
 					//Location
 					else if (entity.name == "target_location")
 					{
-						string message;
 						thingObject.GlobalPosition = entity.origin;
-						if (entity.entityData.TryGetValue("message", out message))
+						if (entity.entityData.TryGetValue("message", out string message))
 							thingObject.EditorDescription = message;
 						MapLoader.Locations.Add(thingObject);
 					}
@@ -1608,9 +1597,8 @@ public partial class ThingsManager : Node
 							{
 								if ((spawnflags & 8) != 0) //Activator Sound
 								{
-									if (entity.entityData.TryGetValue("targetname", out strWord))
+									if (entity.entityData.TryGetValue("targetname", out string target))
 									{
-										string target = strWord;
 										bool playerSound = false;
 
 										if (audioFile.Contains('*'))

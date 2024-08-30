@@ -61,6 +61,7 @@ public partial class PlayerControls : InterpolatedNode3D
 	private bool wishActivate = false;
 	private bool controllerIsGrounded = true;
 	private bool controllerWasGrounded = true;
+	private bool onLadder = false;
 	private float deathTime = 0;
 	private const float respawnDelay = 1.7f;
 
@@ -368,8 +369,7 @@ public partial class PlayerControls : InterpolatedNode3D
 					if (lastCollision != null)
 					{
 						CollisionObject3D collisionObject = (CollisionObject3D)lastCollision.GetCollider();
-						SurfaceType st;
-						if (MapLoader.mapSurfaceTypes.TryGetValue(collisionObject, out st))
+						if (MapLoader.mapSurfaceTypes.TryGetValue(collisionObject, out SurfaceType st))
 						{
 							if (playerThing.waterLever == 1)
 								currentFootStep = PlayerThing.FootStepType.Splash;
@@ -384,14 +384,31 @@ public partial class PlayerControls : InterpolatedNode3D
 
 							if (st.NoFallDamage)
 								applyFallDamage = false;
+							if (st.Ladder)
+								onLadder = true;
 						}
 
 					}
 				}
 
 			}
-			else
-				playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed, deltaTime);
+			else if (!onLadder)
+			{
+				KinematicCollision3D lastCollision = playerThing.GetLastSlideCollision();
+				if (lastCollision != null)
+				{
+					CollisionObject3D collisionObject = (CollisionObject3D)lastCollision.GetCollider();
+					if (MapLoader.mapSurfaceTypes.TryGetValue(collisionObject, out SurfaceType st))
+					{
+						if (st.Ladder)
+							onLadder = true;
+					}
+				}
+				if (onLadder)
+					playerThing.avatar.TurnLegs((int)currentMoveType, cMove.sidewaysSpeed, cMove.forwardSpeed, deltaTime);
+				else
+					playerThing.avatar.TurnLegsOnJump(cMove.sidewaysSpeed, deltaTime);
+			}
 		}
 
 		if ((GlobalPosition - lastGlobalPosition).LengthSquared() > .0001f)
@@ -501,7 +518,9 @@ public partial class PlayerControls : InterpolatedNode3D
 
         if (doGoundChecks)
         {
-			if (controllerIsGrounded)
+			if (onLadder)
+				LadderMove(deltaTime);
+			else if (controllerIsGrounded)
 			{
 				GroundMove(deltaTime);
 				if (!controllerWasGrounded)
@@ -576,6 +595,29 @@ public partial class PlayerControls : InterpolatedNode3D
 		playerThing.Velocity = (playerVelocity + jumpPadVel);
 		lastGlobalPosition = GlobalPosition;
 		playerThing.MoveAndSlide();
+		if (onLadder)
+		{
+			//Need to check if player is still on a ladder
+			int count = playerThing.GetSlideCollisionCount();
+			bool foundLadder = false;
+			for (int i = 0; i < count; i++)
+			{
+				KinematicCollision3D slideCollision = playerThing.GetSlideCollision(i);
+				if (slideCollision == null)
+					continue;
+
+				CollisionObject3D collisionObject = (CollisionObject3D)slideCollision.GetCollider();
+				if (MapLoader.mapSurfaceTypes.TryGetValue(collisionObject, out SurfaceType st))
+				{
+					if (st.Ladder)
+					{
+						foundLadder = true;
+						break;
+					}
+				}
+			}
+			onLadder = foundLadder;
+		}
 	}
 	private void SetMovementDir()
 	{
@@ -676,6 +718,32 @@ public partial class PlayerControls : InterpolatedNode3D
 			playerVelocity.Y -= 1f;
 	}
 
+	private void LadderMove(float deltaTime)
+	{
+		Vector3 wishdir;
+		float friction = 1.0f;
+
+		ApplyFriction(friction, deltaTime);
+
+		SetMovementDir();
+
+		wishdir = new Vector3(cMove.sidewaysSpeed, 0, cMove.forwardSpeed);
+		if (wishdir.LengthSquared() == 0)
+			wishdir.Y = 0;
+		else
+			wishdir.Y = -cMove.forwardSpeed * viewDirection.X / 90;
+		wishdir = playerInfo.Transform.Basis * wishdir;
+		float wishspeed;
+		wishdir = wishdir.GetLenghtAndNormalize(out wishspeed);
+		wishspeed *= moveSpeed;
+
+		//Check if Haste
+		if (playerInfo.haste)
+			wishspeed *= 1.3f;
+
+		Accelerate(wishdir, wishspeed, runAcceleration, deltaTime, runSpeed);
+		playerVelocity.Y = wishdir.Y * runSpeed;
+	}
 	private void GroundMove(float deltaTime)
 	{
 		Vector3 wishdir;

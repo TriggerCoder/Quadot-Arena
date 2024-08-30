@@ -199,8 +199,7 @@ public partial class MaterialManager : Node
 		if (lm_index >= 0 && Instance.applyLightmaps)
 			lmap = MapLoader.lightMaps[lm_index];
 
-		ShaderMaterial sourceMat;
-		if (Materials.TryGetValue(textureName, out sourceMat))
+		if (Materials.TryGetValue(textureName, out ShaderMaterial sourceMat))
 		{
 			if (hasPortal = IsPortalMaterial(textureName))
 			{
