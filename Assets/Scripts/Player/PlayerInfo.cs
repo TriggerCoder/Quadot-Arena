@@ -21,7 +21,7 @@ public partial class PlayerInfo : Node3D
 	//Weapons and Ammo
 	public int[] Ammo = new int[11] { 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; //bullets, shells, grenades, rockets, lightning, slugs, cells, bfgammo, nailammo, chainammo, proxammo
 	public bool[] Weapon = new bool[14] { true, true, false, false, false, false, false, false, false, false, false, false, false, false }; //gauntlet, machinegun, shotgun, grenade launcher, rocket launcher, lightning gun, railgun, plasma gun, bfg10k, grapple, nailgun, chaingun, proxmine, heavymachinegun
-	public int[] MaxAmmo = new int[11] { 200, 200, 200, 200, 200, 200, 200, 300, 200, 300, 200 };
+	public int[] MaxAmmo = new int[11] { 200, 200, 200, 200, 200, 200, 200, 300, 25, 300, 200 };
 	public int[] DefaultAmmo = new int[11] { 50, 10, 5, 5, 60, 10, 30, 100, 10, 100, 10 };
 	//Const Weapon Nums
 	public const int Gauntlet = 0;

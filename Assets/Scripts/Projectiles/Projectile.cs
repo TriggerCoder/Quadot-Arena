@@ -1,23 +1,16 @@
 using Godot;
-using System;
 using ExtensionMethods;
 
 public partial class Projectile : InterpolatedNode3D
 {
 	public Node3D owner;
 	[Export]
-	public ParticlesController fx;
-	[Export]
-	public string projectileName;
-	[Export]
-	public bool destroyAfterUse = true;
-	[Export]
 	public float _lifeTime = 1;
 	[Export]
 	public float speed = 4f;
 	[Export]
 	public int rotateSpeed = 0;
-	[Export] 
+	[Export]
 	public int damageMin = 3;
 	[Export]
 	public int damageMax = 24;
@@ -28,44 +21,28 @@ public partial class Projectile : InterpolatedNode3D
 	[Export]
 	public float explosionRadius = 2f;
 	[Export]
-	public DamageType damageType = DamageType.Generic;
-	[Export] 
 	public float pushForce = 0f;
-	[Export] 
+	[Export]
 	public string OnDeathSpawn;
-	[Export] 
+	[Export]
 	public string decalMark;
 	[Export]
 	public string secondaryMark;
 	[Export]
 	public string SecondaryOnDeathSpawn;
 	[Export]
-	public string _onFlySound;
+	public MultiAudioStream audioStream;
 	[Export]
 	public string _onDeathSound;
-	[Export]
-	public MultiAudioStream audioStream;
 
 	public uint ignoreSelfLayer = 0;
 
-	//Needed for homing projectires
-	public Node3D target = null;
-	const float capAngle = 16.875f;
-
-	public bool goingUp = false;
-
 	float time = 0f;
-	private Rid Sphere;
-	private PhysicsShapeQueryParameters3D SphereCast;
-	private PhysicsPointQueryParameters3D PointIntersect;
+	protected Rid Sphere;
+	protected PhysicsShapeQueryParameters3D SphereCast;
+	protected PhysicsPointQueryParameters3D PointIntersect;
 	public override void _Ready()
 	{
-		if (!string.IsNullOrEmpty(_onFlySound))
-		{
-			audioStream.Stream = SoundManager.LoadSound(_onFlySound, true);
-			audioStream.Play();
-		}
-
 		Sphere = PhysicsServer3D.SphereShapeCreate();
 		SphereCast = new PhysicsShapeQueryParameters3D();
 		SphereCast.ShapeRid = Sphere;
@@ -74,6 +51,8 @@ public partial class Projectile : InterpolatedNode3D
 		PointIntersect.CollideWithAreas = true;
 		PointIntersect.CollideWithBodies = false;
 		PointIntersect.CollisionMask = (1 << GameManager.FogLayer);
+
+		OnInit();
 	}
 	public void EnableQuad()
 	{
@@ -81,6 +60,7 @@ public partial class Projectile : InterpolatedNode3D
 		damageMax *= GameManager.Instance.QuadMul;
 		blastDamage *= GameManager.Instance.QuadMul;
 		pushForce *= GameManager.Instance.QuadMul * .5f;
+		OnEnableQuad();
 	}
 	public override void _PhysicsProcess(double delta)
 	{
@@ -93,9 +73,7 @@ public partial class Projectile : InterpolatedNode3D
 
 		if (time >= _lifeTime)
 		{
-			if (!string.IsNullOrEmpty(_onDeathSound))
-				SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(_onDeathSound));
-			QueueFree();
+			OnDestroy(GlobalPosition);
 			return;
 		}
 
@@ -125,26 +103,7 @@ public partial class Projectile : InterpolatedNode3D
 						Collision = (Vector3)hit["point"];
 						Normal = (Vector3)hit["normal"];
 						Hit = collider;
-
-						if ((damageType == DamageType.Rocket) || (damageType == DamageType.Grenade) || (damageType == DamageType.Plasma) || (damageType == DamageType.BFGBall))
-						{
-							Vector3 impulseDir = d.Normalized();
-
-							if (Hit is Damageable damageable)
-							{
-								switch (damageType)
-								{
-									case DamageType.BFGBall:
-										damageable.Impulse(impulseDir, pushForce);
-										damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
-										break;
-									default:
-										damageable.Impulse(impulseDir, pushForce);
-										damageable.Damage(GD.RandRange(damageMin, damageMax), damageType, owner);
-										break;
-								}
-							}
-						}
+						OnCollision(Collision, Normal, d, collider);
 					}
 				}
 			}
@@ -153,78 +112,8 @@ public partial class Projectile : InterpolatedNode3D
 		//explosion
 		if (Hit != null)
 		{
-			PhysicsServer3D.ShapeSetData(Sphere, explosionRadius);
-			SphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
-			SphereCast.Motion = Vector3.Zero;
-			SphereCast.Transform = new Transform3D(GlobalTransform.Basis, Collision);
-			var hits = SpaceState.IntersectShape(SphereCast);
-			var max = hits.Count;
-
-			for (int i = 0; i < max; i++)
-			{
-				var hit = hits[i];
-				
-				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
-				if (collider is Damageable damageable)
-				{
-					Vector3 collision = collider.GlobalPosition;
-					var RayCast = PhysicsRayQueryParameters3D.Create(GlobalPosition, collision, (1 << GameManager.ColliderLayer));
-					var check = SpaceState.IntersectRay(RayCast);
-					if (check.Count == 0)
-					{
-						Vector3 hPosition = collider.Position;
-						Vector3 Distance = (hPosition - Collision);
-						float lenght;
-						Vector3 impulseDir = Distance.GetLenghtAndNormalize(out lenght);
-
-						switch (damageType)
-						{
-							case DamageType.Explosion:
-							case DamageType.Rocket:
-								int damage = blastDamage;
-								//in order to enable rocket jump
-								if (collider == owner)
-									damage = Mathf.CeilToInt(damage / 3);
-								damageable.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, lenght / explosionRadius));
-								damageable.Damage(Mathf.CeilToInt(Mathf.Lerp(damage, 1, lenght / explosionRadius)), DamageType.Explosion, owner);
-								break;
-							case DamageType.Plasma:
-								if (collider == owner) //Plasma never does self damage
-									continue;
-								else
-									damageable.Damage(GD.RandRange(damageMin, damageMax), damageType, owner);
-								break;
-							case DamageType.BFGBall:
-								if (collider == owner) //BFG never does self damage
-									continue;
-								else
-									damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, damageType, owner);
-								break;
-							case DamageType.Telefrag:
-								damageable.Impulse(impulseDir, Mathf.Lerp(pushForce, 100, lenght / explosionRadius));
-								damageable.Damage(blastDamage, DamageType.Telefrag, owner);
-								break;
-							default:
-								damageable.Damage(GD.RandRange(damageMin, damageMax), damageType, owner);
-								break;
-						}
-					}
-				}
-			}
-
-			if (!string.IsNullOrEmpty(OnDeathSpawn))
-			{
-				Node3D DeathSpawn = (Node3D)ThingsManager.thingsPrefabs[OnDeathSpawn].Instantiate();
-				GameManager.Instance.TemporaryObjectsHolder.AddChild(DeathSpawn);
-				DeathSpawn.Position = Collision + d;
-				DeathSpawn.SetForward(-d);
-				DeathSpawn.Rotate(d, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
-				if (fx != null)
-				{
-					fx.Reparent(DeathSpawn);
-					fx.enableLifeTime = true;
-				}
-			}
+			OnExplosion(Collision, d, SpaceState);
+			OnExplosionFX(Collision, d);
 
 			//Check if collider can be marked
 			if (CheckIfCanMark(SpaceState, Hit, Collision))
@@ -247,38 +136,27 @@ public partial class Projectile : InterpolatedNode3D
 						SecondMark.referenceNode = Hit;
 				}
 			}
-			if (!string.IsNullOrEmpty(_onDeathSound))
-				SoundManager.Create3DSound(Collision, SoundManager.LoadSound(_onDeathSound));
-			QueueFree();
+
+			OnDestroy(Collision);
 			return;
 		}
-		/*
-		if (target != null)
-		{
-			Vector3 aimAt = (target.transform.position - cTransform.position).normalized;
-			float angle = Vector3.SignedAngle(aimAt, cTransform.forward, cTransform.up);
-			if (Mathf.Abs(angle) > capAngle)
-			{
-				Quaternion newRot;
-				if (angle > 0)
-					newRot = Quaternion.AngleAxis(capAngle, cTransform.up);
-				else
-					newRot = Quaternion.AngleAxis(-capAngle, cTransform.up);
-				aimAt = (newRot * cTransform.forward).normalized;
-			}
-			cTransform.forward = aimAt;
-		}
-
-		if (rotateSpeed != 0)
-			cTransform.RotateAround(cTransform.position, cTransform.forward, rotateSpeed * deltaTime);
-
-		if (goingUp)
-			cTransform.position = cTransform.position + cTransform.up * speed * deltaTime;
-		else
-		*/
+		OnPhysicsUpdate(deltaTime, SpaceState);
 		Position -= d * speed * deltaTime;
-
 	}
+
+	protected virtual void OnPhysicsUpdate(float deltaTime, PhysicsDirectSpaceState3D SpaceState) { }
+	protected virtual void OnInit() { }
+	protected virtual void OnEnableQuad() { }
+	protected virtual void OnCollision(Vector3 collision, Vector3 normal, Vector3 direction, CollisionObject3D collider) { }
+	protected virtual void OnExplosion(Vector3 collision, Vector3 direction, PhysicsDirectSpaceState3D SpaceState) { }
+	protected virtual void OnExplosionFX(Vector3 collision, Vector3 direction) { }
+	protected virtual void OnDestroy(Vector3 collision)
+	{
+		if (!string.IsNullOrEmpty(_onDeathSound))
+			SoundManager.Create3DSound(collision, SoundManager.LoadSound(_onDeathSound));
+		QueueFree();
+	}
+
 	public bool CheckIfCanMark(PhysicsDirectSpaceState3D SpaceState, CollisionObject3D collider, Vector3 collision)
 	{
 		if (collider is Damageable)

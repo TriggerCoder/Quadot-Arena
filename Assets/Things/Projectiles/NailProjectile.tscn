@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3 uid="uid://bwlq31t2rd807"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Nail.cs" id="1_uuky4"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_2v63n"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="3_6rojk"]
+[ext_resource type="PackedScene" uid="uid://dehfbnimk6l18" path="res://Assets/Things/FX/Particles/Trail.tscn" id="4_hhdh7"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="4_iyjow"]
+
+[node name="NailProjectile" type="Node3D" node_paths=PackedStringArray("audioStream")]
+script = ExtResource("1_uuky4")
+_hitSounds = PackedStringArray("weapons/nailgun/wnalimpd", "weapons/nailgun/wnalimpl", "weapons/nailgun/wnalimpm")
+_lifeTime = 3.0
+speed = 32.0
+rotateSpeed = 180
+damageMin = 10
+damageMax = 20
+OnDeathSpawn = "BulletHit"
+decalMark = "ShotMark"
+audioStream = NodePath("MultiAudioStream")
+
+[node name="SourceNail" type="Node3D" parent="."]
+
+[node name="MultiAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_2v63n")
+
+[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source", "interpolationReset")]
+script = ExtResource("3_6rojk")
+Source = NodePath("../SourceNail")
+interpolationReset = NodePath("..")
+
+[node name="Nail" type="Node3D" parent="InterpolatedTransform"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+script = ExtResource("4_iyjow")
+modelName = "weaphits/nail"
+castShadows = true
+
+[node name="TrailParticles" parent="InterpolatedTransform" instance=ExtResource("4_hhdh7")]

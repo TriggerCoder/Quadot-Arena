@@ -1,4 +1,4 @@
-[gd_scene load_steps=274 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=276 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
@@ -98,6 +98,7 @@
 [ext_resource type="PackedScene" uid="uid://dumbqwobmx7ko" path="res://Assets/Things/GamePlay/info/info_notnull.tscn" id="46_6njgx"]
 [ext_resource type="PackedScene" uid="uid://67c1cxd5hoar" path="res://Assets/Things/FX/BloodMarks/BloodMark2.tscn" id="46_h6uxe"]
 [ext_resource type="PackedScene" uid="uid://bwx6v47koleqb" path="res://Assets/Things/GamePlay/func/func_rotating.tscn" id="47_g2dqw"]
+[ext_resource type="PackedScene" uid="uid://bwlq31t2rd807" path="res://Assets/Things/Projectiles/NailProjectile.tscn" id="48_5arwe"]
 [ext_resource type="PackedScene" uid="uid://7pbrpwetygt8" path="res://Assets/Things/Pickups/Weapons/weapon_railgun.tscn" id="48_k36jd"]
 [ext_resource type="PackedScene" uid="uid://c2htilwd1kllr" path="res://Assets/Things/FX/BloodMarks/BloodMark3.tscn" id="48_o5g2n"]
 [ext_resource type="PackedScene" uid="uid://mp5ryxp1smn2" path="res://Assets/Things/GamePlay/misc/misc_portal_camera.tscn" id="48_uv6co"]
@@ -134,6 +135,7 @@
 [ext_resource type="PackedScene" uid="uid://vcyvwg4626pb" path="res://Assets/Things/Pickups/Weapons/weapon_chaingun.tscn" id="94_1nu6c"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/AdaptativeMusicManager.cs" id="95_viiyv"]
 [ext_resource type="AudioStream" uid="uid://by58bujxtsieb" path="res://Assets/Music/Tracks/Out/Ambient_1_Outro.ogg" id="96_e3wmk"]
+[ext_resource type="PackedScene" uid="uid://c7e2p6usofrq8" path="res://Assets/Things/Pickups/Weapons/weapon_nailgun.tscn" id="97_4yncb"]
 [ext_resource type="AudioStream" uid="uid://bbh1a7o5ma5ip" path="res://Assets/Music/Tracks/Main/Ambient_1.ogg" id="97_ff5rj"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/Data Resources/AdaptativeTrack.cs" id="98_5huls"]
 [ext_resource type="AudioStream" uid="uid://c040ju5yn4mep" path="res://Assets/Music/Tracks/Out/Ambient_2_Outro.ogg" id="99_bq65s"]
@@ -409,12 +411,12 @@ script = ExtResource("8_vpkit")
 [node name="ThingsManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("9_71i1l")
 _fxPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("13_l5hcy"), ExtResource("16_xhuyt"), ExtResource("18_nyem1"), ExtResource("20_l0jeh"), ExtResource("21_gxmhp"), ExtResource("22_i5gi6"), ExtResource("28_5ibyp"), ExtResource("38_hwtk2"), ExtResource("39_vtbss")])
-_projectilesPrefabs = Array[PackedScene]([ExtResource("12_6703q"), ExtResource("15_rsp03"), ExtResource("22_jphxe"), ExtResource("24_ua1m5"), ExtResource("25_44wy8"), ExtResource("27_5gm05")])
+_projectilesPrefabs = Array[PackedScene]([ExtResource("12_6703q"), ExtResource("15_rsp03"), ExtResource("22_jphxe"), ExtResource("24_ua1m5"), ExtResource("25_44wy8"), ExtResource("27_5gm05"), ExtResource("48_5arwe")])
 _decalsPrefabs = Array[PackedScene]([ExtResource("17_au5sd"), ExtResource("19_rmn3i"), ExtResource("18_occpy"), ExtResource("19_q0xlo"), ExtResource("24_5opha"), ExtResource("29_l1cqu"), ExtResource("32_kea4x"), ExtResource("43_xrsn8"), ExtResource("46_h6uxe"), ExtResource("48_o5g2n"), ExtResource("54_ylum8"), ExtResource("55_2cxke"), ExtResource("56_tyh37"), ExtResource("57_40726"), ExtResource("58_qsrid")])
 _ammoPrefabs = Array[PackedScene]([ExtResource("19_qacws"), ExtResource("21_gcmhg"), ExtResource("30_kksrp"), ExtResource("22_xc5q4"), ExtResource("20_88qir"), ExtResource("35_frbmv"), ExtResource("40_a7icm"), ExtResource("43_por0y"), ExtResource("71_b14fu"), ExtResource("71_qny55"), ExtResource("71_san3o")])
 _debrisPrefabs = Array[PackedScene]([ExtResource("18_dkfmq"), ExtResource("19_flqi0"), ExtResource("59_rmbdm")])
 _gibsPrefabs = Array[PackedScene]([ExtResource("54_rkkly"), ExtResource("55_f0i75"), ExtResource("56_6f34d"), ExtResource("57_yotn7"), ExtResource("58_16pvy"), ExtResource("59_byap5"), ExtResource("60_a3qpk"), ExtResource("61_eaowh"), ExtResource("62_chqu0"), ExtResource("63_k1tst")])
-_weaponsPrefabs = Array[PackedScene]([ExtResource("84_hoa3p"), ExtResource("24_5ts3k"), ExtResource("25_5i6m0"), ExtResource("26_6gxqa"), ExtResource("37_ho6wf"), ExtResource("42_f3nx2"), ExtResource("48_k36jd"), ExtResource("53_qje8m"), ExtResource("92_dbs5t"), ExtResource("94_1nu6c")])
+_weaponsPrefabs = Array[PackedScene]([ExtResource("84_hoa3p"), ExtResource("24_5ts3k"), ExtResource("25_5i6m0"), ExtResource("26_6gxqa"), ExtResource("37_ho6wf"), ExtResource("42_f3nx2"), ExtResource("48_k36jd"), ExtResource("53_qje8m"), ExtResource("92_dbs5t"), ExtResource("94_1nu6c"), ExtResource("97_4yncb")])
 _healthsPrefabs = Array[PackedScene]([ExtResource("27_5pqil"), ExtResource("28_dpe7f"), ExtResource("30_u4mvd"), ExtResource("31_g11tp")])
 _armorPrefabs = Array[PackedScene]([ExtResource("29_slqlw"), ExtResource("30_8nwr7"), ExtResource("32_pviff"), ExtResource("104_j7abp")])
 _powerUpsPrefabs = Array[PackedScene]([ExtResource("37_60yxr"), ExtResource("42_lo0q4"), ExtResource("43_0nxgr"), ExtResource("44_nb564")])

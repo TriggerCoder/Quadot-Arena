@@ -11,7 +11,6 @@ public partial class ShotgunWeapon : PlayerWeapon
 	public string onDeathSpawn = "BulletHit";
 	public string decalMark = "ShotMark";
 
-	public float vDispersion = .7f;
 	public float maxRange = 400f;
 	public float pushForce = 350;
 	protected override void OnUpdate(float deltaTime)

@@ -990,6 +990,11 @@ public partial class PlayerControls : InterpolatedNode3D
 					return false;
 				break;
 
+			case PlayerInfo.NailGun:
+				if (playerInfo.Ammo[PlayerInfo.nailAmmo] <= 0)
+					return false;
+				break;
+
 			case PlayerInfo.ChainGun:
 				if (playerInfo.Ammo[PlayerInfo.chainAmmo] <= 0)
 					return false;
@@ -1029,6 +1034,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (TrySwapWeapon(PlayerInfo.PlasmaGun)) return;
 		if (TrySwapWeapon(PlayerInfo.HeavyMachineGun)) return;
 		if (TrySwapWeapon(PlayerInfo.LightningGun)) return;
+		if (TrySwapWeapon(PlayerInfo.NailGun)) return;
 		if (TrySwapWeapon(PlayerInfo.Shotgun)) return;
 		if (TrySwapWeapon(PlayerInfo.MachineGun)) return;
 		if (TrySwapWeapon(PlayerInfo.Railgun)) return;
@@ -1046,11 +1052,11 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (TrySwapWeapon(PlayerInfo.LightningGun)) return;
 		if (TrySwapWeapon(PlayerInfo.RocketLauncher)) return;
 		if (TrySwapWeapon(PlayerInfo.GrenadeLauncher)) return;
+		if (TrySwapWeapon(PlayerInfo.NailGun)) return;
 		if (TrySwapWeapon(PlayerInfo.Shotgun)) return;
 		if (TrySwapWeapon(PlayerInfo.MachineGun)) return;
 		if (TrySwapWeapon(PlayerInfo.Gauntlet)) return;
 	}
-
 	public void CheckMouseWheelWeaponChange()
 	{
 		if (Input.IsActionJustPressed(playerInput.Action_WeaponSwitch_Up))
@@ -1079,7 +1085,14 @@ public partial class PlayerControls : InterpolatedNode3D
 					break;
 			}
 			if (!gotWeapon)
-				SwapToBestWeapon();
+			{
+				for (int NextWeapon = 13; NextWeapon >= 0; NextWeapon--)
+				{
+					gotWeapon = TrySwapWeapon(NextWeapon);
+					if (gotWeapon)
+						break;
+				}
+			}
 		}
 	}
 

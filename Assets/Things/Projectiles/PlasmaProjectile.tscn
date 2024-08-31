@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://c5tu2rku1v7om"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Projectile.cs" id="1_ikbab"]
+[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/PlasmaBall.cs" id="1_77jtm"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="3_85jl5"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/SpriteController.cs" id="4_8eear"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="4_nkpjw"]
@@ -14,8 +14,8 @@ destroyTimer = 0.0
 Modulate = Color(0, 0, 0, 1)
 
 [node name="PlasmaProjectile" type="Node3D" node_paths=PackedStringArray("audioStream")]
-script = ExtResource("1_ikbab")
-projectileName = "PlasmaProjectile"
+script = ExtResource("1_77jtm")
+_onFlySound = "weapons/plasma/lasfly"
 _lifeTime = 2.0
 speed = 60.0
 rotateSpeed = 720
@@ -23,13 +23,11 @@ damageMin = 14
 damageMax = 20
 blastDamage = 14
 explosionRadius = 0.2
-damageType = 3
 OnDeathSpawn = "PlasmaExplosion"
 decalMark = "PlasmaMark"
 secondaryMark = "BulletMark"
-_onFlySound = "weapons/plasma/lasfly"
-_onDeathSound = "weapons/plasma/plasmx1a"
 audioStream = NodePath("MultiAudioStream")
+_onDeathSound = "weapons/plasma/plasmx1a"
 
 [node name="SourcePlasma" type="Node3D" parent="."]
 

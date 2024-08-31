@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://dw2it7pnea5rd"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Projectile.cs" id="1_vfo3e"]
+[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/Rocket.cs" id="1_bnl31"]
 [ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_741w6"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_t21kj"]
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="3_ttljs"]
@@ -8,8 +8,9 @@
 [ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="5_rcwvo"]
 
 [node name="RocketProjectile" type="Node3D" node_paths=PackedStringArray("fx", "audioStream")]
-script = ExtResource("1_vfo3e")
+script = ExtResource("1_bnl31")
 fx = NodePath("InterpolatedTransform/SmokeParticles")
+_onFlySound = "weapons/rocket/rockfly"
 _lifeTime = 3.0
 speed = 28.0
 rotateSpeed = 180
@@ -17,13 +18,11 @@ damageMin = 84
 damageMax = 100
 blastDamage = 100
 explosionRadius = 4.0
-damageType = 1
 pushForce = 900.0
 OnDeathSpawn = "RocketExplosion"
 decalMark = "BurnMark"
-_onFlySound = "weapons/rocket/rockfly"
-_onDeathSound = "weapons/rocket/rocklx1a"
 audioStream = NodePath("MultiAudioStream")
+_onDeathSound = "weapons/rocket/rocklx1a"
 
 [node name="SourceRocket" type="Node3D" parent="."]
 

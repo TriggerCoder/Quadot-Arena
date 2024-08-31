@@ -212,7 +212,7 @@ healthLabel = NodePath("Health")
 armorLabel = NodePath("Armor")
 weaponLabel = NodePath("Weapon")
 ammoLabel = NodePath("Ammo")
-weaponIcon = [NodePath("WeaponsContainer/WeaponIcon_1"), NodePath("WeaponsContainer/WeaponIcon_2"), NodePath("WeaponsContainer/WeaponIcon_3"), NodePath("WeaponsContainer/WeaponIcon_4"), NodePath("WeaponsContainer/WeaponIcon_5"), NodePath("WeaponsContainer/WeaponIcon_6"), NodePath("WeaponsContainer/WeaponIcon_7"), NodePath("WeaponsContainer/WeaponIcon_8"), NodePath("WeaponsContainer/WeaponIcon_9"), NodePath("WeaponsContainer/WeaponIcon_10")]
+weaponIcon = [NodePath("WeaponsContainer/WeaponIcon_1"), NodePath("WeaponsContainer/WeaponIcon_2"), NodePath("WeaponsContainer/WeaponIcon_3"), NodePath("WeaponsContainer/WeaponIcon_4"), NodePath("WeaponsContainer/WeaponIcon_5"), NodePath("WeaponsContainer/WeaponIcon_6"), NodePath("WeaponsContainer/WeaponIcon_7"), NodePath("WeaponsContainer/WeaponIcon_8"), NodePath("WeaponsContainer/WeaponIcon_9"), NodePath("WeaponsContainer/WeaponIcon_10"), NodePath("WeaponsContainer/WeaponIcon_11"), NodePath("WeaponsContainer/WeaponIcon_12"), NodePath("WeaponsContainer/WeaponIcon_13"), NodePath("WeaponsContainer/WeaponIcon_14")]
 crossHair = NodePath("CrossHair")
 pickUpIcon = NodePath("PickUpIcon")
 pickUpText = NodePath("PickUpText")
@@ -291,6 +291,34 @@ no_depth_test = true
 
 [node name="WeaponIcon_10" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.15, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_11" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_12" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.85, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_13" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 0, -4)
+visible = false
+layers = 0
+double_sided = false
+no_depth_test = true
+
+[node name="WeaponIcon_14" type="Sprite3D" parent="ViewPortCamera/PlayerHUD/WeaponsContainer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.55, 0, -4)
 visible = false
 layers = 0
 double_sided = false

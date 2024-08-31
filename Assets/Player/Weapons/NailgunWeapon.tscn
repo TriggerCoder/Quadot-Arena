@@ -1,0 +1,46 @@
+[gd_scene load_steps=4 format=3 uid="uid://cu665s4tjooo2"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/NailgunWeapon.cs" id="1_8emae"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_wjcer"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="3_r6mto"]
+
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("audioStream", "models", "muzzleObject", "muzzleLight")]
+script = ExtResource("1_8emae")
+AttackProjectileName = "NailProjectile"
+Offset = Vector3(0.2, -0.25, 0)
+audioStream = NodePath("WeaponAudioStream")
+_sounds = PackedStringArray("weapons/nailgun/wnalfire", "weapons/noammo", "weapons/change")
+models = [NodePath("Nailgun"), NodePath("Nailgun/Muzzle")]
+muzzleObject = NodePath("Nailgun/Muzzle")
+fullAuto = false
+DamageMin = 8
+DamageMax = 12
+kickSpeed = 30.0
+_fireRate = 0.95
+muzzleLight = NodePath("OmniLight3D")
+
+[node name="Nailgun" type="Node3D" parent="."]
+script = ExtResource("2_wjcer")
+modelName = "weapons/nailgun/nailgun"
+useCommon = false
+isViewModel = true
+currentState = 0
+
+[node name="Muzzle" type="Node3D" parent="Nailgun"]
+script = ExtResource("2_wjcer")
+modelName = "weapons/nailgun/nailgun_flash"
+tagName = "tag_flash"
+useCommon = false
+isTransparent = true
+isViewModel = true
+currentState = 0
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+layers = 255
+light_color = Color(1, 0.686275, 0, 1)
+light_bake_mode = 0
+omni_shadow_mode = 0
+
+[node name="WeaponAudioStream" type="Node3D" parent="."]
+script = ExtResource("3_r6mto")
+Bus = "FXBus"

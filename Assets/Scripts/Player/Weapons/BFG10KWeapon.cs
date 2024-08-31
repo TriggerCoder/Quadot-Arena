@@ -77,7 +77,7 @@ public partial class BFG10KWeapon : PlayerWeapon
 				Transform3D global = playerInfo.playerCamera.GlobalTransform;
 				Vector3 d = global.ForwardVector();
 
-				BFGBall bfgBall = (BFGBall)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
+				Projectile bfgBall = (Projectile)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(bfgBall);
 				bfgBall.owner = playerInfo.playerThing;
 				if (hasQuad)

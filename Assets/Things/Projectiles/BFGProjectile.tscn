@@ -18,7 +18,7 @@ Modulate = Color(0, 0, 0, 1)
 script = ExtResource("1_enh3n")
 boltOrigin = [NodePath("BoltOrigin1"), NodePath("BoltOrigin2"), NodePath("BoltOrigin3"), NodePath("BoltOrigin4"), NodePath("BoltOrigin5"), NodePath("BoltOrigin6"), NodePath("BoltOrigin7"), NodePath("BoltOrigin8")]
 Bolt = ExtResource("5_8uuw7")
-projectileName = "BFGProjectile"
+_humSounds = PackedStringArray("weapons/rocket/rockfly", "weapons/lightning/lg_hum")
 _lifeTime = 3.0
 speed = 30.0
 rotateSpeed = 720
@@ -26,13 +26,11 @@ damageMin = 14
 damageMax = 20
 blastDamage = 14
 explosionRadius = 0.2
-damageType = 5
 OnDeathSpawn = "BFGExplosion"
 decalMark = "BFGMark"
 SecondaryOnDeathSpawn = "BFGTracerExplosion"
-_humSounds = PackedStringArray("weapons/rocket/rockfly", "weapons/lightning/lg_hum")
-_onDeathSound = "weapons/rocket/rocklx1a"
 audioStream = NodePath("MultiAudioStream")
+_onDeathSound = "weapons/rocket/rocklx1a"
 
 [node name="SourceBFG" type="Node3D" parent="."]
 

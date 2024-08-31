@@ -23,7 +23,8 @@ public partial class ItemPickup : Area3D
 		Flight,
 		Teleporter,
 		AmmoPack,
-		ChainBullets
+		ChainBullets,
+		Nails
 	}
 	[Export]
 	public ThingController thingController;
@@ -121,6 +122,14 @@ public partial class ItemPickup : Area3D
 					if (player.playerInfo.Ammo[PlayerInfo.bfgAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.bfgAmmo])
 						player.playerInfo.Ammo[PlayerInfo.bfgAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.bfgAmmo];
 					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.bfgAmmo], PlayerInfo.bfgAmmo);
+					disable = true;
+				}
+				if ((player.playerInfo.Weapon[PlayerInfo.NailGun]) && (player.playerInfo.Ammo[PlayerInfo.nailAmmo] < player.playerInfo.MaxAmmo[PlayerInfo.nailAmmo]))
+				{
+					player.playerInfo.Ammo[PlayerInfo.nailAmmo] += (player.playerInfo.DefaultAmmo[PlayerInfo.nailAmmo] * GameManager.Instance.PlayerAmmoReceive);
+					if (player.playerInfo.Ammo[PlayerInfo.nailAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.nailAmmo])
+						player.playerInfo.Ammo[PlayerInfo.nailAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.nailAmmo];
+					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.nailAmmo], PlayerInfo.nailAmmo);
 					disable = true;
 				}
 				if ((player.playerInfo.Weapon[PlayerInfo.ChainGun]) && (player.playerInfo.Ammo[PlayerInfo.chainAmmo] < player.playerInfo.MaxAmmo[PlayerInfo.chainAmmo]))
@@ -231,6 +240,18 @@ public partial class ItemPickup : Area3D
 				player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.chainAmmo], PlayerInfo.chainAmmo);
 				disable = true;
 				break;
+
+			case ItemType.Nails:
+				if (player.playerInfo.Ammo[PlayerInfo.nailAmmo] == player.playerInfo.MaxAmmo[PlayerInfo.nailAmmo])
+					break;
+
+				player.playerInfo.Ammo[PlayerInfo.nailAmmo] += (amount * GameManager.Instance.PlayerAmmoReceive);
+				if (player.playerInfo.Ammo[PlayerInfo.nailAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.nailAmmo])
+					player.playerInfo.Ammo[PlayerInfo.nailAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.nailAmmo];
+				player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.nailAmmo], PlayerInfo.nailAmmo);
+				disable = true;
+				break;
+
 			case ItemType.Health:
 				if (bonus)
 				{
