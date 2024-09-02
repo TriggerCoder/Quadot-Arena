@@ -60,9 +60,9 @@ public partial class ThingsManager : Node
 	public static Texture2D defaultCrosshair;
 	public static readonly string[] quadHogReplacement = { "item_haste", "item_regen", "item_flight", "item_invis", "item_enviro", "item_health_mega", "item_armor_body", "item_armor_combat" };
 
-	public static readonly string[] demoIgnoreItems = { "item_haste", "item_regen", "item_flight", "item_invis", "item_enviro", "weapon_grenadelauncher", "weapon_bfg", "ammo_grenades", "ammo_bfg", "weapon_hmg", "ammo_pack" };
-	public static readonly string[] retailIgnoreItems = { "weapon_chaingun", "weapon_hmg", "ammo_pack" };
-	public static readonly string[] teamArenaIgnoreItems = { "weapon_hmg", "ammo_pack" };
+	public static readonly string[] demoIgnoreItems = { "item_haste", "item_regen", "item_flight", "item_invis", "item_enviro", "weapon_grenadelauncher", "weapon_bfg", "ammo_grenades", "ammo_bfg", "weapon_nailgun", "ammo_nails","weapon_chaingun", "ammo_belt", "weapon_hmg", "ammo_hmg","ammo_pack" };
+	public static readonly string[] retailIgnoreItems = { "weapon_nailgun", "ammo_nails", "weapon_chaingun", "ammo_belt", "weapon_hmg", "ammo_hmg", "ammo_pack" };
+	public static readonly string[] teamArenaIgnoreItems = { "weapon_hmg", "ammo_hmg", "ammo_pack" };
 
 	public static readonly string[] gibsParts = { "GibSkull", "GibBrain", "GibAbdomen", "GibArm", "GibChest", "GibFist", "GibFoot", "GibForearm", "GibIntestine", "GibLeg", "GibLeg" };
 	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group", "info_null", "info_spectator_start", "info_firstplace", "info_secondplace", "info_thirdplace" };

@@ -8,8 +8,9 @@
 
 [node name="NailProjectile" type="Node3D" node_paths=PackedStringArray("audioStream")]
 script = ExtResource("1_uuky4")
+AttackProjectileName = "NailProjectile"
 _hitSounds = PackedStringArray("weapons/nailgun/wnalimpd", "weapons/nailgun/wnalimpl", "weapons/nailgun/wnalimpm")
-_lifeTime = 3.0
+_lifeTime = 5.0
 speed = 32.0
 rotateSpeed = 180
 damageMin = 10

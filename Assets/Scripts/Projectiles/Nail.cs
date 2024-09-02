@@ -4,8 +4,11 @@ using ExtensionMethods;
 public partial class Nail : Projectile
 {
 	[Export]
+	string AttackProjectileName = "";
+	[Export]
 	public string[] _hitSounds;
 	public AudioStream[] hitSounds;
+	public bool hasBounced = false;
 	protected override void OnInit()
 	{
 		hitSounds = new AudioStream[_hitSounds.Length];
@@ -36,6 +39,21 @@ public partial class Nail : Projectile
 					soundIndex = 2;
 				else if (st.Flesh)
 					soundIndex = 1;
+			}
+			//65% chance of bounce
+			if ((!hasBounced) && (GD.Randf() < 0.65f))
+			{
+				Vector3 Reflection = normal * 2 * direction.Dot(normal) - direction;
+				Nail nail = (Nail)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(nail);
+				nail.owner = owner;
+				nail.damageMin = damageMin;
+				nail.damageMax = damageMax;
+				nail.GlobalPosition = collision + Reflection * .1f;
+				nail.ignoreSelfLayer = ignoreSelfLayer;
+				nail.hasBounced = true;
+				nail.SetForward(Reflection);
+				nail.InvoqueSetTransformReset();
 			}
 		}
 		if (hitSounds.Length > soundIndex)
