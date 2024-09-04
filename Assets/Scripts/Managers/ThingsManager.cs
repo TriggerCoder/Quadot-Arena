@@ -67,7 +67,7 @@ public partial class ThingsManager : Node
 	public static readonly string[] gibsParts = { "GibSkull", "GibBrain", "GibAbdomen", "GibArm", "GibChest", "GibFist", "GibFoot", "GibForearm", "GibIntestine", "GibLeg", "GibLeg" };
 	public static readonly string[] ignoreThings = { "misc_model", "light", "func_group", "info_null", "info_spectator_start", "info_firstplace", "info_secondplace", "info_thirdplace" };
 	public static readonly string[] triggerThings = { "func_timer", "trigger_always", "trigger_multiple", "target_relay" , "target_delay", "target_give" };
-	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_relay", "target_delay", "target_give", "target_position", "target_location", "info_notnull", "misc_teleporter_dest" };
+	public static readonly string[] targetThings = { "func_timer", "trigger_multiple", "target_relay", "target_delay", "target_give", "target_position", "target_location", "info_notnull", "misc_teleporter_dest", "target_teleporter", "target_push" };
 	public static List<Portal> portalsOnMap = new List<Portal>();
 	public static readonly string ItemDrop = "ItemDrop";
 	public static readonly string Blood = "Blood";
@@ -334,6 +334,8 @@ public partial class ThingsManager : Node
 						targetsOnMap.Add(target, targetList);
 					}
 				}
+				if (ClassName == "target_push") //Not completly done
+					found = false;
 			}
 
 			if (triggerThings.Any(s => s == ClassName))
@@ -393,6 +395,7 @@ public partial class ThingsManager : Node
 		AddEntitiesToMap();
 		AddTimersToMap();
 		AddPortalsToMap();
+		SpawnerManager.CheckSpawnLocations();
 		//Map Creator didn't put an intermission point
 		if (GameManager.Instance.interMissionCamera == null)
 			CreateInterMission();
@@ -875,16 +878,16 @@ public partial class ThingsManager : Node
 					entity.entityData.TryGetNumValue("angle", out angle);
 
 					SpawnPosition spawnPosition = (SpawnPosition)thingObject;
-					//Deathmatch spawning  location
-					if (entity.name == "info_player_deathmatch")
-						spawnPosition.Init((int)angle, entity.entityData);
 					//Red Team spawning  location
-					else if(entity.name == "team_CTF_redspawn")
+					if(entity.name == "team_CTF_redspawn")
 						spawnPosition.Init((int)angle, entity.entityData, SpawnPosition.SpawnType.Red);
 					//Blue Team spawning  location
 					else if (entity.name == "team_CTF_bluespawn")
 						spawnPosition.Init((int)angle, entity.entityData, SpawnPosition.SpawnType.Blue);
-				}
+					//Deathmatch spawning  location
+					else
+						spawnPosition.Init((int)angle, entity.entityData);
+					}
 				break;
 				case ThingController.ThingType.Blocking:
 				{
@@ -1661,6 +1664,30 @@ public partial class ThingsManager : Node
 						}
 						else if (entity.entityData.ContainsKey("random"))
 							AddRandomTimeToSound(thingObject, entity.entityData, audioStream2D, audioStream, isAudio3d);
+					}
+					//Another Jumpad
+					else if (entity.name == "target_push")
+					{
+						if (entity.entityData.Count > 3)
+							GameManager.Print("This target_push is a potential relay", GameManager.PrintType.Warning);
+/*						string target;
+						List<Target> dest;
+						if (entity.entityData.TryGetValue("target", out target))
+						{
+							if (targetsOnMap.TryGetValue(target, out dest))
+							{
+								thingObject.GlobalPosition = entity.origin;
+								JumpPadThing jumpPad = new JumpPadThing();
+								thingObject.AddChild(jumpPad);
+								strWord = entity.entityData["model"];
+								int model = int.Parse(strWord.Trim('*'));
+								Vector3 destination = dest[0].destination;
+								Vector3 center = MapLoader.GenerateJumpPadCollider(jumpPad, model);
+								jumpPad.Init(destination, center);
+							}
+							break;
+						}
+*/
 					}
 				//Remove PowerUps
 /*

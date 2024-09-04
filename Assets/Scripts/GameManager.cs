@@ -711,7 +711,6 @@ public partial class GameManager : Node
 			MapLoader.GenerateSurfaces();
 			MapLoader.SetLightVolData();
 			ThingsManager.AddThingsToMap();
-			SpawnerManager.CheckSpawnLocations();
 		}
 		limitReach = LimitReach.None;
 		skipFrames = 5;

@@ -1764,6 +1764,7 @@ public static class Mesher
 	public static List<Vector3> RemoveDuplicatedVectors(List<Vector3> test)
 	{
 		List<Vector3> uniqueVector = new List<Vector3>();
+		Vector3 previousPoint = Vector3.Zero;
 		for (int i = 0; i < test.Count; i++)
 		{
 			bool isUnique = true;
@@ -1775,7 +1776,12 @@ public static class Mesher
 						isUnique = false;
 			}
 			if (isUnique)
+			{
+				if (uniqueVector.Count > 0)
+					uniqueVector = uniqueVector.OrderBy(n => (n - previousPoint).LengthSquared()).ToList();
 				uniqueVector.Add(new Vector3(RoundUp4Decimals(test[i].X), RoundUp4Decimals(test[i].Y), RoundUp4Decimals(test[i].Z)));
+				previousPoint = uniqueVector[uniqueVector.Count - 1];
+			}
 		}
 		return uniqueVector;
 	}

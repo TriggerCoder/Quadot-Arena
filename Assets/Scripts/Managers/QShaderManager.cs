@@ -93,7 +93,6 @@ public static class QShaderManager
 		bool skyMap = false;
 		bool depthWrite = false;
 		bool entityColor = false;
-		bool needLightMap = false;
 		bool checkEditorImage = true;
 		bool firstPass = true;
 
@@ -193,7 +192,11 @@ public static class QShaderManager
 							GSUniforms += " : repeat_enable;\n";
 
 						TexIndex.Add(qShaderStage.map[0], index);
-						textures.Add(qShaderStage.map[0]);
+						//Lightmap will be added outside of the shader creation
+						if (qShaderStage.isLightmap)
+							textures.Add("");
+						else
+							textures.Add(qShaderStage.map[0]);
 					}
 				}
 			}
@@ -617,10 +620,7 @@ public static class QShaderManager
 		shaderMaterial.Shader = shader;
 		for (int i = 0; i < textures.Count; i++)
 		{
-			//Lightmap will be added outside of the shader creation
-			if (textures[i].Contains("$LIGHTMAP"))
-				needLightMap = true;
-			else
+			if (textures[i].Length > 0)
 			{
 				//CubeMap Skybox will always be the first stage
 				if ((i == 0) && (skyMap))
@@ -649,12 +649,12 @@ public static class QShaderManager
 			shaderMaterial.NextPass = portalMaterial;
 		}
 
-		if (needLightMap)
+		if (lightmapStage >= 0)
 		{
 			//If Lightmap is needed but there is no lightmapIndex, then the material is broken
-			if (lm_index < 0)
+			if (lm_index == -1)
 			{
-				GameManager.Print("Requested Lightmap, but there is no lightmapIndex");
+				GameManager.Print("Requested Lightmap, but there is no lightmapIndex", GameManager.PrintType.Warning);
 				return MaterialManager.Instance.illegal;
 			}
 		}

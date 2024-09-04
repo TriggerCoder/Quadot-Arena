@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bcemumvn4bxcg"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/SpawnPosition.cs" id="1_3m6gm"]
+
+[node name="info_player_start" type="Node3D"]
+script = ExtResource("1_3m6gm")
+respawnSound = ""
+thingType = 8
