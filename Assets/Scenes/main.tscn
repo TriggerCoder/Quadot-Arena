@@ -1,4 +1,4 @@
-[gd_scene load_steps=279 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=280 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
@@ -124,6 +124,7 @@
 [ext_resource type="PackedScene" uid="uid://b4qvk2ioxoc4c" path="res://Assets/Things/Pickups/Ammo/ammo_belt.tscn" id="71_b14fu"]
 [ext_resource type="PackedScene" uid="uid://54aqp6rpprpf" path="res://Assets/Things/Pickups/Ammo/ammo_hmg.tscn" id="71_qny55"]
 [ext_resource type="PackedScene" uid="uid://nqpms0r2fvnm" path="res://Assets/Things/Pickups/Ammo/ammo_pack.tscn" id="71_san3o"]
+[ext_resource type="PackedScene" uid="uid://c5y186nuku7cy" path="res://Assets/Things/Pickups/Ammo/ammo_nails.tscn" id="72_0n01p"]
 [ext_resource type="PackedScene" uid="uid://bnes0v0ntwmmg" path="res://Assets/Things/GamePlay/info/info_player_intermission.tscn" id="74_1t76s"]
 [ext_resource type="PackedScene" uid="uid://nfj4ju6qkqdo" path="res://Assets/Things/GamePlay/func/func_bobbing.tscn" id="76_lanxu"]
 [ext_resource type="PackedScene" uid="uid://cwmpgottit0na" path="res://Assets/Things/GamePlay/target/target_relay.tscn" id="79_dvn2g"]
@@ -416,7 +417,7 @@ script = ExtResource("9_71i1l")
 _fxPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("13_l5hcy"), ExtResource("16_xhuyt"), ExtResource("18_nyem1"), ExtResource("20_l0jeh"), ExtResource("21_gxmhp"), ExtResource("22_i5gi6"), ExtResource("28_5ibyp"), ExtResource("38_hwtk2"), ExtResource("39_vtbss")])
 _projectilesPrefabs = Array[PackedScene]([ExtResource("12_6703q"), ExtResource("15_rsp03"), ExtResource("22_jphxe"), ExtResource("24_ua1m5"), ExtResource("25_44wy8"), ExtResource("27_5gm05"), ExtResource("48_5arwe")])
 _decalsPrefabs = Array[PackedScene]([ExtResource("17_au5sd"), ExtResource("19_rmn3i"), ExtResource("18_occpy"), ExtResource("19_q0xlo"), ExtResource("24_5opha"), ExtResource("29_l1cqu"), ExtResource("32_kea4x"), ExtResource("43_xrsn8"), ExtResource("46_h6uxe"), ExtResource("48_o5g2n"), ExtResource("54_ylum8"), ExtResource("55_2cxke"), ExtResource("56_tyh37"), ExtResource("57_40726"), ExtResource("58_qsrid")])
-_ammoPrefabs = Array[PackedScene]([ExtResource("19_qacws"), ExtResource("21_gcmhg"), ExtResource("30_kksrp"), ExtResource("22_xc5q4"), ExtResource("20_88qir"), ExtResource("35_frbmv"), ExtResource("40_a7icm"), ExtResource("43_por0y"), ExtResource("71_b14fu"), ExtResource("71_qny55"), ExtResource("71_san3o")])
+_ammoPrefabs = Array[PackedScene]([ExtResource("19_qacws"), ExtResource("21_gcmhg"), ExtResource("30_kksrp"), ExtResource("22_xc5q4"), ExtResource("20_88qir"), ExtResource("35_frbmv"), ExtResource("40_a7icm"), ExtResource("43_por0y"), ExtResource("72_0n01p"), ExtResource("71_b14fu"), ExtResource("71_qny55"), ExtResource("71_san3o")])
 _debrisPrefabs = Array[PackedScene]([ExtResource("18_dkfmq"), ExtResource("19_flqi0"), ExtResource("59_rmbdm")])
 _gibsPrefabs = Array[PackedScene]([ExtResource("54_rkkly"), ExtResource("55_f0i75"), ExtResource("56_6f34d"), ExtResource("57_yotn7"), ExtResource("58_16pvy"), ExtResource("59_byap5"), ExtResource("60_a3qpk"), ExtResource("61_eaowh"), ExtResource("62_chqu0"), ExtResource("63_k1tst")])
 _weaponsPrefabs = Array[PackedScene]([ExtResource("84_hoa3p"), ExtResource("24_5ts3k"), ExtResource("25_5i6m0"), ExtResource("26_6gxqa"), ExtResource("37_ho6wf"), ExtResource("42_f3nx2"), ExtResource("48_k36jd"), ExtResource("53_qje8m"), ExtResource("92_dbs5t"), ExtResource("94_1nu6c"), ExtResource("97_4yncb")])

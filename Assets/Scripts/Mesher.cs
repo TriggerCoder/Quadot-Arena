@@ -52,7 +52,7 @@ public static class Mesher
 		BezierMesh.ClearCaches();
 	}
 
-	public static void GenerateBezObject(int shaderId, int lmIndex, int indexId, Node3D holder, QSurface[] surfaces, bool addPVS = true)
+	public static void GenerateBezObject(int shaderId, int lmIndex, int indexId, Node3D holder, QSurface[] surfaces, bool addPVS = true, CollisionObject3D collider = null)
 	{
 		if (surfaces == null || surfaces.Length == 0)
 		{
@@ -86,15 +86,18 @@ public static class Mesher
 		if ((contentType.value & MaskPlayerSolid) == 0)
 			addCollider = false;
 
-		CollisionObject3D collider = null;
 		uint OwnerShapeId = 0;
 		if (addCollider)
 		{
-			collider = new StaticBody3D();
-			collider.InputRayPickable = false;
-			MapLoader.ColliderGroup.AddChild(collider);
-			collider.Name = "Bezier_" + indexId + "_collider";
-			MapLoader.mapContentTypes.Add(collider, contentType);
+			if (collider == null)
+			{
+				collider = new StaticBody3D();
+				collider.InputRayPickable = false;
+				MapLoader.ColliderGroup.AddChild(collider);
+				collider.Name = "Bezier_" + indexId + "_collider";
+			}
+			if (!MapLoader.mapContentTypes.ContainsKey(collider))
+				MapLoader.mapContentTypes.Add(collider, contentType);
 			OwnerShapeId = collider.CreateShapeOwner(holder);
 		}
 
@@ -118,7 +121,8 @@ public static class Mesher
 				MapLoader.noMarks.Add(collider);
 
 			collider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
-			MapLoader.mapSurfaceTypes.Add(collider, surfaceType);
+			if (!MapLoader.mapSurfaceTypes.ContainsKey(collider))
+				MapLoader.mapSurfaceTypes.Add(collider, surfaceType);
 		}
 
 		if (noDraw)
@@ -1449,7 +1453,8 @@ public static class Mesher
 			holder.AddChild(objCollider);
 		}
 
-		MapLoader.mapContentTypes.Add(objCollider, contentType);
+		if (!MapLoader.mapContentTypes.ContainsKey(objCollider))
+			MapLoader.mapContentTypes.Add(objCollider, contentType);
 
 		uint OwnerShapeId = objCollider.CreateShapeOwner(holder);
 		bool gotValidShapes = false;
@@ -1498,7 +1503,8 @@ public static class Mesher
 		if (isWater)
 			objCollider.CollisionMask |= (1 << GameManager.NoCollisionLayer);
 
-		MapLoader.mapSurfaceTypes.Add(objCollider, surfaceType);
+		if (!MapLoader.mapSurfaceTypes.ContainsKey(objCollider))
+			MapLoader.mapSurfaceTypes.Add(objCollider, surfaceType);
 
 		return (OwnerShapeId, true);
 	}

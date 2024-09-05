@@ -69,16 +69,13 @@ public static class ConvexHull2D
 		pointsOnConvexHull.Add(startPos);
 		Vector2 previousPoint = pointsOnConvexHull[0];
 		int counter = 0;
-
-		while (true)
+		for (;  counter < 100000; counter++)
 		{
 			List<Vector2> pointsToAddToTheHull = new List<Vector2>();
 			Vector2 nextPoint = points[GD.RandRange(0, points.Count - 1)];
 			if (previousPoint.Equals(pointsOnConvexHull[0]) && nextPoint.Equals(pointsOnConvexHull[0]))
-			{
-				counter += 1;
 				continue;
-			}
+			
 
 			pointsToAddToTheHull.Add(nextPoint);
 			for (int i = 0; i < points.Count; i++)
@@ -107,15 +104,13 @@ public static class ConvexHull2D
 				pointsOnConvexHull.RemoveAt(pointsOnConvexHull.Count - 1);
 				break;
 			}
-
-			if (counter > 100000)
-			{
-				GameManager.Print("Stuck in endless loop when generating convex hull with jarvis march", GameManager.PrintType.Warning);
-				return new List<Vector2>();
-			}
-
-			counter += 1;
 		}
+		if (counter == 100000)
+		{
+			GameManager.Print("Stuck in Endless Loop when generating 2d Convex Hull with Jarvis March", GameManager.PrintType.Warning);
+			return new List<Vector2>();
+		}
+
 		return pointsOnConvexHull;
 	}
 }

@@ -97,7 +97,7 @@ public partial class HeavyMachineGunWeapon : PlayerWeapon
 				CollisionObject3D collider = (CollisionObject3D)hit["collider"];
 				Vector3 collision = (Vector3)hit["position"];
 				Vector3 normal = (Vector3)hit["normal"];
-
+				bool hitFx = true;
 				if (collider is Damageable damageable)
 				{
 					if (hasQuad)
@@ -107,12 +107,13 @@ public partial class HeavyMachineGunWeapon : PlayerWeapon
 
 					if (damageable.Bleed)
 					{
+						hitFx = false;
 						Node3D Blood = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.Blood].Instantiate();
 						GameManager.Instance.TemporaryObjectsHolder.AddChild(Blood);
 						Blood.GlobalPosition = collision + (normal * .05f);
 					}
 				}
-				else
+				if (hitFx)
 				{
 					Node3D BulletHit = (Node3D)ThingsManager.thingsPrefabs[onDeathSpawn].Instantiate();
 					GameManager.Instance.TemporaryObjectsHolder.AddChild(BulletHit);

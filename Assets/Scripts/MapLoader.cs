@@ -518,7 +518,7 @@ public static void LerpColorOnRepeatedVertex()
 			}
 		}
 	}
-	public static void GenerateGeometricSurface(Node3D holder, int num)
+	public static void GenerateGeometricSurface(Node3D holder, CollisionObject3D collider, int num)
 	{
 		List<QSurface> staticGeometry = new List<QSurface>();
 		for (int i = 0; i < models[num].numSurfaces; i++)
@@ -557,7 +557,7 @@ public static void LerpColorOnRepeatedVertex()
 				switch (bigGroup.Key.type)
 				{
 					case QSurfaceType.Patch:
-						Mesher.GenerateBezObject(groupSurfaces[0].shaderId, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces, false);
+						Mesher.GenerateBezObject(groupSurfaces[0].shaderId, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces, false, collider);
 						break;
 					case QSurfaceType.Polygon:
 					case QSurfaceType.Mesh:

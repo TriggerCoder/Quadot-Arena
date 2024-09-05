@@ -153,7 +153,7 @@ public partial class ChainGunWeapon : PlayerWeapon
 				Vector3 collision = (Vector3)hit["position"];
 				Vector3 normal = (Vector3)hit["normal"];
 				int soundIndex = 6;
-
+				bool hitFx = true;
 				if (collider is Damageable damageable)
 				{
 					if (hasQuad)
@@ -163,13 +163,14 @@ public partial class ChainGunWeapon : PlayerWeapon
 
 					if (damageable.Bleed)
 					{
+						hitFx = false;
 						soundIndex = 7;
 						Node3D Blood = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.Blood].Instantiate();
 						GameManager.Instance.TemporaryObjectsHolder.AddChild(Blood);
 						Blood.GlobalPosition = collision + (normal * .05f);
 					}
 				}
-				else
+				if (hitFx)
 				{
 					if (MapLoader.mapSurfaceTypes.TryGetValue(collider, out SurfaceType st))
 					{

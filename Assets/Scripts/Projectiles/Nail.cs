@@ -18,20 +18,23 @@ public partial class Nail : Projectile
 	protected override void OnCollision(Vector3 collision, Vector3 normal, Vector3 direction, CollisionObject3D collider)
 	{
 		int soundIndex = 0;
+		bool hitFx = true;
 		if (collider is Damageable damageable)
 		{
 			Vector3 impulseDir = direction.Normalized();
 			damageable.Impulse(impulseDir, pushForce);
 			damageable.Damage(GD.RandRange(damageMin, damageMax), DamageType.Generic, owner);
+
 			if (damageable.Bleed)
 			{
+				hitFx = false;
 				soundIndex = 1; 
 				Node3D Blood = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.Blood].Instantiate();
 				GameManager.Instance.TemporaryObjectsHolder.AddChild(Blood);
 				Blood.GlobalPosition = collision + (normal * .05f);
 			}
 		}
-		else
+		if (hitFx)
 		{
 			if (MapLoader.mapSurfaceTypes.TryGetValue(collider, out SurfaceType st))
 			{

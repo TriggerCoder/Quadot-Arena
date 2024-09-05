@@ -897,7 +897,7 @@ public partial class ThingsManager : Node
 						if (entity.entityData.TryGetValue("model", out strWord))
 						{
 							int model = int.Parse(strWord.Trim('*'));
-							MapLoader.GenerateGeometricSurface(thingObject, model);
+							MapLoader.GenerateGeometricSurface(thingObject, null, model);
 							MapLoader.GenerateGeometricCollider(thingObject, null, model, 0, false);
 						}
 					}
@@ -907,7 +907,7 @@ public partial class ThingsManager : Node
 						if (entity.entityData.TryGetValue("model", out strWord))
 						{
 							int model = int.Parse(strWord.Trim('*'));
-							MapLoader.GenerateGeometricSurface(thingObject, model);
+							MapLoader.GenerateGeometricSurface(thingObject, null, model);
 							MapLoader.GenerateGeometricCollider(thingObject, null, model, 0, false);
 						}
 						else if (entity.entityData.TryGetValue("model2", out strWord))
@@ -947,7 +947,7 @@ public partial class ThingsManager : Node
 						{
 							if (model >= 0)
 							{
-								MapLoader.GenerateGeometricSurface(thingObject, model);
+								MapLoader.GenerateGeometricSurface(thingObject, null, model);
 								MapLoader.GenerateGeometricCollider(thingObject, null, model, 0, false);
 							}
 							else if (modelController != null)
@@ -986,7 +986,7 @@ public partial class ThingsManager : Node
 						bool isCrusher = false;
 						if (model >= 0)
 						{
-							MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
+							MapLoader.GenerateGeometricSurface(interpolatedTransform, platform, model);
 							uint OwnerShapeId = 0;
 							bool valid = false;
 
@@ -1147,7 +1147,7 @@ public partial class ThingsManager : Node
 						if (entity.entityData.TryGetValue("lip", out strWord))
 							lip = int.Parse(strWord);
 
-						MapLoader.GenerateGeometricSurface(sw, model);
+						MapLoader.GenerateGeometricSurface(sw, sw, model);
 						uint OwnerShapeId = 0;
 						bool valid = false;
 
@@ -1259,7 +1259,7 @@ public partial class ThingsManager : Node
 						Aabb BigBox = new Aabb();
 						if (model >= 0)
 						{
-							MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
+							MapLoader.GenerateGeometricSurface(interpolatedTransform, elevator, model);
 							uint OwnerShapeId = 0;
 							bool valid = false;
 
@@ -1384,7 +1384,7 @@ public partial class ThingsManager : Node
 						if (entity.entityData.TryGetValue("dmg", out strWord))
 							dmg = int.Parse(strWord);
 
-						MapLoader.GenerateGeometricSurface(interpolatedTransform, model);
+						MapLoader.GenerateGeometricSurface(interpolatedTransform, door, model);
 						uint OwnerShapeId = 0;
 						bool valid = false;
 

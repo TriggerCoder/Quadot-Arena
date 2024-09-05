@@ -1,0 +1,43 @@
+[gd_scene load_steps=6 format=3 uid="uid://c5y186nuku7cy"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_ehh2m"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_r8q73"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_6nmli"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="4_t3aiy"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+radius = 0.7
+
+[node name="ammo_nails" type="Node3D" node_paths=PackedStringArray("itemPickup")]
+script = ExtResource("1_ehh2m")
+respawnTime = 30.0
+thingType = 2
+itemPickup = NodePath("Item")
+
+[node name="NodeAnimation" type="Node3D" parent="."]
+script = ExtResource("2_r8q73")
+rotEnable = true
+rotFPS = 40.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Nails" type="Node3D" parent="."]
+script = ExtResource("3_6nmli")
+modelName = "powerups/ammo/nailgunam"
+castShadows = true
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("4_t3aiy")
+thingController = NodePath("..")
+itemType = 20
+amount = 10
+PickupSound = "misc/am_pkup"
+PickupIcon = "icons/ammo_nailgun"
+PickupText = "Nails"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

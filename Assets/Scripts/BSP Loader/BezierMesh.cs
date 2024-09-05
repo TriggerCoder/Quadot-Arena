@@ -350,23 +350,22 @@ public static class BezierMesh
 									normalRef = Vector3.Right;
 								else
 									normalRef = Vector3.Left;
-								break;
+							break;
 							case Axis.Y:
 								if (normal.Y > 0)
 									normalRef = Vector3.Up;
 								else
 									normalRef = Vector3.Down;
-								break;
+							break;
 							case Axis.Z:
 								if (normal.Z > 0)
 									normalRef = Vector3.Back;
 								else
 									normalRef = Vector3.Forward;
-								break;
+							break;
 						}
 						changeRotation.CalculateRotation(normal, normalRef);
 					}
-
 					//Check if it's a 2D Surface
 					float Offset = 0;
 					for (int k = 0; k < vertsCleanLocalCache.Count; k++)
@@ -377,15 +376,15 @@ public static class BezierMesh
 							case Axis.X:
 								vertex2d.Add(new Vector2(vertex.Y, vertex.Z));
 								Offset += vertex.X;
-								break;
+							break;
 							case Axis.Y:
 								vertex2d.Add(new Vector2(vertex.X, vertex.Z));
 								Offset += vertex.Y;
-								break;
+							break;
 							case Axis.Z:
 								vertex2d.Add(new Vector2(vertex.X, vertex.Y));
 								Offset += vertex.Z;
-								break;
+							break;
 						}
 					}
 					Offset /= vertsCleanLocalCache.Count;
@@ -399,24 +398,19 @@ public static class BezierMesh
 					vertsCleanLocalCache.Clear();
 					for (int k = 0; k < vertex2d.Count; k++)
 					{
-						Vector3 vertex3d = Vector3.Zero;
+						Vector3 vertex3d;
 						switch (axis)
 						{
+							default:
 							case Axis.X:
-								vertex3d.X = Offset;
-								vertex3d.Y = vertex2d[k].X;
-								vertex3d.Z = vertex2d[k].Y;
-								break;
+								vertex3d = new Vector3(Offset, vertex2d[k].X, vertex2d[k].Y);
+							break;
 							case Axis.Y:
-								vertex3d.X = vertex2d[k].X;
-								vertex3d.Y = Offset;
-								vertex3d.Z = vertex2d[k].Y;
-								break;
+								vertex3d = new Vector3(vertex2d[k].X, Offset, vertex2d[k].Y);
+							break;
 							case Axis.Z:
-								vertex3d.X = vertex2d[k].X;
-								vertex3d.Y = vertex2d[k].Y;
-								vertex3d.Z = Offset;
-								break;
+								vertex3d = new Vector3(vertex2d[k].X, vertex2d[k].Y, Offset);
+							break;
 						}
 						vertex3d = changeRotation * vertex3d;
 						vertsCleanLocalCache.Add(vertex3d);
