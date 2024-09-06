@@ -1065,7 +1065,7 @@ public static class QShaderManager
 		if (GenFunc == null)
 			return StageGen;
 
-		if (GenFunc.Length > 2)
+		if (GenFunc[0] == "WAVE")
 		{
 			string RGBFunc = GenFunc[1];
 			float offset = TryToParseFloat(GenFunc[2]);
@@ -1106,12 +1106,28 @@ public static class QShaderManager
 				if (type == GenFuncType.RGB)
 					StageGen = "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * vertx_color.rgb; \n";
 				else
-					StageGen = "\tStage_" + currentStage + ".a = vertx_color.a ; \n";
+					StageGen = "\tStage_" + currentStage + ".a = vertx_color.a; \n";
 			}
 			else if (Func == "ENTITY")
 			{
 				StageGen = "\tStage_" + currentStage + GenType + " = Stage_" + currentStage + GenType + " * modulate" + GenType + " ; \n";
 				entityColor = true;
+			}
+			if (Func == "CONST")
+			{
+				if (type == GenFuncType.RGB)
+				{
+					float r = TryToParseFloat(GenFunc[2]);
+					float g = TryToParseFloat(GenFunc[3]);
+					float b = TryToParseFloat(GenFunc[4]);
+					StageGen = "\tvec3 ColorGen_" + currentStage + " = vec3(" + r.ToString("0.00") + ", " + g.ToString("0.00") + ", " + b.ToString("0.00") + ");\n";
+					StageGen += "\tStage_" + currentStage + ".rgb = Stage_" + currentStage + ".rgb * ColorGen_" + currentStage + ";\n";
+				}
+				else
+				{
+					float a = TryToParseFloat(GenFunc[1]);
+					StageGen = "\tStage_" + currentStage + ".a = " + a.ToString("0.00") + "; \n";
+				}
 			}
 		}
 		return StageGen;

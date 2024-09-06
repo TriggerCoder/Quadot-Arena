@@ -52,7 +52,7 @@ public static class Mesher
 		BezierMesh.ClearCaches();
 	}
 
-	public static void GenerateBezObject(int shaderId, int lmIndex, int indexId, Node3D holder, QSurface[] surfaces, bool addPVS = true, CollisionObject3D collider = null)
+	public static void GenerateBezObject(int shaderId, int lmIndex, int indexId, Node3D holder, QSurface[] surfaces, bool addPVS = true, CollisionObject3D collider = null, uint OwnerShapeId = 0)
 	{
 		if (surfaces == null || surfaces.Length == 0)
 		{
@@ -86,7 +86,6 @@ public static class Mesher
 		if ((contentType.value & MaskPlayerSolid) == 0)
 			addCollider = false;
 
-		uint OwnerShapeId = 0;
 		if (addCollider)
 		{
 			if (collider == null)
@@ -95,10 +94,11 @@ public static class Mesher
 				collider.InputRayPickable = false;
 				MapLoader.ColliderGroup.AddChild(collider);
 				collider.Name = "Bezier_" + indexId + "_collider";
+				OwnerShapeId = collider.CreateShapeOwner(holder);
 			}
+
 			if (!MapLoader.mapContentTypes.ContainsKey(collider))
 				MapLoader.mapContentTypes.Add(collider, contentType);
-			OwnerShapeId = collider.CreateShapeOwner(holder);
 		}
 
 		int offset = 0;
@@ -1399,7 +1399,7 @@ public static class Mesher
 		return ragdoll;
 	}
 
-	public static (uint, bool) GenerateGroupBrushCollider(int indexId, Node3D holder, QBrush[] brushes, CollisionObject3D objCollider = null, uint extraContentFlag = 0)
+	public static (uint, CollisionObject3D) GenerateGroupBrushCollider(int indexId, Node3D holder, QBrush[] brushes, CollisionObject3D objCollider = null, uint extraContentFlag = 0)
 	{
 		WaterSurface waterSurface = null;
 		bool isWater = false;
@@ -1408,7 +1408,7 @@ public static class Mesher
 		if (((type & ContentFlags.Details) != 0) || ((type & ContentFlags.Structural) != 0))
 		{
 			GameManager.Print("brushes: " + indexId + " Not used for collisions, Content Type is: " + type, GameManager.PrintType.Info);
-			return (0 , false);
+			return (0 , null);
 		}
 
 		type |= extraContentFlag;
@@ -1419,13 +1419,13 @@ public static class Mesher
 			if ((type & ContentFlags.Translucent) == 0)
 			{
 				GameManager.Print("brushes: " + indexId + " state it's liquid however it is not Translucent, Content Type is: " + type);
-				return (0, false);
+				return (0, null);
 			}
 		}
 		else if ((type & MaskPlayerSolid) == 0)
 		{
 			GameManager.Print("brushes: " + indexId + " Is not solid, Content Type is: " + type);
-			return (0, false);
+			return (0, null);
 		}
 
 		ContentType contentType = new ContentType();
@@ -1451,6 +1451,21 @@ public static class Mesher
 				objCollider.Name = "Polygon_" + indexId + "_collider";
 
 			holder.AddChild(objCollider);
+		}
+		else if (isWater)
+		{
+			if (objCollider is WaterSurface)
+				waterSurface = (WaterSurface)objCollider;
+			else
+			{
+				waterSurface = new WaterSurface();
+				if ((type & ContentFlags.Lava) != 0)
+					waterSurface.damageable = WaterSurface.DamageableType.Lava;
+				else if ((type & ContentFlags.Slime) != 0)
+					waterSurface.damageable = WaterSurface.DamageableType.Slime;
+				objCollider.AddChild(waterSurface);
+				objCollider = waterSurface;
+			}
 		}
 
 		if (!MapLoader.mapContentTypes.ContainsKey(objCollider))
@@ -1478,7 +1493,7 @@ public static class Mesher
 
 		//No a single shape was valid
 		if (!gotValidShapes)
-			return (0, false);
+			return (0, null);
 
 		SurfaceType surfaceType = new SurfaceType();
 		surfaceType.Init(stype);
@@ -1506,7 +1521,7 @@ public static class Mesher
 		if (!MapLoader.mapSurfaceTypes.ContainsKey(objCollider))
 			MapLoader.mapSurfaceTypes.Add(objCollider, surfaceType);
 
-		return (OwnerShapeId, true);
+		return (OwnerShapeId, objCollider);
 	}
 
 	public static ConvexPolygonShape3D GenerateBrushCollider(QBrush brush)
@@ -1587,7 +1602,9 @@ public static class Mesher
 		CollisionShape3D mc = new CollisionShape3D();
 		mc.Name = "brushSide: " + brush.brushSide;
 		objCollider.AddChild(mc);
-		MapLoader.mapContentTypes.Add(objCollider, contentType);
+
+		if (!MapLoader.mapContentTypes.ContainsKey(objCollider))
+			MapLoader.mapContentTypes.Add(objCollider, contentType);
 
 		ConvexPolygonShape3D convexHull = new ConvexPolygonShape3D();
 		convexHull.Points = intersectPoint.ToArray();
@@ -1599,7 +1616,9 @@ public static class Mesher
 		type = MapLoader.mapTextures[brush.shaderId].surfaceFlags;
 		SurfaceType surfaceType = new SurfaceType();
 		surfaceType.Init(type);
-		MapLoader.mapSurfaceTypes.Add(objCollider, surfaceType);
+
+		if (!MapLoader.mapSurfaceTypes.ContainsKey(objCollider))
+			MapLoader.mapSurfaceTypes.Add(objCollider, surfaceType);
 
 //		if ((surfaceType.value & NoMarks) != 0)
 //			MapLoader.noMarks.Add(mc);

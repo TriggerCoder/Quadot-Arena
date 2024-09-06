@@ -518,7 +518,20 @@ public static void LerpColorOnRepeatedVertex()
 			}
 		}
 	}
+
+	public static void GenerateGeometricSurface(Node3D holder, int num)
+	{
+		GenerateGeometricSurface(holder, null, 0, num);
+	}
+
 	public static void GenerateGeometricSurface(Node3D holder, CollisionObject3D collider, int num)
+	{
+		uint OwnerShapeId = collider.CreateShapeOwner(holder);
+		GenerateGeometricSurface(holder, collider, OwnerShapeId, num);
+	}
+
+
+	public static void GenerateGeometricSurface(Node3D holder, CollisionObject3D collider, uint OwnerShapeId, int num)
 	{
 		List<QSurface> staticGeometry = new List<QSurface>();
 		for (int i = 0; i < models[num].numSurfaces; i++)
@@ -557,7 +570,7 @@ public static void LerpColorOnRepeatedVertex()
 				switch (bigGroup.Key.type)
 				{
 					case QSurfaceType.Patch:
-						Mesher.GenerateBezObject(groupSurfaces[0].shaderId, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces, false, collider);
+						Mesher.GenerateBezObject(groupSurfaces[0].shaderId, groupSurfaces[0].lightMapID, groupId, holder, groupSurfaces, false, collider, OwnerShapeId);
 						break;
 					case QSurfaceType.Polygon:
 					case QSurfaceType.Mesh:
@@ -576,7 +589,7 @@ public static void LerpColorOnRepeatedVertex()
 			}
 		}
 	}
-	public static (uint, bool) GenerateGeometricCollider(Node3D node, CollisionObject3D collider, int num, uint contentFlags = 0, bool isTrigger = true)
+	public static (uint, CollisionObject3D) GenerateGeometricCollider(Node3D node, CollisionObject3D collider, int num, uint contentFlags = 0, bool isTrigger = true)
 	{
 		List<QBrush> listBrushes = new List<QBrush>();
 
@@ -586,12 +599,12 @@ public static void LerpColorOnRepeatedVertex()
 		if (listBrushes.Count == 0)
 		{
 			GameManager.Print("GenerateGeometricCollider brushes: " + num + " is empty", GameManager.PrintType.Info);
-			return (0, false);
+			return (0, null);
 		}
 		uint OwnerShapeId = 0;
-		bool valid = false;
-		(OwnerShapeId, valid) = Mesher.GenerateGroupBrushCollider(num, node, listBrushes.ToArray(), collider, contentFlags);
-		return (OwnerShapeId, valid);
+		CollisionObject3D shapesOwner;
+		(OwnerShapeId, shapesOwner) = Mesher.GenerateGroupBrushCollider(num, node, listBrushes.ToArray(), collider, contentFlags);
+		return (OwnerShapeId, shapesOwner);
 	}
 
 	public static Vector3 GenerateJumpPadCollider(Area3D jumpPad, int num)
