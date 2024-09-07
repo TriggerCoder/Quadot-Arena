@@ -988,28 +988,40 @@ public partial class ThingsManager : Node
 						{
 							uint OwnerShapeId = 0;
 							CollisionObject3D shapesOwner = null;
-
+							int shapes = 0;
+							
 							(OwnerShapeId, shapesOwner) = MapLoader.GenerateGeometricCollider(thingObject, platform, model, 0, false);
-							if (shapesOwner != null)
+							if (shapesOwner == null)
 							{
-								MapLoader.GenerateGeometricSurface(interpolatedTransform, shapesOwner, OwnerShapeId, model);
-								int shapes = shapesOwner.ShapeOwnerGetShapeCount(OwnerShapeId);
-								Aabb BigBox = new Aabb();
-
-								for (int i = 0; i < shapes; i++)
+								shapesOwner = platform;
+								OwnerShapeId = MapLoader.GenerateGeometricSurface(interpolatedTransform, shapesOwner, model);
+								shapes = shapesOwner.ShapeOwnerGetShapeCount(OwnerShapeId);
+								if (shapes == 0)
 								{
-									Shape3D shape = shapesOwner.ShapeOwnerGetShape(OwnerShapeId, i);
-									Aabb box = shape.GetDebugMesh().GetAabb();
-									if (i == 0)
-										BigBox = new Aabb(box.Position, box.Size);
-									else
-										BigBox = BigBox.Merge(box);
+									GameManager.Print("Platform model: " + model + " is not solid, no collider was generated", GameManager.PrintType.Warning);
+//									thingObject.QueueFree();
+//									break;
 								}
-								center = BigBox.GetCenter();
-								isCrusher = true;
 							}
 							else
-								MapLoader.GenerateGeometricSurface(interpolatedTransform, platform, model);
+							{
+								MapLoader.GenerateGeometricSurface(interpolatedTransform, shapesOwner, OwnerShapeId, model);
+								shapes = shapesOwner.ShapeOwnerGetShapeCount(OwnerShapeId);
+							}
+							Aabb BigBox = new Aabb();
+
+							for (int i = 0; i < shapes; i++)
+							{
+								Shape3D shape = shapesOwner.ShapeOwnerGetShape(OwnerShapeId, i);
+								Aabb box = shape.GetDebugMesh().GetAabb();
+								if (i == 0)
+									BigBox = new Aabb(box.Position, box.Size);
+								else
+									BigBox = BigBox.Merge(box);
+							}
+							center = BigBox.GetCenter();
+							if (shapes > 0)
+								isCrusher = true;
 						}
 						platform.Init(direction, speed, phase, height, isCrusher, center, noise);
 					}
@@ -1157,17 +1169,26 @@ public partial class ThingsManager : Node
 
 						uint OwnerShapeId = 0;
 						CollisionObject3D shapesOwner = null;
-
+						int shapes = 0;
+							
 						(OwnerShapeId, shapesOwner) = MapLoader.GenerateGeometricCollider(thingObject, sw, model, ContentFlags.Solid, false);
 						if (shapesOwner == null)
 						{
-							GameManager.Print("Switch model: " + model + " is not valid, no collider was generated", GameManager.PrintType.Warning);
-							thingObject.QueueFree();
-							break;
+							shapesOwner = sw;
+							OwnerShapeId = MapLoader.GenerateGeometricSurface(sw, shapesOwner, model);
+							shapes = shapesOwner.ShapeOwnerGetShapeCount(OwnerShapeId);
+							if (shapes == 0)
+							{
+								GameManager.Print("Switch model: " + model + " is not valid, no collider was generated", GameManager.PrintType.Warning);
+								thingObject.QueueFree();
+								break;
+							}
 						}
 						else
+						{
 							MapLoader.GenerateGeometricSurface(sw, shapesOwner, OwnerShapeId, model);
-						int shapes = shapesOwner.ShapeOwnerGetShapeCount(OwnerShapeId);
+							shapes = shapesOwner.ShapeOwnerGetShapeCount(OwnerShapeId);
+						}
 						Aabb BigBox = new Aabb();
 						for (int i = 0; i < shapes; i++)
 						{
@@ -1269,25 +1290,36 @@ public partial class ThingsManager : Node
 						{
 							uint OwnerShapeId = 0;
 							CollisionObject3D shapesOwner = null;
+							int shapes = 0;
 
 							(OwnerShapeId, shapesOwner) = MapLoader.GenerateGeometricCollider(thingObject, elevator, model, 0, false);
-							if (shapesOwner != null)
+							if (shapesOwner == null)
 							{
-								MapLoader.GenerateGeometricSurface(interpolatedTransform, shapesOwner, OwnerShapeId, model);
-								int shapes = shapesOwner.ShapeOwnerGetShapeCount(OwnerShapeId);
-
-								for (int i = 0; i < shapes; i++)
+								shapesOwner = elevator;
+								OwnerShapeId = MapLoader.GenerateGeometricSurface(interpolatedTransform, shapesOwner, model);
+								shapes = shapesOwner.ShapeOwnerGetShapeCount(OwnerShapeId);
+								if (shapes == 0)
 								{
-									Shape3D shape = shapesOwner.ShapeOwnerGetShape(OwnerShapeId, i);
-									Aabb box = shape.GetDebugMesh().GetAabb();
-									if (i == 0)
-										BigBox = new Aabb(box.Position, box.Size);
-									else
-										BigBox = BigBox.Merge(box);
+									GameManager.Print("Elevator model: " + model + " is not solid, no collider was generated", GameManager.PrintType.Warning);
+//									thingObject.QueueFree();
+//									break;
 								}
 							}
 							else
-								MapLoader.GenerateGeometricSurface(interpolatedTransform, elevator, model);
+							{
+								MapLoader.GenerateGeometricSurface(interpolatedTransform, shapesOwner, OwnerShapeId, model);
+								shapes = shapesOwner.ShapeOwnerGetShapeCount(OwnerShapeId);
+							}
+
+							for (int i = 0; i < shapes; i++)
+							{
+								Shape3D shape = shapesOwner.ShapeOwnerGetShape(OwnerShapeId, i);
+								Aabb box = shape.GetDebugMesh().GetAabb();
+								if (i == 0)
+									BigBox = new Aabb(box.Position, box.Size);
+								else
+									BigBox = BigBox.Merge(box);
+							}
 						}
 
 						elevator.Init(speed, height, lip, BigBox, model, dmg);
@@ -1396,18 +1428,26 @@ public partial class ThingsManager : Node
 
 						uint OwnerShapeId = 0;
 						CollisionObject3D shapesOwner = null;
-
+						int shapes = 0;
+						
 						(OwnerShapeId, shapesOwner) = MapLoader.GenerateGeometricCollider(thingObject, door, model, ContentFlags.Solid, false);
 						if (shapesOwner == null)
 						{
-							GameManager.Print("Door model: " + model + " is not solid, no collider was generated", GameManager.PrintType.Warning);
-							thingObject.QueueFree();
-							break;
+							shapesOwner = door;
+							OwnerShapeId = MapLoader.GenerateGeometricSurface(interpolatedTransform, shapesOwner, model);
+							shapes = shapesOwner.ShapeOwnerGetShapeCount(OwnerShapeId);
+							if (shapes == 0)
+							{
+								GameManager.Print("Door model: " + model + " is not solid, no collider was generated", GameManager.PrintType.Warning);
+								thingObject.QueueFree();
+								break;
+							}
 						}
 						else
+						{
 							MapLoader.GenerateGeometricSurface(interpolatedTransform, shapesOwner, OwnerShapeId, model);
-						
-						int shapes = shapesOwner.ShapeOwnerGetShapeCount(OwnerShapeId);
+							shapes = shapesOwner.ShapeOwnerGetShapeCount(OwnerShapeId);
+						}
 						Aabb BigBox = new Aabb();
 
 						for (int i = 0; i < shapes; i++)

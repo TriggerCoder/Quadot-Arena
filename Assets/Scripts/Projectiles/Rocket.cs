@@ -41,9 +41,18 @@ public partial class Rocket : Projectile
 			if (collider is Damageable damageable)
 			{
 				Vector3 collision = collider.GlobalPosition;
-				var RayCast = PhysicsRayQueryParameters3D.Create(GlobalPosition, collision, (1 << GameManager.ColliderLayer));
-				var check = SpaceState.IntersectRay(RayCast);
-				if (check.Count == 0)
+				bool collide = false;
+				if ((collider.CollisionLayer & (1 << GameManager.ColliderLayer)) == 0)
+				{
+					var RayCast = PhysicsRayQueryParameters3D.Create(GlobalPosition, collision, (1 << GameManager.ColliderLayer));
+					var check = SpaceState.IntersectRay(RayCast);
+					if (check.Count == 0)
+						collide = true;
+				}
+				else
+					collide = true;
+
+				if (collide)
 				{
 					Vector3 hPosition = collider.Position;
 					Vector3 Distance = (hPosition - Collision);

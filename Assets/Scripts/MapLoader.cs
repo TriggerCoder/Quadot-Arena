@@ -524,10 +524,11 @@ public static void LerpColorOnRepeatedVertex()
 		GenerateGeometricSurface(holder, null, 0, num);
 	}
 
-	public static void GenerateGeometricSurface(Node3D holder, CollisionObject3D collider, int num)
+	public static uint GenerateGeometricSurface(Node3D holder, CollisionObject3D collider, int num)
 	{
 		uint OwnerShapeId = collider.CreateShapeOwner(holder);
 		GenerateGeometricSurface(holder, collider, OwnerShapeId, num);
+		return OwnerShapeId;
 	}
 
 

@@ -95,6 +95,9 @@ public partial class DoorController : AnimatableBody3D, Damageable, Crusher
 		SetAngle(angle);
 
 		hitpoints = hp;
+		if (!Dead)
+			CollisionLayer |= (1 << GameManager.DamageablesLayer);
+
 		speed = sp * GameManager.sizeDividor;
 		waitTime = wait;
 		lip = openlip * GameManager.sizeDividor;

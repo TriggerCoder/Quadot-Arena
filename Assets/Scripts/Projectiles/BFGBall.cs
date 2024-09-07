@@ -163,9 +163,18 @@ public partial class BFGBall : Projectile
 					continue;
 
 				Vector3 collision = collider.GlobalPosition;
-				var RayCast = PhysicsRayQueryParameters3D.Create(GlobalPosition, collision, (1 << GameManager.ColliderLayer));
-				var check = SpaceState.IntersectRay(RayCast);
-				if (check.Count == 0)
+				bool collide = false;
+				if ((collider.CollisionLayer & (1 << GameManager.ColliderLayer)) == 0)
+				{
+					var RayCast = PhysicsRayQueryParameters3D.Create(GlobalPosition, collision, (1 << GameManager.ColliderLayer));
+					var check = SpaceState.IntersectRay(RayCast);
+					if (check.Count == 0)
+						collide = true;
+				}
+				else
+					collide = true;
+
+				if (collide)
 					damageable.Damage(GD.RandRange(damageMin, damageMax) * 100, DamageType.BFGBall, owner);
 			}
 		}
