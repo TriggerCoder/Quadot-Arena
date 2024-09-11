@@ -61,7 +61,10 @@ public partial class PlayerHUD : MeshInstance3D
 
 	private uint currentLayer;
 
+	private int currentFx = 0;
 	private bool hasQuad = false;
+	private bool isRegenerating = false;
+	private bool hasBattleSuit = false;
 	private bool swapColors = false;
 	private bool faceAttack = false;
 
@@ -820,7 +823,29 @@ public partial class PlayerHUD : MeshInstance3D
 		if (hasQuad != playerInfo.quadDamage)
 		{
 			hasQuad = playerInfo.quadDamage;
-			GameManager.ChangeQuadFx(fxMeshes,hasQuad, true);
+			if (hasQuad)
+				currentFx |= GameManager.QuadFX;
+			else
+				currentFx &= ~GameManager.QuadFX;
+			GameManager.ChangeFx(fxMeshes, currentFx, true);
+		}
+		if (isRegenerating != playerInfo.regenerating)
+		{
+			isRegenerating = playerInfo.regenerating;
+			if (isRegenerating)
+				currentFx |= GameManager.RegenFX;
+			else
+				currentFx &= ~GameManager.RegenFX;
+			GameManager.ChangeFx(fxMeshes, currentFx, true);
+		}
+		if (hasBattleSuit != playerInfo.battleSuit)
+		{
+			hasBattleSuit = playerInfo.battleSuit;
+			if (hasBattleSuit)
+				currentFx |= GameManager.BattleSuitFX;
+			else
+				currentFx &= ~GameManager.BattleSuitFX;
+			GameManager.ChangeFx(fxMeshes, currentFx, true);
 		}
 
 		CheckNextHeadAnimation(deltaTime);

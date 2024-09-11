@@ -51,3 +51,15 @@ models/powerups/ammo/ammopack2
 		rgbGen lightingDiffuse
 	}
 }
+
+powerups/regenWeapon
+{
+	deformVertexes wave 100 sin 0.6 0 0 0
+	{
+		map textures/effects/regenmap2.tga
+		blendfunc GL_ONE GL_ONE
+		tcGen environment
+                tcmod rotate 30
+                tcmod scroll 1 .1
+	}
+}

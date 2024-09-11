@@ -56,6 +56,8 @@ public partial class PlayerInfo : Node3D
 	//PowerUps
 	public bool godMode = false;
 	public bool quadDamage = false;
+	public bool battleSuit = false;
+	public bool regenerating = false;
 	public bool haste = false;
 
 	public int MaxHealth = 100;
@@ -146,6 +148,7 @@ public partial class PlayerInfo : Node3D
 
 		godMode = false;
 		quadDamage = false;
+		battleSuit = false;
 		haste = false;
 
 		playerPostProcessing.ResetEffects();
@@ -162,6 +165,7 @@ public partial class PlayerInfo : Node3D
 		playerThing.hasteTime = 0;
 		playerThing.invisTime = 0;
 		playerThing.regenTime = 0;
+		playerThing.regenFXTime = 0;
 		playerThing.enviroSuitTime = 0;
 		playerThing.flightTime = 0;
 		playerThing.lastDamageTime = 0;

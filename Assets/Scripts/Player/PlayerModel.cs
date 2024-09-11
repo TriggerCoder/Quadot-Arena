@@ -165,7 +165,10 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 	protected OmniLight3D FxLight;
 
-	public bool hasQuad = false;
+	private bool hasQuad = false;
+	private bool isRegenerating = false;
+	private bool hasBattleSuit = false;
+	private int currentFx = 0;
 	public override void _Ready()
 	{
 		FxLight = new OmniLight3D();
@@ -430,8 +433,33 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		{
 			hasQuad = playerControls.playerInfo.quadDamage;
 			FxLight.Visible = hasQuad;
-			GameManager.ChangeQuadFx(fxMeshes, hasQuad);
+			if (hasQuad)
+				currentFx |= GameManager.QuadFX;
+			else
+				currentFx &= ~GameManager.QuadFX;
+			GameManager.ChangeFx(fxMeshes, currentFx);
 		}
+
+		if (isRegenerating != playerControls.playerInfo.regenerating)
+		{
+			isRegenerating = playerControls.playerInfo.regenerating;
+			if (isRegenerating)
+				currentFx |= GameManager.RegenFX;
+			else
+				currentFx &= ~GameManager.RegenFX;
+			GameManager.ChangeFx(fxMeshes, currentFx);
+		}
+
+		if (hasBattleSuit != playerControls.playerInfo.battleSuit)
+		{
+			hasBattleSuit = playerControls.playerInfo.battleSuit;
+			if (hasBattleSuit)
+				currentFx |= GameManager.BattleSuitFX;
+			else
+				currentFx &= ~GameManager.BattleSuitFX;
+			GameManager.ChangeFx(fxMeshes, currentFx);
+		}
+		
 	}
 
 	public void ForceChangeView(Quaternion dir)
@@ -648,8 +676,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		upperAnimation = deathNum;
 		lowerAnimation = deathNum;
 
+		currentFx = 0;
 		FxLight.Visible = false;
-		GameManager.ChangeQuadFx(fxMeshes, false);
+		GameManager.ChangeFx(fxMeshes, currentFx);
 
 		ownerDead = true;
 		createRagdollColliders = true;
@@ -680,8 +709,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			QueueFree();
 		else
 		{
+			currentFx = 0;
 			FxLight.Visible = false;
-			GameManager.ChangeQuadFx(fxMeshes, false);
+			GameManager.ChangeFx(fxMeshes, currentFx);
 			playerControls.playerThing.avatar = null;
 			playerControls.playerThing.interpolatedTransform.QueueFree();
 			playerControls.playerThing.interpolatedTransform = null;
@@ -896,7 +926,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		upperAnimation = UpperAnimation.Raise;
 
 		if (hasQuad)
-			GameManager.ChangeQuadFx(fxMeshes, true);
+			GameManager.ChangeFx(fxMeshes, currentFx);
 	}
 
 	public void UnloadWeapon()

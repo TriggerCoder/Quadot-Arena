@@ -28,6 +28,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public static string drowningSound = "player/gurp";
 	public static string wearOffSound = "items/wearoff";
 	public static string regenSound = "items/regen";
+	public static string protectSound = "items/protect3";
 
 	private static readonly string[] normalStep = { "player/footsteps/step1", "player/footsteps/step2", "player/footsteps/step3", "player/footsteps/step4" };
 	private static readonly string[] clankStep = { "player/footsteps/clank1", "player/footsteps/clank2", "player/footsteps/clank3", "player/footsteps/clank4" };
@@ -75,6 +76,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public float hasteTime = 0f;
 	public float invisTime = 0f;
 	public float regenTime = 0f;
+	public float regenFXTime = 0f;
 	public float enviroSuitTime = 0f;
 	public float flightTime = 0f;
 
@@ -90,7 +92,6 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public bool underWater = false;
 	public WaterSurface.DamageableType inDamageable = WaterSurface.DamageableType.None;
 	public bool finished = false;
-	public bool invul = false;
 
 	public Node3D lastAttacker = null;
 	public bool ready { get { return currentState == GameManager.FuncState.Start; } }
@@ -257,14 +258,37 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			SpawnerManager.SpawnToLocation(this);
 		}
 
-
 		if (Dead)
 			return;
 
 		if ((damageType != DamageType.Environment) && (damageType != DamageType.Crusher) && (damageType != DamageType.Telefrag) && (damageType != DamageType.Trigger))
 			amount = Mathf.RoundToInt(amount * handicap * GameManager.Instance.PlayerDamageReceive);
 
-		if ((invul) || (playerInfo.godMode))
+		if (playerInfo.battleSuit)
+		{
+			if (damageType == DamageType.Environment)
+				amount = 0;
+			else if ((damageType != DamageType.Crusher) && (damageType != DamageType.Telefrag) && (damageType != DamageType.Trigger))
+			{
+				if (damageType == DamageType.Explosion)
+					amount = 0;
+				else if (damageType == DamageType.Land)
+				{
+					amount = 0;
+					PlayModelSound("pain100_1");
+				}
+				else if (damageType == DamageType.Fall)
+				{
+					amount = 0;
+					PlayModelSound("fall1");
+				}
+				else
+					amount = (amount >> 2);
+				SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(protectSound));
+			}
+		}
+
+		if (playerInfo.godMode)
 		{
 			if ((damageType != DamageType.Crusher) && (damageType != DamageType.Telefrag) && (damageType != DamageType.Trigger))
 				amount = 0;
@@ -621,6 +645,8 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 					hitpoints += 5;
 					if (hitpoints > playerInfo.MaxBonusHealth)
 						hitpoints = playerInfo.MaxBonusHealth;
+					regenFXTime = 0.5f;
+					playerInfo.regenerating = true;
 					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(regenSound));
 				}
 				playerInfo.playerPostProcessing.playerHUD.UpdateHealth(hitpoints);
@@ -633,6 +659,34 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			regenTime = 0;
 			playerInfo.haste = false;
 			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Regen);
+		}
+
+		if (regenFXTime > 0f)
+		{
+			regenFXTime -= deltaTime;
+		}
+		else if(regenFXTime < 0f)
+		{
+			regenFXTime = 0;
+			playerInfo.regenerating = false;
+		}
+
+		//Battle Suit
+		if (enviroSuitTime > 0f)
+		{
+			if (newTick)
+			{
+				if (enviroSuitTime < 4f)
+					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
+				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.EnviroSuit, Mathf.FloorToInt(enviroSuitTime));
+			}
+			enviroSuitTime -= deltaTime;
+		}
+		else if (enviroSuitTime < 0f)
+		{
+			enviroSuitTime = 0;
+			playerInfo.battleSuit = false;
+			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.EnviroSuit);
 		}
 
 		if (inDamageable != WaterSurface.DamageableType.None)

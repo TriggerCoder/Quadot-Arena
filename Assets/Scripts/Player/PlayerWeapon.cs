@@ -89,7 +89,9 @@ public partial class PlayerWeapon : Node3D
 	public string quadSound = "items/damage3";
 	public List<MeshInstance3D> fxMeshes;
 	public bool hasQuad = false;
-
+	public bool isRegenerating = false;
+	public bool hasBattleSuit = false;
+	private int currentFx = 0;
 	public override void _Ready()
 	{
 		Sounds = new AudioStream[_sounds.Length];
@@ -199,7 +201,29 @@ public partial class PlayerWeapon : Node3D
 		if (hasQuad != playerInfo.quadDamage) 
 		{
 			hasQuad = playerInfo.quadDamage;
-			GameManager.ChangeQuadFx(fxMeshes,hasQuad,true);
+			if (hasQuad)
+				currentFx |= GameManager.QuadFX;
+			else
+				currentFx &= ~GameManager.QuadFX;
+			GameManager.ChangeFx(fxMeshes, currentFx, true);
+		}
+		if (isRegenerating != playerInfo.regenerating)
+		{
+			isRegenerating = playerInfo.regenerating;
+			if (isRegenerating)
+				currentFx |= GameManager.RegenFX;
+			else
+				currentFx &= ~GameManager.RegenFX;
+			GameManager.ChangeFx(fxMeshes, currentFx, true);
+		}
+		if (hasBattleSuit != playerInfo.battleSuit)
+		{
+			hasBattleSuit = playerInfo.battleSuit;
+			if (hasBattleSuit)
+				currentFx |= GameManager.BattleSuitFX;
+			else
+				currentFx &= ~GameManager.BattleSuitFX;
+			GameManager.ChangeFx(fxMeshes, currentFx, true);
 		}
 
 		float deltaTime = (float)delta;

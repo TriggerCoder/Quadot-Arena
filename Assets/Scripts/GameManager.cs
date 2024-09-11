@@ -118,6 +118,14 @@ public partial class GameManager : Node
 	public const int InvisibleMask = 0;
 	public const uint AllPlayerViewMask = ((1 << Player1ViewLayer) | (1 << Player2ViewLayer) | (1 << Player3ViewLayer) | (1 << Player4ViewLayer) | (1 << Player5ViewLayer) | (1 << Player6ViewLayer) | (1 << Player7ViewLayer) | (1 << Player8ViewLayer));
 
+	//FX Mask
+	public const short QuadFX = 1;
+	public const short BattleSuitFX = 2;
+	public const short BattleSuitAndQuadFX = 3;
+	public const short RegenFX = 4;
+	public const short InvisFX = 8;
+
+
 	//SplitScreen Players
 	public const int MaxLocalPlayers = 8;
 
@@ -1085,18 +1093,57 @@ public partial class GameManager : Node
 		}
 		return fxMeshes;
 	}
-	public static void ChangeQuadFx(List<MeshInstance3D> fxMeshes, bool enable, bool viewModel = false)
+	public static void ChangeFx(List<MeshInstance3D> fxMeshes, int currentFx, bool viewModel = false)
 	{
 		for (int i = 0; i < fxMeshes.Count; i++)
 		{
 			MeshInstance3D mesh = fxMeshes[i];
-			if (enable)
+			if (currentFx != 0)
 			{
-				if (viewModel)
-					mesh.SetSurfaceOverrideMaterial(0, MaterialManager.quadWeaponFxMaterial);
-				else
-					mesh.SetSurfaceOverrideMaterial(0, MaterialManager.quadFxMaterial);
 				mesh.Visible = true;
+				mesh.MaterialOverlay = null;
+				if ((currentFx & InvisFX) != 0)
+				{
+
+					return;
+				}
+				
+				if ((currentFx & BattleSuitAndQuadFX) == BattleSuitAndQuadFX)
+				{
+					if (viewModel)
+						mesh.SetSurfaceOverrideMaterial(0, MaterialManager.battleSuitAndQuadWeaponFxMaterial);
+					else
+						mesh.SetSurfaceOverrideMaterial(0, MaterialManager.battleSuitAndQuadFxMaterial);
+				}
+				else if ((currentFx & BattleSuitFX) != 0)
+				{					
+					if (viewModel)
+						mesh.SetSurfaceOverrideMaterial(0, MaterialManager.battleSuitWeaponFxMaterial);
+					else
+						mesh.SetSurfaceOverrideMaterial(0, MaterialManager.battleSuitFxMaterial);
+				}
+				else if ((currentFx & QuadFX) != 0)
+				{
+					if (viewModel)
+						mesh.SetSurfaceOverrideMaterial(0, MaterialManager.quadWeaponFxMaterial);
+					else
+						mesh.SetSurfaceOverrideMaterial(0, MaterialManager.quadFxMaterial);
+				}
+
+				if (currentFx == RegenFX)
+				{
+					if (viewModel)
+						mesh.SetSurfaceOverrideMaterial(0, MaterialManager.regenWeaponFxMaterial);
+					else
+						mesh.SetSurfaceOverrideMaterial(0, MaterialManager.regenFxMaterial);
+				}
+				else if ((currentFx & RegenFX) != 0)
+				{
+					if (viewModel)
+						mesh.MaterialOverlay = MaterialManager.regenWeaponFxMaterial;
+					else
+						mesh.MaterialOverlay = MaterialManager.regenFxMaterial;
+				}
 			}
 			else
 				mesh.Visible = false;

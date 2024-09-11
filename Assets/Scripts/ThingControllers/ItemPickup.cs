@@ -318,6 +318,13 @@ public partial class ItemPickup : Area3D
 				disable = true;
 				break;
 
+			case ItemType.Enviro:
+				player.playerInfo.battleSuit = true;
+				player.enviroSuitTime += amount;
+				player.playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.EnviroSuit, Mathf.CeilToInt(player.enviroSuitTime));
+				disable = true;
+				break;
+
 			case ItemType.Teleporter:
 				if (player.holdableItem != PlayerThing.HoldableItem.None)
 					break;

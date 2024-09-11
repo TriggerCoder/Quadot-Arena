@@ -34,11 +34,25 @@ public partial class MaterialManager : Node
 
 	//PowerUps FX Material
 	public static ShaderMaterial quadFxMaterial;
-	public static string quadFxShader = "powerups/quad";
+	public static string quadFxShader = "POWERUPS/QUAD";
 	public static ShaderMaterial quadWeaponFxMaterial;
-	public static string quadWeaponFxShader = "powerups/quadWeapon";
+	public static string quadWeaponFxShader = "POWERUPS/QUADWEAPON";
+	public static ShaderMaterial battleSuitFxMaterial;
+	public static string battleSuitFxShader = "POWERUPS/BATTLESUIT";
+	public static ShaderMaterial battleSuitWeaponFxMaterial;
+	public static string battleSuitWeaponFxShader = "POWERUPS/BATTLEWEAPON";
+	public static ShaderMaterial battleSuitAndQuadFxMaterial;
+	public static ShaderMaterial battleSuitAndQuadWeaponFxMaterial;
+	public static ShaderMaterial invisFxMaterial;
+	public static ShaderMaterial invisWeaponFxMaterial;
+	public static string invisFxShader = "POWERUPS/INVISIBILITY";
+	public static ShaderMaterial regenFxMaterial;
+	public static string regenFxShader = "POWERUPS/REGEN";
+	public static ShaderMaterial regenWeaponFxMaterial;
+	public static string regenWeaponFxShader = "POWERUPS/REGENWEAPON";
+
 	public static ShaderMaterial consoleMaterial;
-	public static string consoleShader = "console";
+	public static string consoleShader = "CONSOLE";
 	public static FogMaterial waterFogMaterial;
 	public static FogMaterial lavaFogMaterial;
 	public static FogMaterial slimeFogMaterial;
@@ -125,12 +139,22 @@ public partial class MaterialManager : Node
 		{
 			0
 		};
-		quadFxShader = quadFxShader.ToUpper();
-		quadWeaponFxShader = quadWeaponFxShader.ToUpper();
-		consoleShader = consoleShader.ToUpper();
 		quadFxMaterial = QShaderManager.GetShadedMaterial(quadFxShader, -1, ref useAlpha, ref hasPortal, stage);
 		quadWeaponFxMaterial = QShaderManager.GetShadedMaterial(quadWeaponFxShader, -1, ref useAlpha, ref hasPortal, stage, true);
+		battleSuitFxMaterial = QShaderManager.GetShadedMaterial(battleSuitFxShader, -1, ref useAlpha, ref hasPortal, stage);
+		battleSuitWeaponFxMaterial = QShaderManager.GetShadedMaterial(battleSuitWeaponFxShader, -1, ref useAlpha, ref hasPortal, stage, true);
+		invisFxMaterial = QShaderManager.GetShadedMaterial(invisFxShader, -1, ref useAlpha, ref hasPortal, stage);
+		invisWeaponFxMaterial = QShaderManager.GetShadedMaterial(invisFxShader, -1, ref useAlpha, ref hasPortal, stage, true);
+		regenFxMaterial = QShaderManager.GetShadedMaterial(regenFxShader, -1, ref useAlpha, ref hasPortal, stage);
+		regenWeaponFxMaterial = QShaderManager.GetShadedMaterial(regenWeaponFxShader, -1, ref useAlpha, ref hasPortal, stage, true);
+
 		consoleMaterial = QShaderManager.GetShadedMaterial(consoleShader, -1, ref useAlpha, ref hasPortal, null, false, true);
+
+		battleSuitAndQuadFxMaterial = (ShaderMaterial)battleSuitFxMaterial.Duplicate(true);
+		battleSuitAndQuadFxMaterial.NextPass = quadFxMaterial;
+
+		battleSuitAndQuadWeaponFxMaterial = (ShaderMaterial)battleSuitWeaponFxMaterial.Duplicate(true);
+		battleSuitAndQuadWeaponFxMaterial.NextPass = quadWeaponFxMaterial;
 	}
 
 	public static void AddBillBoard(string shaderName)
