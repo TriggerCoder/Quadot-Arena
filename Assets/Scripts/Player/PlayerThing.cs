@@ -671,6 +671,24 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			playerInfo.regenerating = false;
 		}
 
+		//Invisibility
+		if (invisTime > 0f)
+		{
+			if (newTick)
+			{
+				if (invisTime < 4f)
+					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
+				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Invis, Mathf.FloorToInt(invisTime));
+			}
+			invisTime -= deltaTime;
+		}
+		else if (invisTime < 0f)
+		{
+			invisTime = 0;
+			playerInfo.invis = false;
+			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Invis);
+		}
+
 		//Battle Suit
 		if (enviroSuitTime > 0f)
 		{
@@ -688,7 +706,6 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			playerInfo.battleSuit = false;
 			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.EnviroSuit);
 		}
-
 		if (inDamageable != WaterSurface.DamageableType.None)
 		{
 			environmentDamageTime -= deltaTime;

@@ -57,6 +57,7 @@ public partial class PlayerInfo : Node3D
 	public bool godMode = false;
 	public bool quadDamage = false;
 	public bool battleSuit = false;
+	public bool invis = false;
 	public bool regenerating = false;
 	public bool haste = false;
 

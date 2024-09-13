@@ -1093,21 +1093,29 @@ public partial class GameManager : Node
 		}
 		return fxMeshes;
 	}
-	public static void ChangeFx(List<MeshInstance3D> fxMeshes, int currentFx, bool viewModel = false)
+	public static void ChangeFx(List<MeshInstance3D> fxMeshes, int currentFx, bool viewModel = false, bool FXMesh = true)
 	{
 		for (int i = 0; i < fxMeshes.Count; i++)
 		{
 			MeshInstance3D mesh = fxMeshes[i];
 			if (currentFx != 0)
 			{
-				mesh.Visible = true;
 				mesh.MaterialOverlay = null;
 				if ((currentFx & InvisFX) != 0)
 				{
-
-					return;
+					if (FXMesh)
+						mesh.Visible = false;
+					else
+					{
+						if (viewModel)
+							mesh.SetSurfaceOverrideMaterial(0, MaterialManager.invisWeaponFxMaterial);
+						else
+							mesh.SetSurfaceOverrideMaterial(0, MaterialManager.invisFxMaterial);
+					}
+					continue;
 				}
-				
+
+				mesh.Visible = true;
 				if ((currentFx & BattleSuitAndQuadFX) == BattleSuitAndQuadFX)
 				{
 					if (viewModel)
@@ -1145,8 +1153,10 @@ public partial class GameManager : Node
 						mesh.MaterialOverlay = MaterialManager.regenFxMaterial;
 				}
 			}
-			else
+			else if (FXMesh)
 				mesh.Visible = false;
+			else
+				mesh.SetSurfaceOverrideMaterial(0, null);
 		}
 	}
 	public static void Print(string Message, PrintType type = PrintType.Log)

@@ -318,6 +318,13 @@ public partial class ItemPickup : Area3D
 				disable = true;
 				break;
 
+			case ItemType.Invis:
+				player.playerInfo.invis = true;
+				player.invisTime += amount;
+				player.playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Invis, Mathf.CeilToInt(player.invisTime));
+				disable = true;
+				break;
+
 			case ItemType.Enviro:
 				player.playerInfo.battleSuit = true;
 				player.enviroSuitTime += amount;

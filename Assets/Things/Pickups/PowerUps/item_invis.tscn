@@ -1,0 +1,63 @@
+[gd_scene load_steps=6 format=3 uid="uid://0x45wlwk82an"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_7omhq"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_tb1mv"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="3_8yjw6"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="4_707m5"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+
+[node name="item_invis" type="Node3D" node_paths=PackedStringArray("itemPickup")]
+script = ExtResource("1_7omhq")
+respawnSound = "items/poweruprespawn"
+respawnTime = 120.0
+initDisabled = true
+thingType = 2
+itemPickup = NodePath("Item")
+
+[node name="Rings" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+script = ExtResource("2_tb1mv")
+modelName = "powerups/instant/invis_ring"
+receiveShadows = true
+castShadows = true
+
+[node name="NodeAnimation" type="Node3D" parent="Rings"]
+script = ExtResource("3_8yjw6")
+rotEnable = true
+rotFPS = 100.0
+rotAxis = 1
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Invis" type="Node3D" parent="."]
+script = ExtResource("2_tb1mv")
+modelName = "powerups/instant/invis"
+receiveShadows = true
+castShadows = true
+
+[node name="NodeAnimation" type="Node3D" parent="Invis"]
+script = ExtResource("3_8yjw6")
+rotEnable = true
+rotFPS = 100.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("4_707m5")
+thingController = NodePath("..")
+itemType = 14
+amount = 30
+bonus = true
+PickupSound = "items/invisibility"
+SecondaryPickupSound = "invisibility"
+PickupIcon = "icons/invis"
+PickupText = "Invisibility"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

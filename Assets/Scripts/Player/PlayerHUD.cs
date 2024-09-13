@@ -65,6 +65,7 @@ public partial class PlayerHUD : MeshInstance3D
 	private bool hasQuad = false;
 	private bool isRegenerating = false;
 	private bool hasBattleSuit = false;
+	private bool isInvisible = false;
 	private bool swapColors = false;
 	private bool faceAttack = false;
 
@@ -73,6 +74,7 @@ public partial class PlayerHUD : MeshInstance3D
 	private float pickUpTime = 0;
 	private float weaponTime = 0;
 
+	private List<MeshInstance3D> modelsMeshes;
 	private List<MeshInstance3D> fxMeshes;
 	private List<Node3D> ammoContainers = new List<Node3D>();
 	private int currentAmmoType = -1;
@@ -325,7 +327,7 @@ public partial class PlayerHUD : MeshInstance3D
 
 		if (headModel != null)
 			Mesher.GenerateModelFromMeshes(headModel, currentLayer, false, false, viewHead, false, false, meshToSkin, true, false, true, false);
-
+		modelsMeshes = GameManager.GetAllChildrensByType<MeshInstance3D>(viewHeadContainer);
 		fxMeshes = GameManager.CreateFXMeshInstance3D(viewHeadContainer);
 		NodeList = GameManager.GetAllChildrensByType<Node>(viewHead);
 		headAnimation.Set("parameters/Look/pain_shot/active", true);
@@ -820,6 +822,7 @@ public partial class PlayerHUD : MeshInstance3D
 				}
 			}
 		}
+
 		if (hasQuad != playerInfo.quadDamage)
 		{
 			hasQuad = playerInfo.quadDamage;
@@ -829,6 +832,7 @@ public partial class PlayerHUD : MeshInstance3D
 				currentFx &= ~GameManager.QuadFX;
 			GameManager.ChangeFx(fxMeshes, currentFx, true);
 		}
+		
 		if (isRegenerating != playerInfo.regenerating)
 		{
 			isRegenerating = playerInfo.regenerating;
@@ -838,6 +842,23 @@ public partial class PlayerHUD : MeshInstance3D
 				currentFx &= ~GameManager.RegenFX;
 			GameManager.ChangeFx(fxMeshes, currentFx, true);
 		}
+
+		if (isInvisible != playerInfo.invis)
+		{
+			isInvisible = playerInfo.invis;
+			if (isInvisible)
+			{
+				currentFx |= GameManager.InvisFX;
+				GameManager.ChangeFx(modelsMeshes, GameManager.InvisFX, true, false);
+			}
+			else
+			{
+				currentFx &= ~GameManager.InvisFX;
+				GameManager.ChangeFx(modelsMeshes, 0, true, false);
+			}
+			GameManager.ChangeFx(fxMeshes, currentFx, true);
+		}
+
 		if (hasBattleSuit != playerInfo.battleSuit)
 		{
 			hasBattleSuit = playerInfo.battleSuit;

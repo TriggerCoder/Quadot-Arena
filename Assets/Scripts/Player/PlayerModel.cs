@@ -168,6 +168,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	private bool hasQuad = false;
 	private bool isRegenerating = false;
 	private bool hasBattleSuit = false;
+	private bool isInvisible = false;
 	private int currentFx = 0;
 	public override void _Ready()
 	{
@@ -257,9 +258,9 @@ public partial class PlayerModel : RigidBody3D, Damageable
 								nextFrameUpper = upperAnim[upperAnimation + 1].startFrame;
 								deadUpperReady = true;
 							break;
+						case UpperAnimation.Raise:
 						case UpperAnimation.Melee:
 						case UpperAnimation.Attack:
-						case UpperAnimation.Raise:
 							if (isMeleeWeapon)
 								upperAnimation = UpperAnimation.Stand2;
 							else
@@ -419,6 +420,10 @@ public partial class PlayerModel : RigidBody3D, Damageable
 				upperCurrentLerpTime -= 1.0f;
 				currentUpper = nextUpper;
 				currentFrameUpper = nextFrameUpper;
+				//If new weapon check if invisible and apply accordingly
+				if (nextFrameUpper == (upperAnim[UpperAnimation.Raise].startFrame + 1))
+					if ((currentFx & GameManager.InvisFX) != 0)
+						GameManager.ChangeFx(modelsMeshes, GameManager.InvisFX, false, false);
 			}
 
 			if (lowerCurrentLerpTime >= 1.0f)
@@ -447,6 +452,22 @@ public partial class PlayerModel : RigidBody3D, Damageable
 				currentFx |= GameManager.RegenFX;
 			else
 				currentFx &= ~GameManager.RegenFX;
+			GameManager.ChangeFx(fxMeshes, currentFx);
+		}
+
+		if (isInvisible != playerControls.playerInfo.invis)
+		{
+			isInvisible = playerControls.playerInfo.invis;
+			if (isInvisible)
+			{
+				currentFx |= GameManager.InvisFX;
+				GameManager.ChangeFx(modelsMeshes, GameManager.InvisFX, false, false);
+			}
+			else
+			{
+				currentFx &= ~GameManager.InvisFX;
+				GameManager.ChangeFx(modelsMeshes, 0, false, false);
+			}
 			GameManager.ChangeFx(fxMeshes, currentFx);
 		}
 
@@ -925,7 +946,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		isMeleeWeapon = isMelee;
 		upperAnimation = UpperAnimation.Raise;
 
-		if (hasQuad)
+		if (currentFx != 0)
 			GameManager.ChangeFx(fxMeshes, currentFx);
 	}
 

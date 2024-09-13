@@ -87,10 +87,12 @@ public partial class PlayerWeapon : Node3D
 	private PhysicsPointQueryParameters3D PointIntersect;
 
 	public string quadSound = "items/damage3";
+	public List<MeshInstance3D> modelsMeshes = new List<MeshInstance3D>();
 	public List<MeshInstance3D> fxMeshes;
 	public bool hasQuad = false;
 	public bool isRegenerating = false;
 	public bool hasBattleSuit = false;
+	public bool isInvisible = false;
 	private int currentFx = 0;
 	public override void _Ready()
 	{
@@ -131,6 +133,8 @@ public partial class PlayerWeapon : Node3D
 			model.currentLayer = p.uiLayer;
 			model.currentState = GameManager.FuncState.Ready;
 			model.Init();
+			if (i < models.Length - 1)
+				modelsMeshes.AddRange(GameManager.GetAllChildrensByType<MeshInstance3D>(model));
 		}
 
 		for (int i = 0; i < models.Length; i++)
@@ -207,6 +211,7 @@ public partial class PlayerWeapon : Node3D
 				currentFx &= ~GameManager.QuadFX;
 			GameManager.ChangeFx(fxMeshes, currentFx, true);
 		}
+
 		if (isRegenerating != playerInfo.regenerating)
 		{
 			isRegenerating = playerInfo.regenerating;
@@ -216,6 +221,23 @@ public partial class PlayerWeapon : Node3D
 				currentFx &= ~GameManager.RegenFX;
 			GameManager.ChangeFx(fxMeshes, currentFx, true);
 		}
+
+		if (isInvisible != playerInfo.invis)
+		{
+			isInvisible = playerInfo.invis;
+			if (isInvisible)
+			{
+				currentFx |= GameManager.InvisFX;
+				GameManager.ChangeFx(modelsMeshes, GameManager.InvisFX, true, false);
+			}
+			else
+			{
+				currentFx &= ~GameManager.InvisFX;
+				GameManager.ChangeFx(modelsMeshes, 0, true, false);
+			}
+			GameManager.ChangeFx(fxMeshes, currentFx, true);
+		}
+
 		if (hasBattleSuit != playerInfo.battleSuit)
 		{
 			hasBattleSuit = playerInfo.battleSuit;
