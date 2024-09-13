@@ -654,6 +654,7 @@ public partial class GameManager : Node
 			}
 			if (player.interpolatedTransform != null)
 				player.interpolatedTransform.QueueFree();
+			player.playerInfo.playerPostProcessing.playerHUD.HideAmmo();
 			player.playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
 			player.playerInfo.Reset();
 			player.deaths = 0;

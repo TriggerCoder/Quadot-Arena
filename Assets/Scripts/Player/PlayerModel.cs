@@ -149,6 +149,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	private Quaternion QuaternionZero = new Quaternion(0, 0, 0, 0);
 	private Quaternion turnTo = new Quaternion(0, 0, 0, 0);
 	private List<MeshInstance3D> modelsMeshes = new List<MeshInstance3D>();
+	private List<MeshInstance3D> playerAndWeaponsMeshes = new List<MeshInstance3D>();
 	private List<MeshInstance3D> fxMeshes = new List<MeshInstance3D>();
 	private int hitpoints;
 	private List<MultiMeshData> multiMeshDataList = new List<MultiMeshData>();
@@ -423,7 +424,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 				//If new weapon check if invisible and apply accordingly
 				if (nextFrameUpper == (upperAnim[UpperAnimation.Raise].startFrame + 1))
 					if ((currentFx & GameManager.InvisFX) != 0)
-						GameManager.ChangeFx(modelsMeshes, GameManager.InvisFX, false, false);
+						GameManager.ChangeFx(playerAndWeaponsMeshes, GameManager.InvisFX, false, false);
 			}
 
 			if (lowerCurrentLerpTime >= 1.0f)
@@ -437,7 +438,8 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		if (hasQuad != playerControls.playerInfo.quadDamage)
 		{
 			hasQuad = playerControls.playerInfo.quadDamage;
-			FxLight.Visible = hasQuad;
+			if ((currentFx & GameManager.InvisFX) == 0)
+				FxLight.Visible = hasQuad;
 			if (hasQuad)
 				currentFx |= GameManager.QuadFX;
 			else
@@ -461,12 +463,14 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			if (isInvisible)
 			{
 				currentFx |= GameManager.InvisFX;
-				GameManager.ChangeFx(modelsMeshes, GameManager.InvisFX, false, false);
+				FxLight.Visible = false;
+				GameManager.ChangeFx(playerAndWeaponsMeshes, GameManager.InvisFX, false, false);
 			}
 			else
 			{
 				currentFx &= ~GameManager.InvisFX;
-				GameManager.ChangeFx(modelsMeshes, 0, false, false);
+				FxLight.Visible = hasQuad;
+				GameManager.ChangeFx(playerAndWeaponsMeshes, 0, false, false);
 			}
 			GameManager.ChangeFx(fxMeshes, currentFx);
 		}
@@ -937,7 +941,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			{
 				muzzleFlash = weaponPart;
 				muzzleFlash.Visible = false;
-				AddAllMeshInstance3D(weaponPart, false);
+				AddAllMeshInstance3D(weaponPart, false, false);
 			}
 			else
 				AddAllMeshInstance3D(weaponPart);
@@ -978,7 +982,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		lightningBolt.Hide();
 		weaponModel.node.AddChild(lightningBolt);
 		lightningBolt.Position = muzzleFlash.Position;
-		AddAllMeshInstance3D(lightningBolt, false);
+		AddAllMeshInstance3D(lightningBolt, false, false);
 		ChangeLayer(currentLayer);
 	}
 
@@ -1145,7 +1149,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		currentLayer = layer;
 	}
 
-	private void AddAllMeshInstance3D(Node parent, bool addFx = true)
+	private void AddAllMeshInstance3D(Node parent, bool addFx = true, bool isPlayerOrWeapon = true)
 	{
 		List<MeshInstance3D> Childrens = GameManager.GetAllChildrensByType<MeshInstance3D>(parent);
 		foreach (MeshInstance3D mesh in Childrens)
@@ -1159,7 +1163,11 @@ public partial class PlayerModel : RigidBody3D, Damageable
 
 			if (fxMeshes.Contains(mesh))
 				continue;
+
 			modelsMeshes.Add(mesh);
+
+			if (isPlayerOrWeapon && (!playerAndWeaponsMeshes.Contains(mesh)))
+				playerAndWeaponsMeshes.Add(mesh);
 
 			//UI Self Shadow
 			MeshInstance3D shadowMesh = new MeshInstance3D();
@@ -1189,6 +1197,8 @@ public partial class PlayerModel : RigidBody3D, Damageable
 				fxMeshes.Remove(mesh);
 			if (modelsMeshes.Contains(mesh))
 				modelsMeshes.Remove(mesh);
+			if (playerAndWeaponsMeshes.Contains(mesh))
+				playerAndWeaponsMeshes.Remove(mesh);
 		}
 	}
 
