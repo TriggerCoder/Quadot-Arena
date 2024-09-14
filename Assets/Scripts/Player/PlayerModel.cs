@@ -165,11 +165,13 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	public BloodType BloodColor { get { return BloodType.Red; } }
 
 	protected OmniLight3D FxLight;
+	protected Node3D fxParticles = null;
 
 	private bool hasQuad = false;
 	private bool isRegenerating = false;
 	private bool hasBattleSuit = false;
 	private bool isInvisible = false;
+	private bool hasFlight = false;
 	private int currentFx = 0;
 	public override void _Ready()
 	{
@@ -484,7 +486,28 @@ public partial class PlayerModel : RigidBody3D, Damageable
 				currentFx &= ~GameManager.BattleSuitFX;
 			GameManager.ChangeFx(fxMeshes, currentFx);
 		}
-		
+
+		if (hasFlight != playerControls.playerInfo.flight)
+		{
+			hasFlight = playerControls.playerInfo.flight;
+			if (hasFlight)
+			{
+				if (fxParticles == null)
+				{
+					fxParticles = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.Trail].Instantiate();
+					fxParticles.Quaternion= Quaternion.FromEuler(new Vector3(Mathf.DegToRad(90), 0, 0));
+					AddChild(fxParticles);
+				}
+			}
+			else
+			{
+				if (fxParticles != null)
+				{
+					fxParticles.QueueFree();
+					fxParticles = null;
+				}
+			}
+		}
 	}
 
 	public void ForceChangeView(Quaternion dir)

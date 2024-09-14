@@ -537,12 +537,22 @@ public partial class PlayerControls : InterpolatedNode3D
 		//dampen jump pad impulse
 		if (jumpPadVel.LengthSquared() > 0)
 		{
-			jumpPadVel.Y -= (GameManager.Instance.gravity * deltaTime);
-			if (jumpPadVel.Y < 0)
+			if (playerInfo.flight && wishJump)
 			{
-				fallSpeed = jumpPadVel.Y;
-				if (controllerIsGrounded)
-					jumpPadVel = Vector3.Zero;
+				playerVelocity.Y = jumpPadVel.Y;
+				if (playerVelocity.Y > GameManager.Instance.flightAccel)
+					playerVelocity.Y = GameManager.Instance.flightAccel;
+				jumpPadVel = Vector3.Zero;
+			}
+			else
+			{
+				jumpPadVel.Y -= (GameManager.Instance.gravity * deltaTime);
+				if (jumpPadVel.Y < 0)
+				{
+					fallSpeed = jumpPadVel.Y;
+					if (controllerIsGrounded)
+						jumpPadVel = Vector3.Zero;
+				}
 			}
 		}
 
@@ -654,7 +664,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 	private void QueueJump()
 	{
-		if (playerInfo.configData.AutoHop)
+		if ((playerInfo.configData.AutoHop) || (playerInfo.flight))
 		{
 			wishJump = Input.IsActionPressed(playerInput.Action_Jump);
 			return;
@@ -773,8 +783,9 @@ public partial class PlayerControls : InterpolatedNode3D
 
 		// Reset the gravity velocity
 		playerVelocity.Y = -GameManager.Instance.gravity * deltaTime;
-
-		if ((controllerIsGrounded) && (wishJump))
+		if (playerInfo.flight && wishJump)
+			playerVelocity.Y = GameManager.Instance.gravity * deltaTime;
+		else if ((controllerIsGrounded) && (wishJump))
 		{
 			float currentJumpSpeed = jumpSpeed;
 			if (playerThing.waterLever > 0)
@@ -882,8 +893,19 @@ public partial class PlayerControls : InterpolatedNode3D
 			playerVelocity.Y = 0;
 		else
 		{
-			playerVelocity.Y -= GameManager.Instance.gravity * deltaTime;
-			fallSpeed = playerVelocity.Y;
+			if (playerInfo.flight && wishJump)
+			{
+				playerVelocity.Y += GameManager.Instance.flightAccel * deltaTime;
+				if (playerVelocity.Y > GameManager.Instance.flightAccel)
+					playerVelocity.Y = GameManager.Instance.flightAccel;
+			}
+			else
+			{
+				if (playerInfo.flight && (playerVelocity.Y > 0))
+					playerVelocity.Y = 0;
+				playerVelocity.Y -= GameManager.Instance.gravity * deltaTime;
+				fallSpeed = playerVelocity.Y;
+			}
 		}
 	}
 

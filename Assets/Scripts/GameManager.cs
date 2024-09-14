@@ -146,6 +146,7 @@ public partial class GameManager : Node
 
 	public float gravity = 25f;					//default 800 * sizeDividor
 	public float friction = 6f;
+	public float flightAccel = 12;
 	public float waterFriction = 12f;
 	public float waterDeadFall = 4.5f;
 	public float terminalLimit = 256f;

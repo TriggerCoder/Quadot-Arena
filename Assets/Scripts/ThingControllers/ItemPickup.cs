@@ -332,6 +332,13 @@ public partial class ItemPickup : Area3D
 				disable = true;
 				break;
 
+			case ItemType.Flight:
+				player.playerInfo.flight = true;
+				player.flightTime += amount;
+				player.playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Flight, Mathf.CeilToInt(player.flightTime));
+				disable = true;
+				break;
+
 			case ItemType.Teleporter:
 				if (player.holdableItem != PlayerThing.HoldableItem.None)
 					break;

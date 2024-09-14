@@ -55,7 +55,7 @@ particles_anim_loop = true
 [sub_resource type="QuadMesh" id="QuadMesh_q1bte"]
 material = SubResource("StandardMaterial3D_pyn4x")
 
-[node name="TrailParticles" type="GPUParticles3D"]
+[node name="Trail" type="GPUParticles3D"]
 layers = 255
 amount = 10
 amount_ratio = 0.1

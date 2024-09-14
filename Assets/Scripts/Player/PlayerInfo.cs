@@ -60,6 +60,7 @@ public partial class PlayerInfo : Node3D
 	public bool invis = false;
 	public bool regenerating = false;
 	public bool haste = false;
+	public bool flight = false;
 
 	public int MaxHealth = 100;
 	public int MaxBonusHealth = 200;
@@ -150,6 +151,8 @@ public partial class PlayerInfo : Node3D
 		godMode = false;
 		quadDamage = false;
 		battleSuit = false;
+		invis = false;
+		flight = false;
 		haste = false;
 
 		playerPostProcessing.ResetEffects();

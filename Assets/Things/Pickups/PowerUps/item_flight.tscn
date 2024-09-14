@@ -1,0 +1,62 @@
+[gd_scene load_steps=6 format=3 uid="uid://c74uxqi6kx7qb"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_i0m4g"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_lqost"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="3_iifpo"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="4_vxwrt"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+
+[node name="item_flight" type="Node3D" node_paths=PackedStringArray("itemPickup")]
+script = ExtResource("1_i0m4g")
+respawnSound = "items/poweruprespawn"
+respawnTime = 120.0
+initDisabled = true
+thingType = 2
+itemPickup = NodePath("Item")
+
+[node name="Rings" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+script = ExtResource("2_lqost")
+modelName = "powerups/instant/flight_ring"
+receiveShadows = true
+castShadows = true
+
+[node name="NodeAnimation" type="Node3D" parent="Rings"]
+script = ExtResource("3_iifpo")
+rotEnable = true
+rotFPS = 100.0
+rotAxis = 1
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Flight" type="Node3D" parent="."]
+script = ExtResource("2_lqost")
+modelName = "powerups/instant/flight"
+receiveShadows = true
+castShadows = true
+
+[node name="NodeAnimation" type="Node3D" parent="Flight"]
+script = ExtResource("3_iifpo")
+rotEnable = true
+rotFPS = 100.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("4_vxwrt")
+thingController = NodePath("..")
+itemType = 16
+amount = 30
+bonus = true
+PickupSound = "items/holdable"
+PickupIcon = "icons/flight"
+PickupText = "Flight"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

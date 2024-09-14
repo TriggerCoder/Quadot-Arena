@@ -72,6 +72,7 @@ public partial class ThingsManager : Node
 	public static readonly string ItemDrop = "ItemDrop";
 	public static readonly string Blood = "Blood";
 	public static readonly string BloodTrail = "BloodTrail";
+	public static readonly string Trail = "Trail";
 
 	//Drop To Floor
 	private static Rid Sphere;

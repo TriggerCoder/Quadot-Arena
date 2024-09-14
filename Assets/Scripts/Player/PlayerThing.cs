@@ -706,6 +706,25 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			playerInfo.battleSuit = false;
 			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.EnviroSuit);
 		}
+
+		//Flight
+		if (flightTime > 0f)
+		{
+			if (newTick)
+			{
+				if (flightTime < 4f)
+					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
+				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Flight, Mathf.FloorToInt(flightTime));
+			}
+			flightTime -= deltaTime;
+		}
+		else if (flightTime < 0f)
+		{
+			flightTime = 0;
+			playerInfo.flight = false;
+			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Flight);
+		}
+
 		if (inDamageable != WaterSurface.DamageableType.None)
 		{
 			environmentDamageTime -= deltaTime;
