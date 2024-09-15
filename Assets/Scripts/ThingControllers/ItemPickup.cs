@@ -51,7 +51,7 @@ public partial class ItemPickup : Area3D
 		BodyEntered += OnBodyEntered;
 	}
 
-	public void PickUp(PlayerThing player, bool disableCollider = true)
+	public bool PickUp(PlayerThing player, bool disableCollider = true)
 	{
 		bool disable = false;
 		switch (itemType)
@@ -388,6 +388,8 @@ public partial class ItemPickup : Area3D
 				if (showItemPickUp)
 					player.playerInfo.playerPostProcessing.playerHUD.ItemPickUp(PickupIcon, PickupText);
 		}
+
+		return disable;
 	}
 
 	void OnBodyEntered(Node3D other)

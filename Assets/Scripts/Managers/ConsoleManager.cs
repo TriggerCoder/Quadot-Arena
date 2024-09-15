@@ -727,7 +727,8 @@ public partial class ConsoleManager : Control
 		GameManager.Instance.TemporaryObjectsHolder.AddChild(thingObject);
 		thingObject.GlobalPosition = GameManager.Instance.Players[playerNum].GlobalPosition;
 		thingObject.SetRespawnTime(-1);
-		itemPickup.PickUp(GameManager.Instance.Players[playerNum]);
+		if (!itemPickup.PickUp(GameManager.Instance.Players[playerNum]))
+			thingObject.QueueFree();
 		AddToConsole("Command: " + args[0] + " executed sucesfully for Player " + playerNum, GameManager.PrintType.Success);
 	}
 

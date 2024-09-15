@@ -63,3 +63,12 @@ powerups/regenWeapon
                 tcmod scroll 1 .1
 	}
 }
+
+Puff
+{
+	sort Additive
+	{
+		map gfx/misc/smokepuff3.tga
+		blendFunc GL_SRC_ALPHA GL_ZERO
+	}
+}

@@ -87,8 +87,8 @@
 [ext_resource type="PackedScene" uid="uid://dym5swdk61pvo" path="res://Assets/Things/Pickups/Ammo/ammo_slugs.tscn" id="40_a7icm"]
 [ext_resource type="PackedScene" uid="uid://crc0nbdbusq2l" path="res://Assets/Things/GamePlay/func/func_static.tscn" id="40_xap66"]
 [ext_resource type="PackedScene" uid="uid://bddv7ddaa8jd0" path="res://Assets/Things/GamePlay/trigger/trigger_multiple.tscn" id="40_yfkkd"]
-[ext_resource type="PackedScene" uid="uid://dehfbnimk6l18" path="res://Assets/Things/FX/Particles/Trail.tscn" id="42_1evt6"]
 [ext_resource type="PackedScene" uid="uid://51iutkkelrci" path="res://Assets/Things/Pickups/Weapons/weapon_bfg.tscn" id="42_f3nx2"]
+[ext_resource type="PackedScene" uid="uid://db78l7apwrpot" path="res://Assets/Things/FX/Particles/Puff.tscn" id="42_fuobq"]
 [ext_resource type="PackedScene" uid="uid://3kdaobbeqoxp" path="res://Assets/Things/Pickups/PowerUps/item_haste.tscn" id="42_lo0q4"]
 [ext_resource type="PackedScene" uid="uid://sdf2rj3p3tbh" path="res://Assets/Things/Pickups/PowerUps/item_regen.tscn" id="43_0nxgr"]
 [ext_resource type="PackedScene" uid="uid://bat7yn34ag74j" path="res://Assets/Things/Pickups/Ammo/ammo_grenades.tscn" id="43_por0y"]
@@ -418,7 +418,7 @@ script = ExtResource("8_vpkit")
 
 [node name="ThingsManager" type="Node" parent="Quadot Arena"]
 script = ExtResource("9_71i1l")
-_fxPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("13_l5hcy"), ExtResource("16_xhuyt"), ExtResource("18_nyem1"), ExtResource("20_l0jeh"), ExtResource("21_gxmhp"), ExtResource("22_i5gi6"), ExtResource("28_5ibyp"), ExtResource("38_hwtk2"), ExtResource("39_vtbss"), ExtResource("42_1evt6")])
+_fxPrefabs = Array[PackedScene]([ExtResource("11_rh4dk"), ExtResource("13_l5hcy"), ExtResource("16_xhuyt"), ExtResource("18_nyem1"), ExtResource("20_l0jeh"), ExtResource("21_gxmhp"), ExtResource("22_i5gi6"), ExtResource("28_5ibyp"), ExtResource("38_hwtk2"), ExtResource("39_vtbss"), ExtResource("42_fuobq")])
 _projectilesPrefabs = Array[PackedScene]([ExtResource("12_6703q"), ExtResource("15_rsp03"), ExtResource("22_jphxe"), ExtResource("24_ua1m5"), ExtResource("25_44wy8"), ExtResource("27_5gm05"), ExtResource("48_5arwe")])
 _decalsPrefabs = Array[PackedScene]([ExtResource("17_au5sd"), ExtResource("19_rmn3i"), ExtResource("18_occpy"), ExtResource("19_q0xlo"), ExtResource("24_5opha"), ExtResource("29_l1cqu"), ExtResource("32_kea4x"), ExtResource("43_xrsn8"), ExtResource("46_h6uxe"), ExtResource("48_o5g2n"), ExtResource("54_ylum8"), ExtResource("55_2cxke"), ExtResource("56_tyh37"), ExtResource("57_40726"), ExtResource("58_qsrid")])
 _ammoPrefabs = Array[PackedScene]([ExtResource("19_qacws"), ExtResource("21_gcmhg"), ExtResource("30_kksrp"), ExtResource("22_xc5q4"), ExtResource("20_88qir"), ExtResource("35_frbmv"), ExtResource("40_a7icm"), ExtResource("43_por0y"), ExtResource("72_0n01p"), ExtResource("71_b14fu"), ExtResource("71_qny55"), ExtResource("71_san3o")])

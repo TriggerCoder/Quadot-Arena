@@ -55,6 +55,8 @@ public partial class PlayerControls : InterpolatedNode3D
 	public Vector3 playerVelocity = Vector3.Zero;
 	private Vector2 deadZone = Vector2.Zero;
 
+	public bool WhishJump { get { return wishJump; } }
+
 	private bool wishJump = false;
 	private bool wishSink = false;
 	private bool wishFire = false;

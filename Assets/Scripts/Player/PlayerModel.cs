@@ -165,13 +165,11 @@ public partial class PlayerModel : RigidBody3D, Damageable
 	public BloodType BloodColor { get { return BloodType.Red; } }
 
 	protected OmniLight3D FxLight;
-	protected Node3D fxParticles = null;
 
 	private bool hasQuad = false;
 	private bool isRegenerating = false;
 	private bool hasBattleSuit = false;
 	private bool isInvisible = false;
-	private bool hasFlight = false;
 	private int currentFx = 0;
 	public override void _Ready()
 	{
@@ -486,28 +484,6 @@ public partial class PlayerModel : RigidBody3D, Damageable
 				currentFx &= ~GameManager.BattleSuitFX;
 			GameManager.ChangeFx(fxMeshes, currentFx);
 		}
-
-		if (hasFlight != playerControls.playerInfo.flight)
-		{
-			hasFlight = playerControls.playerInfo.flight;
-			if (hasFlight)
-			{
-				if (fxParticles == null)
-				{
-					fxParticles = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.Trail].Instantiate();
-					fxParticles.Quaternion= Quaternion.FromEuler(new Vector3(Mathf.DegToRad(90), 0, 0));
-					AddChild(fxParticles);
-				}
-			}
-			else
-			{
-				if (fxParticles != null)
-				{
-					fxParticles.QueueFree();
-					fxParticles = null;
-				}
-			}
-		}
 	}
 
 	public void ForceChangeView(Quaternion dir)
@@ -817,6 +793,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		nextMoveType = moveType;
 
 		Quaternion rotate = Quaternion.Identity;
+		Quaternion rollRotate = Quaternion.Identity;
 		if (forwardMove < 0)
 		{
 			switch (nextMoveType)
@@ -833,9 +810,15 @@ public partial class PlayerModel : RigidBody3D, Damageable
 					break;
 			}
 			if (sideMove > 0)
+			{
 				rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(-30f));
+				rollRotate = new Quaternion(playerModel.RightVector(), Mathf.DegToRad(-5f));
+			}
 			else if (sideMove < 0)
+			{
 				rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(30f));
+				rollRotate = new Quaternion(playerModel.RightVector(), Mathf.DegToRad(5f));
+			}
 		}
 		else if (forwardMove > 0)
 		{
@@ -853,9 +836,15 @@ public partial class PlayerModel : RigidBody3D, Damageable
 					break;
 			}
 			if (sideMove > 0)
+			{
 				rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(30f));
+				rollRotate = new Quaternion(playerModel.RightVector(), Mathf.DegToRad(5f));
+			}
 			else if (sideMove < 0)
+			{
 				rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(-30f));
+				rollRotate = new Quaternion(playerModel.RightVector(), Mathf.DegToRad(-5f));
+			}
 		}
 		else if (sideMove != 0)
 		{
@@ -873,9 +862,15 @@ public partial class PlayerModel : RigidBody3D, Damageable
 					break;
 			}
 			if (sideMove > 0)
+			{
 				rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(-50f));
+				rollRotate = new Quaternion(playerModel.RightVector(), Mathf.DegToRad(-10f));
+			}
 			else if (sideMove < 0)
+			{
 				rotate = new Quaternion(playerModel.UpVector(), Mathf.DegToRad(50f));
+				rollRotate = new Quaternion(playerModel.RightVector(), Mathf.DegToRad(10f));
+			}
 		}
 		else if ((lowerAnimation != LowerAnimation.Turn) && (lowerAnimation != LowerAnimation.Land) && (lowerAnimation != LowerAnimation.LandBack))
 		{
@@ -885,6 +880,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 				lowerAnimation = LowerAnimation.Idle;
 		}
 		lowerNode.Quaternion = lowerNode.Quaternion.Slerp(rotate, lowerRotationFPS * deltaTime);
+		Quaternion = Quaternion.Slerp(rollRotate, lowerRotationFPS * deltaTime);
 	}
 	public void MuzzleFlashSetScale(Vector3 scale)
 	{

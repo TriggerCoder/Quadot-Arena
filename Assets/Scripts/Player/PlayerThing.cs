@@ -716,6 +716,15 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(wearOffSound));
 				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Flight, Mathf.FloorToInt(flightTime));
 			}
+
+			if ((playerControls.WhishJump) && ((Engine.GetFramesDrawn() % 7) == 0))
+			{
+				Node3D Puff = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.Puff].Instantiate();
+				GameManager.Instance.TemporaryObjectsHolder.AddChild(Puff);
+				Puff.GlobalPosition = GlobalPosition;
+			}
+
+
 			flightTime -= deltaTime;
 		}
 		else if (flightTime < 0f)
