@@ -958,6 +958,8 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			}
 			else if (newWeaponList[i] == muzzleObject)
 			{
+				if ((barrel != null) && (!isMelee))
+					weaponPart.Reparent(barrel, false);
 				muzzleFlash = weaponPart;
 				muzzleFlash.Visible = false;
 				AddAllMeshInstance3D(weaponPart, false, false);

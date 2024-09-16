@@ -29,6 +29,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public static string wearOffSound = "items/wearoff";
 	public static string regenSound = "items/regen";
 	public static string protectSound = "items/protect3";
+	public static string flySound = "items/flight";
 
 	private static readonly string[] normalStep = { "player/footsteps/step1", "player/footsteps/step2", "player/footsteps/step3", "player/footsteps/step4" };
 	private static readonly string[] clankStep = { "player/footsteps/clank1", "player/footsteps/clank2", "player/footsteps/clank3", "player/footsteps/clank4" };
@@ -79,6 +80,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public float regenFXTime = 0f;
 	public float enviroSuitTime = 0f;
 	public float flightTime = 0f;
+	public float flightSoundTime = 0f;
 
 	public float lastDamageTime = 0f;
 
@@ -717,18 +719,27 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 				playerInfo.playerPostProcessing.playerHUD.UpdatePowerUpTime(PlayerHUD.PowerUpType.Flight, Mathf.FloorToInt(flightTime));
 			}
 
-			if ((playerControls.WhishJump) && ((Engine.GetFramesDrawn() % 7) == 0))
+			if (playerControls.WhishJump)
 			{
-				Node3D Puff = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.Puff].Instantiate();
-				GameManager.Instance.TemporaryObjectsHolder.AddChild(Puff);
-				Puff.GlobalPosition = GlobalPosition;
+				if ((Engine.GetFramesDrawn() % 7) == 0)
+				{
+					Node3D Puff = (Node3D)ThingsManager.thingsPrefabs[ThingsManager.Puff].Instantiate();
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(Puff);
+					Puff.GlobalPosition = GlobalPosition;
+				}
+				if (flightSoundTime < 0f)
+				{
+					flightSoundTime = .75f;
+					SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(flySound));
+				}
 			}
 
-
+			flightSoundTime -= deltaTime;
 			flightTime -= deltaTime;
 		}
 		else if (flightTime < 0f)
 		{
+			flightSoundTime = 0;
 			flightTime = 0;
 			playerInfo.flight = false;
 			playerInfo.playerPostProcessing.playerHUD.RemovePowerUp(PlayerHUD.PowerUpType.Flight);

@@ -172,6 +172,7 @@ public partial class PlayerInfo : Node3D
 		playerThing.regenFXTime = 0;
 		playerThing.enviroSuitTime = 0;
 		playerThing.flightTime = 0;
+		playerThing.flightSoundTime = 0;
 		playerThing.lastDamageTime = 0;
 
 		playerThing.lastAttacker = null;
