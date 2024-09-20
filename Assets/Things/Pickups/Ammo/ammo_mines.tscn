@@ -1,0 +1,43 @@
+[gd_scene load_steps=6 format=3 uid="uid://dyp5kdutyyc4l"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_81sre"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_0aak2"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_ya8os"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="4_c3llw"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+radius = 0.7
+
+[node name="ammo_mines" type="Node3D" node_paths=PackedStringArray("itemPickup")]
+script = ExtResource("1_81sre")
+respawnTime = 30.0
+thingType = 2
+itemPickup = NodePath("Item")
+
+[node name="NodeAnimation" type="Node3D" parent="."]
+script = ExtResource("2_0aak2")
+rotEnable = true
+rotFPS = 40.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Mines" type="Node3D" parent="."]
+script = ExtResource("3_ya8os")
+modelName = "powerups/ammo/proxmineam"
+castShadows = true
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("4_c3llw")
+thingController = NodePath("..")
+itemType = 21
+amount = 10
+PickupSound = "misc/am_pkup"
+PickupIcon = "icons/ammo_proxmine"
+PickupText = "Proximity Mines"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

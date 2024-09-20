@@ -1,0 +1,46 @@
+[gd_scene load_steps=6 format=3 uid="uid://b4o35hn6n5rwb"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_630wn"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/NodeAnimation.cs" id="2_jcrko"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="3_0suy6"]
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ItemPickup.cs" id="4_ogerj"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_whspm"]
+radius = 0.7
+
+[node name="weapon_prox_launcher" type="Node3D" node_paths=PackedStringArray("itemPickup")]
+script = ExtResource("1_630wn")
+respawnTime = 30.0
+thingType = 2
+itemPickup = NodePath("Item")
+
+[node name="NodeAnimation" type="Node3D" parent="."]
+script = ExtResource("2_jcrko")
+rotEnable = true
+rotFPS = 40.0
+posEnable = true
+posAmplitude = 0.1
+posFPS = 5.0
+
+[node name="Proximity Launcher" type="Node3D" parent="."]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
+script = ExtResource("3_0suy6")
+modelName = "weapons/proxmine/proxmine"
+receiveShadows = true
+castShadows = true
+
+[node name="Item" type="Area3D" parent="." node_paths=PackedStringArray("thingController")]
+collision_layer = 32
+collision_mask = 32704
+monitorable = false
+script = ExtResource("4_ogerj")
+thingController = NodePath("..")
+itemType = 21
+amount = 10
+givesWeapon = 12
+PickupSound = "misc/w_pkup"
+PickupIcon = "icons/proxmine"
+PickupText = "Proximity Launcher"
+
+[node name="Shape" type="CollisionShape3D" parent="Item"]
+shape = SubResource("SphereShape3D_whspm")

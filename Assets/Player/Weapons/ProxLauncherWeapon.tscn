@@ -1,0 +1,110 @@
+[gd_scene load_steps=12 format=3 uid="uid://dior35ig7yu0j"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Player/Weapons/ProxLauncherWeapon.cs" id="1_61bt2"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="2_uhy3b"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="3_xsudu"]
+
+[sub_resource type="Animation" id="Animation_pi8jm"]
+resource_name = "fire"
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.3, 1, 0, 0, -0.131, 0.991, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="Animation" id="Animation_jenqq"]
+resource_name = "idle"
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_1s830"]
+_data = {
+"fire": SubResource("Animation_pi8jm"),
+"idle": SubResource("Animation_jenqq")
+}
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_a46c4"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_j54x4"]
+animation = &"fire"
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_jrkcu"]
+mix_mode = 1
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_cij11"]
+animation = &"idle"
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_ul8cb"]
+graph_offset = Vector2(-512.7, 27.7)
+nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_a46c4")
+nodes/TimeScale/position = Vector2(-100, 200)
+nodes/attack/node = SubResource("AnimationNodeAnimation_j54x4")
+nodes/attack/position = Vector2(-260, 240)
+nodes/fire_shot/node = SubResource("AnimationNodeOneShot_jrkcu")
+nodes/fire_shot/position = Vector2(60, 100)
+nodes/idle/node = SubResource("AnimationNodeAnimation_cij11")
+nodes/idle/position = Vector2(-318.976, 109.718)
+node_connections = [&"TimeScale", 0, &"attack", &"fire_shot", 0, &"idle", &"fire_shot", 1, &"TimeScale", &"output", 0, &"fire_shot"]
+
+[node name="PlayerWeapon" type="Node3D" node_paths=PackedStringArray("weaponAnimation", "audioStream", "models", "muzzleObject", "muzzleLight")]
+transform = Transform3D(0.997546, 0.0700209, 0, -0.0700209, 0.997546, 0, 0, 0, 1, 0, 0, 0)
+script = ExtResource("1_61bt2")
+AttackProjectileName = "ProxMinesProjectile"
+weaponAnimation = NodePath("AnimationTree")
+animationSpeed = 2.0
+Offset = Vector3(0.2, -0.3, 0)
+audioStream = NodePath("WeaponAudioStream")
+_sounds = PackedStringArray("weapons/proxmine/wstbfire", "weapons/noammo", "weapons/change")
+models = [NodePath("Proximity Launcher"), NodePath("Proximity Launcher/Muzzle")]
+muzzleObject = NodePath("Proximity Launcher/Muzzle")
+fullAuto = false
+_fireRate = 0.95
+muzzleLight = NodePath("OmniLight3D")
+
+[node name="Proximity Launcher" type="Node3D" parent="."]
+script = ExtResource("2_uhy3b")
+modelName = "weapons/proxmine/proxmine"
+useCommon = false
+isViewModel = true
+currentState = 0
+
+[node name="Muzzle" type="Node3D" parent="Proximity Launcher"]
+script = ExtResource("2_uhy3b")
+modelName = "weapons/proxmine/proxmine"
+tagName = "tag_flash"
+useCommon = false
+isTransparent = true
+isViewModel = true
+currentState = 0
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+layers = 255
+light_color = Color(1, 0.686275, 0, 1)
+light_bake_mode = 0
+omni_shadow_mode = 0
+
+[node name="WeaponAudioStream" type="Node3D" parent="."]
+script = ExtResource("3_xsudu")
+Bus = "FXBus"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+deterministic = true
+libraries = {
+"": SubResource("AnimationLibrary_1s830")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+active = false
+tree_root = SubResource("AnimationNodeBlendTree_ul8cb")
+anim_player = NodePath("../AnimationPlayer")
+parameters/TimeScale/scale = 1.0
+parameters/fire_shot/active = false
+parameters/fire_shot/internal_active = false
+parameters/fire_shot/request = 0

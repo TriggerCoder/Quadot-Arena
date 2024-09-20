@@ -173,8 +173,8 @@ public partial class WaterSurface : Area3D
 			return;
 
 		//Hide smoke and modify physics of grenade in water
-		if (other is Grenade grenade)
-			grenade.ChangeWater(true, underSound);
+		if (other is PhysicProjectile projectile)
+			projectile.ChangeWater(true, underSound);
 
 		if (other is PlayerThing player)
 		{

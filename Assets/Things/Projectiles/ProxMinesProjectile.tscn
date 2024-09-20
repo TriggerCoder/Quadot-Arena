@@ -1,0 +1,56 @@
+[gd_scene load_steps=7 format=3 uid="uid://bieifq73101vg"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Projectiles/ProxMines.cs" id="1_q0011"]
+[ext_resource type="Script" path="res://Assets/ThirdParty/MultiAudioListener/MultiAudioStream.cs" id="2_tkfa2"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/InterpolatedTransform.cs" id="3_kjrnf"]
+[ext_resource type="Script" path="res://Assets/Scripts/Generic/ModelController.cs" id="4_csk1p"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_x6url"]
+bounce = 0.65
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_6a5k7"]
+height = 0.15
+radius = 0.15
+
+[node name="ProxMinesProjectile" type="RigidBody3D" node_paths=PackedStringArray("audioStream")]
+collision_layer = 2
+collision_mask = 4
+input_ray_pickable = false
+mass = 2.5
+physics_material_override = SubResource("PhysicsMaterial_x6url")
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0, 0.2)
+continuous_cd = true
+contact_monitor = true
+max_contacts_reported = 1
+script = ExtResource("1_q0011")
+audioStream = NodePath("MultiAudioStream")
+_sounds = PackedStringArray("weapons/proxmine/wstbtick", "weapons/proxmine/wstbactv", "weapons/proxmine/wstbimpd", "weapons/proxmine/wstbimpl", "weapons/proxmine/wstbimpm")
+damageMin = 90
+damageMax = 100
+blastDamage = 150
+projectileRadius = 0.5
+explosionRadius = 6.0
+pushForce = 900.0
+OnDeathSpawn = "GrenadeExplosion"
+decalMark = "BurnMark"
+_onDeathSound = "weapons/proxmine/wstbexpl"
+destroyTimer = 10.0
+
+[node name="BounceShape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.125)
+shape = SubResource("CylinderShape3D_6a5k7")
+
+[node name="SourceMines" type="Node3D" parent="."]
+
+[node name="MultiAudioStream" type="Node3D" parent="."]
+script = ExtResource("2_tkfa2")
+
+[node name="InterpolatedTransform" type="Node3D" parent="." node_paths=PackedStringArray("Source")]
+script = ExtResource("3_kjrnf")
+Source = NodePath("../SourceMines")
+
+[node name="Proximity Mines" type="Node3D" parent="InterpolatedTransform"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+script = ExtResource("4_csk1p")
+modelName = "weaphits/proxmine"

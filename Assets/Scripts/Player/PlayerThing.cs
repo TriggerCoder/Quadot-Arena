@@ -506,6 +506,18 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			case PlayerInfo.BFG10K:
 				itemsToDrop.Add("weapon_bfg");
 			break;
+			case PlayerInfo.NailGun:
+				itemsToDrop.Add("weapon_nailgun");
+			break;
+			case PlayerInfo.ChainGun:
+				itemsToDrop.Add("weapon_chaingun");
+			break;
+			case PlayerInfo.ProxLauncher:
+				itemsToDrop.Add("weapon_prox_launcher");
+			break;
+			case PlayerInfo.HeavyMachineGun:
+				itemsToDrop.Add("weapon_hmg");
+			break;
 		}
 
 		for (int i = 0; i < itemsToDrop.Count; i++)

@@ -24,7 +24,8 @@ public partial class ItemPickup : Area3D
 		Teleporter,
 		AmmoPack,
 		ChainBullets,
-		Nails
+		Nails,
+		Mines
 	}
 	[Export]
 	public ThingController thingController;
@@ -140,6 +141,14 @@ public partial class ItemPickup : Area3D
 					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.chainAmmo], PlayerInfo.chainAmmo);
 					disable = true;
 				}
+				if ((player.playerInfo.Weapon[PlayerInfo.ProxLauncher]) && (player.playerInfo.Ammo[PlayerInfo.minesAmmo] < player.playerInfo.MaxAmmo[PlayerInfo.minesAmmo]))
+				{
+					player.playerInfo.Ammo[PlayerInfo.minesAmmo] += (amount * GameManager.Instance.PlayerAmmoReceive);
+					if (player.playerInfo.Ammo[PlayerInfo.minesAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.minesAmmo])
+						player.playerInfo.Ammo[PlayerInfo.minesAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.minesAmmo];
+					player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.minesAmmo], PlayerInfo.minesAmmo);
+					disable = true;
+				}
 				break;
 
 			case ItemType.Bullets:
@@ -249,6 +258,17 @@ public partial class ItemPickup : Area3D
 				if (player.playerInfo.Ammo[PlayerInfo.nailAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.nailAmmo])
 					player.playerInfo.Ammo[PlayerInfo.nailAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.nailAmmo];
 				player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.nailAmmo], PlayerInfo.nailAmmo);
+				disable = true;
+				break;
+
+			case ItemType.Mines:
+				if (player.playerInfo.Ammo[PlayerInfo.minesAmmo] == player.playerInfo.MaxAmmo[PlayerInfo.minesAmmo])
+					break;
+
+				player.playerInfo.Ammo[PlayerInfo.minesAmmo] += (amount * GameManager.Instance.PlayerAmmoReceive);
+				if (player.playerInfo.Ammo[PlayerInfo.minesAmmo] > player.playerInfo.MaxAmmo[PlayerInfo.minesAmmo])
+					player.playerInfo.Ammo[PlayerInfo.minesAmmo] = player.playerInfo.MaxAmmo[PlayerInfo.minesAmmo];
+				player.playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(player.playerInfo.Ammo[PlayerInfo.minesAmmo], PlayerInfo.minesAmmo);
 				disable = true;
 				break;
 

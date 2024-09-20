@@ -1023,6 +1023,12 @@ public partial class PlayerControls : InterpolatedNode3D
 				if (playerInfo.Ammo[PlayerInfo.chainAmmo] <= 0)
 					return false;
 				break;
+
+			case PlayerInfo.ProxLauncher:
+				if (playerInfo.Ammo[PlayerInfo.minesAmmo] <= 0)
+					return false;
+				break;
+
 		}
 		return true;
 	}
@@ -1062,6 +1068,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (TrySwapWeapon(PlayerInfo.Shotgun)) return;
 		if (TrySwapWeapon(PlayerInfo.MachineGun)) return;
 		if (TrySwapWeapon(PlayerInfo.Railgun)) return;
+		if (TrySwapWeapon(PlayerInfo.ProxLauncher)) return;
 		if (TrySwapWeapon(PlayerInfo.RocketLauncher)) return;
 		if (TrySwapWeapon(PlayerInfo.GrenadeLauncher)) return;
 		if (TrySwapWeapon(PlayerInfo.Gauntlet)) return;
@@ -1075,6 +1082,7 @@ public partial class PlayerControls : InterpolatedNode3D
 		if (TrySwapWeapon(PlayerInfo.Railgun)) return;
 		if (TrySwapWeapon(PlayerInfo.LightningGun)) return;
 		if (TrySwapWeapon(PlayerInfo.RocketLauncher)) return;
+		if (TrySwapWeapon(PlayerInfo.ProxLauncher)) return;
 		if (TrySwapWeapon(PlayerInfo.GrenadeLauncher)) return;
 		if (TrySwapWeapon(PlayerInfo.NailGun)) return;
 		if (TrySwapWeapon(PlayerInfo.Shotgun)) return;

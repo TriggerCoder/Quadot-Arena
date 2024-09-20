@@ -51,6 +51,7 @@ public partial class PlayerInfo : Node3D
 	public const int bfgAmmo = 7;
 	public const int nailAmmo = 8;
 	public const int chainAmmo = 9;
+	public const int minesAmmo = 10;
 
 
 	//PowerUps

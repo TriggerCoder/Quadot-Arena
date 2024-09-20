@@ -1,8 +1,7 @@
 using Godot;
 using System;
 using ExtensionMethods;
-
-public partial class GrenadeLauncherWeapon : PlayerWeapon
+public partial class ProxLauncherWeapon : PlayerWeapon
 {
 	public override float verticalDispersion { get { return .02f; } }
 	public override float horizontalDispersion { get { return .02f; } }
@@ -16,7 +15,7 @@ public partial class GrenadeLauncherWeapon : PlayerWeapon
 	public Vector3 spawnPos;
 	protected override void OnUpdate(float deltaTime)
 	{
-		if (playerInfo.Ammo[PlayerInfo.grenadesAmmo] <= 0 && fireTime < .1f)
+		if (playerInfo.Ammo[PlayerInfo.minesAmmo] <= 0 && fireTime < .1f)
 		{
 			if ((!putAway) && (Sounds.Length > 1))
 			{
@@ -33,8 +32,8 @@ public partial class GrenadeLauncherWeapon : PlayerWeapon
 			audioStream.Stream = Sounds[2];
 			audioStream.Play();
 		}
-		playerInfo.playerPostProcessing.playerHUD.UpdateAmmoType(PlayerInfo.grenadesAmmo);
-		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.grenadesAmmo]);
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmoType(PlayerInfo.minesAmmo);
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.minesAmmo]);
 
 		weaponAnimation.Active = true;
 		weaponAnimation.Set("parameters/fire_shot/active", true);
@@ -49,11 +48,11 @@ public partial class GrenadeLauncherWeapon : PlayerWeapon
 		if (fireTime > 0.05f)
 			return false;
 
-		if (playerInfo.Ammo[PlayerInfo.grenadesAmmo] <= 0)
+		if (playerInfo.Ammo[PlayerInfo.minesAmmo] <= 0)
 			return false;
 
-		playerInfo.Ammo[PlayerInfo.grenadesAmmo]--;
-		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.grenadesAmmo]);
+		playerInfo.Ammo[PlayerInfo.minesAmmo]--;
+		playerInfo.playerPostProcessing.playerHUD.UpdateAmmo(playerInfo.Ammo[PlayerInfo.minesAmmo]);
 
 		if (GameOptions.UseMuzzleLight)
 		{
@@ -91,24 +90,24 @@ public partial class GrenadeLauncherWeapon : PlayerWeapon
 			Transform3D global = playerInfo.playerCamera.GlobalTransform;
 			Vector3 d = global.ForwardVector();
 
-			PhysicProjectile grenade = (PhysicProjectile)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
-			GameManager.Instance.TemporaryObjectsHolder.AddChild(grenade);
-			grenade.owner = playerInfo.playerThing;
+			PhysicProjectile mine = (PhysicProjectile)ThingsManager.thingsPrefabs[AttackProjectileName].Instantiate();
+			GameManager.Instance.TemporaryObjectsHolder.AddChild(mine);
+			mine.owner = playerInfo.playerThing;
 			if (hasQuad)
-				grenade.EnableQuad();
+				mine.EnableQuad();
 			if (muzzleObject != null)
-				grenade.GlobalPosition = muzzleObject.GlobalPosition + d;
+				mine.GlobalPosition = muzzleObject.GlobalPosition + d;
 			else
-				grenade.GlobalPosition = global.Origin;
-			grenade.Init(playerInfo.playerLayer);
+				mine.GlobalPosition = global.Origin;
+			mine.Init(playerInfo.playerLayer);
 			Vector2 r = GetDispersion();
 			d += global.RightVector() * r.X + global.UpVector() * r.Y;
 			d = d.Normalized();
-			grenade.SetForward(d);
-			Vector3 velocity = -d * 25;
-			grenade.LinearVelocity = velocity;
+			mine.SetForward(d);
+			Vector3 velocity = -d * 20;
+			mine.LinearVelocity = velocity;
 			velocity = new Vector3((float)GD.RandRange(-20f, 20f), (float)GD.RandRange(5f, 10f), (float)GD.RandRange(-20f, 20f));
-			grenade.AngularVelocity = velocity;
+			mine.AngularVelocity = velocity;
 		}
 
 		return true;
