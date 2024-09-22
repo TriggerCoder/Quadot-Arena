@@ -54,7 +54,7 @@ public partial class ThingsManager : Node
 	public static Dictionary<string, ConvexPolygonShape3D> gibsShapes = new Dictionary<string, ConvexPolygonShape3D>();
 	public static Dictionary<string, ThingController> uniqueThingsOnMap = new Dictionary<string, ThingController>();
 	public static Dictionary<string, ThingController> potentialuniqueThingsOnMap = new Dictionary<string, ThingController>();
-	public static List<string> uniqueGamePlayThings = new List<string>();
+	public static HashSet<string> uniqueGamePlayThings = new HashSet<string>();
 	public static List<Texture2D> smallCrosshairs = new List<Texture2D>();
 	public static List<Texture2D> largeCrosshairs = new List<Texture2D>();
 	public static Texture2D defaultCrosshair;
@@ -602,6 +602,8 @@ public partial class ThingsManager : Node
 					MapLoader.GenerateGeometricCollider(thingObject, objCollider, model, ContentFlags.Trigger);
 					objCollider.BodyEntered += tc.OnBodyEntered;
 					tc.Areas.Add(objCollider);
+					if (tc.destroyPhysicsNodes)
+						objCollider.CollisionMask |= (1 << GameManager.PhysicCollisionLayer);
 				}
 			}
 			triggerToActivate.Add(target, tc);
@@ -769,9 +771,9 @@ public partial class ThingsManager : Node
 
 			//Check for Unique Things according to GamePlay rules
 			bool skip = false;
-			for (int i = 0; i < uniqueGamePlayThings.Count; i++)
+			foreach(string uniqueItem in uniqueGamePlayThings)
 			{
-				if (entity.name == uniqueGamePlayThings[i])
+				if (entity.name == uniqueItem)
 				{
 					thingObject.initDisabled = false;
 					if (uniqueThingsOnMap.ContainsKey(entity.name))
@@ -1741,30 +1743,35 @@ public partial class ThingsManager : Node
 						}
 */
 					}
-				//Remove PowerUps
-/*
-				else if (entity.name ==  "target_remove_powerups":
-				{
-					if (entity.entityData.TryGetValue("targetname", out strWord))
+					//Remove PowerUps
+					else if (entity.name ==  "target_remove_powerups")
 					{
-						string target = strWord;
+						if (entity.entityData.TryGetValue("targetname", out strWord))
+						{
+							string target = strWord;
 
-						TriggerController tc;
-						if (!triggerToActivate.TryGetValue(target, out tc))
-						{
-							tc = thingObject.AddComponent<TriggerController>();
-							triggerToActivate.Add(target, tc);
+							TriggerController tc;
+							if (!triggerToActivate.TryGetValue(target, out tc))
+							{
+								tc = new TriggerController();
+								thingObject.AddChild(tc);
+								triggerToActivate.Add(target, tc);
+							}
+							else
+							{
+								foreach (var Area in tc.Areas)
+									Area.CollisionMask |= (1 << GameManager.PhysicCollisionLayer);
+							}
+
+							tc.Repeatable = true;
+							tc.destroyPhysicsNodes = true;
+							tc.SetController(target, (p) =>
+							{
+								p.DropNothingOnDeath();
+							});
 						}
-						else
-							Destroy(thingObject);
-						tc.Repeatable = true;
-						tc.SetController(target, (p) =>
-						{
-							p.RemovePowerUps();
-						});
 					}
-				}
-*/
+
 				}
 				break;
 				case ThingController.ThingType.Trigger:
@@ -1851,9 +1858,8 @@ public partial class ThingsManager : Node
 				break;
 				case GameManager.GameType.QuadHog:
 				{
-					for (int i = 0; i < uniqueGamePlayThings.Count; i++)
+					foreach(string uniqueItem in uniqueGamePlayThings)
 					{
-						string uniqueItem = uniqueGamePlayThings[i];
 						for (int j = 0; j < quadHogReplacement.Length; j++)
 						{
 							string searchItem = quadHogReplacement[j];

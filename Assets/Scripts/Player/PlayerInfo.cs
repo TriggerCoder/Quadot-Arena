@@ -153,8 +153,9 @@ public partial class PlayerInfo : Node3D
 		quadDamage = false;
 		battleSuit = false;
 		invis = false;
-		flight = false;
+		regenerating = false;
 		haste = false;
+		flight = false;
 
 		playerPostProcessing.ResetEffects();
 
@@ -164,6 +165,8 @@ public partial class PlayerInfo : Node3D
 		playerThing.inDamageable = WaterSurface.DamageableType.None;
 		playerThing.hitpoints = 100;
 		playerThing.armor = 0;
+
+		playerThing.dropPowerUps = true;
 
 		playerThing.painTime = 0;
 		playerThing.quadTime = 0;

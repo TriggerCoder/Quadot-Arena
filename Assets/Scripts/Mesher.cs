@@ -1516,7 +1516,7 @@ public static class Mesher
 
 		objCollider.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
 		if (isWater)
-			objCollider.CollisionMask |= (1 << GameManager.NoCollisionLayer);
+			objCollider.CollisionMask |= (1 << GameManager.PhysicCollisionLayer);
 
 		if (!MapLoader.mapSurfaceTypes.ContainsKey(objCollider))
 			MapLoader.mapSurfaceTypes.Add(objCollider, surfaceType);
@@ -1707,7 +1707,7 @@ public static class Mesher
 		Area3D fogArea = new Area3D();
 		fogArea.Name = "FogArea_" + index;
 		fogArea.CollisionLayer = (1 << GameManager.FogLayer);
-		fogArea.CollisionMask = (1 << GameManager.NoCollisionLayer);
+		fogArea.CollisionMask = (1 << GameManager.PhysicCollisionLayer);
 		fogArea.InputRayPickable = false;
 
 		holder.AddChild(fogArea);

@@ -94,7 +94,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public bool underWater = false;
 	public WaterSurface.DamageableType inDamageable = WaterSurface.DamageableType.None;
 	public bool finished = false;
-
+	public bool dropPowerUps = true;
 	public Node3D lastAttacker = null;
 	public bool ready { get { return currentState == GameManager.FuncState.Start; } }
 	private float handicap = 1;
@@ -337,7 +337,6 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			playerControls.playerCamera.ChangeThirdPersonCamera(true);
 
 			DropWeaponsAndPowerUps();
-
 			playerInfo.playerPostProcessing.playerHUD.RemoveAllItems();
 
 			if (hitpoints <= GameManager.Instance.gibHealth)
@@ -353,7 +352,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 					if (damageType != DamageType.Generic)
 						GameManager.Instance.PlayAnnouncer(GameManager.Instance.announcer + "holy_shit");
 				}
-				avatar.Gib();
+				avatar.Gib(dropPowerUps);
 			}
 			else
 			{
@@ -452,6 +451,12 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		playerControls.AnimateLegsOnJump();
 	}
 
+	public void DropNothingOnDeath()
+	{
+		dropPowerUps = false;
+	}
+
+
 	public void DropWeaponsAndPowerUps()
 	{
 		List<string> itemsToDrop = new List<string>();
@@ -477,6 +482,27 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 			itemQuantity.Add("item_regen", Mathf.CeilToInt(regenTime));
 		}
 		regenTime = 0;
+
+		if (invisTime > 0)
+		{
+			itemsToDrop.Add("item_invis");
+			itemQuantity.Add("item_invis", Mathf.CeilToInt(invisTime));
+		}
+		invisTime = 0;
+
+		if (enviroSuitTime > 0)
+		{
+			itemsToDrop.Add("item_enviro");
+			itemQuantity.Add("item_enviro", Mathf.CeilToInt(enviroSuitTime));
+		}
+		enviroSuitTime = 0;
+
+		if (flightTime > 0)
+		{
+			itemsToDrop.Add("item_flight");
+			itemQuantity.Add("item_flight", Mathf.CeilToInt(flightTime));
+		}
+		flightTime = 0;
 
 		switch (playerControls.CurrentWeapon)
 		{
@@ -523,6 +549,17 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		for (int i = 0; i < itemsToDrop.Count; i++)
 		{
 			string currentItem = itemsToDrop[i];
+
+			if (dropPowerUps == false)
+			{
+				if (ThingsManager.uniqueGamePlayThings.Contains(currentItem))
+				{
+					if (ThingsManager.uniqueThingsOnMap.TryGetValue(currentItem, out ThingController masterThing))
+						masterThing.RespawnNow();
+				}
+				continue;
+			}
+
 			RigidBody3D dropItem = (RigidBody3D)ThingsManager.thingsPrefabs[ThingsManager.ItemDrop].Instantiate();
 			if (dropItem != null)
 			{
@@ -550,16 +587,13 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 				if (itemQuantity.TryGetValue(currentItem, out int amount))
 					thingObject.itemPickup.amount = amount;
 
-				for (int j = 0; j < ThingsManager.uniqueGamePlayThings.Count; j++)
+				if (ThingsManager.uniqueGamePlayThings.Contains(currentItem))
 				{
-					if (currentItem == ThingsManager.uniqueGamePlayThings[j])
+					thingObject.uniqueItem = true;
+					if (itemQuantity.ContainsKey(currentItem))
 					{
-						thingObject.uniqueItem = true;
-						if (itemQuantity.ContainsKey(currentItem))
-						{
-							if (ThingsManager.uniqueThingsOnMap.TryGetValue(currentItem, out ThingController masterThing))
-								thingObject.itemPickup.amount = masterThing.itemPickup.amount;
-						}
+						if (ThingsManager.uniqueThingsOnMap.TryGetValue(currentItem, out ThingController masterThing))
+							thingObject.itemPickup.amount = masterThing.itemPickup.amount;
 					}
 				}
 			}

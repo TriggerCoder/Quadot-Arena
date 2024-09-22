@@ -56,7 +56,7 @@ public partial class GameManager : Node
 
 	//Physic Layers
 	public const short DefaultLayer = 0;
-	public const short NoCollisionLayer = 1;
+	public const short PhysicCollisionLayer = 1;
 
 	public const short ColliderLayer = 2;
 	public const short InvisibleBlockerLayer = 3;
@@ -109,7 +109,7 @@ public partial class GameManager : Node
 										(1 << Player7Layer) | 
 										(1 << Player8Layer));
 
-	public const uint NoHitMask = ((1 << NoCollisionLayer) |
+	public const uint NoHitMask = ((1 << PhysicCollisionLayer) |
 									(1 << InvisibleBlockerLayer) |
 									(1 << WalkTriggerLayer) |
 									(1 << ThingsLayer));

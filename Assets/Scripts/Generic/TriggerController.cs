@@ -10,7 +10,9 @@ public partial class TriggerController : Node3D
 	public bool activated = false;
 	private List<Action<PlayerThing>> OnActivate = new List<Action<PlayerThing>>();
 	private Dictionary<Node3D, int> CurrentColliders = new Dictionary<Node3D, int>();
+	private List<Node3D> DestroyNodes = new List<Node3D>();
 	public bool Repeatable = false;
+	public bool destroyPhysicsNodes = false;
 	public bool AutoReturn = false;
 	public float AutoReturnTime = 1f;
 	public bool activateOnInit = false;
@@ -85,7 +87,6 @@ public partial class TriggerController : Node3D
 			break;
 		}
 
-
 		if (time <= 0)
 			return;
 		else
@@ -111,6 +112,13 @@ public partial class TriggerController : Node3D
 			if (!CurrentColliders.ContainsKey(other))
 				CurrentColliders.Add(other,0);
 		}
+		else if (destroyPhysicsNodes)
+		{
+			if (other is PlayerModel avatar)
+				avatar.Gib(false);
+			else if (!DestroyNodes.Contains(other))
+				DestroyNodes.Add(other);
+		}
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -122,6 +130,16 @@ public partial class TriggerController : Node3D
 		{
 			SetPhysicsProcess(false);
 			return;
+		}
+
+		if (DestroyNodes.Count > 0)
+		{
+			for (int i = 0; i < DestroyNodes.Count; i++)
+			{
+				GameManager.Print("DESTROY: " + DestroyNodes[i].Name);
+				DestroyNodes[i].QueueFree();
+			}
+			DestroyNodes.Clear();
 		}
 
 		if (CurrentColliders.Count == 0)

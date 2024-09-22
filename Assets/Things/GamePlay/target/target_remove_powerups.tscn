@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bkhsxj4731sj5"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/ThingControllers/ThingController.cs" id="1_r48f8"]
+
+[node name="target_remove_powerups" type="Node3D"]
+script = ExtResource("1_r48f8")
+respawnSound = ""
+thingType = 5

@@ -620,7 +620,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		//JOLT require Node to be added after all the shapes have been adeed:
 		AddChild(collisionShape);
 
-		playerControls.playerThing.CollisionLayer = (1 << GameManager.NoCollisionLayer);
+		playerControls.playerThing.CollisionLayer = (1 << GameManager.PhysicCollisionLayer);
 		if (playerControls.playerThing.waterLever > 0)
 			deadWater = true;
 
@@ -708,25 +708,30 @@ public partial class PlayerModel : RigidBody3D, Damageable
 		createRagdollColliders = true;
 	}
 
-	public void Gib()
+	public void Gib(bool throwBodyParts = true)
 	{
 		int init = GD.RandRange(0, 1);
 		SoundManager.Create3DSound(GlobalPosition, SoundManager.LoadSound(gibSound));
-		for (; init < ThingsManager.gibsParts.Length; init++)
+
+		if (throwBodyParts)
 		{
-			RigidBody3D gipPart = (RigidBody3D)ThingsManager.thingsPrefabs[ThingsManager.gibsParts[init]].Instantiate();
-			if (gipPart != null)
+			for (; init < ThingsManager.gibsParts.Length; init++)
 			{
-				GameManager.Instance.TemporaryObjectsHolder.AddChild(gipPart);
-				gipPart.GlobalPosition = GlobalPosition;
-				Vector3 velocity = new Vector3((float)GD.RandRange(-20f, 20f), (float)GD.RandRange(5f, 10f), (float)GD.RandRange(-20f, 20f));
-				gipPart.LinearVelocity = velocity;
-				gipPart.AngularVelocity = velocity;
+				RigidBody3D gipPart = (RigidBody3D)ThingsManager.thingsPrefabs[ThingsManager.gibsParts[init]].Instantiate();
+				if (gipPart != null)
+				{
+					GameManager.Instance.TemporaryObjectsHolder.AddChild(gipPart);
+					gipPart.GlobalPosition = GlobalPosition;
+					Vector3 velocity = new Vector3((float)GD.RandRange(-20f, 20f), (float)GD.RandRange(5f, 10f), (float)GD.RandRange(-20f, 20f));
+					gipPart.LinearVelocity = velocity;
+					gipPart.AngularVelocity = velocity;
+				}
+				//Never throw brains and skull
+				if (init == 0)
+					init++;
 			}
-			//Never throw brains and skull
-			if (init == 0)
-				init++;
 		}
+
 		SetProcess(false);
 		SetPhysicsProcess(false);
 		if (ragDoll)
