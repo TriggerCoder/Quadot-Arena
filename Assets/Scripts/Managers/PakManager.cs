@@ -12,6 +12,9 @@ public static class PakManager
 {
 	public static Dictionary<string, string> ZipFiles = new Dictionary<string, string>();
 	public static Dictionary<string, FileStream> QuakeFiles = new Dictionary<string, FileStream>();
+	private static Dictionary<string, ZipArchive> OpenedZippedFiles = new Dictionary<string, ZipArchive>();
+	private static List<FileStream> OpenedPK3Files = new List<FileStream>();
+	public static Dictionary<string, int> EntryByIndex = new Dictionary<string, int>();
 
 	public static List<string> mapList = new List<string>();
 	public static List<string> playerModelList = new List<string>();
@@ -155,8 +158,11 @@ public static class PakManager
 	{
 		ZipArchive reader = new ZipArchive(file, ZipArchiveMode.Read);
 		GameManager.Print("Checking file " + file.Name);
-		foreach (ZipArchiveEntry e in reader.Entries)
+
+
+		for (int index = 0; index < reader.Entries.Count; index++)
 		{
+			ZipArchiveEntry e = reader.Entries[index];
 			//Only Files
 			if (e.FullName.Contains("."))
 			{
@@ -172,9 +178,13 @@ public static class PakManager
 				{
 //					GameManager.Print("Updating pak file with name " + logName);
 					ZipFiles[logName] = file.Name;
+					EntryByIndex[logName] = index;
 				}
 				else
+				{
 					ZipFiles.Add(logName, file.Name);
+					EntryByIndex.Add(logName, index);
+				}
 
 				if (logName.Contains(".BSP"))
 					AddMapToList(logName);
@@ -398,4 +408,34 @@ public static class PakManager
 		return mapRotation;
 	}
 
+	public static byte[] GetPK3FileData(string FileName, string PK3FileName)
+	{
+		ZipArchive reader;
+		if (!OpenedZippedFiles.TryGetValue(PK3FileName, out reader))
+		{
+			FileStream file = File.Open(PK3FileName, FileMode.Open, FileAccess.Read);
+			reader = new ZipArchive(file, ZipArchiveMode.Read);
+			OpenedZippedFiles.Add(PK3FileName, reader);
+			OpenedPK3Files.Add(file);
+		}
+
+		ZipArchiveEntry entry = reader.Entries[EntryByIndex[FileName]];
+
+		using (MemoryStream ms = new MemoryStream())
+		{
+			entry.Open().CopyTo(ms);
+			return ms.ToArray();
+		}
+	}
+
+	public static void ClosePK3Files()
+	{
+		foreach (ZipArchive reader in OpenedZippedFiles.Values)
+			reader.Dispose();
+		OpenedZippedFiles.Clear();
+
+		foreach (FileStream file in OpenedPK3Files)
+			file.Dispose();
+		OpenedPK3Files.Clear();
+	}
 }

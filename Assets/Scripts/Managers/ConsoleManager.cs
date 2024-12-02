@@ -377,6 +377,14 @@ public partial class ConsoleManager : Control
 			weaponNum = 7;
 		else if ((weapon == "BFG") || (weapon == "BFG10K"))
 			weaponNum = 8;
+		else if ((weapon == "NAIL") || (weapon == "NAILGUN"))
+			weaponNum = 10;
+		else if ((weapon == "CHAIN") || (weapon == "CHAINGUN"))
+			weaponNum = 11;
+		else if ((weapon == "PROXIMITY") || (weapon == "PROXIMITYLAUNCHER"))
+			weaponNum = 12;
+		else if ((weapon == "HMG") || (weapon == "HEAVYMACHINEGUN"))
+			weaponNum = 13;
 		else
 		{
 			AddToConsole("Command: " + args[0] + " was not changed. Weapon " + weapon + " doesn't exist", GameManager.PrintType.Warning);
@@ -665,7 +673,12 @@ public partial class ConsoleManager : Control
 
 		item = item.ToLower();
 		bool found = false;
-		if (!item.Contains('_'))
+		if (ThingsManager.itemName.TryGetValue(item, out string foundItem))
+		{
+			item = foundItem;
+			found = true;
+		}
+		else if (!item.Contains('_'))
 		{
 			string[] checks = new string[5] { "weapon_", "ammo_", "item_", "item_armor_", "item_health_" };
 			for (int i = 0; i < checks.Length; i++) 

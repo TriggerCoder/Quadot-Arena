@@ -195,6 +195,7 @@ public partial class GameManager : Node
 	private static readonly string OneMinute = "feedback/1_minute";
 	private static readonly string[] Seconds = { "feedback/three", "feedback/two", "feedback/one" };
 	private static readonly string[] FragsLeft = { "feedback/1_frag", "feedback/2_frags", "feedback/3_frags" };
+
 	private int second = 0;
 	private int currentDeathCount = 0;
 
@@ -722,6 +723,7 @@ public partial class GameManager : Node
 			MapLoader.SetLightVolData();
 			ThingsManager.AddThingsToMap();
 		}
+		PakManager.ClosePK3Files();
 		limitReach = LimitReach.None;
 		skipFrames = 5;
 		loading = true;
@@ -1230,10 +1232,10 @@ public partial class GameManager : Node
 		if (!Players[playerNum].playerInfo.LoadSavedConfigData())
 			Players[playerNum].playerInfo.SaveConfigData();
 	}
-
 	public static void QuitGame()
 	{
 		SceneTree main = Instance.GetTree();
+		PakManager.ClosePK3Files();
 		main.Root.PropagateNotification((int)NotificationWMCloseRequest);
 		main.Quit();
 	}

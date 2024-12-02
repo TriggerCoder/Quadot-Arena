@@ -98,9 +98,7 @@ public static class TextureLoader
 					
 				if (PakManager.ZipFiles.TryGetValue(path, out FileName))
 				{
-					var reader = new ZipReader();
-					reader.Open(FileName);
-					byte[] imageBytes = reader.ReadFile(path, false);
+					byte[] imageBytes = PakManager.GetPK3FileData(path, FileName);
 
 					Image baseTex = new Image();
 					switch (imageFormat)
@@ -275,9 +273,7 @@ public static class TextureLoader
 
 			if (PakManager.ZipFiles.TryGetValue(path, out FileName))
 			{
-				var reader = new ZipReader();
-				reader.Open(FileName);
-				byte[] imageBytes = reader.ReadFile(path, false);
+				byte[] imageBytes = PakManager.GetPK3FileData(path, FileName);
 
 				Image baseTex = new Image();
 				if (imageFormat == ImageFormat.TGA)
@@ -451,15 +447,19 @@ public static class TextureLoader
 			}
 			Ambient.SetData(Size.X, Size.Y, false, Format.Rgba8, dataAmbient);
 			Directional.SetData(Size.X, Size.Y, false, Format.Rgba8, dataDirectional);
-			Ambient.CompressFromChannels(CompressMode.Bptc, UsedChannels.Rgba);
-			Directional.CompressFromChannels(CompressMode.Bptc, UsedChannels.Rgba);
+//			For some reason EXPORT doesn't like ImageTexture3D in BPTC Format
+//			Ambient.CompressFromChannels(CompressMode.Bptc, UsedChannels.Rgba);
+//			Directional.CompressFromChannels(CompressMode.Bptc, UsedChannels.Rgba);
 			AmbientImage.Add(Ambient);
 			DirectionalImage.Add(Directional);
 		}
 		ImageTexture3D AmbientTex = new ImageTexture3D();
 		ImageTexture3D DirectionalTex = new ImageTexture3D();
-		AmbientTex.Create(Format.BptcRgba, Size.X, Size.Y, Size.Z, false, AmbientImage);
-		DirectionalTex.Create(Format.BptcRgba, Size.X, Size.Y, Size.Z, false, DirectionalImage);
+//		For some reason EXPORT doesn't like ImageTexture3D in BPTC Format
+//		AmbientTex.Create(Format.BptcRgba, Size.X, Size.Y, Size.Z, false, AmbientImage);
+//		DirectionalTex.Create(Format.BptcRgba, Size.X, Size.Y, Size.Z, false, DirectionalImage);
+		AmbientTex.Create(Format.Rgba8, Size.X, Size.Y, Size.Z, false, AmbientImage);
+		DirectionalTex.Create(Format.Rgba8, Size.X, Size.Y, Size.Z, false, DirectionalImage);
 		GameManager.Print("3D Grid N: X=" + Size.X + " Y=" + Size.Y + " Z=" + Size.Z);
 		Normalize = new Vector3(Size.X * 2, Size.Y * 2, Size.Z * 4);
 		return (AmbientTex, DirectionalTex);

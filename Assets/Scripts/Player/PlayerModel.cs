@@ -1247,9 +1247,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			animFile = new StreamReader(File.Open(path, FileMode.Open));
 		else if (PakManager.ZipFiles.TryGetValue(path = ("models/" + file + ".cfg").ToUpper(), out FileName))
 		{
-			var reader = new ZipReader();
-			reader.Open(FileName);
-			MemoryStream ms = new MemoryStream(reader.ReadFile(path, false));
+			MemoryStream ms = new MemoryStream(PakManager.GetPK3FileData(path, FileName));
 			animFile = new StreamReader(ms);
 		}
 		else
@@ -1432,9 +1430,7 @@ public partial class PlayerModel : RigidBody3D, Damageable
 			SkinFile = new StreamReader(File.Open(path, FileMode.Open));
 		else if (PakManager.ZipFiles.TryGetValue(path = ("models/" + skinName + ".skin").ToUpper(), out FileName))
 		{
-			var reader = new ZipReader();
-			reader.Open(FileName);
-			MemoryStream ms = new MemoryStream(reader.ReadFile(path, false));
+			MemoryStream ms = new MemoryStream(PakManager.GetPK3FileData(path, FileName));
 			SkinFile = new StreamReader(ms);
 		}
 		else

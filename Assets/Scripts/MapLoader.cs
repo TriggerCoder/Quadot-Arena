@@ -73,9 +73,7 @@ public static class MapLoader
 			BSPMap = new BinaryReader(File.Open(path, FileMode.Open));
 		else if (PakManager.ZipFiles.TryGetValue(path = ("maps/" + mapName + ".bsp").ToUpper(), out FileName))
 		{
-			var reader = new ZipReader();
-			reader.Open(FileName);
-			MemoryStream ms = new MemoryStream(reader.ReadFile(path, false));
+			MemoryStream ms = new MemoryStream(PakManager.GetPK3FileData(path, FileName));
 			BSPMap = new BinaryReader(ms);
 		}
 		else

@@ -87,6 +87,9 @@ public partial class BFGBall : Projectile
 					if (collider == owner)
 						continue;
 
+					if (collider is PhysicProjectile)
+						continue;
+
 					if (collider is Damageable damageable)
 					{
 						boltOrigin[damaged].Show();

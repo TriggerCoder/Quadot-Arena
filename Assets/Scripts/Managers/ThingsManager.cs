@@ -58,10 +58,30 @@ public partial class ThingsManager : Node
 	public static List<Texture2D> smallCrosshairs = new List<Texture2D>();
 	public static List<Texture2D> largeCrosshairs = new List<Texture2D>();
 	public static Texture2D defaultCrosshair;
+
+	public static readonly Dictionary<string, string> itemName = new Dictionary<string, string>
+	{
+		{ "shotgun", "weapon_shotgun" },
+		{ "grenade", "weapon_grenadelauncher" }, { "grenadelauncher", "weapon_grenadelauncher" }, 
+		{ "rocket", "weapon_rocketlauncher" }, { "rocketlauncher", "weapon_rocketlauncher" }, 
+		{ "lightninggun", "weapon_lightning" },
+		{ "rail", "weapon_railgun" }, { "railgun", "weapon_railgun" },
+		{ "plasma", "weapon_plasmagun" }, { "plasmagun", "weapon_plasmagun" },
+		{ "bfg10k", "weapon_bfg" },
+		{ "nail", "weapon_nailgun" }, { "nailgun", "weapon_nailgun" },
+		{ "chain", "weapon_chaingun" }, { "chaingun", "weapon_chaingun" },
+		{ "proximity", "weapon_prox_launcher" }, { "proximitylauncher", "weapon_prox_launcher" },
+		{ "hmg", "weapon_hmg" }, { "heavymachinegun", "weapon_hmg" },
+		{ "bfg", "ammo_bfg" },
+		{ "lightning", "ammo_lightning" },
+		{ "mega", "item_health_mega" },
+		{ "armor", "item_armor_body" },
+	};
+
 	public static readonly string[] quadHogReplacement = { "item_haste", "item_regen", "item_flight", "item_invis", "item_enviro", "item_health_mega", "item_armor_body", "item_armor_combat" };
 
-	public static readonly string[] demoIgnoreItems = { "item_haste", "item_regen", "item_flight", "item_invis", "item_enviro", "weapon_grenadelauncher", "weapon_bfg", "ammo_grenades", "ammo_bfg", "weapon_nailgun", "ammo_nails","weapon_chaingun", "ammo_belt", "weapon_hmg", "ammo_hmg","ammo_pack" };
-	public static readonly string[] retailIgnoreItems = { "weapon_nailgun", "ammo_nails", "weapon_chaingun", "ammo_belt", "weapon_hmg", "ammo_hmg", "ammo_pack" };
+	public static readonly string[] demoIgnoreItems = { "item_haste", "item_regen", "item_flight", "item_invis", "item_enviro", "weapon_grenadelauncher", "weapon_bfg", "ammo_grenades", "ammo_bfg", "weapon_nailgun", "ammo_nails","weapon_chaingun", "ammo_belt", "weapon_prox_launcher", "ammo_mines", "weapon_hmg", "ammo_hmg","ammo_pack" };
+	public static readonly string[] retailIgnoreItems = { "weapon_nailgun", "ammo_nails", "weapon_chaingun", "ammo_belt", "weapon_prox_launcher", "ammo_mines", "weapon_hmg", "ammo_hmg", "ammo_pack" };
 	public static readonly string[] teamArenaIgnoreItems = { "weapon_hmg", "ammo_hmg", "ammo_pack" };
 
 	public static readonly string[] gibsParts = { "GibSkull", "GibBrain", "GibAbdomen", "GibArm", "GibChest", "GibFist", "GibFoot", "GibForearm", "GibIntestine", "GibLeg", "GibLeg" };

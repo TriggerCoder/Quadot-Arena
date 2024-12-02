@@ -33,6 +33,7 @@ public partial class ProxMines : PhysicProjectile, Damageable
 			Vector3 Normal = (Vector3)hit["normal"];
 			GlobalPosition = Collision;
 			this.SetForward(-Normal);
+			this.Rotate(Normal, (float)GD.RandRange(0, Mathf.Pi * 2.0f));
 			if (MapLoader.mapSurfaceTypes.TryGetValue(Hit, out SurfaceType st))
 			{
 				if (st.MetalSteps)
@@ -164,10 +165,11 @@ public partial class ProxMines : PhysicProjectile, Damageable
 		if (Dead)
 			return;
 
-		if ((damageType == DamageType.Explosion) || (damageType == DamageType.Plasma))
+		if ((damageType == DamageType.Explosion) || (damageType == DamageType.Plasma) || (damageType == DamageType.Lightning) || (damageType == DamageType.Rail) || (damageType == DamageType.BFGBall) || (damageType == DamageType.BFGBlast))
 		{
 			hitpoints = 0;
-			Explode();
+			//Delay Explosion in order to de-sync multiple mines
+			destroyTimer = (float)GD.RandRange(0.1, 0.5);
 		}
 	}
 	public void Impulse(Vector3 direction, float force)

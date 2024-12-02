@@ -36,17 +36,13 @@ public static class SoundManager
 		}
 		else if (PakManager.ZipFiles.TryGetValue(path = (dir + soundName + ".wav").ToUpper(), out FileName))
 		{
-			var reader = new ZipReader();
-			reader.Open(FileName);
-			WavSoudFile = reader.ReadFile(path, false);
+			WavSoudFile = PakManager.GetPK3FileData(path, FileName);
 			string[] soundFileName = path.Split('/');
 			clip = ToAudioStream(WavSoudFile, 0, soundFileName[soundFileName.Length - 1], loop);
 		}
 		else if (PakManager.ZipFiles.TryGetValue(path = (dir + soundName + ".ogg").ToUpper(), out FileName))
 		{
-			var reader = new ZipReader();
-			reader.Open(FileName);
-			WavSoudFile = reader.ReadFile(path, false);
+			WavSoudFile = PakManager.GetPK3FileData(path, FileName);
 			AudioStreamOggVorbis audio = AudioStreamOggVorbis.LoadFromBuffer(WavSoudFile);
 			audio.Loop = loop;
 			clip = audio;

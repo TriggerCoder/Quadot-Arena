@@ -1,4 +1,4 @@
-[gd_scene load_steps=288 format=3 uid="uid://dkadw51a54t5j"]
+[gd_scene load_steps=290 format=3 uid="uid://dkadw51a54t5j"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/GameManager.cs" id="2_8g0sx"]
 [ext_resource type="Script" path="res://Assets/Scripts/Managers/MaterialManager.cs" id="3_amftv"]
@@ -376,6 +376,10 @@ isRepeatable = true
 TrackFile = ExtResource("112_ouf8h")
 hasOutro = false
 
+[sub_resource type="World3D" id="World3D_2k6mp"]
+
+[sub_resource type="World3D" id="World3D_vldmj"]
+
 [node name="main" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -482,6 +486,7 @@ size_flags_vertical = 3
 stretch = true
 
 [node name="IntermissionViewPort" type="SubViewport" parent="Quadot Arena/IntermissionContainer"]
+world_3d = SubResource("World3D_2k6mp")
 handle_input_locally = false
 positional_shadow_atlas_size = 0
 positional_shadow_atlas_16_bits = false
@@ -494,6 +499,7 @@ render_target_clear_mode = 1
 render_target_update_mode = 0
 
 [node name="AdvertisementViewPort" type="SubViewport" parent="Quadot Arena"]
+world_3d = SubResource("World3D_vldmj")
 handle_input_locally = false
 positional_shadow_atlas_size = 0
 positional_shadow_atlas_16_bits = false

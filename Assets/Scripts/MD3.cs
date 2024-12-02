@@ -63,9 +63,7 @@ public class MD3
 			Md3ModelFile = new BinaryReader(File.Open(path, FileMode.Open));
 		else if (PakManager.ZipFiles.TryGetValue(path = ("models/" + modelName + ".md3").ToUpper(), out FileName))
 		{
-			var reader = new ZipReader();
-			reader.Open(FileName);
-			MemoryStream ms = new MemoryStream(reader.ReadFile(path, false));
+			MemoryStream ms = new MemoryStream(PakManager.GetPK3FileData(path, FileName));
 			Md3ModelFile = new BinaryReader(ms);
 		}
 		else
