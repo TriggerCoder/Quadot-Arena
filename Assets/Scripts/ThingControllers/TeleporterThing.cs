@@ -9,9 +9,14 @@ public partial class TeleporterThing : Area3D
 
 	public List<Target> destinations = new List<Target>();
 	private List<PlayerThing> toTeleport = new List<PlayerThing>();
+	private static PhysicsShapeQueryParameters3D SphereCast;
 	public override void _Ready()
 	{
 		BodyEntered += OnBodyEntered;
+		Rid Sphere = PhysicsServer3D.SphereShapeCreate();
+		SphereCast = new PhysicsShapeQueryParameters3D();
+		SphereCast.ShapeRid = Sphere;
+		PhysicsServer3D.ShapeSetData(Sphere, 2f);
 	}
 	public void Init(List<Target> dest, Dictionary<string, string> entityData)
 	{
@@ -29,10 +34,6 @@ public partial class TeleporterThing : Area3D
 	}
 	public static void TelefragEverything(Vector3 position, Node3D node)
 	{
-		Rid Sphere = PhysicsServer3D.SphereShapeCreate();
-		PhysicsShapeQueryParameters3D SphereCast = new PhysicsShapeQueryParameters3D();
-		SphereCast.ShapeRid = Sphere;
-		PhysicsServer3D.ShapeSetData(Sphere, 2f);
 		SphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
 		SphereCast.Motion = Vector3.Zero;
 		SphereCast.Transform = new Transform3D(Basis.Identity, position);

@@ -47,6 +47,7 @@ public partial class PhysicProjectile : RigidBody3D
 		Sphere = PhysicsServer3D.SphereShapeCreate();
 		SphereCast = new PhysicsShapeQueryParameters3D();
 		SphereCast.ShapeRid = Sphere;
+		PhysicsServer3D.ShapeSetData(Sphere, projectileRadius);
 
 		PointIntersect = new PhysicsPointQueryParameters3D();
 		PointIntersect.CollideWithAreas = true;

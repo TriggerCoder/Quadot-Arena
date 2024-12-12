@@ -46,6 +46,7 @@ public partial class Projectile : InterpolatedNode3D
 		Sphere = PhysicsServer3D.SphereShapeCreate();
 		SphereCast = new PhysicsShapeQueryParameters3D();
 		SphereCast.ShapeRid = Sphere;
+		PhysicsServer3D.ShapeSetData(Sphere, projectileRadius);
 
 		PointIntersect = new PhysicsPointQueryParameters3D();
 		PointIntersect.CollideWithAreas = true;
@@ -84,8 +85,7 @@ public partial class Projectile : InterpolatedNode3D
 
 		var SpaceState = GetWorld3D().DirectSpaceState;
 		//check for collision
-		{			
-			PhysicsServer3D.ShapeSetData(Sphere, projectileRadius);
+		{
 			SphereCast.CollisionMask = ~(GameManager.NoHitMask | ignoreSelfLayer);
 			SphereCast.Motion = -d * speed * deltaTime;
 			SphereCast.Transform = GlobalTransform;

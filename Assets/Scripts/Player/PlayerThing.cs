@@ -123,9 +123,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 	public GameManager.FuncState currentState = GameManager.FuncState.None;
 	public override void _Ready()
 	{
-		playerControls.feetRay = new SeparationRayShape3D();
-		playerControls.feetRay.Length = .8f;
-		Feet.Shape = playerControls.feetRay;
+		playerControls.feetRay = (SeparationRayShape3D)Feet.Shape;
 
 		damageArea = new Area3D();
 		damageArea.Name = "Damage Area";
@@ -143,10 +141,7 @@ public partial class PlayerThing : CharacterBody3D, Damageable
 		damageShape.Shape = playerControls.damageCollider;
 		damageArea.AddChild(damageShape);
 
-		playerControls.collider = new CapsuleShape3D();
-		playerControls.collider.Radius = .5f;
-		playerControls.collider.Height = 1.6f;
-		Torso.Shape = playerControls.collider;
+		playerControls.collider = (CapsuleShape3D)Torso.Shape;
 		currentState = GameManager.FuncState.Ready;
 	}
 	public void InitPlayer()

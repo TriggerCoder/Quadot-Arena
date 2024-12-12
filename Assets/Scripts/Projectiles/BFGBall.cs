@@ -47,6 +47,7 @@ public partial class BFGBall : Projectile
 		lightBolt.SetArcsLayers(GameManager.AllPlayerViewMask);
 		lightningBolt.Add(lightBolt);
 		boltOrigin[0].AddChild(lightningBolt[0]);
+		PhysicsServer3D.ShapeSetData(Sphere, lightningRadius);
 	}
 
 	protected override void OnEnableQuad()
@@ -60,7 +61,6 @@ public partial class BFGBall : Projectile
 		if (damageTime > 0)
 			damageTime -= deltaTime;
 
-		PhysicsServer3D.ShapeSetData(Sphere, lightningRadius);
 		SphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
 		SphereCast.Motion = Vector3.Zero;
 		SphereCast.Transform = GlobalTransform;
