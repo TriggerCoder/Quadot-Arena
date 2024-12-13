@@ -5,6 +5,8 @@ public partial class PlasmaBall : Projectile
 {
 	[Export]
 	public string _onFlySound;
+	private Rid ExplosionSphere;
+	private PhysicsShapeQueryParameters3D ExplosionSphereCast;
 	protected override void OnInit()
 	{
 		if (!string.IsNullOrEmpty(_onFlySound))
@@ -12,6 +14,10 @@ public partial class PlasmaBall : Projectile
 			audioStream.Stream = SoundManager.LoadSound(_onFlySound, true);
 			audioStream.Play();
 		}
+		ExplosionSphere = PhysicsServer3D.SphereShapeCreate();
+		ExplosionSphereCast = new PhysicsShapeQueryParameters3D();
+		ExplosionSphereCast.ShapeRid = ExplosionSphere;
+		PhysicsServer3D.ShapeSetData(ExplosionSphere, explosionRadius);
 	}
 	protected override void OnCollision(Vector3 collision, Vector3 normal, Vector3 direction, CollisionObject3D collider)
 	{
@@ -24,11 +30,10 @@ public partial class PlasmaBall : Projectile
 	}
 	protected override void OnExplosion(Vector3 Collision, Vector3 direction, PhysicsDirectSpaceState3D SpaceState)
 	{
-		PhysicsServer3D.ShapeSetData(Sphere, explosionRadius);
-		SphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
-		SphereCast.Motion = Vector3.Zero;
-		SphereCast.Transform = new Transform3D(GlobalTransform.Basis, Collision);
-		var hits = SpaceState.IntersectShape(SphereCast);
+		ExplosionSphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+		ExplosionSphereCast.Motion = Vector3.Zero;
+		ExplosionSphereCast.Transform = new Transform3D(GlobalTransform.Basis, Collision);
+		var hits = SpaceState.IntersectShape(ExplosionSphereCast);
 		var max = hits.Count;
 
 		for (int i = 0; i < max; i++)

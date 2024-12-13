@@ -15,6 +15,34 @@ public partial class ProxMines : PhysicProjectile, Damageable
 	public bool Dead { get { return hitpoints <= 0; } }
 	public bool Bleed { get { return false; } }
 	public BloodType BloodColor { get { return BloodType.None; } }
+
+	private Rid ContactSphere;
+	private PhysicsShapeQueryParameters3D ContactSphereCast;
+	private Rid TriggerSphere;
+	private PhysicsShapeQueryParameters3D TriggerSphereCast;
+	private Rid ExplosionSphere;
+	private PhysicsShapeQueryParameters3D ExplosionSphereCast;
+
+	protected override void OnInit()
+	{
+		ContactSphere = PhysicsServer3D.SphereShapeCreate();
+		ContactSphereCast = new PhysicsShapeQueryParameters3D();
+		ContactSphereCast.ShapeRid = ContactSphere;
+		ContactSphereCast.CollisionMask = (1 << GameManager.ColliderLayer);
+		PhysicsServer3D.ShapeSetData(ContactSphere, projectileRadius);
+
+		TriggerSphere = PhysicsServer3D.SphereShapeCreate();
+		TriggerSphereCast = new PhysicsShapeQueryParameters3D();
+		TriggerSphereCast.ShapeRid = TriggerSphere;
+		TriggerSphereCast.CollisionMask = GameManager.TakeDamageMask;
+		PhysicsServer3D.ShapeSetData(TriggerSphere, explosionRadius / 3);
+
+		ExplosionSphere = PhysicsServer3D.SphereShapeCreate();
+		ExplosionSphereCast = new PhysicsShapeQueryParameters3D();
+		ExplosionSphereCast.ShapeRid = ExplosionSphere;
+		ExplosionSphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+		PhysicsServer3D.ShapeSetData(ExplosionSphere, explosionRadius);
+	}
 	protected override void OnBodyEntered(Node other)
 	{
 		if (CurrentState != GameManager.FuncState.None)
@@ -22,10 +50,8 @@ public partial class ProxMines : PhysicProjectile, Damageable
 
 		Freeze = true;
 		var SpaceState = GetWorld3D().DirectSpaceState;
-		PhysicsServer3D.ShapeSetData(Sphere, projectileRadius);
-		SphereCast.CollisionMask = (1 << GameManager.ColliderLayer);
-		SphereCast.Transform = GlobalTransform;
-		var hit = SpaceState.GetRestInfo(SphereCast);
+		ContactSphereCast.Transform = GlobalTransform;
+		var hit = SpaceState.GetRestInfo(ContactSphereCast);
 		if (hit.Count > 0)
 		{
 			CollisionObject3D Hit = (CollisionObject3D)InstanceFromId((ulong)hit["collider_id"]);
@@ -95,16 +121,14 @@ public partial class ProxMines : PhysicProjectile, Damageable
 					delayArm = 0;
 					if (Sounds.Length > 0)
 						SoundManager.Create3DSound(GlobalPosition, Sounds[0]);
-					PhysicsServer3D.ShapeSetData(Sphere, explosionRadius / 3);
-					SphereCast.CollisionMask = GameManager.TakeDamageMask;
-					SphereCast.Motion = Vector3.Zero;
-					SphereCast.Transform = GlobalTransform;
+					TriggerSphereCast.Motion = Vector3.Zero;
+					TriggerSphereCast.Transform = GlobalTransform;
 					CurrentState = GameManager.FuncState.Start;
 				}
 			break;
 			case GameManager.FuncState.Start:
 				var SpaceState = GetWorld3D().DirectSpaceState;
-				var hits = SpaceState.IntersectShape(SphereCast);
+				var hits = SpaceState.IntersectShape(TriggerSphereCast);
 				var max = hits.Count;
 				bool explode = false;
 				for (int i = 0; i < max; i++)
@@ -132,11 +156,9 @@ public partial class ProxMines : PhysicProjectile, Damageable
 	}
 	protected override void OnExplosion(Vector3 Collision, Vector3 direction, PhysicsDirectSpaceState3D SpaceState)
 	{
-		PhysicsServer3D.ShapeSetData(Sphere, explosionRadius);
-		SphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
-		SphereCast.Motion = Vector3.Zero;
-		SphereCast.Transform = new Transform3D(GlobalTransform.Basis, Collision);
-		var hits = SpaceState.IntersectShape(SphereCast);
+		ExplosionSphereCast.Motion = Vector3.Zero;
+		ExplosionSphereCast.Transform = new Transform3D(GlobalTransform.Basis, Collision);
+		var hits = SpaceState.IntersectShape(ExplosionSphereCast);
 		var max = hits.Count;
 
 		for (int i = 0; i < max; i++)

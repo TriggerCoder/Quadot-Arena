@@ -23,6 +23,11 @@ public partial class BFGBall : Projectile
 
 	private float damageTime = 0;
 	private Color Green = new Color(0x006158FF);
+	private Rid ElectricSphere;
+	private PhysicsShapeQueryParameters3D ElectricSphereCast;
+	private Rid ExplosionSphere;
+	private PhysicsShapeQueryParameters3D ExplosionSphereCast;
+
 	public enum CurrentHum
 	{
 		None,
@@ -47,7 +52,16 @@ public partial class BFGBall : Projectile
 		lightBolt.SetArcsLayers(GameManager.AllPlayerViewMask);
 		lightningBolt.Add(lightBolt);
 		boltOrigin[0].AddChild(lightningBolt[0]);
-		PhysicsServer3D.ShapeSetData(Sphere, lightningRadius);
+
+		ElectricSphere = PhysicsServer3D.SphereShapeCreate();
+		ElectricSphereCast = new PhysicsShapeQueryParameters3D();
+		ElectricSphereCast.ShapeRid = ElectricSphere;
+		PhysicsServer3D.ShapeSetData(ElectricSphere, lightningRadius);
+
+		ExplosionSphere = PhysicsServer3D.SphereShapeCreate();
+		ExplosionSphereCast = new PhysicsShapeQueryParameters3D();
+		ExplosionSphereCast.ShapeRid = ExplosionSphere;
+		PhysicsServer3D.ShapeSetData(ExplosionSphere, explosionRadius);
 	}
 
 	protected override void OnEnableQuad()
@@ -61,10 +75,10 @@ public partial class BFGBall : Projectile
 		if (damageTime > 0)
 			damageTime -= deltaTime;
 
-		SphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
-		SphereCast.Motion = Vector3.Zero;
-		SphereCast.Transform = GlobalTransform;
-		var hits = SpaceState.IntersectShape(SphereCast);
+		ElectricSphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+		ElectricSphereCast.Motion = Vector3.Zero;
+		ElectricSphereCast.Transform = GlobalTransform;
+		var hits = SpaceState.IntersectShape(ElectricSphereCast);
 		var max = hits.Count;
 
 		int damaged = 0;
@@ -147,11 +161,10 @@ public partial class BFGBall : Projectile
 	}
 	protected override void OnExplosion(Vector3 Collision, Vector3 direction, PhysicsDirectSpaceState3D SpaceState)
 	{
-		PhysicsServer3D.ShapeSetData(Sphere, explosionRadius);
-		SphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
-		SphereCast.Motion = Vector3.Zero;
-		SphereCast.Transform = new Transform3D(GlobalTransform.Basis, Collision);
-		var hits = SpaceState.IntersectShape(SphereCast);
+		ExplosionSphereCast.CollisionMask = GameManager.TakeDamageMask | (1 << GameManager.RagdollLayer);
+		ExplosionSphereCast.Motion = Vector3.Zero;
+		ExplosionSphereCast.Transform = new Transform3D(GlobalTransform.Basis, Collision);
+		var hits = SpaceState.IntersectShape(ExplosionSphereCast);
 		var max = hits.Count;
 
 		for (int i = 0; i < max; i++)

@@ -38,9 +38,9 @@ public partial class Projectile : InterpolatedNode3D
 	public uint ignoreSelfLayer = 0;
 
 	float time = 0f;
-	protected Rid Sphere;
-	protected PhysicsShapeQueryParameters3D SphereCast;
-	protected PhysicsPointQueryParameters3D PointIntersect;
+	private Rid Sphere;
+	private PhysicsShapeQueryParameters3D SphereCast;
+	private PhysicsPointQueryParameters3D PointIntersect;
 	public override void _Ready()
 	{
 		Sphere = PhysicsServer3D.SphereShapeCreate();

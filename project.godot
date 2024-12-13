@@ -810,6 +810,7 @@ limits/debugger/max_chars_per_second=65535
 
 [physics]
 
+3d/run_on_separate_thread=true
 common/physics_ticks_per_second=40
 3d/physics_engine="Jolt Physics"
 

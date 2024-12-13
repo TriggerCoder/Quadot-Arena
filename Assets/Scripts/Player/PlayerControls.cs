@@ -57,6 +57,7 @@ public partial class PlayerControls : InterpolatedNode3D
 
 	public bool WhishJump { get { return wishJump; } }
 
+	private bool wishRestart = false;
 	private bool wishJump = false;
 	private bool wishSink = false;
 	private bool wishFire = false;
@@ -210,20 +211,10 @@ public partial class PlayerControls : InterpolatedNode3D
 				deathTime += deltaTime;
 			else if (playerThing.interpolatedTransform == null)
 			{
+				if (wishRestart)
+					return;
 				if (Input.IsActionJustPressed(playerInput.Action_Jump) || Input.IsActionJustPressed(playerInput.Action_Fire))
-				{
-					deathTime = 0;
-					viewDirection = Vector2.Zero;
-
-					if (playerWeapon != null)
-					{
-						playerWeapon.QueueFree();
-						playerWeapon = null;
-					}
-
-					playerInfo.Reset();
-					playerThing.InitPlayer();
-				}
+					wishRestart = true;
 			}
 			return;
 		}
@@ -494,6 +485,23 @@ public partial class PlayerControls : InterpolatedNode3D
 
 		if (playerThing.Dead)
 		{
+			if (wishRestart)
+			{
+				wishRestart = false;
+				deathTime = 0;
+				viewDirection = Vector2.Zero;
+
+				if (playerWeapon != null)
+				{
+					playerWeapon.QueueFree();
+					playerWeapon = null;
+				}
+
+				playerInfo.Reset();
+				playerThing.InitPlayer();
+				return;
+			}
+
 			// Reset the gravity velocity
 			float gravityAccumulator = GameManager.Instance.gravity;
 			if (playerThing.waterLever > 0)
