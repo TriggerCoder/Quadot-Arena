@@ -321,10 +321,7 @@ public static class TextureLoader
 				{
 					baseTex.ResizeToPo2(false, Interpolation.Lanczos);
 					baseTex.GenerateMipmaps();
-					if ((tex.addAlpha) || (hasAlpha))
-						baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgba);
-					else
-						baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgb);
+					baseTex.CompressFromChannels(CompressMode.S3Tc, UsedChannels.Rgba);
 				}
 				ImageTexture readyTex = ImageTexture.CreateFromImage(baseTex);
 				readyTex.SetMeta("luminance", luminance);
@@ -447,19 +444,15 @@ public static class TextureLoader
 			}
 			Ambient.SetData(Size.X, Size.Y, false, Format.Rgba8, dataAmbient);
 			Directional.SetData(Size.X, Size.Y, false, Format.Rgba8, dataDirectional);
-//			For some reason EXPORT doesn't like ImageTexture3D in BPTC Format
-//			Ambient.CompressFromChannels(CompressMode.Bptc, UsedChannels.Rgba);
-//			Directional.CompressFromChannels(CompressMode.Bptc, UsedChannels.Rgba);
+			Ambient.CompressFromChannels(CompressMode.Bptc, UsedChannels.Rgba);
+			Directional.CompressFromChannels(CompressMode.Bptc, UsedChannels.Rgba);
 			AmbientImage.Add(Ambient);
 			DirectionalImage.Add(Directional);
 		}
 		ImageTexture3D AmbientTex = new ImageTexture3D();
 		ImageTexture3D DirectionalTex = new ImageTexture3D();
-//		For some reason EXPORT doesn't like ImageTexture3D in BPTC Format
-//		AmbientTex.Create(Format.BptcRgba, Size.X, Size.Y, Size.Z, false, AmbientImage);
-//		DirectionalTex.Create(Format.BptcRgba, Size.X, Size.Y, Size.Z, false, DirectionalImage);
-		AmbientTex.Create(Format.Rgba8, Size.X, Size.Y, Size.Z, false, AmbientImage);
-		DirectionalTex.Create(Format.Rgba8, Size.X, Size.Y, Size.Z, false, DirectionalImage);
+		AmbientTex.Create(Format.BptcRgba, Size.X, Size.Y, Size.Z, false, AmbientImage);
+		DirectionalTex.Create(Format.BptcRgba, Size.X, Size.Y, Size.Z, false, DirectionalImage);
 		GameManager.Print("3D Grid N: X=" + Size.X + " Y=" + Size.Y + " Z=" + Size.Z);
 		Normalize = new Vector3(Size.X * 2, Size.Y * 2, Size.Z * 4);
 		return (AmbientTex, DirectionalTex);
